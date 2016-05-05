@@ -10,9 +10,15 @@ You can use the repository like this:
 
     git clone <this url>
     cd aekos-api/
+    ./run-server.sh
+
+Or, an alternate way if you like to run the steps yourself:
+
+    git clone <this url>
+    cd aekos-api/
     mvn clean package
-    java -jar target/aekos-api-X.Y.jar
-Then you'll be able to see the endpoint at http://localhost:8080/
+    java -jar target/aekos-api-X.Y.jar # replace X.Y with the version
+Then you'll be able to see the endpoint at http://localhost:8099/
 
 ## Interacting with the endpoint
 The provides the following methods:
