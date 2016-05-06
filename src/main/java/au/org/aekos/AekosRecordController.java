@@ -22,7 +22,7 @@ public class AekosRecordController {
 
 	private static final Logger logger = LoggerFactory.getLogger(AekosRecordController.class);
 	private static final String DATE_PLACEHOLDER = "[importDate]";
-	private SimpleDateFormat sdf = new SimpleDateFormat("dd-mm-yyyy");
+	private SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
 	
     @RequestMapping("/data.json")
     public AekosRecordResponse dataJson(@RequestParam(required=false) Integer limit, HttpServletResponse resp) {
