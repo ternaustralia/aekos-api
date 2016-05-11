@@ -20,6 +20,12 @@ Or, an alternate way if you like to run the steps yourself:
     java -jar target/aekos-api-X.Y.jar # replace X.Y with the version
 Then you'll be able to see the endpoint at http://localhost:8099/
 
+You can build a docker container that's configured to run this webapp with:
+
+    cd aekos-api/
+    ./build-docker-image.sh
+    # instructions on how to use it will be printed to the console
+
 ## Interacting with the endpoint
 The provides the following methods:
  - `GET /v1/data.json[?limit=n]`  gets data in JSON format with an optional limit on the number of records returned
