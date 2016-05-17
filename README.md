@@ -28,5 +28,7 @@ You can build a docker container that's configured to run this webapp with:
 
 ## Interacting with the endpoint
 The provides the following methods:
- - `GET /v1/data.json[?limit=n]`  gets data in JSON format with an optional limit on the number of records returned
- - `GET /v1/data.csv[?limit=n]`  gets data in CSV format with an optional limit on the number of records returned
+ - `GET /v1/speciesData.json[?limit=n]`  gets data in JSON format with an optional limit on the number of records returned
+ - `GET /v1/speciesData.csv[?limit=n]`  gets data in CSV format with an optional limit on the number of records returned
+ - `GET /v1/getTraitVocab.json`  gets the available trait vocabulary values
+ - `GET /v1/speciesAutocomplete.json?q=[partial species name]`  queries for a matching species names based on the supplied partial name
