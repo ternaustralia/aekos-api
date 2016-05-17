@@ -25,8 +25,10 @@ import au.org.aekos.model.SpeciesName;
 import au.org.aekos.model.TraitDataRecord;
 import au.org.aekos.model.TraitDataResponse;
 import au.org.aekos.model.TraitVocabEntry;
-
-import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 @Api(basePath = "/v1", value = "AekosV1", description = "Aekos API", produces = "application/json")
 @RestController()
@@ -41,6 +43,7 @@ public class AekosRecordController {
 	private TraitDataFactory traitDataFactory;
 	
 	@RequestMapping("/getTraitVocab.json")
+	@ApiOperation(value = "Get trait vocabulary", notes = "TODO", httpMethod="GET")
     public List<TraitVocabEntry> getTraitVocab() {
 		try {
 			return traitDataFactory.getData();
@@ -50,11 +53,13 @@ public class AekosRecordController {
 	}
 	
 	@RequestMapping("/speciesAutocomplete.json")
+	@ApiOperation(value = "Autocomplete partial species names", notes = "TODO", httpMethod="GET")
     public SpeciesName speciesAutocomplete(@RequestParam(name="q") String partialSpeciesName, HttpServletResponse resp) {
 		return new SpeciesName("testSpecies");
 	}
 	
 	@RequestMapping("/getTraitsBySpecies.json")
+	@ApiOperation(value = "Get all available traits for specified species", notes = "TODO", httpMethod="GET")
     public List<TraitVocabEntry> getTraitsBySpecies(@RequestParam String speciesName, HttpServletResponse resp) {
 		List<TraitVocabEntry> result = new ArrayList<>();
 		result.add(new TraitVocabEntry("trait1", "Trait One"));
@@ -64,6 +69,7 @@ public class AekosRecordController {
 	}
 	
 	@RequestMapping("/getSpeciesByTrait.json")
+	@ApiOperation(value = "Get all available species for specified traits", notes = "TODO", httpMethod="GET")
     public List<SpeciesName> getSpeciesByTrait(@RequestParam String traitName, HttpServletResponse resp) {
 		List<SpeciesName> result = new ArrayList<>();
 		result.add(new SpeciesName("species1"));
@@ -73,7 +79,7 @@ public class AekosRecordController {
 	}
 		
     @RequestMapping("/speciesData.json")
-    @ApiOperation(value = "Get Aekos data", notes = "Gets Aekos data")
+    @ApiOperation(value = "Get Aekos data", notes = "Gets Aekos data", httpMethod="GET")
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message = "Internal Server Error"),
             @ApiResponse(code = 201, message = "") })
@@ -89,6 +95,7 @@ public class AekosRecordController {
     }
 
     @RequestMapping("/speciesData.csv")
+    @ApiOperation(value = "Get species data in CSV format", notes = "TODO", httpMethod="GET")
     public String speciesDataCsv(@RequestParam(required=false) Integer limit, HttpServletResponse resp) {
     	int checkedLimit = (limit != null && limit > 0) ? limit : Integer.MAX_VALUE;
     	try {
@@ -101,6 +108,7 @@ public class AekosRecordController {
     }
     
     @RequestMapping("/traitData.json")
+    @ApiOperation(value = "Get all trait data for the specified species", notes = "TODO", httpMethod="GET")
     public TraitDataResponse traitDataJson(@RequestParam String speciesName, HttpServletResponse resp) {
 		TraitDataResponse result = new TraitDataResponse();
 		result.add(new TraitDataRecord("row1"));
