@@ -44,20 +44,20 @@ public class AekosRecordController {
 	}
 	
 	@RequestMapping("/getTraitsBySpecies.json")
-    public List<TraitVocabEntry> getTraitsBySpecies(@RequestParam(required=false) String speciesName, HttpServletResponse resp) {
+    public List<TraitVocabEntry> getTraitsBySpecies(@RequestParam String speciesName, HttpServletResponse resp) {
 		List<TraitVocabEntry> result = new ArrayList<>();
 		result.add(new TraitVocabEntry("trait1"));
 		result.add(new TraitVocabEntry("trait2"));
-		result.add(new TraitVocabEntry("trait3"));
+		result.add(new TraitVocabEntry("trait" + speciesName));
 		return result;
 	}
 	
 	@RequestMapping("/getSpeciesByTrait.json")
-    public List<SpeciesName> getSpeciesByTrait(@RequestParam(required=false) String traitName, HttpServletResponse resp) {
+    public List<SpeciesName> getSpeciesByTrait(@RequestParam String traitName, HttpServletResponse resp) {
 		List<SpeciesName> result = new ArrayList<>();
 		result.add(new SpeciesName("species1"));
 		result.add(new SpeciesName("species2"));
-		result.add(new SpeciesName("species3"));
+		result.add(new SpeciesName("species" + traitName));
 		return result;
 	}
 	
@@ -86,7 +86,7 @@ public class AekosRecordController {
     }
     
     @RequestMapping("/traitData.json")
-    public TraitDataResponse traitDataJson(@RequestParam(required=false) String speciesName, HttpServletResponse resp) {
+    public TraitDataResponse traitDataJson(@RequestParam String speciesName, HttpServletResponse resp) {
 		TraitDataResponse result = new TraitDataResponse();
 		result.add(new TraitDataRecord("row1"));
 		result.add(new TraitDataRecord("row2"));
