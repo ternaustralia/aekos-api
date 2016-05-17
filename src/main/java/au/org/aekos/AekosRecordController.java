@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -36,9 +37,16 @@ public class AekosRecordController {
 	private static final String DATE_PLACEHOLDER = "[importDate]";
 	private SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
 	
+	@Autowired
+	private TraitDataFactory traitDataFactory;
+	
 	@RequestMapping("/getTraitVocab.json")
-    public TraitVocabEntry getTraitVocab(HttpServletResponse resp) {
-		return new TraitVocabEntry("testTrait");
+    public List<TraitVocabEntry> getTraitVocab() {
+		try {
+			return traitDataFactory.getData();
+		} catch (IOException e) {
+			throw new IllegalStateException("Data error: failed to load trait data", e);
+		}
 	}
 	
 	@RequestMapping("/speciesAutocomplete.json")
@@ -49,9 +57,9 @@ public class AekosRecordController {
 	@RequestMapping("/getTraitsBySpecies.json")
     public List<TraitVocabEntry> getTraitsBySpecies(@RequestParam String speciesName, HttpServletResponse resp) {
 		List<TraitVocabEntry> result = new ArrayList<>();
-		result.add(new TraitVocabEntry("trait1"));
-		result.add(new TraitVocabEntry("trait2"));
-		result.add(new TraitVocabEntry("trait" + speciesName));
+		result.add(new TraitVocabEntry("trait1", "Trait One"));
+		result.add(new TraitVocabEntry("trait2", "Trait Two"));
+		result.add(new TraitVocabEntry("trait" + speciesName, "Trait " + speciesName));
 		return result;
 	}
 	
