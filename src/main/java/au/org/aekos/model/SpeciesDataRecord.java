@@ -1,6 +1,6 @@
-package au.org.aekos;
+package au.org.aekos.model;
 
-public class AekosRecord {
+public class SpeciesDataRecord {
 
     private final double latCoord;
     private final double longCoord;
@@ -17,7 +17,7 @@ public class AekosRecord {
     private final String citation;
     private final String metadata;
 
-	public AekosRecord(double latCoord, double longCoord, String siteId, String species, String collectionFormat,
+	public SpeciesDataRecord(double latCoord, double longCoord, String siteId, String species, String collectionFormat,
 			String date, String year, String month, String traitHeight, String traitGrowth, String envVariablePh,
 			String envVariableEc, String citation, String metadata) {
 		this.latCoord = latCoord;
@@ -92,7 +92,7 @@ public class AekosRecord {
 		return metadata;
 	}
 
-	public static AekosRecord deserialiseFrom(String[] fields) {
+	public static SpeciesDataRecord deserialiseFrom(String[] fields) {
     	double latCoordField = Double.parseDouble(fields[0]); // FIXME validate
 		double longCoordField = Double.parseDouble(fields[1]); // FIXME validate
 		String siteIdField = fields[2];
@@ -107,7 +107,7 @@ public class AekosRecord {
 		String envVariableEcField = fields[11];
 		String citationField = fields[12];
 		String metadataField = fields[13];
-		AekosRecord result = new AekosRecord(latCoordField, longCoordField, 
+		SpeciesDataRecord result = new SpeciesDataRecord(latCoordField, longCoordField, 
 				siteIdField, speciesField, collectionFormatField, dateOfRecordingField, 
 				yearOfRecordingField, monthOfRecordingField, traightHeightField, traitGrowthField, envVariablePhField, envVariableEcField, citationField, 
 				metadataField);

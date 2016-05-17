@@ -1,19 +1,19 @@
-package au.org.aekos;
+package au.org.aekos.model;
 
 import java.util.Collection;
 import java.util.LinkedList;
 
-public class AekosRecordResponse {
-	private final Collection<AekosRecord> data = new LinkedList<>();
+public class SpeciesDataResponse {
+	private final Collection<SpeciesDataRecord> data = new LinkedList<>();
 	private final boolean success;
 	private final String errorMessage;
 
-	public AekosRecordResponse() {
+	public SpeciesDataResponse() {
 		this.success = true;
 		this.errorMessage = null;
 	}
 	
-	public AekosRecordResponse(Throwable t) {
+	public SpeciesDataResponse(Throwable t) {
 		this.success = false;
 		this.errorMessage = t.getMessage();
 	}
@@ -22,11 +22,11 @@ public class AekosRecordResponse {
 		return data.size();
 	}
 	
-	public void addData(AekosRecord record) {
+	public void addData(SpeciesDataRecord record) {
 		data.add(record);
 	}
 	
-	public Collection<AekosRecord> getData() {
+	public Collection<SpeciesDataRecord> getData() {
 		return data;
 	}
 

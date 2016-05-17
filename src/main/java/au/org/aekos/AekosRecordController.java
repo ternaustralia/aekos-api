@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -16,6 +18,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.opencsv.CSVReader;
 
+import au.org.aekos.model.SpeciesDataRecord;
+import au.org.aekos.model.SpeciesDataResponse;
+import au.org.aekos.model.SpeciesName;
+import au.org.aekos.model.TraitDataRecord;
+import au.org.aekos.model.TraitDataResponse;
+import au.org.aekos.model.TraitVocabEntry;
+
 @RestController()
 @RequestMapping("/v1")
 public class AekosRecordController {
@@ -24,20 +33,48 @@ public class AekosRecordController {
 	private static final String DATE_PLACEHOLDER = "[importDate]";
 	private SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
 	
-    @RequestMapping("/data.json")
-    public AekosRecordResponse dataJson(@RequestParam(required=false) Integer limit, HttpServletResponse resp) {
+	@RequestMapping("/getTraitVocab.json")
+    public TraitVocabEntry getTraitVocab(HttpServletResponse resp) {
+		return new TraitVocabEntry("testTrait");
+	}
+	
+	@RequestMapping("/speciesAutocomplete.json")
+    public SpeciesName speciesAutocomplete(@RequestParam(name="q") String partialSpeciesName, HttpServletResponse resp) {
+		return new SpeciesName("testSpecies");
+	}
+	
+	@RequestMapping("/getTraitsBySpecies.json")
+    public List<TraitVocabEntry> getTraitsBySpecies(@RequestParam(required=false) String speciesName, HttpServletResponse resp) {
+		List<TraitVocabEntry> result = new ArrayList<>();
+		result.add(new TraitVocabEntry("trait1"));
+		result.add(new TraitVocabEntry("trait2"));
+		result.add(new TraitVocabEntry("trait3"));
+		return result;
+	}
+	
+	@RequestMapping("/getSpeciesByTrait.json")
+    public List<SpeciesName> getSpeciesByTrait(@RequestParam(required=false) String traitName, HttpServletResponse resp) {
+		List<SpeciesName> result = new ArrayList<>();
+		result.add(new SpeciesName("species1"));
+		result.add(new SpeciesName("species2"));
+		result.add(new SpeciesName("species3"));
+		return result;
+	}
+	
+    @RequestMapping("/speciesData.json")
+    public SpeciesDataResponse speciesDataJson(@RequestParam(required=false) Integer limit, HttpServletResponse resp) {
     	int checkedLimit = (limit != null && limit > 0) ? limit : Integer.MAX_VALUE;
     	try {
     		return getParsedData(checkedLimit);
 		} catch (IOException e) {
 			resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			logger.error("Failed to return AEKOS data", e);
-			return new AekosRecordResponse(e);
+			return new SpeciesDataResponse(e);
 		}
     }
 
-    @RequestMapping("/data.csv")
-    public String dataCsv(@RequestParam(required=false) Integer limit, HttpServletResponse resp) {
+    @RequestMapping("/speciesData.csv")
+    public String speciesDataCsv(@RequestParam(required=false) Integer limit, HttpServletResponse resp) {
     	int checkedLimit = (limit != null && limit > 0) ? limit : Integer.MAX_VALUE;
     	try {
     		return getRawData(checkedLimit);
@@ -47,6 +84,14 @@ public class AekosRecordController {
 			return "Server Error: [" + e.getClass().toString() + "] " + e.getMessage();
 		}
     }
+    
+    @RequestMapping("/traitData.json")
+    public TraitDataResponse traitDataJson(@RequestParam(required=false) String speciesName, HttpServletResponse resp) {
+		TraitDataResponse result = new TraitDataResponse();
+		result.add(new TraitDataRecord("row1"));
+		result.add(new TraitDataRecord("row2"));
+		return result;
+	}
     
 	private String getRawData(int limit) throws IOException {
 		BufferedReader in = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/au/org/aekos/data.csv")));
@@ -61,15 +106,15 @@ public class AekosRecordController {
 		return result.toString();
 	}
 	
-	private AekosRecordResponse getParsedData(int limit) throws IOException {
+	private SpeciesDataResponse getParsedData(int limit) throws IOException {
 		CSVReader reader = new CSVReader(new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/au/org/aekos/data.csv"))));
 		reader.readNext(); // Bin the header
 		String[] currLine;
 		int lineCounter = 0;
-		AekosRecordResponse result = new AekosRecordResponse();
+		SpeciesDataResponse result = new SpeciesDataResponse();
 		while (lineCounter < limit && (currLine = reader.readNext()) != null) {
 			String[] processedLine = replaceDatePlaceholder(currLine);
-			result.addData(AekosRecord.deserialiseFrom(processedLine));
+			result.addData(SpeciesDataRecord.deserialiseFrom(processedLine));
 			lineCounter++;
 		}
 		reader.close();
