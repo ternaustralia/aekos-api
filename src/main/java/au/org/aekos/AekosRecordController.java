@@ -44,8 +44,9 @@ public class AekosRecordController {
 	
 	@RequestMapping("/getTraitVocab.json")
 	@ApiOperation(value = "Get trait vocabulary", notes = "TODO", httpMethod="GET")
-    public List<TraitVocabEntry> getTraitVocab() {
+    public List<TraitVocabEntry> getTraitVocab(HttpServletResponse resp) {
 		try {
+			resp.setHeader("Access-Control-Allow-Origin", "*");
 			return traitDataFactory.getData();
 		} catch (IOException e) {
 			throw new IllegalStateException("Data error: failed to load trait data", e);
