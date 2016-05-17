@@ -25,6 +25,9 @@ import au.org.aekos.model.TraitDataRecord;
 import au.org.aekos.model.TraitDataResponse;
 import au.org.aekos.model.TraitVocabEntry;
 
+import io.swagger.annotations.*;
+
+@Api(basePath = "/v1", value = "AekosV1", description = "Aekos API", produces = "application/json")
 @RestController()
 @RequestMapping("/v1")
 public class AekosRecordController {
@@ -60,8 +63,12 @@ public class AekosRecordController {
 		result.add(new SpeciesName("species" + traitName));
 		return result;
 	}
-	
+		
     @RequestMapping("/speciesData.json")
+    @ApiOperation(value = "Get Aekos data", notes = "Gets Aekos data")
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message = "Internal Server Error"),
+            @ApiResponse(code = 201, message = "") })
     public SpeciesDataResponse speciesDataJson(@RequestParam(required=false) Integer limit, HttpServletResponse resp) {
     	int checkedLimit = (limit != null && limit > 0) ? limit : Integer.MAX_VALUE;
     	try {
