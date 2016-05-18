@@ -3,6 +3,8 @@ package au.org.aekos;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -30,6 +32,7 @@ import au.org.aekos.model.EnvironmentVariable;
 import au.org.aekos.model.SpeciesDataRecord;
 import au.org.aekos.model.SpeciesDataResponse;
 import au.org.aekos.model.SpeciesName;
+import au.org.aekos.model.SpeciesSummary;
 import au.org.aekos.model.TraitDataRecord;
 import au.org.aekos.model.TraitDataResponse;
 import au.org.aekos.model.TraitVocabEntry;
@@ -116,6 +119,30 @@ public class AekosRecordController {
 		result.add(new EnvironmentVariable("windSpeedDirection", "Wind Speed Direction"));
 		for (String curr : speciesNames) {
 			result.add(new EnvironmentVariable("env" + curr, "Env " + curr));
+		}
+		return result;
+	}
+	
+	@RequestMapping(path="/speciesSummary.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+	@ApiOperation(value = "Get a summary of the specified species", notes = "TODO", tags="Search")
+    public List<SpeciesSummary> getSpeciesSummary(@RequestParam(name="speciesName") String[] speciesNames, HttpServletResponse resp) {
+		setCommonHeaders(resp);
+		// TODO support searching/substring as the param, same as ALA
+		List<SpeciesSummary> result = new ArrayList<>();
+//		RestTemplate rt = new RestTemplate();
+		for (String curr : speciesNames) {
+			// TODO look at getting info from ALA
+//			String jsonResp = rt.getForObject("http://bie.ala.org.au/ws/search.json?q=" + URLEncoder.encode(curr, "utf8"), String.class);
+//			JSONObject obj = new JSONObject(jsonResp);
+//			JSONObject firstResult = obj.getJSONObject("searchResults").getJSONArray("results").getJSONObject(1);
+			try {
+				result.add(new SpeciesSummary(new SpeciesName(curr).getId(), curr, "science " + curr,
+						123, new URL("http://ecoinformatics.org.au/sites/default/files/TERN189x80.png"), // FIXME get image URL from ALA
+						new URL("http://aekos.org.au/FIXME"), // FIXME create and then link to landing page
+						"species")); // FIXME how do we find out class?
+			} catch (MalformedURLException e) {
+				logger.error("Data error: failed to create URL", e);
+			}
 		}
 		return result;
 	}
