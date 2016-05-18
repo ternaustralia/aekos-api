@@ -121,7 +121,7 @@ public class AekosRecordController {
 	}
 	
     @RequestMapping(path="/speciesData.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Get Aekos data", notes = "Gets Aekos data", tags="Data Retrieval")
+    @ApiOperation(value = "Get species data in JSON format", notes = "Gets Aekos data", tags="Data Retrieval")
     public SpeciesDataResponse speciesDataJson(@RequestParam(required=false) Integer limit, HttpServletResponse resp) {
     	setCommonHeaders(resp);
     	int checkedLimit = (limit != null && limit > 0) ? limit : Integer.MAX_VALUE;
