@@ -39,8 +39,8 @@ import au.org.aekos.model.TraitVocabEntry;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(value = "AekosV1", description = "Aekos API", produces = "application/json")
-@RestController
+@Api(value = "AekosV1", produces = "application/json")
+@RestController()
 @RequestMapping("/v1")
 public class AekosRecordController {
 
@@ -54,7 +54,7 @@ public class AekosRecordController {
 	private TraitDataFactory traitDataFactory;
 	
 	@RequestMapping(path="/getTraitVocab.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-	@ApiOperation(value = "Get trait vocabulary", notes = "TODO", tags="Search")
+	@ApiOperation(value = "Get trait vocabulary", notes = "TODO", tags="Search", nickname = "getTraitVocab.json")
     public List<TraitVocabEntry> getTraitVocab(HttpServletResponse resp) {
 		try {
 			setCommonHeaders(resp);
