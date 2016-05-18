@@ -62,7 +62,7 @@ public class AekosRecordController {
 	}
 
 	@RequestMapping(path="/speciesAutocomplete.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-	@ApiOperation(value = "Autocomplete partial species names", notes = "TODO")
+	@ApiOperation(value = "Autocomplete partial species names", notes = "TODO", tags="Search")
     public List<SpeciesName> speciesAutocomplete(@RequestParam(name="q") String partialSpeciesName, HttpServletResponse resp) {
 		setCommonHeaders(resp);
 		List<SpeciesName> result = new LinkedList<>();
@@ -78,7 +78,7 @@ public class AekosRecordController {
 	}
 	
 	@RequestMapping(path="/getTraitsBySpecies.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-	@ApiOperation(value = "Get all available traits for specified species", notes = "TODO")
+	@ApiOperation(value = "Get all available traits for specified species", notes = "TODO", tags="Search")
     public List<TraitVocabEntry> getTraitsBySpecies(@RequestParam(name="speciesName") String[] speciesNames, HttpServletResponse resp) {
 		setCommonHeaders(resp);
 		List<TraitVocabEntry> result = new ArrayList<>();
@@ -93,7 +93,7 @@ public class AekosRecordController {
 	}
 	
 	@RequestMapping(path="/getSpeciesByTrait.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-	@ApiOperation(value = "Get all available species for specified traits", notes = "TODO")
+	@ApiOperation(value = "Get all available species for specified traits", notes = "TODO", tags="Search")
     public List<SpeciesName> getSpeciesByTrait(@RequestParam(name="traitName") String[] traitNames, HttpServletResponse resp) {
 		setCommonHeaders(resp);
 		List<SpeciesName> result = new ArrayList<>();
@@ -108,7 +108,7 @@ public class AekosRecordController {
 	}
 	
 	@RequestMapping(path="/getEnvironmentBySpecies.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-	@ApiOperation(value = "Get all available environment variable names for specified species", notes = "TODO")
+	@ApiOperation(value = "Get all available environment variable names for specified species", notes = "TODO", tags="Search")
     public List<EnvironmentVariable> getEnvironmentBySpecies(@RequestParam(name="speciesName") String[] speciesNames, HttpServletResponse resp) {
 		setCommonHeaders(resp);
 		List<EnvironmentVariable> result = new ArrayList<>();
@@ -121,7 +121,7 @@ public class AekosRecordController {
 	}
 	
     @RequestMapping(path="/speciesData.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Get Aekos data", notes = "Gets Aekos data")
+    @ApiOperation(value = "Get Aekos data", notes = "Gets Aekos data", tags="Data Retrieval")
     public SpeciesDataResponse speciesDataJson(@RequestParam(required=false) Integer limit, HttpServletResponse resp) {
     	setCommonHeaders(resp);
     	int checkedLimit = (limit != null && limit > 0) ? limit : Integer.MAX_VALUE;
@@ -135,7 +135,7 @@ public class AekosRecordController {
     }
 
     @RequestMapping(path="/speciesData.csv", method=RequestMethod.GET, produces=MediaType.TEXT_PLAIN_VALUE)
-    @ApiOperation(value = "Get species data in CSV format", notes = "TODO")
+    @ApiOperation(value = "Get species data in CSV format", notes = "TODO", tags="Data Retrieval")
     public String speciesDataCsv(@RequestParam(required=false) Integer limit, HttpServletResponse resp) {
     	setCommonHeaders(resp);
     	int checkedLimit = (limit != null && limit > 0) ? limit : Integer.MAX_VALUE;
@@ -149,7 +149,7 @@ public class AekosRecordController {
     }
     
     @RequestMapping(path="/traitData.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Get all trait data for the specified species", notes = "TODO")
+    @ApiOperation(value = "Get all trait data for the specified species", notes = "TODO", tags="Data Retrieval")
     public TraitDataResponse traitDataJson(@RequestParam String speciesName, HttpServletResponse resp) {
     	setCommonHeaders(resp);
     	TraitDataResponse result = new TraitDataResponse();
