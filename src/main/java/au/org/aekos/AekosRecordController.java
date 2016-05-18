@@ -37,7 +37,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 @Api(value = "AekosV1", description = "Aekos API", produces = "application/json")
-@RestController()
+@RestController
 @RequestMapping("/v1")
 public class AekosRecordController {
 
