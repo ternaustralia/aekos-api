@@ -1,15 +1,19 @@
 package au.org.aekos;
 
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
-@RestController
+@Controller
 public class RootController {
 
-	@RequestMapping(path="/", method=RequestMethod.GET)
-    public ModelAndView speciesAutocomplete() {
+	@RequestMapping(path="/doco")
+    public ModelAndView root() {
 		return new ModelAndView("redirect:/swagger-ui.html");
+	}
+	
+	@RequestMapping(path="/")
+    public String home() {
+		return "home";
 	}
 }
