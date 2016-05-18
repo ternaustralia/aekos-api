@@ -6,7 +6,10 @@ import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -41,6 +44,8 @@ public class AekosRecordController {
 	private static final Logger logger = LoggerFactory.getLogger(AekosRecordController.class);
 	private static final String DATE_PLACEHOLDER = "[importDate]";
 	private SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+	private final Map<String, List<TraitVocabEntry>> traitsBySpecies = initTraitBySpecies();
+	private final Map<String, List<SpeciesName>> speciesByTrait = initSpeciesByTrait();
 	
 	@Autowired
 	private TraitDataFactory traitDataFactory;
@@ -60,7 +65,7 @@ public class AekosRecordController {
 	@ApiOperation(value = "Autocomplete partial species names", notes = "TODO")
     public SpeciesName speciesAutocomplete(@RequestParam(name="q") String partialSpeciesName, HttpServletResponse resp) {
 		setCommonHeaders(resp);
-		return new SpeciesName("testSpecies");
+		return new SpeciesName(partialSpeciesName + "blah");
 	}
 	
 	@RequestMapping(path="/getTraitsBySpecies.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
@@ -68,10 +73,12 @@ public class AekosRecordController {
     public List<TraitVocabEntry> getTraitsBySpecies(@RequestParam(name="speciesName") String[] speciesNames, HttpServletResponse resp) {
 		setCommonHeaders(resp);
 		List<TraitVocabEntry> result = new ArrayList<>();
-		result.add(new TraitVocabEntry("trait1", "Trait One"));
-		result.add(new TraitVocabEntry("trait2", "Trait Two"));
 		for (String curr : speciesNames) {
-			result.add(new TraitVocabEntry("trait" + curr, "Trait " + curr));
+			List<TraitVocabEntry> traitsForCurr = traitsBySpecies.get(curr);
+			if (traitsForCurr == null) {
+				continue;
+			}
+			result.addAll(traitsForCurr);
 		}
 		return result;
 	}
@@ -81,10 +88,12 @@ public class AekosRecordController {
     public List<SpeciesName> getSpeciesByTrait(@RequestParam(name="traitName") String[] traitNames, HttpServletResponse resp) {
 		setCommonHeaders(resp);
 		List<SpeciesName> result = new ArrayList<>();
-		result.add(new SpeciesName("species1"));
-		result.add(new SpeciesName("species2"));
 		for (String curr : traitNames) {
-			result.add(new SpeciesName("species" + curr));
+			List<SpeciesName> speciesForCurr = speciesByTrait.get(curr);
+			if (speciesForCurr == null) {
+				continue;
+			}
+			result.addAll(speciesForCurr);
 		}
 		return result;
 	}
@@ -190,5 +199,40 @@ public class AekosRecordController {
 	
 	private void setCommonHeaders(HttpServletResponse resp) {
 		resp.setHeader("Access-Control-Allow-Origin", "*"); // FIXME replace with @CrossOrigin
+	}
+	
+	private Map<String, List<TraitVocabEntry>> initTraitBySpecies() {
+		Map<String, List<TraitVocabEntry>> result = new HashMap<>();
+		result.put("Leersia hexandra", traitList("Life Stage","Dominance","Total Length"));
+		result.put("Ectrosia schultzii var. annua", traitList("Life Stage","Basal Area"));
+		result.put("Rutaceae sp.", traitList("Height","Biomass"));
+		result.put("Tristania neriifolia", traitList("Weight","Canopy Cover"));
+		return result;
+	}
+
+	private List<TraitVocabEntry> traitList(String...traitNames) {
+		List<TraitVocabEntry> result = new ArrayList<>();
+		for (String curr : traitNames) {
+			String noSpaces = curr.replaceAll("\\s", "");
+			String code = noSpaces.substring(0, 1).toLowerCase() + noSpaces.substring(1);
+			result.add(new TraitVocabEntry(code, curr));
+		}
+		return result;
+	}
+	
+	private Map<String, List<SpeciesName>> initSpeciesByTrait() {
+		Map<String, List<SpeciesName>> result = new HashMap<>();
+		for (Entry<String, List<TraitVocabEntry>> currEntry : initTraitBySpecies().entrySet()) {
+			String speciesName = currEntry.getKey();
+			for (TraitVocabEntry currTrait : currEntry.getValue()) {
+				List<SpeciesName> speciesList = result.get(currTrait);
+				if (speciesList == null) {
+					speciesList = new ArrayList<>();
+					result.put(currTrait.getCode(), speciesList);
+				}
+				speciesList.add(new SpeciesName(speciesName));
+			}
+		}
+		return result;
 	}
 }
