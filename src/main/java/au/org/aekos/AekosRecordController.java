@@ -13,7 +13,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,7 +32,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
-@Api(basePath = "/v1", value = "AekosV1", description = "Aekos API", produces = "application/json")
+@Api(value = "AekosV1", description = "Aekos API", produces = "application/json")
 @RestController()
 @RequestMapping("/v1")
 public class AekosRecordController {
@@ -42,26 +44,28 @@ public class AekosRecordController {
 	@Autowired
 	private TraitDataFactory traitDataFactory;
 	
-	@RequestMapping("/getTraitVocab.json")
-	@ApiOperation(value = "Get trait vocabulary", notes = "TODO", httpMethod="GET")
+	@RequestMapping(path="/getTraitVocab.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+	@ApiOperation(value = "Get trait vocabulary", notes = "TODO", tags="Search")
     public List<TraitVocabEntry> getTraitVocab(HttpServletResponse resp) {
 		try {
-			resp.setHeader("Access-Control-Allow-Origin", "*");
+			setCommonHeaders(resp);
 			return traitDataFactory.getData();
 		} catch (IOException e) {
 			throw new IllegalStateException("Data error: failed to load trait data", e);
 		}
 	}
-	
-	@RequestMapping("/speciesAutocomplete.json")
-	@ApiOperation(value = "Autocomplete partial species names", notes = "TODO", httpMethod="GET")
+
+	@RequestMapping(path="/speciesAutocomplete.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+	@ApiOperation(value = "Autocomplete partial species names", notes = "TODO")
     public SpeciesName speciesAutocomplete(@RequestParam(name="q") String partialSpeciesName, HttpServletResponse resp) {
+		setCommonHeaders(resp);
 		return new SpeciesName("testSpecies");
 	}
 	
-	@RequestMapping("/getTraitsBySpecies.json")
-	@ApiOperation(value = "Get all available traits for specified species", notes = "TODO", httpMethod="GET")
+	@RequestMapping(path="/getTraitsBySpecies.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+	@ApiOperation(value = "Get all available traits for specified species", notes = "TODO")
     public List<TraitVocabEntry> getTraitsBySpecies(@RequestParam String speciesName, HttpServletResponse resp) {
+		setCommonHeaders(resp);
 		List<TraitVocabEntry> result = new ArrayList<>();
 		result.add(new TraitVocabEntry("trait1", "Trait One"));
 		result.add(new TraitVocabEntry("trait2", "Trait Two"));
@@ -69,9 +73,10 @@ public class AekosRecordController {
 		return result;
 	}
 	
-	@RequestMapping("/getSpeciesByTrait.json")
-	@ApiOperation(value = "Get all available species for specified traits", notes = "TODO", httpMethod="GET")
+	@RequestMapping(path="/getSpeciesByTrait.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+	@ApiOperation(value = "Get all available species for specified traits", notes = "TODO")
     public List<SpeciesName> getSpeciesByTrait(@RequestParam String traitName, HttpServletResponse resp) {
+		setCommonHeaders(resp);
 		List<SpeciesName> result = new ArrayList<>();
 		result.add(new SpeciesName("species1"));
 		result.add(new SpeciesName("species2"));
@@ -79,12 +84,13 @@ public class AekosRecordController {
 		return result;
 	}
 		
-    @RequestMapping("/speciesData.json")
-    @ApiOperation(value = "Get Aekos data", notes = "Gets Aekos data", httpMethod="GET")
+    @RequestMapping(path="/speciesData.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Get Aekos data", notes = "Gets Aekos data")
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message = "Internal Server Error"),
             @ApiResponse(code = 201, message = "") })
     public SpeciesDataResponse speciesDataJson(@RequestParam(required=false) Integer limit, HttpServletResponse resp) {
+    	setCommonHeaders(resp);
     	int checkedLimit = (limit != null && limit > 0) ? limit : Integer.MAX_VALUE;
     	try {
     		return getParsedData(checkedLimit);
@@ -95,9 +101,10 @@ public class AekosRecordController {
 		}
     }
 
-    @RequestMapping("/speciesData.csv")
-    @ApiOperation(value = "Get species data in CSV format", notes = "TODO", httpMethod="GET")
+    @RequestMapping(path="/speciesData.csv", method=RequestMethod.GET, produces=MediaType.TEXT_PLAIN_VALUE)
+    @ApiOperation(value = "Get species data in CSV format", notes = "TODO")
     public String speciesDataCsv(@RequestParam(required=false) Integer limit, HttpServletResponse resp) {
+    	setCommonHeaders(resp);
     	int checkedLimit = (limit != null && limit > 0) ? limit : Integer.MAX_VALUE;
     	try {
     		return getRawData(checkedLimit);
@@ -108,10 +115,11 @@ public class AekosRecordController {
 		}
     }
     
-    @RequestMapping("/traitData.json")
-    @ApiOperation(value = "Get all trait data for the specified species", notes = "TODO", httpMethod="GET")
+    @RequestMapping(path="/traitData.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Get all trait data for the specified species", notes = "TODO")
     public TraitDataResponse traitDataJson(@RequestParam String speciesName, HttpServletResponse resp) {
-		TraitDataResponse result = new TraitDataResponse();
+    	setCommonHeaders(resp);
+    	TraitDataResponse result = new TraitDataResponse();
 		result.add(new TraitDataRecord("row1"));
 		result.add(new TraitDataRecord("row2"));
 		return result;
@@ -160,5 +168,9 @@ public class AekosRecordController {
 			return line;
 		}
 		return line.replace(DATE_PLACEHOLDER, sdf.format(new Date()));
+	}
+	
+	private void setCommonHeaders(HttpServletResponse resp) {
+		resp.setHeader("Access-Control-Allow-Origin", "*");
 	}
 }
