@@ -64,23 +64,27 @@ public class AekosRecordController {
 	
 	@RequestMapping(path="/getTraitsBySpecies.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ApiOperation(value = "Get all available traits for specified species", notes = "TODO")
-    public List<TraitVocabEntry> getTraitsBySpecies(@RequestParam String speciesName, HttpServletResponse resp) {
+    public List<TraitVocabEntry> getTraitsBySpecies(@RequestParam(name="speciesName") String[] speciesNames, HttpServletResponse resp) {
 		setCommonHeaders(resp);
 		List<TraitVocabEntry> result = new ArrayList<>();
 		result.add(new TraitVocabEntry("trait1", "Trait One"));
 		result.add(new TraitVocabEntry("trait2", "Trait Two"));
-		result.add(new TraitVocabEntry("trait" + speciesName, "Trait " + speciesName));
+		for (String curr : speciesNames) {
+			result.add(new TraitVocabEntry("trait" + curr, "Trait " + curr));
+		}
 		return result;
 	}
 	
 	@RequestMapping(path="/getSpeciesByTrait.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ApiOperation(value = "Get all available species for specified traits", notes = "TODO")
-    public List<SpeciesName> getSpeciesByTrait(@RequestParam String traitName, HttpServletResponse resp) {
+    public List<SpeciesName> getSpeciesByTrait(@RequestParam(name="traitName") String[] traitNames, HttpServletResponse resp) {
 		setCommonHeaders(resp);
 		List<SpeciesName> result = new ArrayList<>();
 		result.add(new SpeciesName("species1"));
 		result.add(new SpeciesName("species2"));
-		result.add(new SpeciesName("species" + traitName));
+		for (String curr : traitNames) {
+			result.add(new SpeciesName("species" + curr));
+		}
 		return result;
 	}
 		
@@ -171,6 +175,6 @@ public class AekosRecordController {
 	}
 	
 	private void setCommonHeaders(HttpServletResponse resp) {
-		resp.setHeader("Access-Control-Allow-Origin", "*");
+		resp.setHeader("Access-Control-Allow-Origin", "*"); // FIXME replace with @CrossOrigin
 	}
 }
