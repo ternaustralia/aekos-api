@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.opencsv.CSVReader;
 
+import au.org.aekos.model.EnvironmentVariable;
 import au.org.aekos.model.SpeciesDataRecord;
 import au.org.aekos.model.SpeciesDataResponse;
 import au.org.aekos.model.SpeciesName;
@@ -87,7 +88,20 @@ public class AekosRecordController {
 		}
 		return result;
 	}
-		
+	
+	@RequestMapping(path="/getEnvironmentBySpecies.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+	@ApiOperation(value = "Get all available environment variable names for specified species", notes = "TODO")
+    public List<EnvironmentVariable> getEnvironmentBySpecies(@RequestParam(name="speciesName") String[] speciesNames, HttpServletResponse resp) {
+		setCommonHeaders(resp);
+		List<EnvironmentVariable> result = new ArrayList<>();
+		result.add(new EnvironmentVariable("soilPh_10cm", "Soil pH 10cm"));
+		result.add(new EnvironmentVariable("windSpeedDirection", "Wind Speed Direction"));
+		for (String curr : speciesNames) {
+			result.add(new EnvironmentVariable("env" + curr, "Env " + curr));
+		}
+		return result;
+	}
+	
     @RequestMapping(path="/speciesData.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get Aekos data", notes = "Gets Aekos data")
     @ApiResponses(value = {
