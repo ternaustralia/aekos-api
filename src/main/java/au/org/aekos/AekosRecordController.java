@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -17,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -33,8 +35,6 @@ import au.org.aekos.model.TraitDataResponse;
 import au.org.aekos.model.TraitVocabEntry;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 
 @Api(value = "AekosV1", description = "Aekos API", produces = "application/json")
 @RestController()
@@ -44,7 +44,7 @@ public class AekosRecordController {
 	private static final Logger logger = LoggerFactory.getLogger(AekosRecordController.class);
 	private static final String DATE_PLACEHOLDER = "[importDate]";
 	private SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
-	private final Map<String, List<TraitVocabEntry>> traitsBySpecies = initTraitBySpecies();
+	private final Map<SpeciesName, List<TraitVocabEntry>> traitsBySpecies = initTraitBySpecies();
 	private final Map<String, List<SpeciesName>> speciesByTrait = initSpeciesByTrait();
 	
 	@Autowired
@@ -63,9 +63,18 @@ public class AekosRecordController {
 
 	@RequestMapping(path="/speciesAutocomplete.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ApiOperation(value = "Autocomplete partial species names", notes = "TODO")
-    public SpeciesName speciesAutocomplete(@RequestParam(name="q") String partialSpeciesName, HttpServletResponse resp) {
+    public List<SpeciesName> speciesAutocomplete(@RequestParam(name="q") String partialSpeciesName, HttpServletResponse resp) {
 		setCommonHeaders(resp);
-		return new SpeciesName(partialSpeciesName + "blah");
+		List<SpeciesName> result = new LinkedList<>();
+		if (!StringUtils.hasText(partialSpeciesName)) {
+			return result;
+		}
+		for (SpeciesName curr : traitsBySpecies.keySet()) {
+			if (curr.getName().toLowerCase().startsWith(partialSpeciesName.toLowerCase())) {
+				result.add(curr);
+			}
+		}
+		return result;
 	}
 	
 	@RequestMapping(path="/getTraitsBySpecies.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
@@ -74,7 +83,7 @@ public class AekosRecordController {
 		setCommonHeaders(resp);
 		List<TraitVocabEntry> result = new ArrayList<>();
 		for (String curr : speciesNames) {
-			List<TraitVocabEntry> traitsForCurr = traitsBySpecies.get(curr);
+			List<TraitVocabEntry> traitsForCurr = traitsBySpecies.get(new SpeciesName(curr));
 			if (traitsForCurr == null) {
 				continue;
 			}
@@ -198,12 +207,12 @@ public class AekosRecordController {
 		resp.setHeader("Access-Control-Allow-Origin", "*"); // FIXME replace with @CrossOrigin
 	}
 	
-	private Map<String, List<TraitVocabEntry>> initTraitBySpecies() {
-		Map<String, List<TraitVocabEntry>> result = new HashMap<>();
-		result.put("Leersia hexandra", traitList("Life Stage","Dominance","Total Length"));
-		result.put("Ectrosia schultzii var. annua", traitList("Life Stage","Basal Area"));
-		result.put("Rutaceae sp.", traitList("Height","Biomass"));
-		result.put("Tristania neriifolia", traitList("Weight","Canopy Cover"));
+	private Map<SpeciesName, List<TraitVocabEntry>> initTraitBySpecies() {
+		Map<SpeciesName, List<TraitVocabEntry>> result = new HashMap<>();
+		result.put(new SpeciesName("Leersia hexandra"), traitList("Life Stage","Dominance","Total Length"));
+		result.put(new SpeciesName("Ectrosia schultzii var. annua"), traitList("Life Stage","Basal Area"));
+		result.put(new SpeciesName("Rutaceae sp."), traitList("Height","Biomass"));
+		result.put(new SpeciesName("Tristania neriifolia"), traitList("Weight","Canopy Cover"));
 		return result;
 	}
 
@@ -219,15 +228,15 @@ public class AekosRecordController {
 	
 	private Map<String, List<SpeciesName>> initSpeciesByTrait() {
 		Map<String, List<SpeciesName>> result = new HashMap<>();
-		for (Entry<String, List<TraitVocabEntry>> currEntry : initTraitBySpecies().entrySet()) {
-			String speciesName = currEntry.getKey();
+		for (Entry<SpeciesName, List<TraitVocabEntry>> currEntry : initTraitBySpecies().entrySet()) {
+			SpeciesName speciesName = currEntry.getKey();
 			for (TraitVocabEntry currTrait : currEntry.getValue()) {
 				List<SpeciesName> speciesList = result.get(currTrait);
 				if (speciesList == null) {
 					speciesList = new ArrayList<>();
 					result.put(currTrait.getCode(), speciesList);
 				}
-				speciesList.add(new SpeciesName(speciesName));
+				speciesList.add(speciesName);
 			}
 		}
 		return result;

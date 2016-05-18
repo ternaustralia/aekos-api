@@ -6,8 +6,11 @@ import org.junit.Test;
 
 public class SpeciesDataRecordTest {
 
+	/**
+	 * Can we deserialise a String[] to an object when all fields are present?
+	 */
 	@Test
-	public void test() {
+	public void testDeserialiseFrom01() {
 		String[] fields = new String[] {
 				"-32.10841","139.35191","aekos.org.au/collection/adelaide.edu.au/Koonamore/VegetationQuadrats/QFR2",
 				"Senna artemisioides subsp. petiolaris","Individuals","23/11/12","2012","11","200","Scrub","9.1","0.28",
