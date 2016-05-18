@@ -113,9 +113,6 @@ public class AekosRecordController {
 	
     @RequestMapping(path="/speciesData.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get Aekos data", notes = "Gets Aekos data")
-    @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message = "Internal Server Error"),
-            @ApiResponse(code = 201, message = "") })
     public SpeciesDataResponse speciesDataJson(@RequestParam(required=false) Integer limit, HttpServletResponse resp) {
     	setCommonHeaders(resp);
     	int checkedLimit = (limit != null && limit > 0) ? limit : Integer.MAX_VALUE;
