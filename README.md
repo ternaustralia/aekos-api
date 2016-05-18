@@ -27,13 +27,4 @@ You can build a docker container that's configured to run this webapp with:
     # instructions on how to use it will be printed to the console
 
 ## Interacting with the endpoint
-The API provides the following methods for searching:
- - `GET /v1/getTraitVocab.json`  gets the available trait vocabulary values
- - `GET /v1/speciesAutocomplete.json?q=[partial species name]`  queries for a matching species names based on the supplied partial name
- - `GET /v1/getTraitBySpecies.json?q=[species name]`  queries for matching *trait* names based on the supplied *species* name
- - `GET /v1/getSpeciesByTrait.json?q=[trait name]`  queries for matching *species* names based on the supplied *trait* name
-
-...and the following methods for getting data:
- - `GET /v1/speciesData.json[?limit=n]`  gets data in JSON format with an optional limit on the number of records returned
- - `GET /v1/speciesData.csv[?limit=n]`  gets data in CSV format with an optional limit on the number of records returned
- - `GET /v1/traitData.json?speciesName=<speciesName>`  gets the trait data for all records for the supplied species
+Documentation is automatically generated using Swagger. You will be redirected to the documentation when you do a GET on the root of the webapp. You can also look at the production documentation at http://api.aekos.org.au:8099/
