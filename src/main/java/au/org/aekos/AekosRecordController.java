@@ -54,7 +54,7 @@ public class AekosRecordController {
 	private TraitDataFactory traitDataFactory;
 	
 	@RequestMapping(path="/getTraitVocab.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-	@ApiOperation(value = "Get trait vocabulary", notes = "TODO", tags="Search", nickname = "getTraitVocab.json")
+	@ApiOperation(value = "Get trait vocabulary", notes = "TODO", tags="Search")
     public List<TraitVocabEntry> getTraitVocab(HttpServletResponse resp) {
 		try {
 			setCommonHeaders(resp);
