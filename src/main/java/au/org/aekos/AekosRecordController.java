@@ -193,7 +193,6 @@ public class AekosRecordController {
 
 	private void getSpeciesDataCsv(Integer limit, boolean download, Writer responseWriter, HttpServletResponse resp) {
 		setCommonHeaders(resp);
-		// TODO add col headers
     	resp.setContentType("text/csv");
     	if (download) {
     		resp.setHeader("Content-Disposition", "attachment;filename=aekosSpeciesData.csv"); // TODO give a more dynamic name
