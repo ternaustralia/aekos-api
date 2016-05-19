@@ -33,8 +33,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import springfox.documentation.annotations.ApiIgnore;
 
-@Api(value = "AekosV1", description = "Aekos API", produces = "application/json")
-@RestController
+@Api(value = "AekosV1", produces = "application/json")
+@RestController()
 @RequestMapping("/v1")
 public class AekosRecordController {
 
