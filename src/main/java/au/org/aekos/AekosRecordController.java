@@ -38,6 +38,14 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/v1")
 public class AekosRecordController {
 
+	// TODO add content negotiation methods for all *data resources
+	// TODO split controller so each resource gets their own
+	// TODO add lots more Swagger doco
+	// TODO figure out how to get Swagger to support content negotiation with overloaded methods
+	// TODO am I doing content negotiation correctly?
+	// TODO define coord ref system
+	// TODO do we accept LSID/species ID and/or a species name for the species related services?
+	
 	private static final Logger logger = LoggerFactory.getLogger(AekosRecordController.class);
 	
 	@Autowired
@@ -107,10 +115,12 @@ public class AekosRecordController {
     public List<EnvironmentVariable> getEnvironmentBySpecies(@RequestParam(name="speciesName") String[] speciesNames, HttpServletResponse resp) {
 		setCommonHeaders(resp);
 		List<EnvironmentVariable> result = new ArrayList<>();
-		result.add(new EnvironmentVariable("soilPh_10cm", "Soil pH 10cm"));
-		result.add(new EnvironmentVariable("windSpeedDirection", "Wind Speed Direction"));
 		for (String curr : speciesNames) {
-			result.add(new EnvironmentVariable("env" + curr, "Env " + curr));
+			List<EnvironmentVariable> envForCurr = dataFactory.getEnvironmentBySpecies().get(new SpeciesName(curr));
+			if (envForCurr == null) {
+				continue;
+			}
+			result.addAll(envForCurr);
 		}
 		return result;
 	}
@@ -202,6 +212,7 @@ public class AekosRecordController {
     @ApiOperation(value = "Get all trait data for the specified species", notes = "TODO", tags="Data Retrieval")
     public List<TraitDataRecord> traitDataJson(@RequestParam(name="speciesName") String[] speciesName, 
     		@RequestParam(name="traitName") String[] traitNames, HttpServletResponse resp) {
+    	// TODO do we include units in the field name, as an extra value or as a header/metadata object in the resp
     	setCommonHeaders(resp);
     	List<TraitDataRecord> result = new LinkedList<>();
 		result.add(new TraitDataRecord("row1"));
@@ -213,6 +224,7 @@ public class AekosRecordController {
     @ApiOperation(value = "Get all environment data for the specified species", notes = "TODO", tags="Data Retrieval")
     public List<EnvironmentDataRecord> environmentDataJson(@RequestParam(name="speciesName") String[] speciesName,
     		@RequestParam(name="envVarName") String[] envVarNames, HttpServletResponse resp) {
+    	// TODO do we include units in the field name, as an extra value or as a header/metadata object in the resp
     	setCommonHeaders(resp);
     	List<EnvironmentDataRecord> result = new LinkedList<>();
 		result.add(new EnvironmentDataRecord("row1"));

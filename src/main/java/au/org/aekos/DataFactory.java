@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import com.opencsv.CSVReader;
 
+import au.org.aekos.model.EnvironmentVariable;
 import au.org.aekos.model.SpeciesDataRecord;
 import au.org.aekos.model.SpeciesName;
 import au.org.aekos.model.TraitVocabEntry;
@@ -30,9 +31,19 @@ public class DataFactory {
 	private Map<SpeciesName, List<TraitVocabEntry>> traitBySpecies;
 	private List<TraitVocabEntry> traitVocabs;
 	private Map<String, List<SpeciesName>> speciesByTrait;
+	private Map<SpeciesName, List<EnvironmentVariable>> environmentBySpecies;
 	
-	@Value("${data-file.trait}")
+	@Value("${data-file.trait-vocab}")
 	private String dataFilePath;
+	
+//	@Value("${data-file.species}")
+//	private String speciesDataFilePath;
+//	
+//	@Value("${data-file.trait}")
+//	private String traitDataFilePath;
+//	
+//	@Value("${data-file.env}")
+//	private String envDataFilePath;
 	
 	public List<TraitVocabEntry> getTraitVocabData() throws IOException {
 		if (traitVocabs == null) {
@@ -55,6 +66,13 @@ public class DataFactory {
 		return speciesByTrait;
 	}
 	
+	public Map<SpeciesName, List<EnvironmentVariable>> getEnvironmentBySpecies() {
+		if (environmentBySpecies == null) {
+			environmentBySpecies = initEnvironmentBySpecies();
+		}
+		return environmentBySpecies;
+	}
+
 	public void getSpeciesCsvData(int limit, Writer responseWriter) throws IOException {
 		BufferedReader in = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/au/org/aekos/data.csv")));
 		in.readLine(); // Bin the header
@@ -62,7 +80,7 @@ public class DataFactory {
 		int lineCounter = 0;
 		while (lineCounter < limit && (currLine = in.readLine()) != null) {
 			responseWriter.write(replaceDatePlaceholder(currLine) + "\n");
-			responseWriter.flush(); // TODO is it efficient to flush ever row?
+			responseWriter.flush(); // TODO is it efficient to flush every row?
 			lineCounter++;
 		}
 	}
@@ -112,10 +130,64 @@ public class DataFactory {
 	
 	private Map<SpeciesName, List<TraitVocabEntry>> initTraitBySpecies() {
 		Map<SpeciesName, List<TraitVocabEntry>> result = new HashMap<>();
-		result.put(new SpeciesName("Leersia hexandra"), traitList("Life Stage","Dominance","Total Length"));
-		result.put(new SpeciesName("Ectrosia schultzii var. annua"), traitList("Life Stage","Basal Area"));
-		result.put(new SpeciesName("Rutaceae sp."), traitList("Height","Biomass"));
-		result.put(new SpeciesName("Tristania neriifolia"), traitList("Weight","Canopy Cover"));
+		for (Entry<SpeciesName, Data> currEntry : initMainData().entrySet()) {
+			SpeciesName speciesName = currEntry.getKey();
+			result.put(speciesName, currEntry.getValue().traitList);
+		}
+		return result;
+	}
+
+	private Map<String, List<SpeciesName>> initSpeciesByTrait() {
+		Map<String, List<SpeciesName>> result = new HashMap<>();
+		for (Entry<SpeciesName, Data> currEntry : initMainData().entrySet()) {
+			SpeciesName speciesName = currEntry.getKey();
+			for (TraitVocabEntry currTrait : currEntry.getValue().traitList) {
+				List<SpeciesName> speciesList = result.get(currTrait);
+				if (speciesList == null) {
+					speciesList = new ArrayList<>();
+					result.put(currTrait.getCode(), speciesList);
+				}
+				speciesList.add(speciesName);
+			}
+		}
+		return result;
+	}
+	
+	private Map<SpeciesName, List<EnvironmentVariable>> initEnvironmentBySpecies() {
+		Map<SpeciesName, List<EnvironmentVariable>> result = new HashMap<>();
+		for (Entry<SpeciesName, Data> currEntry : initMainData().entrySet()) {
+			SpeciesName speciesName = currEntry.getKey();
+			result.put(speciesName, currEntry.getValue().envList);
+		}
+		return result;
+	}
+	
+	private Map<SpeciesName, Data> initMainData() {
+		Map<SpeciesName, Data> result = new HashMap<>();
+		result.put(new SpeciesName("Leersia hexandra"), new Data(traitList("Life Stage","Dominance","Total Length"), envList("Soil pH 10cm")));
+		result.put(new SpeciesName("Ectrosia schultzii var. annua"), new Data(traitList("Life Stage","Basal Area"), envList("Soil pH 20cm")));
+		result.put(new SpeciesName("Rutaceae sp."), new Data(traitList("Height","Biomass"), envList("Soil pH 10cm", "Wind Speed Direction")));
+		result.put(new SpeciesName("Tristania neriifolia"), new Data(traitList("Weight","Canopy Cover"), envList("Wind Speed Direction", "Soil pH 20cm")));
+		return result;
+	}
+	
+	private class Data {
+		private List<TraitVocabEntry> traitList;
+		private List<EnvironmentVariable> envList;
+
+		public Data(List<TraitVocabEntry> traitList, List<EnvironmentVariable> envList) {
+			this.traitList = traitList;
+			this.envList = envList;
+		}
+	}
+	
+	private List<EnvironmentVariable> envList(String...envLabels) {
+		List<EnvironmentVariable> result = new ArrayList<>();
+		for (String curr : envLabels) {
+			String noSpaces = curr.replaceAll("\\s", "");
+			String code = noSpaces.substring(0, 1).toLowerCase() + noSpaces.substring(1);
+			result.add(new EnvironmentVariable(code, curr));
+		}
 		return result;
 	}
 
@@ -125,22 +197,6 @@ public class DataFactory {
 			String noSpaces = curr.replaceAll("\\s", "");
 			String code = noSpaces.substring(0, 1).toLowerCase() + noSpaces.substring(1);
 			result.add(new TraitVocabEntry(code, curr));
-		}
-		return result;
-	}
-	
-	private Map<String, List<SpeciesName>> initSpeciesByTrait() {
-		Map<String, List<SpeciesName>> result = new HashMap<>();
-		for (Entry<SpeciesName, List<TraitVocabEntry>> currEntry : initTraitBySpecies().entrySet()) {
-			SpeciesName speciesName = currEntry.getKey();
-			for (TraitVocabEntry currTrait : currEntry.getValue()) {
-				List<SpeciesName> speciesList = result.get(currTrait);
-				if (speciesList == null) {
-					speciesList = new ArrayList<>();
-					result.put(currTrait.getCode(), speciesList);
-				}
-				speciesList.add(speciesName);
-			}
 		}
 		return result;
 	}
