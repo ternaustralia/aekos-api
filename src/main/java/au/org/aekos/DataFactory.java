@@ -55,13 +55,14 @@ public class DataFactory {
 		return speciesByTrait;
 	}
 	
-	public void getCsvSpeciesCsvData(int limit, Writer responseWriter) throws IOException {
+	public void getSpeciesCsvData(int limit, Writer responseWriter) throws IOException {
 		BufferedReader in = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/au/org/aekos/data.csv")));
 		in.readLine(); // Bin the header
 		String currLine;
 		int lineCounter = 0;
 		while (lineCounter < limit && (currLine = in.readLine()) != null) {
 			responseWriter.write(replaceDatePlaceholder(currLine) + "\n");
+			responseWriter.flush(); // TODO is it efficient to flush ever row?
 			lineCounter++;
 		}
 	}

@@ -190,7 +190,7 @@ public class AekosRecordController {
     	}
     	int checkedLimit = (limit != null && limit > 0) ? limit : Integer.MAX_VALUE;
     	try {
-    		dataFactory.getCsvSpeciesCsvData(checkedLimit, responseWriter);
+    		dataFactory.getSpeciesCsvData(checkedLimit, responseWriter);
 		} catch (IOException e) {
 			resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			logger.error("Failed to return AEKOS data", e);
