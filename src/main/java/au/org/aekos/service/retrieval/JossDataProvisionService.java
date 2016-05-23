@@ -1,8 +1,5 @@
 package au.org.aekos.service.retrieval;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Collection;
@@ -14,12 +11,7 @@ import org.javaswift.joss.model.Account;
 import org.javaswift.joss.model.Container;
 import org.javaswift.joss.model.StoredObject;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
-
-@Configuration
-@PropertySource("classpath:application.properties")
 
 @Service
 public class JossDataProvisionService implements DataProvisionService {
@@ -74,7 +66,7 @@ public class JossDataProvisionService implements DataProvisionService {
 	}
 	
 	// Check to see if the container already exists and if not, create it
-	private Container getContainer() {
+	Container getContainer() {
 		
 	    Collection<Container> containers = account.list();
 	    for (Container currentContainer : containers) {
@@ -100,27 +92,4 @@ public class JossDataProvisionService implements DataProvisionService {
 	    System.out.println("Public URL: "+object.getPublicURL());
 	    return (null);
 	}
-	
-    public void doTests(String[] args) {
-        // TODO - Run some tests
-    	JossDataProvisionService service = new JossDataProvisionService();
-
-    	final String targetName = "dog.png"; 
-    	Container container = service.getContainer();
-    	StoredObject object = container.getObject(targetName);
-		try {
-			InputStream targetStream = new FileInputStream(new File("/dog.png"));
-	    	service.storeData(targetStream);
-
-			System.out.println("Last modified:  "+object.getLastModified());
-	        System.out.println("ETag:           "+object.getEtag());
-	        System.out.println("Content type:   "+object.getContentType());
-	        System.out.println("Content length: "+object.getContentLength());
-		    System.out.println("Public URL: "    +object.getPublicURL());
-
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-    }
-
 }
