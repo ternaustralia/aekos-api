@@ -1,6 +1,6 @@
 package au.org.aekos.service.retrieval;
 
-import java.io.OutputStream;
+import java.io.InputStream;
 import java.net.URL;
 
 /**
@@ -9,5 +9,5 @@ import java.net.URL;
  */
 public interface DataProvisionService {
 
-	URL storeData(OutputStream os);
+	URL storeData(InputStream is);
 }
