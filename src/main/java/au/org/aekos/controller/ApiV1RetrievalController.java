@@ -6,8 +6,6 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
@@ -26,13 +24,12 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import springfox.documentation.annotations.ApiIgnore;
 
-@Api(value = "AekosV1", produces = "application/json")
+@Api(value = "AekosV1", produces=MediaType.APPLICATION_JSON_VALUE)
 @RestController
 @RequestMapping("/v1")
-public class ApiRetrievalController {
+public class ApiV1RetrievalController {
 
 	private static final String TEXT_CSV_MIME = "text/csv";
-
 	private static final String DL_PARAM_MSG = "Makes the response trigger a downloadable file rather than streaming the response";
 
 	// TODO add content negotiation methods for all *data resources
@@ -41,8 +38,6 @@ public class ApiRetrievalController {
 	// TODO am I doing content negotiation correctly?
 	// TODO define coord ref system
 	// TODO do we accept LSID/species ID and/or a species name for the species related services?
-	
-	private static final Logger logger = LoggerFactory.getLogger(ApiRetrievalController.class);
 	
 	@Autowired
 	@Qualifier("stubRetrievalService")
