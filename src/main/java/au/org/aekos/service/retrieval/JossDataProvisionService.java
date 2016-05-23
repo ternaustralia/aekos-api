@@ -5,6 +5,8 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.UUID;
 
+import javax.annotation.PostConstruct;
+
 import org.javaswift.joss.client.factory.AccountConfig;
 import org.javaswift.joss.client.factory.AccountFactory;
 import org.javaswift.joss.model.Account;
@@ -33,6 +35,9 @@ public class JossDataProvisionService implements DataProvisionService {
 
 	@Value("${joss.tenant-name}")
 	private String tenantName;
+	
+	@Value("${joss.disable-eager-login}")
+	private boolean disableEagerLogin;
 
 	private AccountConfig config;
 	private Account account;
@@ -47,15 +52,11 @@ public class JossDataProvisionService implements DataProvisionService {
 	private final String AEKOS_BUCKET_NAME = "aekos-data-store";
 	private final String AEKOS_BUCKET_ITEM_STUB = "aekos-data-item";
 	
-	/**
-	 * Login to SWIFT when we are created 
-	 */
-	public JossDataProvisionService() {
-		super();
-		loginToAccount();
-	}
-
-	private void loginToAccount() {
+	@PostConstruct
+	public void loginToAccount() {
+		if (disableEagerLogin) {
+			return;
+		}
 		config = new AccountConfig();
 		config.setUsername(username);
 		config.setPassword(password);

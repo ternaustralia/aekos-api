@@ -10,15 +10,11 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import au.org.aekos.TestApplication;
-
 @RunWith(SpringJUnit4ClassRunner.class)
-@PropertySource("classpath:/au/org/aekos/JossDataProvisionServiceTest-context.properties")
-@ContextConfiguration(classes=TestApplication.class)
+@ContextConfiguration("classpath:/au/org/aekos/applicationContext-test.xml")
 public class JossDataProvisionServiceTest {
 
 	@Autowired
