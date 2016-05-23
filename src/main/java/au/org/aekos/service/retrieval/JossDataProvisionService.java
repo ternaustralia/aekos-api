@@ -98,8 +98,7 @@ public class JossDataProvisionService implements DataProvisionService {
 	    StoredObject object = container.getObject(AEKOS_BUCKET_ITEM_STUB + "_" + uuid);
 	    object.uploadObject(is);
 	    System.out.println("Public URL: "+object.getPublicURL());
-
-		return null;
+	    return (null);
 	}
 	
     public static void main(String[] args) {

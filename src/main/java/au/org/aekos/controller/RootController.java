@@ -1,4 +1,4 @@
-package au.org.aekos;
+package au.org.aekos.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
