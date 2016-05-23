@@ -1,5 +1,43 @@
 package au.org.aekos.service.retrieval;
 
+import java.io.Writer;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import au.org.aekos.model.EnvironmentDataRecord;
+import au.org.aekos.model.SpeciesDataRecord;
+import au.org.aekos.model.TraitDataRecord;
+
+@Service
 public class JenaRetrievalService implements RetrievalService {
+
 	// TODO Tom to implement
+	
+	@Override
+	public List<SpeciesDataRecord> getSpeciesDataJson(List<String> speciesNames, Integer limit)
+			throws AekosApiRetrievalException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void getSpeciesDataCsv(List<String> speciesNames, Integer limit, boolean triggerDownload,
+			Writer responseWriter) throws AekosApiRetrievalException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public List<TraitDataRecord> getTraitData(List<String> speciesNames, List<String> traitNames) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<EnvironmentDataRecord> getEnvironmentalData(List<String> speciesNames,
+			List<String> environmentalVariableNames) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

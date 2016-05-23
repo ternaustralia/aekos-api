@@ -1,33 +1,34 @@
-package au.org.aekos;
+package au.org.aekos.service.search;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.Writer;
-import java.text.SimpleDateFormat;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.opencsv.CSVReader;
 
 import au.org.aekos.model.EnvironmentVariable;
-import au.org.aekos.model.SpeciesDataRecord;
 import au.org.aekos.model.SpeciesName;
+import au.org.aekos.model.SpeciesSummary;
 import au.org.aekos.model.TraitVocabEntry;
 
 @Service
-public class DataFactory {
+public class StubSearchService implements SearchService {
 
-	private static final String DATE_PLACEHOLDER = "[importDate]";
-	private SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+	private static final Logger logger = LoggerFactory.getLogger(StubSearchService.class);
 	private Map<SpeciesName, List<TraitVocabEntry>> traitBySpecies;
 	private List<TraitVocabEntry> traitVocabs;
 	private Map<String, List<SpeciesName>> speciesByTrait;
@@ -36,87 +37,118 @@ public class DataFactory {
 	@Value("${data-file.trait-vocab}")
 	private String dataFilePath;
 	
-//	@Value("${data-file.species}")
-//	private String speciesDataFilePath;
-//	
-//	@Value("${data-file.trait}")
-//	private String traitDataFilePath;
-//	
-//	@Value("${data-file.env}")
-//	private String envDataFilePath;
+	@Override
+	public List<TraitVocabEntry> getTraitVocabData() {
+		try {
+			return getTraitVocabDataHelper();
+		} catch (IOException e) {
+			throw new IllegalStateException("Data error: failed to load trait data", e);
+		}
+	}
 	
-	public List<TraitVocabEntry> getTraitVocabData() throws IOException {
+	@Override
+	public List<TraitVocabEntry> getTraitBySpecies(List<String> speciesNames) {
+		List<TraitVocabEntry> result = new ArrayList<>();
+		Map<SpeciesName, List<TraitVocabEntry>> traitBySpeciesData = getTraitBySpeciesHelper();
+		for (String curr : speciesNames) {
+			List<TraitVocabEntry> traitsForCurr = traitBySpeciesData.get(new SpeciesName(curr));
+			if (traitsForCurr == null) {
+				continue;
+			}
+			result.addAll(traitsForCurr);
+		}
+		return result;
+	}
+
+	@Override
+	public List<SpeciesName> getSpeciesByTrait(List<String> traitNames) {
+		List<SpeciesName> result = new ArrayList<>();
+		for (String curr : traitNames) {
+			List<SpeciesName> speciesForCurr = getSpeciesByTraitHelper().get(curr);
+			if (speciesForCurr == null) {
+				continue;
+			}
+			result.addAll(speciesForCurr);
+		}
+		return result;
+	}
+	
+	@Override
+	public List<EnvironmentVariable> getEnvironmentBySpecies(List<String> speciesNames) {
+		List<EnvironmentVariable> result = new ArrayList<>();
+		for (String curr : speciesNames) {
+			List<EnvironmentVariable> envForCurr = getEnvironmentBySpeciesHelper().get(new SpeciesName(curr));
+			if (envForCurr == null) {
+				continue;
+			}
+			result.addAll(envForCurr);
+		}
+		return result;
+	}
+	
+	@Override
+	public List<SpeciesName> autocompleteSpeciesName(String partialSpeciesName) {
+		List<SpeciesName> result = new LinkedList<>();
+		if (!StringUtils.hasText(partialSpeciesName)) {
+			return result;
+		}
+		for (SpeciesName curr : getTraitBySpeciesHelper().keySet()) {
+			if (curr.getName().toLowerCase().startsWith(partialSpeciesName.toLowerCase())) {
+				result.add(curr);
+			}
+		}
+		return result;
+	}
+
+	@Override
+	public List<SpeciesSummary> getSpeciesSummary(List<String> speciesNames) {
+		List<SpeciesSummary> result = new ArrayList<>();
+//		RestTemplate rt = new RestTemplate();
+		for (String curr : speciesNames) {
+			// TODO look at getting info from ALA
+//			String jsonResp = rt.getForObject("http://bie.ala.org.au/ws/search.json?q=" + URLEncoder.encode(curr, "utf8"), String.class);
+//			JSONObject obj = new JSONObject(jsonResp);
+//			JSONObject firstResult = obj.getJSONObject("searchResults").getJSONArray("results").getJSONObject(1);
+			try {
+				result.add(new SpeciesSummary(new SpeciesName(curr).getId(), curr, "science " + curr,
+						123, new URL("http://ecoinformatics.org.au/sites/default/files/TERN189x80.png"), // FIXME get image URL from ALA
+						new URL("http://aekos.org.au/FIXME"), // FIXME create and then link to landing page
+						"species")); // FIXME how do we find out class?
+			} catch (MalformedURLException e) {
+				logger.error("Data error: failed to create URL", e);
+			}
+		}
+		return result;
+	}
+	
+	private List<TraitVocabEntry> getTraitVocabDataHelper() throws IOException {
 		if (traitVocabs == null) {
 			traitVocabs = initTraitVocabs();
 		}
 		return traitVocabs;
 	}
 	
-	public Map<SpeciesName, List<TraitVocabEntry>> getTraitBySpeciesData() {
+	private Map<SpeciesName, List<TraitVocabEntry>> getTraitBySpeciesHelper() {
 		if (traitBySpecies == null) {
 			traitBySpecies = initTraitBySpecies();
 		}
 		return traitBySpecies;
 	}
 	
-	public Map<String, List<SpeciesName>> getSpeciesByTrait() {
+	private Map<String, List<SpeciesName>> getSpeciesByTraitHelper() {
 		if (speciesByTrait == null) {
 			speciesByTrait = initSpeciesByTrait();
 		}
 		return speciesByTrait;
 	}
 	
-	public Map<SpeciesName, List<EnvironmentVariable>> getEnvironmentBySpecies() {
+	private Map<SpeciesName, List<EnvironmentVariable>> getEnvironmentBySpeciesHelper() {
 		if (environmentBySpecies == null) {
 			environmentBySpecies = initEnvironmentBySpecies();
 		}
 		return environmentBySpecies;
 	}
 
-	public void getSpeciesCsvData(int limit, Writer responseWriter) throws IOException {
-		BufferedReader in = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/au/org/aekos/data.csv")));
-		String currLine;
-		int dontCountHeader = -1;
-		int lineCounter = dontCountHeader;
-		while (lineCounter < limit && (currLine = in.readLine()) != null) {
-			responseWriter.write(replaceDatePlaceholder(currLine) + "\n");
-			responseWriter.flush(); // TODO is it efficient to flush every row?
-			lineCounter++;
-		}
-	}
-	
-	private String replaceDatePlaceholder(String line) {
-		if (!line.contains(DATE_PLACEHOLDER)) {
-			return line;
-		}
-		return line.replace(DATE_PLACEHOLDER, sdf.format(new Date()));
-	}
-	
-	public List<SpeciesDataRecord> getSpeciesJsonData(int limit) throws IOException {
-		CSVReader reader = new CSVReader(new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/au/org/aekos/data.csv"))));
-		reader.readNext(); // Bin the header
-		String[] currLine;
-		int lineCounter = 0;
-		List<SpeciesDataRecord> result = new LinkedList<>();
-		while (lineCounter < limit && (currLine = reader.readNext()) != null) {
-			String[] processedLine = replaceDatePlaceholder(currLine);
-			result.add(SpeciesDataRecord.deserialiseFrom(processedLine));
-			lineCounter++;
-		}
-		reader.close();
-		return result;
-	}
-
-	private String[] replaceDatePlaceholder(String[] line) {
-		for (int i = 0; i<line.length;i++) {
-			String currField = line[i];
-			if (currField.contains(DATE_PLACEHOLDER)) {
-				line[i] = currField.replace(DATE_PLACEHOLDER, sdf.format(new Date()));
-			}
-		}
-		return line;
-	}
-	
 	private List<TraitVocabEntry> initTraitVocabs() throws IOException {
 		CSVReader reader = new CSVReader(new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(dataFilePath))));
 		String[] currLine;
