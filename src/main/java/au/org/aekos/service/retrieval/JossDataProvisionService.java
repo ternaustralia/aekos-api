@@ -101,7 +101,7 @@ public class JossDataProvisionService implements DataProvisionService {
 	    return (null);
 	}
 	
-    public static void main(String[] args) {
+    public void doTests(String[] args) {
         // TODO - Run some tests
     	JossDataProvisionService service = new JossDataProvisionService();
 
