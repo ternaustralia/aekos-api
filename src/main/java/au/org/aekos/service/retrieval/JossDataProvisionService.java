@@ -36,8 +36,8 @@ public class JossDataProvisionService implements DataProvisionService {
 	@Value("${joss.tenant-name}")
 	private String tenantName;
 	
-	@Value("${joss.disable-eager-login}")
-	private boolean disableEagerLogin;
+	//@Value("${joss.disable-eager-login}")
+	private boolean disableEagerLogin = true;
 
 	private AccountConfig config;
 	private Account account;
