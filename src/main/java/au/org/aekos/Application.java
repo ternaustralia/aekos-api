@@ -16,6 +16,7 @@ import org.springframework.web.servlet.mvc.method.annotation.AbstractJsonpRespon
 @SpringBootApplication
 @ImportResource("application-context.xml")
 @PropertySource("classpath:/au/org/aekos/aekos-api.properties")
+@PropertySource(value="file://${user.home}/aekos-api.properties", ignoreResourceNotFound=true)
 public class Application extends SpringBootServletInitializer {
 
 	@Override
@@ -44,5 +45,4 @@ public class Application extends SpringBootServletInitializer {
             }
         };
     }
-    
 }
