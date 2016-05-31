@@ -14,7 +14,13 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.index.IndexableField;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.search.FieldValueQuery;
 import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.QueryBuilder;
@@ -23,6 +29,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class IndexManager {
 
+	public static void main(String [] args) throws IOException{
+		IndexManager im = new IndexManager();
+		im.createIndex();
+		im.searchForDocumentsTest();
+		im.createTestDocument();
+		im.searchForDocumentsTest();
+	}
+	
 	private String indexPath = "C:\\lucene\\indexes\\index1";
 	
 	private boolean createNew = true;
@@ -62,15 +76,11 @@ public class IndexManager {
 	public void searchForDocumentsTest() throws IOException{
 		IndexReader reader = DirectoryReader.open(FSDirectory.open(Paths.get(indexPath)));
 		IndexSearcher searcher = new IndexSearcher(reader);
-		Analyzer analyzer = new StandardAnalyzer();
-		QueryBuilder qb = new QueryBuilder(analyzer);
-		//qb.cr
-		
-		
-		
-		
-		
-		
+		Query query = new TermQuery(new Term(fieldName, "Species1"));   
+		TopDocs rs = searcher.search(query, 10);
+		System.out.println(rs.totalHits);
+		Document firstHit = searcher.doc(rs.scoreDocs[0].doc);
+		System.out.println(firstHit);
 	}
 
 }
