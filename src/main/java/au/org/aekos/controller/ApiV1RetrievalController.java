@@ -48,7 +48,6 @@ public class ApiV1RetrievalController {
     public List<SpeciesDataRecord> speciesDataDotJson(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(required=false) Integer limit, HttpServletResponse resp) {
-		setCommonHeaders(resp);
 		try {
 			return retrievalService.getSpeciesDataJson(Arrays.asList(speciesNames), limit);
 		} catch (AekosApiRetrievalException e) {
@@ -63,7 +62,6 @@ public class ApiV1RetrievalController {
     public List<SpeciesDataRecord> speciesDataJson(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(required=false) Integer limit, HttpServletResponse resp) {
-		setCommonHeaders(resp);
 		try {
 			return retrievalService.getSpeciesDataJson(Arrays.asList(speciesNames), limit);
 		} catch (AekosApiRetrievalException e) {
@@ -79,7 +77,6 @@ public class ApiV1RetrievalController {
     		@RequestParam(required=false) Integer limit,
     		@RequestParam(required=false, defaultValue="false") @ApiParam(DL_PARAM_MSG) boolean download,
     		@ApiIgnore Writer responseWriter, HttpServletResponse resp) {
-		setCommonHeaders(resp);
 		resp.setContentType(TEXT_CSV_MIME);
     	if (download) {
     		resp.setHeader("Content-Disposition", "attachment;filename=aekosSpeciesData.csv"); // TODO give a more dynamic name
@@ -94,12 +91,12 @@ public class ApiV1RetrievalController {
 	
     @RequestMapping(path="/speciesData", method=RequestMethod.GET, produces=TEXT_CSV_MIME, headers="Accept="+TEXT_CSV_MIME)
     //FIXME what do I put in here? Do I copy from the other overloaded method?
-    @ApiOperation(value = "Get species data blah", notes = "Gets Aekos data", tags="Data Retrieval")
+    @ApiOperation(value = "get species occurrence data",
+    			notes = "Gets species occurrence data in a Darwin Core compliant data format", tags="Data Retrieval")
     public void speciesDataCsv(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(required=false) Integer limit,
     		@ApiIgnore Writer responseWriter, HttpServletResponse resp) {
-    	setCommonHeaders(resp);
     	resp.setContentType(TEXT_CSV_MIME);
     	try {
     		retrievalService.getSpeciesDataCsv(Arrays.asList(speciesNames), limit, false, responseWriter);
@@ -114,7 +111,6 @@ public class ApiV1RetrievalController {
     public List<TraitDataRecord> traitDataJson(@RequestParam(name="speciesName") String[] speciesNames, 
     		@RequestParam(name="traitName") String[] traitNames, HttpServletResponse resp) {
     	// TODO do we include units in the field name, as an extra value or as a header/metadata object in the resp
-    	setCommonHeaders(resp);
     	return retrievalService.getTraitData(Arrays.asList(speciesNames), Arrays.asList(traitNames));
 	}
     
@@ -123,12 +119,7 @@ public class ApiV1RetrievalController {
     public List<EnvironmentDataRecord> environmentDataJson(@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(name="envVarName") String[] envVarNames, HttpServletResponse resp) {
     	// TODO do we include units in the field name, as an extra value or as a header/metadata object in the resp
-    	setCommonHeaders(resp);
     	List<EnvironmentDataRecord> result = retrievalService.getEnvironmentalData(Arrays.asList(speciesNames), Arrays.asList(envVarNames));
     	return result;
-	}
-    
-	private void setCommonHeaders(HttpServletResponse resp) {
-		resp.setHeader("Access-Control-Allow-Origin", "*"); // FIXME replace with @CrossOrigin
 	}
 }
