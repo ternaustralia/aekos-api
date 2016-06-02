@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -24,10 +25,12 @@ import au.org.aekos.model.TraitDataRecord;
 import au.org.aekos.model.TraitDataRecord.Entry;
 import au.org.aekos.model.TraitDataRecordWrapper;
 import au.org.aekos.model.TraitDataRecordWrapper.TraitDataRecordKey;
+import au.org.aekos.model.TraitDataResponse;
 
 @Service
 public class StubRetrievalService implements RetrievalService {
 
+	private static final String TRAIT_FILE = "/au/org/aekos/AEKOS_BCCVL_import_example_traits.csv";
 	private static final Logger logger = LoggerFactory.getLogger(StubRetrievalService.class);
 	private static final String DATE_PLACEHOLDER = "[importDate]";
 	private SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
@@ -58,9 +61,10 @@ public class StubRetrievalService implements RetrievalService {
 	}
 	
 	@Override
-	public List<TraitDataRecord> getTraitData(List<String> speciesNames, List<String> traitNames) throws AekosApiRetrievalException {
+	public TraitDataResponse getTraitData(List<String> speciesNames, List<String> traitNames, int start, int count) throws AekosApiRetrievalException {
+		long startTime = new Date().getTime();
 		try {
-			CSVReader reader = new CSVReader(new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/au/org/aekos/AEKOS_BCCVL_import_example_traits.csv"))));
+			CSVReader reader = new CSVReader(new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(TRAIT_FILE), StandardCharsets.UTF_8)));
 			reader.readNext(); // Bin the header
 			String[] currLine;
 			Map<TraitDataRecordKey, TraitDataRecord> interimAggregatingResult = new HashMap<>();
@@ -84,7 +88,12 @@ public class StubRetrievalService implements RetrievalService {
 				}
 			}
 			reader.close();
-			return new ArrayList<>(interimAggregatingResult.values());
+			List<TraitDataRecord> records = new ArrayList<>(interimAggregatingResult.values());
+			int numFound = records.size();
+			int toIndex = start+count > numFound ? numFound : start+count;
+			List<TraitDataRecord> recordPage = records.subList(start, toIndex);
+	    	int elapsedTime = (int) (new Date().getTime() - startTime);
+			return TraitDataResponse.newInstance(recordPage, start, count, recordPage.size(), speciesNames, traitNames, elapsedTime); // FIXME make factory
 		} catch (IOException e) {
 			String msg = "Server failed to retrieve trait data";
 			logger.error(msg, e);

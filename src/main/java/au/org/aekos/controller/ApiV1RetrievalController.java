@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import au.org.aekos.model.EnvironmentDataRecord;
 import au.org.aekos.model.SpeciesOccurrenceRecord;
-import au.org.aekos.model.TraitDataRecord;
+import au.org.aekos.model.TraitDataResponse;
 import au.org.aekos.service.retrieval.AekosApiRetrievalException;
 import au.org.aekos.service.retrieval.RetrievalService;
 import io.swagger.annotations.Api;
@@ -113,11 +113,17 @@ public class ApiV1RetrievalController {
     
     @RequestMapping(path="/traitData.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get all trait data for the specified species", notes = "TODO", tags="Data Retrieval")
-    public List<TraitDataRecord> traitDataJson(@RequestParam(name="speciesName") String[] speciesNames, 
-    		@RequestParam(name="traitName", required=false) String[] traitNames, HttpServletResponse resp) throws AekosApiRetrievalException {
+    public TraitDataResponse traitDataJson(
+    		@RequestParam(name="speciesName") String[] speciesNames,
+    		@RequestParam(name="traitName", required=false) String[] traitNames,
+    		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
+    		@RequestParam(required=false, defaultValue="20") @ApiParam("result page size") int rows,
+    		HttpServletResponse resp) throws AekosApiRetrievalException {
     	// TODO do we include units in the field name, as an extra value or as a header/metadata object in the resp
     	List<String> traits = traitNames != null ? Arrays.asList(traitNames) : Collections.emptyList();
-		return retrievalService.getTraitData(Arrays.asList(speciesNames), traits);
+    	// TODO validate start ! < 0
+    	// TODO validate count > 0
+    	return retrievalService.getTraitData(Arrays.asList(speciesNames), traits, start, rows);
 	}
     
     @RequestMapping(path="/environmentData.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
