@@ -2,6 +2,7 @@ package au.org.aekos.controller;
 
 import java.io.Writer;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
@@ -15,13 +16,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import au.org.aekos.model.EnvironmentDataRecord;
-import au.org.aekos.model.SpeciesDataRecord;
+import au.org.aekos.model.SpeciesOccurrenceRecord;
 import au.org.aekos.model.TraitDataRecord;
 import au.org.aekos.service.retrieval.AekosApiRetrievalException;
 import au.org.aekos.service.retrieval.RetrievalService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import springfox.documentation.annotations.ApiIgnore;
 
 @Api(value = "AekosV1", produces=MediaType.APPLICATION_JSON_VALUE)
@@ -45,10 +48,9 @@ public class ApiV1RetrievalController {
 	
 	@RequestMapping(path="/speciesData.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get species data in JSON format", notes = "Gets Aekos data", tags="Data Retrieval")
-    public List<SpeciesDataRecord> speciesDataDotJson(
+    public List<SpeciesOccurrenceRecord> speciesDataDotJson(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(required=false) Integer limit, HttpServletResponse resp) {
-		setCommonHeaders(resp);
 		try {
 			return retrievalService.getSpeciesDataJson(Arrays.asList(speciesNames), limit);
 		} catch (AekosApiRetrievalException e) {
@@ -60,10 +62,9 @@ public class ApiV1RetrievalController {
 	@RequestMapping(path="/speciesData", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE,
     		headers="Accept="+MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get species data", notes = "Gets Aekos data", tags="Data Retrieval")
-    public List<SpeciesDataRecord> speciesDataJson(
+    public List<SpeciesOccurrenceRecord> speciesDataJson(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(required=false) Integer limit, HttpServletResponse resp) {
-		setCommonHeaders(resp);
 		try {
 			return retrievalService.getSpeciesDataJson(Arrays.asList(speciesNames), limit);
 		} catch (AekosApiRetrievalException e) {
@@ -73,13 +74,14 @@ public class ApiV1RetrievalController {
     }
 
 	@RequestMapping(path="/speciesData.csv", method=RequestMethod.GET, produces=TEXT_CSV_MIME)
-    @ApiOperation(value = "Get species data in CSV format", notes = "TODO", tags="Data Retrieval")
+    @ApiOperation(value = "Get species occurrence data in CSV format",
+    		notes = "TODO", tags="Data Retrieval")
+	@ApiResponses(@ApiResponse(code=200, message="Data is returned")) // FIXME how do we word this FIXME are there status code int constants somewhere?
     public void speciesDataDotCsv(
-    		@RequestParam(name="speciesName") String[] speciesNames,
+    		@RequestParam(name="speciesName") @ApiParam(value="Scientific name(s) of species to retrieve data for", example="Atriplex vesicaria") String[] speciesNames,
     		@RequestParam(required=false) Integer limit,
     		@RequestParam(required=false, defaultValue="false") @ApiParam(DL_PARAM_MSG) boolean download,
     		@ApiIgnore Writer responseWriter, HttpServletResponse resp) {
-		setCommonHeaders(resp);
 		resp.setContentType(TEXT_CSV_MIME);
     	if (download) {
     		resp.setHeader("Content-Disposition", "attachment;filename=aekosSpeciesData.csv"); // TODO give a more dynamic name
@@ -94,12 +96,12 @@ public class ApiV1RetrievalController {
 	
     @RequestMapping(path="/speciesData", method=RequestMethod.GET, produces=TEXT_CSV_MIME, headers="Accept="+TEXT_CSV_MIME)
     //FIXME what do I put in here? Do I copy from the other overloaded method?
-    @ApiOperation(value = "Get species data blah", notes = "Gets Aekos data", tags="Data Retrieval")
+    @ApiOperation(value = "get species occurrence data",
+			notes = "Gets species occurrence data in a Darwin Core compliant data format", tags="Data Retrieval")
     public void speciesDataCsv(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(required=false) Integer limit,
     		@ApiIgnore Writer responseWriter, HttpServletResponse resp) {
-    	setCommonHeaders(resp);
     	resp.setContentType(TEXT_CSV_MIME);
     	try {
     		retrievalService.getSpeciesDataCsv(Arrays.asList(speciesNames), limit, false, responseWriter);
@@ -112,23 +114,19 @@ public class ApiV1RetrievalController {
     @RequestMapping(path="/traitData.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get all trait data for the specified species", notes = "TODO", tags="Data Retrieval")
     public List<TraitDataRecord> traitDataJson(@RequestParam(name="speciesName") String[] speciesNames, 
-    		@RequestParam(name="traitName") String[] traitNames, HttpServletResponse resp) {
+    		@RequestParam(name="traitName", required=false) String[] traitNames, HttpServletResponse resp) throws AekosApiRetrievalException {
     	// TODO do we include units in the field name, as an extra value or as a header/metadata object in the resp
-    	setCommonHeaders(resp);
-    	return retrievalService.getTraitData(Arrays.asList(speciesNames), Arrays.asList(traitNames));
+    	List<String> traits = traitNames != null ? Arrays.asList(traitNames) : Collections.emptyList();
+		return retrievalService.getTraitData(Arrays.asList(speciesNames), traits);
 	}
     
     @RequestMapping(path="/environmentData.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get all environment data for the specified species", notes = "TODO", tags="Data Retrieval")
     public List<EnvironmentDataRecord> environmentDataJson(@RequestParam(name="speciesName") String[] speciesNames,
-    		@RequestParam(name="envVarName") String[] envVarNames, HttpServletResponse resp) {
+    		@RequestParam(name="envVarName", required=false) String[] envVarNames, HttpServletResponse resp) throws AekosApiRetrievalException {
     	// TODO do we include units in the field name, as an extra value or as a header/metadata object in the resp
-    	setCommonHeaders(resp);
-    	List<EnvironmentDataRecord> result = retrievalService.getEnvironmentalData(Arrays.asList(speciesNames), Arrays.asList(envVarNames));
+    	List<String> varNames = envVarNames != null ? Arrays.asList(envVarNames) : Collections.emptyList();
+		List<EnvironmentDataRecord> result = retrievalService.getEnvironmentalData(Arrays.asList(speciesNames), varNames);
     	return result;
-	}
-    
-	private void setCommonHeaders(HttpServletResponse resp) {
-		resp.setHeader("Access-Control-Allow-Origin", "*"); // FIXME replace with @CrossOrigin
 	}
 }

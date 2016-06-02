@@ -6,7 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import au.org.aekos.model.EnvironmentDataRecord;
-import au.org.aekos.model.SpeciesDataRecord;
+import au.org.aekos.model.SpeciesOccurrenceRecord;
 import au.org.aekos.model.TraitDataRecord;
 
 @Service
@@ -15,7 +15,7 @@ public class JenaRetrievalService implements RetrievalService {
 	// TODO Tom to implement
 	
 	@Override
-	public List<SpeciesDataRecord> getSpeciesDataJson(List<String> speciesNames, Integer limit)
+	public List<SpeciesOccurrenceRecord> getSpeciesDataJson(List<String> speciesNames, Integer limit)
 			throws AekosApiRetrievalException {
 		// TODO Auto-generated method stub
 		return null;

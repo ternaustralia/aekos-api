@@ -1,48 +1,24 @@
 package au.org.aekos.model;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-
-public class TraitDataRecord {
+public class SpeciesOccurrenceRecord {
 
 	private final double decimalLatitude;
     private final double decimalLongitude;
     private final String locationID;
     private final String scientificName;
-    private final String collectionFormat;
     private final String eventDate; // FIXME make date the correct format
     private final String year;
     private final String month;
-    private final Collection<Entry> traits = new LinkedList<>();
     private final String bibliographicCitation;
     private final String datasetID;
 
-    public static class Entry {
-    	private final String trait;
-    	private final String traitValue;
-		
-    	public Entry(String trait, String traitValue) {
-			this.trait = trait;
-			this.traitValue = traitValue;
-		}
-
-		public String getTrait() {
-			return trait;
-		}
-
-		public String getTraitValue() {
-			return traitValue;
-		}
-    }
-    
-	public TraitDataRecord(double decimalLatitude, double decimalLongitude, String locationID, String scientificName,
-			String collectionFormat, String eventDate, String year, String month, String bibliographicCitation, String datasetID) {
+	public SpeciesOccurrenceRecord(double decimalLatitude, double decimalLongitude, String locationID,
+			String scientificName, String eventDate, String year, String month, String bibliographicCitation,
+			String datasetID) {
 		this.decimalLatitude = decimalLatitude;
 		this.decimalLongitude = decimalLongitude;
 		this.locationID = locationID;
 		this.scientificName = scientificName;
-		this.collectionFormat = collectionFormat;
 		this.eventDate = eventDate;
 		this.year = year;
 		this.month = month;
@@ -66,10 +42,6 @@ public class TraitDataRecord {
 		return scientificName;
 	}
 
-	public String getCollectionFormat() {
-		return collectionFormat;
-	}
-
 	public String getEventDate() {
 		return eventDate;
 	}
@@ -82,10 +54,6 @@ public class TraitDataRecord {
 		return month;
 	}
 
-	public Collection<Entry> getTraits() {
-		return Collections.unmodifiableCollection(traits);
-	}
-
 	public String getBibliographicCitation() {
 		return bibliographicCitation;
 	}
@@ -94,7 +62,19 @@ public class TraitDataRecord {
 		return datasetID;
 	}
 
-	public void addTraitValue(Entry entry) {
-		traits.add(entry);
-	}
+	public static SpeciesOccurrenceRecord deserialiseFrom(String[] fields) {
+    	double decimalLatitudeField = Double.parseDouble(fields[0]);
+		double decimalLongitudeField = Double.parseDouble(fields[1]);
+		String locationIdField = fields[2];
+		String scientificNameField = fields[3];
+		String eventDateField = fields[4];
+		String yearField = fields[5];
+		String monthField = fields[6];
+		String bibliographicCitationField = fields[7];
+		String datasetIdField = fields[8];
+		SpeciesOccurrenceRecord result = new SpeciesOccurrenceRecord(decimalLatitudeField, decimalLongitudeField, 
+				locationIdField, scientificNameField, eventDateField, yearField, 
+				monthField, bibliographicCitationField, datasetIdField);
+		return result;
+    }
 }

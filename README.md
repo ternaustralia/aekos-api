@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/adelaideecoinformatics/aekos-api.svg?branch=master)](https://travis-ci.org/adelaideecoinformatics/aekos-api)
+
 # &AElig;KOS API
 This repository is the endpoint that provides a publicly accessible machine interface for data from the AEKOS system (http://www.aekos.org.au/).
 
