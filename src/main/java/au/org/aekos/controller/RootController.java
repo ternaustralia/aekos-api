@@ -23,10 +23,21 @@ public class RootController {
 		return "home";
 	}
 
+	@RequestMapping(path="/home2")
+    public String home2() {
+		return "home2";
+	}
+
 	
 	// Q for Tom - 
 	// Should this set of methods be moved to the Metrics controller? They seem to not serve static content when there.
 
+	// The system metrics (not usage, but threads etc)
+	@RequestMapping(path="/access")
+    public String access() {
+		return "access";
+	}
+	
 	// The system metrics (not usage, but threads etc)
 	@RequestMapping(path="/metrics")
     public String metrics() {
