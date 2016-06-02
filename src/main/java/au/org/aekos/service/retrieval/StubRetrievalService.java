@@ -61,7 +61,7 @@ public class StubRetrievalService implements RetrievalService {
 	}
 	
 	@Override
-	public TraitDataResponse getTraitData(List<String> speciesNames, List<String> traitNames, int start, int count) throws AekosApiRetrievalException {
+	public TraitDataResponse getTraitData(List<String> speciesNames, List<String> traitNames, int start, int rows) throws AekosApiRetrievalException {
 		long startTime = new Date().getTime();
 		try {
 			CSVReader reader = new CSVReader(new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(TRAIT_FILE), StandardCharsets.UTF_8)));
@@ -90,15 +90,32 @@ public class StubRetrievalService implements RetrievalService {
 			reader.close();
 			List<TraitDataRecord> records = new ArrayList<>(interimAggregatingResult.values());
 			int numFound = records.size();
-			int toIndex = start+count > numFound ? numFound : start+count;
+			int toIndex = start+rows > numFound ? numFound : start+rows;
 			List<TraitDataRecord> recordPage = records.subList(start, toIndex);
 	    	int elapsedTime = (int) (new Date().getTime() - startTime);
-			return TraitDataResponse.newInstance(recordPage, start, count, recordPage.size(), speciesNames, traitNames, elapsedTime); // FIXME make factory
+			int totalPages = calculateTotalPages(rows, numFound);
+			int pageNumber = calculatePageNumber(start, numFound, totalPages);
+			TraitDataResponse result = TraitDataResponse.newInstance(recordPage, start, rows, numFound, speciesNames, 
+					traitNames, elapsedTime, pageNumber, totalPages); // FIXME make factory
+			return result;
 		} catch (IOException e) {
 			String msg = "Server failed to retrieve trait data";
 			logger.error(msg, e);
 			throw new AekosApiRetrievalException(msg, e);
 		}
+	}
+
+	int calculateTotalPages(int rows, int numFound) {
+		return (int)Math.ceil((double)numFound / (double)rows);
+	}
+
+	int calculatePageNumber(int start, int numFound, int totalPages) {
+		if (start == 0) {
+			return 1;
+		}
+		double decimalProgress = ((double)start+1) / (double)numFound;
+		double decimalPageNumber = decimalProgress * (double)totalPages;
+		return (int)Math.ceil(decimalPageNumber);
 	}
 
 	@Override

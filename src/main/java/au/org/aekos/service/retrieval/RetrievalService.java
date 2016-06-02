@@ -29,12 +29,12 @@ public interface RetrievalService {
 	/**
 	 * @param speciesNames
 	 * @param traitNames
-	 * @param count 
+	 * @param rows 
 	 * @param start 
 	 * @return
 	 * @throws AekosApiRetrievalException 
 	 */
-	TraitDataResponse getTraitData(List<String> speciesNames, List<String> traitNames, int start, int count) throws AekosApiRetrievalException;
+	TraitDataResponse getTraitData(List<String> speciesNames, List<String> traitNames, int start, int rows) throws AekosApiRetrievalException;
 
 	/**
 	 * @param speciesNames

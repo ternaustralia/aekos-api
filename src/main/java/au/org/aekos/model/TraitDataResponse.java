@@ -22,14 +22,19 @@ public class TraitDataResponse {
 
 	public static class ResponseHeader {
 		private final int numFound;
+		private final int pageNumber;
+		private final int totalPages;
 		private final int elapsedTime;
 		private final Params params;
 		
-		public ResponseHeader(int numFound, int elapsedTime, Params params) {
+		public ResponseHeader(int numFound, int pageNumber, int totalPages, int elapsedTime, Params params) {
 			this.numFound = numFound;
+			this.pageNumber = pageNumber;
+			this.totalPages = totalPages;
 			this.elapsedTime = elapsedTime;
 			this.params = params;
 		}
+		
 		public int getNumFound() {
 			return numFound;
 		}
@@ -38,6 +43,12 @@ public class TraitDataResponse {
 		}
 		public Params getParams() {
 			return params;
+		}
+		public int getPageNumber() {
+			return pageNumber;
+		}
+		public int getTotalPages() {
+			return totalPages;
 		}
 	}
 	
@@ -72,9 +83,9 @@ public class TraitDataResponse {
 	}
 
 	public static TraitDataResponse newInstance(List<TraitDataRecord> recordsPage, int startParam, int countParam, int numFoundParam,
-			List<String> speciesNamesParam, List<String> traitNamesParam, int elapsedTimeParam) {
+			List<String> speciesNamesParam, List<String> traitNamesParam, int elapsedTimeParam, int pageNumberParam, int totalPagesParam) {
 		Params params = new Params(startParam, countParam, speciesNamesParam, traitNamesParam);
-		ResponseHeader headerParam = new ResponseHeader(numFoundParam, elapsedTimeParam, params);
+		ResponseHeader headerParam = new ResponseHeader(numFoundParam, pageNumberParam, totalPagesParam, elapsedTimeParam, params);
 		return new TraitDataResponse(headerParam, recordsPage);
 	}
 }
