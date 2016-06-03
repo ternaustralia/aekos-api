@@ -11,7 +11,7 @@ public class TraitDataRecord {
     private final String locationID;
     private final String scientificName;
     private final String collectionFormat;
-    private final String eventDate; // FIXME make date the correct format
+    private final String eventDate;
     private final String year;
     private final String month;
     private final Collection<Entry> traits = new LinkedList<>();

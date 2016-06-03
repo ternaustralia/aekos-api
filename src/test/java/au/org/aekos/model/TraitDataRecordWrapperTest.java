@@ -1,6 +1,6 @@
 package au.org.aekos.model;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 

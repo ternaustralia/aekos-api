@@ -6,7 +6,7 @@ public class SpeciesOccurrenceRecord {
     private final double decimalLongitude;
     private final String locationID;
     private final String scientificName;
-    private final String eventDate; // FIXME make date the correct format
+    private final String eventDate;
     private final String year;
     private final String month;
     private final String bibliographicCitation;

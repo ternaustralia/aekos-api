@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +15,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import au.org.aekos.model.EnvironmentDataRecord;
 import au.org.aekos.model.SpeciesOccurrenceRecord;
-import au.org.aekos.model.TraitDataRecord;
+import au.org.aekos.model.TraitDataResponse;
 import au.org.aekos.service.retrieval.AekosApiRetrievalException;
 import au.org.aekos.service.retrieval.RetrievalService;
 import io.swagger.annotations.Api;
@@ -113,14 +115,69 @@ public class ApiV1RetrievalController {
     
     @RequestMapping(path="/traitData.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get all trait data for the specified species", notes = "TODO", tags="Data Retrieval")
-    public List<TraitDataRecord> traitDataJson(@RequestParam(name="speciesName") String[] speciesNames, 
-    		@RequestParam(name="traitName", required=false) String[] traitNames, HttpServletResponse resp) throws AekosApiRetrievalException {
+    public TraitDataResponse traitDataJson(
+    		@RequestParam(name="speciesName") String[] speciesNames,
+    		@RequestParam(name="traitName", required=false) String[] traitNames,
+    		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
+    		@RequestParam(required=false, defaultValue="20") @ApiParam("result page size") int rows,
+    		HttpServletRequest req, HttpServletResponse resp) throws AekosApiRetrievalException {
     	// TODO do we include units in the field name, as an extra value or as a header/metadata object in the resp
     	List<String> traits = traitNames != null ? Arrays.asList(traitNames) : Collections.emptyList();
-		return retrievalService.getTraitData(Arrays.asList(speciesNames), traits);
+    	// TODO validate start ! < 0
+    	// TODO validate count > 0
+    	String fullReqUrl = req.getRequestURL().toString() + "?" + req.getQueryString();
+    	TraitDataResponse result = retrievalService.getTraitData(Arrays.asList(speciesNames), traits, start, rows);
+    	resp.addHeader("Link", buildLinkHeader(UriComponentsBuilder.fromHttpUrl(fullReqUrl), result));
+		return result;
 	}
     
-    @RequestMapping(path="/environmentData.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+    private String buildLinkHeader(UriComponentsBuilder fromPath, TraitDataResponse response) {
+		// FIXME can't handle weird params like start=2, rows=3
+    	int start = response.getResponseHeader().getParams().getStart();
+		int rows = response.getResponseHeader().getParams().getRows();
+		int pageNumber = response.getResponseHeader().getPageNumber();
+		int totalPages = response.getResponseHeader().getTotalPages();
+		StringBuilder result = new StringBuilder();
+		boolean hasNextPage = pageNumber < totalPages;
+		if (hasNextPage) {
+			int startForNextPage = start + rows;
+			String uriForNextPage = fromPath.replaceQueryParam("start", startForNextPage).build().toUriString();
+			result.append(createLinkHeader(uriForNextPage, "next"));
+		}
+		boolean hasPrevPage = pageNumber > 1;
+		if (hasPrevPage) {
+			int startForPrevPage = start - rows;
+			String uriForPrevPage = fromPath.replaceQueryParam("start", startForPrevPage).build().toUriString();
+			appendCommaIfNecessary(result);
+			result.append(createLinkHeader(uriForPrevPage, "prev"));
+		}
+		boolean hasFirstPage = pageNumber > 1;
+		if (hasFirstPage) {
+			String uriForFirstPage = fromPath.replaceQueryParam("start", 0).build().toUriString();
+			appendCommaIfNecessary(result);
+            result.append(createLinkHeader(uriForFirstPage, "first"));
+		}
+		boolean hasLastPage = pageNumber < totalPages;
+		if (hasLastPage) {
+			int startForLastPage = (totalPages-1) * rows;
+			String uriForLastPage = fromPath.replaceQueryParam("start", startForLastPage).build().toUriString();
+			appendCommaIfNecessary(result);
+            result.append(createLinkHeader(uriForLastPage, "last"));
+		}
+		return result.toString();
+	}
+    
+    void appendCommaIfNecessary(final StringBuilder linkHeader) {
+        if (linkHeader.length() > 0) {
+            linkHeader.append(", ");
+        }
+    }
+
+    public static String createLinkHeader(final String uri, final String rel) {
+        return "<" + uri + ">; rel=\"" + rel + "\"";
+    }
+
+	@RequestMapping(path="/environmentData.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get all environment data for the specified species", notes = "TODO", tags="Data Retrieval")
     public List<EnvironmentDataRecord> environmentDataJson(@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(name="envVarName", required=false) String[] envVarNames, HttpServletResponse resp) throws AekosApiRetrievalException {

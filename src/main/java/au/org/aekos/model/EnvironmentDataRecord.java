@@ -5,7 +5,7 @@ public class EnvironmentDataRecord {
 	private final double decimalLatitude;
     private final double decimalLongitude;
     private final String locationID;
-    private final String eventDate; // FIXME make date the correct format
+    private final String eventDate;
     private final String year;
     private final String month;
     private final String envVariable;

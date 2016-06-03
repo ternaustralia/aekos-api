@@ -5,7 +5,7 @@ import java.util.List;
 
 import au.org.aekos.model.EnvironmentDataRecord;
 import au.org.aekos.model.SpeciesOccurrenceRecord;
-import au.org.aekos.model.TraitDataRecord;
+import au.org.aekos.model.TraitDataResponse;
 
 public interface RetrievalService {
 
@@ -29,10 +29,12 @@ public interface RetrievalService {
 	/**
 	 * @param speciesNames
 	 * @param traitNames
+	 * @param rows 
+	 * @param start 
 	 * @return
 	 * @throws AekosApiRetrievalException 
 	 */
-	List<TraitDataRecord> getTraitData(List<String> speciesNames, List<String> traitNames) throws AekosApiRetrievalException;
+	TraitDataResponse getTraitData(List<String> speciesNames, List<String> traitNames, int start, int rows) throws AekosApiRetrievalException;
 
 	/**
 	 * @param speciesNames
