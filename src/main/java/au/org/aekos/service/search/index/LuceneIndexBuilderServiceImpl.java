@@ -1,7 +1,10 @@
 package au.org.aekos.service.search.index;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -90,26 +93,31 @@ public class LuceneIndexBuilderServiceImpl implements LuceneIndexBuilderService 
 	public RAMDirectory buildSpeciesRAMDirectory() {
 		RAMDirectory idx = new RAMDirectory();
 		IndexWriterConfig conf = new IndexWriterConfig( new StandardAnalyzer());
-		try{
+		try(InputStream in = this.getClass().getClassLoader()
+                .getResourceAsStream(getSpeciesResourcePath());
+		    InputStreamReader isr = new InputStreamReader(in);
+		    BufferedReader reader = new BufferedReader(isr);){
 			IndexWriter writer = new IndexWriter(idx, conf);
 			int commitCounter = 0;
 			int commitLimit = 1000;
 			
-			Path filePath = getSpeciesListPathFromResourceFile();
+			//Path filePath = getSpeciesListPathFromResourceFile();
 			
-			try(BufferedReader reader = Files.newBufferedReader(filePath, StandardCharsets.UTF_8)){
-				String line = null; 
-				while ((line = reader.readLine()) != null){
-					Document doc = createIndexDocument(line);
-					writer.addDocument(doc);
-					if(++commitCounter == commitLimit ){
-						writer.commit();
-						commitCounter = 0;
-					}
+			
+			
+			//try(BufferedReader reader = Files.newBufferedReader(filePath, StandardCharsets.UTF_8)){
+			String line = null; 
+			while ((line = reader.readLine()) != null){
+				Document doc = createIndexDocument(line);
+				writer.addDocument(doc);
+				if(++commitCounter == commitLimit ){
+					writer.commit();
+					commitCounter = 0;
 				}
 			}
-			writer.commit();
-	        writer.close();
+				
+				writer.commit();
+		        writer.close();
 		}catch(IOException e){
 			logger.error("issue with RAM Directory index writing",e);
 			throw new RuntimeException("Species Index could not be initialised");
