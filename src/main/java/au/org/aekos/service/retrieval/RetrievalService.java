@@ -4,8 +4,8 @@ import java.io.Writer;
 import java.util.List;
 
 import au.org.aekos.model.EnvironmentDataRecord;
-import au.org.aekos.model.SpeciesDataRecord;
-import au.org.aekos.model.TraitDataRecord;
+import au.org.aekos.model.SpeciesOccurrenceRecord;
+import au.org.aekos.model.TraitDataResponse;
 
 public interface RetrievalService {
 
@@ -15,7 +15,7 @@ public interface RetrievalService {
 	 * @return
 	 * @throws AekosApiRetrievalException
 	 */
-	List<SpeciesDataRecord> getSpeciesDataJson(List<String> speciesNames, Integer limit) throws AekosApiRetrievalException;
+	List<SpeciesOccurrenceRecord> getSpeciesDataJson(List<String> speciesNames, Integer limit) throws AekosApiRetrievalException;
 
 	/**
 	 * @param speciesNames
@@ -29,14 +29,18 @@ public interface RetrievalService {
 	/**
 	 * @param speciesNames
 	 * @param traitNames
+	 * @param rows 
+	 * @param start 
 	 * @return
+	 * @throws AekosApiRetrievalException 
 	 */
-	List<TraitDataRecord> getTraitData(List<String> speciesNames, List<String> traitNames);
+	TraitDataResponse getTraitData(List<String> speciesNames, List<String> traitNames, int start, int rows) throws AekosApiRetrievalException;
 
 	/**
 	 * @param speciesNames
 	 * @param environmentalVariableNames
 	 * @return
+	 * @throws AekosApiRetrievalException 
 	 */
-	List<EnvironmentDataRecord> getEnvironmentalData(List<String> speciesNames, List<String> environmentalVariableNames);
+	List<EnvironmentDataRecord> getEnvironmentalData(List<String> speciesNames, List<String> environmentalVariableNames) throws AekosApiRetrievalException;
 }

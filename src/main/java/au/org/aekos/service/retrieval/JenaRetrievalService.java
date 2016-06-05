@@ -6,8 +6,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import au.org.aekos.model.EnvironmentDataRecord;
-import au.org.aekos.model.SpeciesDataRecord;
-import au.org.aekos.model.TraitDataRecord;
+import au.org.aekos.model.SpeciesOccurrenceRecord;
+import au.org.aekos.model.TraitDataResponse;
 
 @Service
 public class JenaRetrievalService implements RetrievalService {
@@ -15,7 +15,7 @@ public class JenaRetrievalService implements RetrievalService {
 	// TODO Tom to implement
 	
 	@Override
-	public List<SpeciesDataRecord> getSpeciesDataJson(List<String> speciesNames, Integer limit)
+	public List<SpeciesOccurrenceRecord> getSpeciesDataJson(List<String> speciesNames, Integer limit)
 			throws AekosApiRetrievalException {
 		// TODO Auto-generated method stub
 		return null;
@@ -29,14 +29,15 @@ public class JenaRetrievalService implements RetrievalService {
 	}
 
 	@Override
-	public List<TraitDataRecord> getTraitData(List<String> speciesNames, List<String> traitNames) {
+	public List<EnvironmentDataRecord> getEnvironmentalData(List<String> speciesNames,
+			List<String> environmentalVariableNames) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public List<EnvironmentDataRecord> getEnvironmentalData(List<String> speciesNames,
-			List<String> environmentalVariableNames) {
+	public TraitDataResponse getTraitData(List<String> speciesNames, List<String> traitNames, int start, int count)
+			throws AekosApiRetrievalException {
 		// TODO Auto-generated method stub
 		return null;
 	}
