@@ -82,6 +82,7 @@ public class LuceneIndexBuilderServiceImpl implements LuceneIndexBuilderService 
 		Path path = null;
 		try {
 			path =  Paths.get(ClassLoader.getSystemResource(speciesResourcePath).toURI());
+			logger.info("Resolved the species list file to: " + path.toAbsolutePath());
 		} catch (URISyntaxException e) {
 			logger.error("Issue with speciesResourcePath " + speciesResourcePath, e);
 			throw new RuntimeException("Issue with speciesResourcePath " + speciesResourcePath, e);
