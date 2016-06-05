@@ -26,16 +26,24 @@ import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.QueryBuilder;
 import org.springframework.stereotype.Component;
 
+/**
+ * Initial exploration of Lucene basics . . . 
+ * 
+ * 
+ * @author Ben
+ *
+ */
 @Component
 public class IndexManager {
 
-	public static void main(String [] args) throws IOException{
+	public void main(String [] args) throws IOException{
 		IndexManager im = new IndexManager();
 		im.createIndex();
 		im.searchForDocumentsTest();
 		im.createTestDocument();
 		im.searchForDocumentsTest();
 	}
+	
 	
 	private String indexPath = "C:\\lucene\\indexes\\index1";
 	
