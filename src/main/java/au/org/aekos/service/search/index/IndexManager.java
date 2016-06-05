@@ -33,7 +33,7 @@ import org.springframework.stereotype.Component;
  * @author Ben
  *
  */
-@Component
+@Component @Deprecated
 public class IndexManager {
 
 	public void main(String [] args) throws IOException{
