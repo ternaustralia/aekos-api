@@ -19,7 +19,6 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.BytesRef;
-import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,15 +42,11 @@ public class LuceneIndexBuilderServiceImpl implements LuceneIndexBuilderService 
 	@Value("${species.csv.resourcePath}")
 	private String speciesResourcePath;
 	
-	
-	
-	
-	
-	
-	
-	
-	
 	public String getSpeciesResourcePath() {
+		if(speciesResourcePath == null){
+			return "taxa_names.csv";
+		}
+		
 		return speciesResourcePath;
 	}
 

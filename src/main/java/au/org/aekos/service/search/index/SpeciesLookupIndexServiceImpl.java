@@ -147,8 +147,8 @@ public class SpeciesLookupIndexServiceImpl implements InitializingBean{
 	
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		speciesIndex = indexBuilderService.buildSpeciesRAMDirectory();
-		logger.info("Species index created - ram bytes " + speciesIndex.ramBytesUsed());
+		//speciesIndex = indexBuilderService.buildSpeciesRAMDirectory();
+		//logger.info("Species index created - ram bytes " + speciesIndex.ramBytesUsed());
 	}
 	
 	public RAMDirectory getSpeciesIndex() {
