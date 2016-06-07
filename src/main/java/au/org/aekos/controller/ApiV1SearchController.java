@@ -1,5 +1,6 @@
 package au.org.aekos.controller;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -18,6 +19,7 @@ import au.org.aekos.model.SpeciesName;
 import au.org.aekos.model.SpeciesSummary;
 import au.org.aekos.model.TraitVocabEntry;
 import au.org.aekos.service.search.SearchService;
+import au.org.aekos.service.search.index.SpeciesLookupIndexService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -36,6 +38,10 @@ public class ApiV1SearchController {
 	@Qualifier("stubSearchService")
 	private SearchService searchService;
 	
+	@Autowired
+	private SpeciesLookupIndexService speciesSearchService;
+	
+	
 	@RequestMapping(path="/getTraitVocab.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ApiOperation(value = "Get trait vocabulary", notes = "TODO", tags="Search")
     public List<TraitVocabEntry> getTraitVocab(HttpServletResponse resp) {
@@ -44,10 +50,10 @@ public class ApiV1SearchController {
 
 	@RequestMapping(path="/speciesAutocomplete.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ApiOperation(value = "Autocomplete partial species names", notes = "TODO", tags="Search")
-    public List<SpeciesName> speciesAutocomplete(@RequestParam(name="q") String partialSpeciesName, HttpServletResponse resp) {
+    public List<SpeciesName> speciesAutocomplete(@RequestParam(name="q") String partialSpeciesName, HttpServletResponse resp) throws IOException {
 		// TODO do we need propagating headers to enable browser side caching
 		// TODO look at returning a complex object with meta information like total results, curr page, etc
-		return searchService.autocompleteSpeciesName(partialSpeciesName);
+		return speciesSearchService.performSearch(partialSpeciesName, 50, false);
 	}
 
 	@RequestMapping(path="/getTraitsBySpecies.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)

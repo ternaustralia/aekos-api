@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service;
 import au.org.aekos.model.SpeciesName;
 
 @Service
-public class SpeciesLookupIndexServiceImpl implements InitializingBean{
+public class SpeciesLookupIndexServiceImpl implements InitializingBean, SpeciesLookupIndexService {
 	
 	private Logger logger = LoggerFactory.getLogger(SpeciesLookupIndexServiceImpl.class);
 	
