@@ -9,13 +9,13 @@ public class SpeciesOccurrenceRecord {
     private final String scientificName;
     private final int individualCount;
     private final String eventDate;
-    private final String year;
-    private final String month;
+    private final int year;
+    private final int month;
     private final String bibliographicCitation;
     private final String datasetID;
 
 	public SpeciesOccurrenceRecord(double decimalLatitude, double decimalLongitude, String geodeticDatum, String locationID,
-			String scientificName, int individualCount, String eventDate, String year, String month, String bibliographicCitation,
+			String scientificName, int individualCount, String eventDate, int year, int month, String bibliographicCitation,
 			String datasetID) {
 		this.decimalLatitude = decimalLatitude;
 		this.decimalLongitude = decimalLongitude;
@@ -50,11 +50,11 @@ public class SpeciesOccurrenceRecord {
 		return eventDate;
 	}
 
-	public String getYear() {
+	public int getYear() {
 		return year;
 	}
 
-	public String getMonth() {
+	public int getMonth() {
 		return month;
 	}
 
@@ -82,8 +82,8 @@ public class SpeciesOccurrenceRecord {
 		String scientificNameField = fields[4];
 		int individualCountField = Integer.parseInt(fields[5]);
 		String eventDateField = fields[6];
-		String yearField = fields[7];
-		String monthField = fields[8];
+		int yearField = Integer.parseInt(fields[7]);
+		int monthField = Integer.parseInt(fields[8]);
 		String bibliographicCitationField = fields[9];
 		String datasetIdField = fields[10];
 		SpeciesOccurrenceRecord result = new SpeciesOccurrenceRecord(decimalLatitudeField, decimalLongitudeField,

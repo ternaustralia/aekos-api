@@ -89,7 +89,11 @@
     		<artifactId>commons-lang3</artifactId>
     		<version>3.4</version>
 		</dependency>
-		
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-tdb</artifactId>
+			<version>3.1.0</version>
+		</dependency>
 	</dependencies>
 
 	<properties>

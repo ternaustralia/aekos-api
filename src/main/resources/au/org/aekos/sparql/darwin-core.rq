@@ -1,0 +1,20 @@
+PREFIX api: <http://www.aekos.org.au/api/1.0#>
+
+SELECT *
+WHERE {
+  [
+    api:datasetID ?datasetID ;
+  	api:decimalLatitude ?decimalLatitude ;
+  	api:decimalLongitude ?decimalLongitude ;
+  	api:eventDate ?eventDate ;
+  	api:geodeticDatum ?geodeticDatum ;
+  	api:individualCount ?individualCount ;
+  	api:locationID ?locationID ;
+  	api:year ?year ;
+  	api:month ?month ;
+  	api:scientificName ?scientificName ;
+  	api:datasetIDEntity ?s ;
+  ] .
+  VALUES ?scientificName { %SCIENTIFIC_NAME_PLACEHOLDER% } .
+  ?s api:bibliographicCitation ?bibliographicCitation .
+}
