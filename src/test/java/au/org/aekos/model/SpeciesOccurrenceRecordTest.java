@@ -15,14 +15,16 @@ public class SpeciesOccurrenceRecordTest {
 				+ "Version 12 /2014. Persistent Hyperlink: http://www.aekos.org.au/collection/adelaide.edu.au/Koonamore/VegetationQuadrats. "
 				+ "ÆKOS Data Portal, rights owned by The University of Adelaide (www.adelaide.edu.au). Accessed [dd mmm yyyy e.g., 01 Jan 2016].";
 		String[] fields = new String[] {
-				"-32.1094","139.3506","aekos.org.au/collection/adelaide.edu.au/Koonamore/Photopoints/pp28A","Atriplex stipitata",
+				"-32.1094","139.3506","GDA94","aekos.org.au/collection/adelaide.edu.au/Koonamore/Photopoints/pp28A","Atriplex stipitata","1",
 				"23/11/12","2012","11",citation, "http://aekos.org.au/collection/adelaide.edu.au/Koonamore/Photopoints/pp28A"
 		};
 		SpeciesOccurrenceRecord result = SpeciesOccurrenceRecord.deserialiseFrom(fields);
 		assertEquals(-32.1094d, result.getDecimalLatitude(), 0.00001);
 		assertEquals(139.3506d, result.getDecimalLongitude(), 0.00001);
+		assertEquals("GDA94", result.getGeodeticDatum());
 		assertEquals("aekos.org.au/collection/adelaide.edu.au/Koonamore/Photopoints/pp28A", result.getLocationID());
 		assertEquals("Atriplex stipitata", result.getScientificName());
+		assertEquals(1, result.getIndividualCount());
 		assertEquals("23/11/12", result.getEventDate());
 		assertEquals("2012", result.getYear());
 		assertEquals("11", result.getMonth());

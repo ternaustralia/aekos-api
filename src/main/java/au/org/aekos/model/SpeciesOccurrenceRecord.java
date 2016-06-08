@@ -4,21 +4,25 @@ public class SpeciesOccurrenceRecord {
 
 	private final double decimalLatitude;
     private final double decimalLongitude;
+    private final String geodeticDatum;
     private final String locationID;
     private final String scientificName;
+    private final int individualCount;
     private final String eventDate;
     private final String year;
     private final String month;
     private final String bibliographicCitation;
     private final String datasetID;
 
-	public SpeciesOccurrenceRecord(double decimalLatitude, double decimalLongitude, String locationID,
-			String scientificName, String eventDate, String year, String month, String bibliographicCitation,
+	public SpeciesOccurrenceRecord(double decimalLatitude, double decimalLongitude, String geodeticDatum, String locationID,
+			String scientificName, int individualCount, String eventDate, String year, String month, String bibliographicCitation,
 			String datasetID) {
 		this.decimalLatitude = decimalLatitude;
 		this.decimalLongitude = decimalLongitude;
+		this.geodeticDatum = geodeticDatum;
 		this.locationID = locationID;
 		this.scientificName = scientificName;
+		this.individualCount = individualCount;
 		this.eventDate = eventDate;
 		this.year = year;
 		this.month = month;
@@ -62,19 +66,29 @@ public class SpeciesOccurrenceRecord {
 		return datasetID;
 	}
 
+	public String getGeodeticDatum() {
+		return geodeticDatum;
+	}
+
+	public int getIndividualCount() {
+		return individualCount;
+	}
+
 	public static SpeciesOccurrenceRecord deserialiseFrom(String[] fields) {
     	double decimalLatitudeField = Double.parseDouble(fields[0]);
 		double decimalLongitudeField = Double.parseDouble(fields[1]);
-		String locationIdField = fields[2];
-		String scientificNameField = fields[3];
-		String eventDateField = fields[4];
-		String yearField = fields[5];
-		String monthField = fields[6];
-		String bibliographicCitationField = fields[7];
-		String datasetIdField = fields[8];
-		SpeciesOccurrenceRecord result = new SpeciesOccurrenceRecord(decimalLatitudeField, decimalLongitudeField, 
-				locationIdField, scientificNameField, eventDateField, yearField, 
-				monthField, bibliographicCitationField, datasetIdField);
+		String geodeticDatumField = fields[2];
+		String locationIdField = fields[3];
+		String scientificNameField = fields[4];
+		int individualCountField = Integer.parseInt(fields[5]);
+		String eventDateField = fields[6];
+		String yearField = fields[7];
+		String monthField = fields[8];
+		String bibliographicCitationField = fields[9];
+		String datasetIdField = fields[10];
+		SpeciesOccurrenceRecord result = new SpeciesOccurrenceRecord(decimalLatitudeField, decimalLongitudeField,
+				geodeticDatumField, locationIdField, scientificNameField, individualCountField, eventDateField,
+				yearField, monthField, bibliographicCitationField, datasetIdField);
 		return result;
     }
 }
