@@ -1,6 +1,8 @@
 package au.org.aekos.service.retrieval;
 
+import java.io.IOException;
 import java.io.Writer;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -12,6 +14,8 @@ import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import au.org.aekos.model.EnvironmentDataRecord;
@@ -22,26 +26,63 @@ import au.org.aekos.model.TraitDataResponse;
 public class JenaRetrievalService implements RetrievalService {
 
 	static final String SCIENTIFIC_NAME_PLACEHOLDER = "%SCIENTIFIC_NAME_PLACEHOLDER%";
-	private Model darwinCoreGraph;
+	private static final String OFFSET_PLACEHOLDER = "%OFFSET_PLACEHOLDER%";
+	private static final String LIMIT_PLACEHOLDER = "%LIMIT_PLACEHOLDER%";
+	
+	@Autowired
+	@Qualifier("model")
+	private Model model;
+	
+	@Autowired
+	@Qualifier("darwinCoreQueryTemplate")
 	private String darwinCoreQueryTemplate;
 	
+	@Autowired
+	private StubRetrievalService stubDelegate;
+	
 	@Override
-	public List<SpeciesOccurrenceRecord> getSpeciesDataJson(List<String> speciesNames, Integer limit) throws AekosApiRetrievalException {
+	public List<SpeciesOccurrenceRecord> getSpeciesDataJson(List<String> speciesNames, int start, int rows) throws AekosApiRetrievalException {
+		return getSpeciesDataJsonPrivate(speciesNames, start, rows);
+	}
+
+	@Override
+	public void getSpeciesDataCsv(List<String> speciesNames, int start, int rows, Writer responseWriter) throws AekosApiRetrievalException {
+		// TODO write a header?
+		for (Iterator<SpeciesOccurrenceRecord> it = getSpeciesDataJsonPrivate(speciesNames, start, rows).iterator();it.hasNext();) {
+			SpeciesOccurrenceRecord curr = it.next();
+			try {
+				responseWriter.write(curr.toCsv());
+				if (it.hasNext()) {
+					responseWriter.write("\n");
+				}
+			} catch (IOException e) {
+				throw new AekosApiRetrievalException("Failed to write to the supplied writer: " + responseWriter.getClass(), e);
+			}
+		}
+	}
+
+	@Override
+	public List<EnvironmentDataRecord> getEnvironmentalData(List<String> speciesNames, List<String> environmentalVariableNames) throws AekosApiRetrievalException {
+		// FIXME make real
+		return stubDelegate.getEnvironmentalData(speciesNames, environmentalVariableNames);
+	}
+
+	@Override
+	public TraitDataResponse getTraitData(List<String> speciesNames, List<String> traitNames, int start, int count) throws AekosApiRetrievalException {
+		// FIXME make real
+		return stubDelegate.getTraitData(speciesNames, traitNames, start, count);
+	}
+
+	private List<SpeciesOccurrenceRecord> getSpeciesDataJsonPrivate(List<String> speciesNames, int start, int rows) {
 		List<SpeciesOccurrenceRecord> result = new LinkedList<>();
-		String sparql = getProcessedSparql(speciesNames);
+		String sparql = getProcessedSparql(speciesNames, start, rows);
 		Query query = QueryFactory.create(sparql);
-		int rowCount = 0;
-		try (QueryExecution qexec = QueryExecutionFactory.create(query, darwinCoreGraph)) {
+		try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
 			ResultSet results = qexec.execSelect();
 			if (!results.hasNext()) {
 				throw new RuntimeException("No results were returned in the solution for the query: " + darwinCoreQueryTemplate);
 			}
 			for (; results.hasNext();) {
-				boolean isLimitEnabled = limit > 0;
-				boolean isLimitReached = rowCount++ >= limit;
-				if (isLimitEnabled && isLimitReached) {
-					break;
-				}
 				QuerySolution s = results.next();
 				result.add(new SpeciesOccurrenceRecord(getDouble(s, "decimalLatitude"),
 						getDouble(s, "decimalLongitude"), getString(s, "geodeticDatum"), getString(s, "locationID"),
@@ -52,10 +93,13 @@ public class JenaRetrievalService implements RetrievalService {
 		}
 		return result;
 	}
-
-	String getProcessedSparql(List<String> speciesNames) {
+	
+	String getProcessedSparql(List<String> speciesNames, int offset, int limit) {
 		String scientificNameValueList = speciesNames.stream().collect(Collectors.joining("\" \"", "\"", "\""));
-		String processedSparql = darwinCoreQueryTemplate.replace(SCIENTIFIC_NAME_PLACEHOLDER, scientificNameValueList);
+		String processedSparql = darwinCoreQueryTemplate
+				.replace(SCIENTIFIC_NAME_PLACEHOLDER, scientificNameValueList)
+				.replace(OFFSET_PLACEHOLDER, String.valueOf(offset))
+				.replace(LIMIT_PLACEHOLDER, String.valueOf(limit == 0 ? Integer.MAX_VALUE : limit));
 		return processedSparql;
 	}
 
@@ -70,30 +114,9 @@ public class JenaRetrievalService implements RetrievalService {
 	private double getDouble(QuerySolution soln, String variableName) {
 		return soln.get(variableName).asLiteral().getDouble();
 	}
-
-	@Override
-	public void getSpeciesDataCsv(List<String> speciesNames, Integer limit, boolean triggerDownload,
-			Writer responseWriter) throws AekosApiRetrievalException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public List<EnvironmentDataRecord> getEnvironmentalData(List<String> speciesNames,
-			List<String> environmentalVariableNames) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public TraitDataResponse getTraitData(List<String> speciesNames, List<String> traitNames, int start, int count)
-			throws AekosApiRetrievalException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public void setDarwinCoreGraph(Model darwinCoreGraph) {
-		this.darwinCoreGraph = darwinCoreGraph;
+	
+	public void setModel(Model model) {
+		this.model = model;
 	}
 
 	public void setDarwinCoreQueryTemplate(String darwinCoreQueryTemplate) {

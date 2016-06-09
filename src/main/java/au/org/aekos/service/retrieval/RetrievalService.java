@@ -10,37 +10,47 @@ import au.org.aekos.model.TraitDataResponse;
 public interface RetrievalService {
 
 	/**
-	 * @param speciesNames
-	 * @param limit
-	 * @return
-	 * @throws AekosApiRetrievalException
+	 * Retrieves JSON serialised Darwin Core compliant records for the specified species.
+	 * 
+	 * @param speciesNames	names of the species to retrieve data for
+	 * @param start			offset to start retrieving records
+	 * @param rows			number of rows to return (page size), 0 means all
+	 * @return				specified number of records for the specific species
+	 * @throws AekosApiRetrievalException	when something goes wrong
 	 */
-	List<SpeciesOccurrenceRecord> getSpeciesDataJson(List<String> speciesNames, Integer limit) throws AekosApiRetrievalException;
+	List<SpeciesOccurrenceRecord> getSpeciesDataJson(List<String> speciesNames, int start, int rows) throws AekosApiRetrievalException;
 
 	/**
-	 * @param speciesNames
-	 * @param limit
-	 * @param triggerDownload
-	 * @param responseWriter
+	 * Retrieves CSV serialised Darwin Core compliant records for the specified species.
+	 * 
+	 * @param speciesNames	names of the species to retrieve data for
+	 * @param start			offset to start retrieving records
+	 * @param rows			number of rows to return (page size), 0 means all
+	 * @param responseWriter writer to write records to
 	 * @throws AekosApiRetrievalException 
 	 */
-	void getSpeciesDataCsv(List<String> speciesNames, Integer limit, boolean triggerDownload, Writer responseWriter) throws AekosApiRetrievalException;
+	void getSpeciesDataCsv(List<String> speciesNames, int start, int rows, Writer responseWriter) throws AekosApiRetrievalException;
 
 	/**
-	 * @param speciesNames
-	 * @param traitNames
-	 * @param rows 
-	 * @param start 
-	 * @return
-	 * @throws AekosApiRetrievalException 
+	 * Retrieves trait data for the specified species.
+	 * 
+	 * The traits can be filtered by supplying <code>traitNames</code>. The result data is
+	 * Darwin Core (as per {@link #getSpeciesDataJson(List, int, int)} plus trait data.
+	 * 
+	 * @param speciesNames	names of the species to retrieve data for
+	 * @param traitNames	list of trait names to filter by or an empty list to get all traits
+	 * @param start			offset to start retrieving records
+	 * @param rows			number of rows to return (page size), 0 means all 
+	 * @return				specified number of records for the specified species filtered by the supplied trait name list
+	 * @throws AekosApiRetrievalException when something goes wrong
 	 */
 	TraitDataResponse getTraitData(List<String> speciesNames, List<String> traitNames, int start, int rows) throws AekosApiRetrievalException;
 
 	/**
-	 * @param speciesNames
-	 * @param environmentalVariableNames
-	 * @return
-	 * @throws AekosApiRetrievalException 
+	 * @param speciesNames					names of the species to retrieve data for
+	 * @param environmentalVariableNames	list of environmental variable names to filter by or an empty list to get all variables
+	 * @return								TODO
+	 * @throws AekosApiRetrievalException 	when something goes wrong
 	 */
 	List<EnvironmentDataRecord> getEnvironmentalData(List<String> speciesNames, List<String> environmentalVariableNames) throws AekosApiRetrievalException;
 }

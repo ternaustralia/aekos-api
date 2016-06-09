@@ -34,6 +34,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/v1")
 public class ApiV1RetrievalController {
 
+	private static final String DEFAULT_ROWS = "20";
 	private static final String TEXT_CSV_MIME = "text/csv";
 	private static final String DL_PARAM_MSG = "Makes the response trigger a downloadable file rather than streaming the response";
 
@@ -45,16 +46,18 @@ public class ApiV1RetrievalController {
 	// TODO do we accept LSID/species ID and/or a species name for the species related services?
 	
 	@Autowired
-	@Qualifier("stubRetrievalService")
+	@Qualifier("jenaRetrievalService")
 	private RetrievalService retrievalService;
 	
 	@RequestMapping(path="/speciesData.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get species data in JSON format", notes = "Gets Aekos data", tags="Data Retrieval")
     public List<SpeciesOccurrenceRecord> speciesDataDotJson(
     		@RequestParam(name="speciesName") String[] speciesNames,
-    		@RequestParam(required=false) Integer limit, HttpServletResponse resp) {
+    		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
+    		@RequestParam(required=false, defaultValue=DEFAULT_ROWS) @ApiParam("result page size") int rows,
+    		HttpServletResponse resp) {
 		try {
-			return retrievalService.getSpeciesDataJson(Arrays.asList(speciesNames), limit);
+			return retrievalService.getSpeciesDataJson(Arrays.asList(speciesNames), start, rows);
 		} catch (AekosApiRetrievalException e) {
 			resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			throw new RuntimeException(e);
@@ -66,9 +69,11 @@ public class ApiV1RetrievalController {
     @ApiOperation(value = "Get species data", notes = "Gets Aekos data", tags="Data Retrieval")
     public List<SpeciesOccurrenceRecord> speciesDataJson(
     		@RequestParam(name="speciesName") String[] speciesNames,
-    		@RequestParam(required=false) Integer limit, HttpServletResponse resp) {
+    		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
+    		@RequestParam(required=false, defaultValue=DEFAULT_ROWS) @ApiParam("result page size") int rows,
+    		HttpServletResponse resp) {
 		try {
-			return retrievalService.getSpeciesDataJson(Arrays.asList(speciesNames), limit);
+			return retrievalService.getSpeciesDataJson(Arrays.asList(speciesNames), start, rows);
 		} catch (AekosApiRetrievalException e) {
 			resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			throw new RuntimeException(e);
@@ -81,7 +86,8 @@ public class ApiV1RetrievalController {
 	@ApiResponses(@ApiResponse(code=200, message="Data is returned")) // FIXME how do we word this FIXME are there status code int constants somewhere?
     public void speciesDataDotCsv(
     		@RequestParam(name="speciesName") @ApiParam(value="Scientific name(s) of species to retrieve data for", example="Atriplex vesicaria") String[] speciesNames,
-    		@RequestParam(required=false) Integer limit,
+    		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
+    		@RequestParam(required=false, defaultValue=DEFAULT_ROWS) @ApiParam("result page size") int rows,
     		@RequestParam(required=false, defaultValue="false") @ApiParam(DL_PARAM_MSG) boolean download,
     		@ApiIgnore Writer responseWriter, HttpServletResponse resp) {
 		resp.setContentType(TEXT_CSV_MIME);
@@ -89,7 +95,7 @@ public class ApiV1RetrievalController {
     		resp.setHeader("Content-Disposition", "attachment;filename=aekosSpeciesData.csv"); // TODO give a more dynamic name
     	}
 		try {
-			retrievalService.getSpeciesDataCsv(Arrays.asList(speciesNames), limit, download, responseWriter);
+			retrievalService.getSpeciesDataCsv(Arrays.asList(speciesNames), start, rows, responseWriter);
 		} catch (AekosApiRetrievalException e) {
 			resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			throw new RuntimeException(e);
@@ -102,11 +108,12 @@ public class ApiV1RetrievalController {
 			notes = "Gets species occurrence data in a Darwin Core compliant data format", tags="Data Retrieval")
     public void speciesDataCsv(
     		@RequestParam(name="speciesName") String[] speciesNames,
-    		@RequestParam(required=false) Integer limit,
+    		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
+    		@RequestParam(required=false, defaultValue=DEFAULT_ROWS) @ApiParam("result page size") int rows,
     		@ApiIgnore Writer responseWriter, HttpServletResponse resp) {
     	resp.setContentType(TEXT_CSV_MIME);
     	try {
-    		retrievalService.getSpeciesDataCsv(Arrays.asList(speciesNames), limit, false, responseWriter);
+    		retrievalService.getSpeciesDataCsv(Arrays.asList(speciesNames), start, rows, responseWriter);
     	} catch (AekosApiRetrievalException e) {
 			resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			throw new RuntimeException(e);
@@ -119,7 +126,7 @@ public class ApiV1RetrievalController {
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(name="traitName", required=false) String[] traitNames,
     		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
-    		@RequestParam(required=false, defaultValue="20") @ApiParam("result page size") int rows,
+    		@RequestParam(required=false, defaultValue=DEFAULT_ROWS) @ApiParam("result page size") int rows,
     		HttpServletRequest req, HttpServletResponse resp) throws AekosApiRetrievalException {
     	// TODO do we include units in the field name, as an extra value or as a header/metadata object in the resp
     	List<String> traits = traitNames != null ? Arrays.asList(traitNames) : Collections.emptyList();

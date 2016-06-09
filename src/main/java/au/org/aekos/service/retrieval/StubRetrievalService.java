@@ -36,8 +36,8 @@ public class StubRetrievalService implements RetrievalService {
 	private SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
 	
 	@Override
-	public List<SpeciesOccurrenceRecord> getSpeciesDataJson(List<String> speciesNames, Integer limit) throws AekosApiRetrievalException {
-    	int checkedLimit = (limit != null && limit > 0) ? limit : Integer.MAX_VALUE;
+	public List<SpeciesOccurrenceRecord> getSpeciesDataJson(List<String> speciesNames, int start, int rows) throws AekosApiRetrievalException {
+    	int checkedLimit = (start > 0) ? start : Integer.MAX_VALUE;
     	try {
     		return getSpeciesDataJsonHelper(speciesNames, checkedLimit);
 		} catch (IOException e) {
@@ -48,9 +48,8 @@ public class StubRetrievalService implements RetrievalService {
 	}
 
 	@Override
-	public void getSpeciesDataCsv(List<String> speciesNames, Integer limit, boolean triggerDownload,
-			Writer responseWriter) throws AekosApiRetrievalException {
-		int checkedLimit = (limit != null && limit > 0) ? limit : Integer.MAX_VALUE;
+	public void getSpeciesDataCsv(List<String> speciesNames, int start, int rows, Writer responseWriter) throws AekosApiRetrievalException {
+		int checkedLimit = (start > 0) ? start : Integer.MAX_VALUE;
     	try {
     		getSpeciesCsvDataHelper(speciesNames, checkedLimit, responseWriter);
 		} catch (IOException e) {

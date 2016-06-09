@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xsi:schemaLocation="
+            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.2.xsd
+            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.2.xsd">
+	
+	<context:property-placeholder location="classpath:/au/org/aekos/retrievalContext-test.properties" />
+	
+	<context:component-scan base-package="au.org.aekos.service.retrieval">
+		<context:exclude-filter type="assignable" expression="au.org.aekos.service.retrieval.JossDataProvisionService"/>
+		<context:exclude-filter type="assignable" expression="au.org.aekos.service.search.index.LuceneIndexBuilderServiceImpl"/>
+		<context:exclude-filter type="assignable" expression="au.org.aekos.service.search.index.SpeciesLookupIndexServiceImpl"/>
+	</context:component-scan>
+	
+	<bean id="darwinCoreQueryTemplate" class="java.lang.String">
+	    <constructor-arg>
+	        <bean class="org.springframework.util.FileCopyUtils" factory-method="copyToByteArray">
+	            <constructor-arg value="classpath:au/org/aekos/sparql/darwin-core.rq" type="java.io.InputStream" />
+	        </bean>     
+	    </constructor-arg>
+	</bean>
+	
+	<bean id="testGetSpeciesDataCsv01_expected" class="java.lang.String">
+	    <constructor-arg>
+	        <bean class="org.springframework.util.FileCopyUtils" factory-method="copyToByteArray">
+	            <constructor-arg value="classpath:au/org/aekos/retrieval/testGetSpeciesDataCsv01_expected.txt" type="java.io.InputStream" />
+	        </bean>     
+	    </constructor-arg>
+	</bean>
+	
+	<bean id="testGetSpeciesDataCsv02_expected" class="java.lang.String">
+	    <constructor-arg>
+	        <bean class="org.springframework.util.FileCopyUtils" factory-method="copyToByteArray">
+	            <constructor-arg value="classpath:au/org/aekos/retrieval/testGetSpeciesDataCsv02_expected.txt" type="java.io.InputStream" />
+	        </bean>     
+	    </constructor-arg>
+	</bean>
+	
+	<bean id="testGetSpeciesDataCsv03_expected" class="java.lang.String">
+	    <constructor-arg>
+	        <bean class="org.springframework.util.FileCopyUtils" factory-method="copyToByteArray">
+	            <constructor-arg value="classpath:au/org/aekos/retrieval/testGetSpeciesDataCsv03_expected.txt" type="java.io.InputStream" />
+	        </bean>     
+	    </constructor-arg>
+	</bean>
+	
+	<bean id="modelLoader" class="au.org.aekos.util.ModelLoader" />
+	
+	<bean id="model" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+		<property name="targetObject" ref="modelLoader" />
+		<property name="targetMethod" value="loadModel" />
+	</bean>
+	
+	<!-- pre-populates the model -->
+	<bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+		<property name="targetObject" ref="model" />
+		<property name="targetMethod" value="read" />
+		<property name="arguments">
+			<array>
+				<value type="java.io.InputStream">classpath:au/org/aekos/test-darwin-core.ttl</value>
+				<value>null</value>
+				<value>TTL</value>
+			</array>
+		</property>
+	</bean>
+</beans>
