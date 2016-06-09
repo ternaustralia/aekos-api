@@ -9,4 +9,4 @@ docker save -o $IMAGE_TAR $IMAGE_NAME
 echo "Docker file written to `pwd`/$IMAGE_TAR so now you can:"
 echo "  # scp to another machine"
 echo "  docker load -i $TAR_NAME"
-echo "  docker run -p 8099:8080 $IMAGE_NAME"
+echo "  docker run -p 8099:8080 -v /host/path/to/tdb:/tdb $IMAGE_NAME"
