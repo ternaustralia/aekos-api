@@ -127,8 +127,8 @@ public class LuceneIndexBuilderServiceImpl implements LuceneIndexBuilderService 
 	private static Document createIndexDocument(String speciesName){
 		speciesName = speciesName.trim();
 		Document doc = new Document();
-		doc.add(new StringField(IndexConstants.TRAIT_VALUE , speciesName, Field.Store.YES ));
-		doc.add(new StringField(IndexConstants.DISPLAY_VALUE , speciesName, Field.Store.YES ));
+		doc.add(new StringField(IndexConstants.FLD_TRAIT_VALUE , speciesName, Field.Store.YES ));
+		doc.add(new StringField(IndexConstants.FLD_DISPLAY_VALUE , speciesName, Field.Store.YES ));
 		
 		//Case insensitive tokenisation with boosting
 		manualLowercaseTokeniseAndAddBoost(speciesName, doc);
@@ -137,15 +137,15 @@ public class LuceneIndexBuilderServiceImpl implements LuceneIndexBuilderService 
 	
 	static private void manualLowercaseTokeniseAndAddBoost(String traitDisplayValue, Document doc){
 		String lowercase = traitDisplayValue.toLowerCase().replace(" ", "").replace(".", "");
-		Field textField = new TextField(IndexConstants.SEARCH, lowercase, Field.Store.NO );
+		Field textField = new TextField(IndexConstants.FLD_SEARCH, lowercase, Field.Store.NO );
 		
 		textField.setBoost(10.0f);
 		doc.add(textField);
-		doc.add(new SortedDocValuesField(IndexConstants.SEARCH, new BytesRef(lowercase)));
+		doc.add(new SortedDocValuesField(IndexConstants.FLD_SEARCH, new BytesRef(lowercase)));
         
 		//Text field for levenstein distance search - guess what?? We don't use it !!
 		String lev = lowercase.replaceAll(",", "").replaceAll("'", "").replaceAll("-","");
-	    Field textFieldLev = new TextField(IndexConstants.SEARCH_LEV, lev, Field.Store.NO );
+	    Field textFieldLev = new TextField(IndexConstants.FLD_SEARCH_LEV, lev, Field.Store.NO );
 		doc.add(textFieldLev);
 		if(traitDisplayValue.contains(" ")){
 			String lc = traitDisplayValue.toLowerCase();
@@ -154,7 +154,7 @@ public class LuceneIndexBuilderServiceImpl implements LuceneIndexBuilderService 
 				for(int x = 1; x < tokens.length; x++ ){
 					String token = tokens[x];
 					if(StringUtils.hasLength(token) && ! token.contains(".") ){
-					    Field field = new TextField(IndexConstants.SEARCH_SUB, token, Field.Store.NO);
+					    Field field = new TextField(IndexConstants.FLD_SEARCH_SUB, token, Field.Store.NO);
 					    doc.add(field);
 					}
 				}

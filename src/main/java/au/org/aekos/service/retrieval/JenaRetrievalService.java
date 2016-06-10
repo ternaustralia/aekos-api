@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
@@ -29,7 +30,7 @@ public class JenaRetrievalService implements RetrievalService {
 	private static final String OFFSET_PLACEHOLDER = "%OFFSET_PLACEHOLDER%";
 	private static final String LIMIT_PLACEHOLDER = "%LIMIT_PLACEHOLDER%";
 	
-	@Autowired
+	@Autowired 
 	@Qualifier("model")
 	private Model model;
 	
@@ -77,7 +78,6 @@ public class JenaRetrievalService implements RetrievalService {
 		List<SpeciesOccurrenceRecord> result = new LinkedList<>();
 		String sparql = getProcessedSparql(speciesNames, start, rows);
 		Query query = QueryFactory.create(sparql);
-		// FIXME handle when no results are found and return something sensible to the user
 		try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
 			ResultSet results = qexec.execSelect();
 			if (!results.hasNext()) {

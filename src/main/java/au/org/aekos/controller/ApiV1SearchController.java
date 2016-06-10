@@ -74,6 +74,7 @@ public class ApiV1SearchController {
 		return searchService.getEnvironmentBySpecies(Arrays.asList(speciesNames));
 	}
 	
+	//species summary document??
 	@RequestMapping(path="/speciesSummary.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ApiOperation(value = "Get a summary of the specified species", notes = "TODO", tags="Search")
     public List<SpeciesSummary> getSpeciesSummary(@RequestParam(name="speciesName") String[] speciesNames, HttpServletResponse resp) {

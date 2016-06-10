@@ -42,24 +42,24 @@ public class SpeciesLookupIndexServiceImpl implements InitializingBean, SpeciesL
 		RAMDirectory idx = getSpeciesIndex();
 		IndexSearcher searcher = new IndexSearcher( DirectoryReader.open(idx) );
 		String searchTerm = term.toLowerCase().replace(" ", "").replace(".", "");
-		Query q = new PrefixQuery(new Term(IndexConstants.SEARCH, searchTerm ));
-		Query q2 = new PrefixQuery(new Term(IndexConstants.SEARCH_SUB, searchTerm ));
-		TopDocs td = searcher.search(q, numResults, new Sort(new SortField(IndexConstants.SEARCH, SortField.Type.STRING)));
+		Query q = new PrefixQuery(new Term(IndexConstants.FLD_SEARCH, searchTerm ));
+		Query q2 = new PrefixQuery(new Term(IndexConstants.FLD_SEARCH_SUB, searchTerm ));
+		TopDocs td = searcher.search(q, numResults, new Sort(new SortField(IndexConstants.FLD_SEARCH, SortField.Type.STRING)));
 		if( td.totalHits > 0 ){
 			for(ScoreDoc sd :td.scoreDocs ){
 				Document d = searcher.doc(sd.doc);
 				if(d != null){
-					SpeciesNameList1.add(new SpeciesName(  d.getField(IndexConstants.DISPLAY_VALUE).stringValue()));
+					SpeciesNameList1.add(new SpeciesName(  d.getField(IndexConstants.FLD_DISPLAY_VALUE).stringValue()));
 				}
 			}
 		}
 		
-		TopDocs td2 = searcher.search(q2, numResults, new Sort(new SortField(IndexConstants.SEARCH, SortField.Type.STRING)));
+		TopDocs td2 = searcher.search(q2, numResults, new Sort(new SortField(IndexConstants.FLD_SEARCH, SortField.Type.STRING)));
 		if( td2.totalHits > 0 ){
 			for(ScoreDoc sd :td2.scoreDocs ){
 				Document d = searcher.doc(sd.doc);
 				if(d != null){
-					SpeciesNameList2.add(new SpeciesName( d.getField(IndexConstants.DISPLAY_VALUE).stringValue()));
+					SpeciesNameList2.add(new SpeciesName( d.getField(IndexConstants.FLD_DISPLAY_VALUE).stringValue()));
 				}
 			}
 		}
@@ -83,7 +83,7 @@ public class SpeciesLookupIndexServiceImpl implements InitializingBean, SpeciesL
 			for(ScoreDoc sd :td.scoreDocs ){
 				Document d = searcher.doc(sd.doc);
 				if(d != null){
-					SpeciesNameList.add(new SpeciesName(d.getField(IndexConstants.DISPLAY_VALUE).stringValue()));
+					SpeciesNameList.add(new SpeciesName(d.getField(IndexConstants.FLD_DISPLAY_VALUE).stringValue()));
 				}
 			}
 		}

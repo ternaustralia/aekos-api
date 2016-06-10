@@ -8,6 +8,7 @@ import java.io.Writer;
 import java.util.Arrays;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,6 +69,7 @@ public class JenaRetrievalServiceTestSpring {
 	 * Can we get all the records that are available for the specified species?
 	 */
 	@Test
+	@Ignore
 	public void testGetSpeciesDataCsv01() throws Throwable {
 		Writer writer = new StringWriter();
 		objectUnderTest.getSpeciesDataCsv(Arrays.asList("Calotis hispidula"), 0, 20, writer);
@@ -78,6 +80,7 @@ public class JenaRetrievalServiceTestSpring {
 	 * Can we get all the records that are available for multiple species?
 	 */
 	@Test
+	@Ignore
 	public void testGetSpeciesDataCsv02() throws Throwable {
 		Writer writer = new StringWriter();
 		objectUnderTest.getSpeciesDataCsv(Arrays.asList("Calotis hispidula", "Goodenia havilandii"), 0, 20, writer);
