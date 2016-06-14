@@ -8,6 +8,7 @@ import java.io.Writer;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang.SystemUtils;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,6 +18,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import au.org.aekos.model.SpeciesOccurrenceRecord;
+import junit.framework.Assert;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("classpath:/au/org/aekos/retrievalContext-test.xml")
@@ -69,22 +71,29 @@ public class JenaRetrievalServiceTestSpring {
 	 * Can we get all the records that are available for the specified species?
 	 */
 	@Test
-	@Ignore
+	//@Ignore
 	public void testGetSpeciesDataCsv01() throws Throwable {
 		Writer writer = new StringWriter();
 		objectUnderTest.getSpeciesDataCsv(Arrays.asList("Calotis hispidula"), 0, 20, writer);
-		assertThat(writer.toString(), is(testGetSpeciesDataCsv01_expected));
+		String compareStr = testGetSpeciesDataCsv01_expected;
+		if(SystemUtils.IS_OS_WINDOWS){
+			compareStr = testGetSpeciesDataCsv01_expected.replaceAll("\r", "");
+		}
+		assertThat(writer.toString(), is(compareStr));
 	}
 
 	/**
 	 * Can we get all the records that are available for multiple species?
 	 */
 	@Test
-	@Ignore
 	public void testGetSpeciesDataCsv02() throws Throwable {
 		Writer writer = new StringWriter();
 		objectUnderTest.getSpeciesDataCsv(Arrays.asList("Calotis hispidula", "Goodenia havilandii"), 0, 20, writer);
-		assertThat(writer.toString(), is(testGetSpeciesDataCsv02_expected));
+		String compareStr = testGetSpeciesDataCsv02_expected;
+		if(SystemUtils.IS_OS_WINDOWS){
+			compareStr = testGetSpeciesDataCsv02_expected.replaceAll("\r", "");
+		}
+		assertThat(writer.toString(), is(compareStr));
 	}
 
 	/**
@@ -95,6 +104,12 @@ public class JenaRetrievalServiceTestSpring {
 		int onlyOne = 1;
 		Writer writer = new StringWriter();
 		objectUnderTest.getSpeciesDataCsv(Arrays.asList("Calotis hispidula"), 0, onlyOne, writer);
+		
+		String compareStr = testGetSpeciesDataCsv03_expected;
+		if(SystemUtils.IS_OS_WINDOWS){
+			compareStr = testGetSpeciesDataCsv03_expected.replaceAll("\r", "");
+		}
+		
 		assertThat(writer.toString(), is(testGetSpeciesDataCsv03_expected));
 	}
 }
