@@ -71,7 +71,6 @@ public class JenaRetrievalServiceTestSpring {
 	 * Can we get all the records that are available for the specified species?
 	 */
 	@Test
-	//@Ignore
 	public void testGetSpeciesDataCsv01() throws Throwable {
 		Writer writer = new StringWriter();
 		objectUnderTest.getSpeciesDataCsv(Arrays.asList("Calotis hispidula"), 0, 20, writer);

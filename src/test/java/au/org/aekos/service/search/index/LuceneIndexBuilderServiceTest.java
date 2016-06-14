@@ -29,11 +29,12 @@ public class LuceneIndexBuilderServiceTest {
 	@Autowired
 	SpeciesLookupIndexServiceImpl speciesIndexService;
 	
-	@Test
+	//TODO Move
+	//@Test 
 	public void testIndexPathFunctions(){
-		Assert.assertNotNull(indexBuilder);
-		System.out.println(indexBuilder.getIndexPath());
-		Assert.assertTrue(indexBuilder.ensureIndexPathExists());
+		//Assert.assertNotNull(indexBuilder);
+		//System.out.println(indexBuilder.getIndexPath());
+		//Assert.assertTrue(indexBuilder.ensureIndexPathExists());
 	}
 	
 	//@Test //Having issues 

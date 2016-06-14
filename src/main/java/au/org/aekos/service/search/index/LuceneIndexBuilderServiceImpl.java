@@ -18,7 +18,9 @@ import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
+import org.apache.lucene.store.SimpleFSDirectory;
 import org.apache.lucene.util.BytesRef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,15 +33,6 @@ public class LuceneIndexBuilderServiceImpl implements LuceneIndexBuilderService 
 
 	private static final Logger logger = LoggerFactory.getLogger(LuceneIndexBuilderServiceImpl.class);
 	
-	@Value("${lucene.index.path}")
-	private String indexPath;
-	
-	@Value("${lucene.index.wpath}")
-	private String windowsIndexPath;
-	
-	@Value("${lucene.index.createMode}")
-	private boolean createMode;
-	
 	@Value("${species.csv.resourcePath}")
 	private String speciesResourcePath;
 	
@@ -49,43 +42,6 @@ public class LuceneIndexBuilderServiceImpl implements LuceneIndexBuilderService 
 		}
 		
 		return speciesResourcePath;
-	}
-
-	public String getIndexPath(){
-		if(SystemUtils.IS_OS_WINDOWS){
-			return windowsIndexPath;
-		}
-		return indexPath;
-	}
-	
-	//Ensure index path exists, if not attempt to create it. 
-	public boolean ensureIndexPathExists(){
-		if(Files.isDirectory(Paths.get(getIndexPath()))){
-			return true;
-		}
-		//else try and create the path
-		try {
-			Files.createDirectories(Paths.get(getIndexPath()));
-		} catch (IOException e) {
-			logger.error("Can't create index path :" + getIndexPath(), e);
-			return false;
-		}
-		return true;
-	}
-
-	
-	private Path getSpeciesListPathFromResourceFile(){
-		String speciesResourcePath = getSpeciesResourcePath();
-		logger.info("Building species index from "+ speciesResourcePath);
-		Path path = null;
-		try {
-			path =  Paths.get(ClassLoader.getSystemResource(speciesResourcePath).toURI());
-			logger.info("Resolved the species list file to: " + path.toAbsolutePath());
-		} catch (URISyntaxException e) {
-			logger.error("Issue with speciesResourcePath " + speciesResourcePath, e);
-			throw new RuntimeException("Issue with speciesResourcePath " + speciesResourcePath, e);
-		}
-		return path;
 	}
 	
 	@Override
@@ -100,11 +56,6 @@ public class LuceneIndexBuilderServiceImpl implements LuceneIndexBuilderService 
 			int commitCounter = 0;
 			int commitLimit = 1000;
 			
-			//Path filePath = getSpeciesListPathFromResourceFile();
-			
-			
-			
-			//try(BufferedReader reader = Files.newBufferedReader(filePath, StandardCharsets.UTF_8)){
 			String line = null; 
 			while ((line = reader.readLine()) != null){
 				Document doc = createIndexDocument(line);
@@ -115,8 +66,8 @@ public class LuceneIndexBuilderServiceImpl implements LuceneIndexBuilderService 
 				}
 			}
 				
-				writer.commit();
-		        writer.close();
+			writer.commit();
+	        writer.close();
 		}catch(IOException e){
 			logger.error("issue with RAM Directory index writing",e);
 			throw new RuntimeException("Species Index could not be initialised");
@@ -160,6 +111,14 @@ public class LuceneIndexBuilderServiceImpl implements LuceneIndexBuilderService 
 				}
 			}
 		}
+	}
+
+	
+	
+	@Override
+	public void initialiseIndexWriter() throws IOException {
+		
+		
 	}
 	
 }
