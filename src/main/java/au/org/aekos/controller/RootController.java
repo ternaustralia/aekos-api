@@ -22,12 +22,6 @@ public class RootController {
     public String home() {
 		return "home";
 	}
-
-	@RequestMapping(path="/home2")
-    public String home2() {
-		return "home2";
-	}
-
 	
 	// Q for Tom - 
 	// Should this set of methods be moved to the Metrics controller? They seem to not serve static content when there.
