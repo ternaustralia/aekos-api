@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import com.opencsv.CSVReader;
 
+import au.org.aekos.controller.ApiV1RetrievalController.RetrievalResponseHeader;
 import au.org.aekos.model.EnvironmentDataRecord;
 import au.org.aekos.model.SpeciesOccurrenceRecord;
 import au.org.aekos.model.TraitDataRecord;
@@ -60,7 +61,7 @@ public class StubRetrievalService implements RetrievalService {
 	}
 	
 	@Override
-	public TraitDataResponse getTraitData(List<String> speciesNames, List<String> traitNames, int start, int rows) throws AekosApiRetrievalException {
+	public TraitDataResponse getTraitDataJson(List<String> speciesNames, List<String> traitNames, int start, int rows) throws AekosApiRetrievalException {
 		long startTime = new Date().getTime();
 		try {
 			CSVReader reader = new CSVReader(new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(TRAIT_FILE), StandardCharsets.UTF_8)));
@@ -104,6 +105,27 @@ public class StubRetrievalService implements RetrievalService {
 		}
 	}
 
+	@Override
+	public RetrievalResponseHeader getTraitDataCsv(List<String> speciesNames, List<String> traitNames, int start, int rows, Writer respWriter)
+			throws AekosApiRetrievalException {
+		int checkedLimit = (start > 0) ? start : Integer.MAX_VALUE;
+		int rowsProcessed = 0;
+		TraitDataResponse result = getTraitDataJson(speciesNames, traitNames, start, rows);
+		try {
+			for (TraitDataRecord curr : result.getResponse()) {
+				respWriter.write(curr.toCsv());
+				respWriter.write("\n");
+				// FIXME doesn't support start
+				if (rowsProcessed++ >= checkedLimit) {
+					break;
+				}
+			}
+		} catch (IOException e) {
+			throw new AekosApiRetrievalException("Failed to get dummy trait data", e);
+		}
+		return RetrievalResponseHeader.newInstance(result);
+	}
+	
 	int calculateTotalPages(int rows, int numFound) {
 		return (int)Math.ceil((double)numFound / (double)rows);
 	}

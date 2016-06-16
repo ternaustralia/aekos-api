@@ -7,7 +7,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
@@ -19,8 +18,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import au.org.aekos.controller.ApiV1RetrievalController.RetrievalResponseHeader;
 import au.org.aekos.model.EnvironmentDataRecord;
 import au.org.aekos.model.SpeciesOccurrenceRecord;
+import au.org.aekos.model.TraitDataRecord;
 import au.org.aekos.model.TraitDataResponse;
 
 @Service
@@ -69,11 +70,29 @@ public class JenaRetrievalService implements RetrievalService {
 	}
 
 	@Override
-	public TraitDataResponse getTraitData(List<String> speciesNames, List<String> traitNames, int start, int count) throws AekosApiRetrievalException {
-		// FIXME make real
-		return stubDelegate.getTraitData(speciesNames, traitNames, start, count);
+	public TraitDataResponse getTraitDataJson(List<String> speciesNames, List<String> traitNames, int start, int count) throws AekosApiRetrievalException {
+		return getTraitDataJsonPrivate(speciesNames, traitNames, start, count);
 	}
 
+	@Override
+	public RetrievalResponseHeader getTraitDataCsv(List<String> speciesNames, List<String> traitNames, int start,
+			int count, Writer respWriter) throws AekosApiRetrievalException {
+		// TODO write header and deal with varying with schema
+		TraitDataResponse result = getTraitDataJsonPrivate(speciesNames, traitNames, start, count);
+		for (Iterator<TraitDataRecord> it = result.getResponse().iterator();it.hasNext();) {
+			TraitDataRecord curr = it.next();
+			try {
+				respWriter.write(curr.toCsv());
+				if (it.hasNext()) {
+					respWriter.write("\n");
+				}
+			} catch (IOException e) {
+				throw new AekosApiRetrievalException("Failed to write to the supplied writer: " + respWriter.getClass(), e);
+			}
+		}
+		return RetrievalResponseHeader.newInstance(result);
+	}
+	
 	private List<SpeciesOccurrenceRecord> getSpeciesDataJsonPrivate(List<String> speciesNames, int start, int rows) {
 		List<SpeciesOccurrenceRecord> result = new LinkedList<>();
 		String sparql = getProcessedSparql(speciesNames, start, rows);
@@ -93,6 +112,11 @@ public class JenaRetrievalService implements RetrievalService {
 			}
 		}
 		return result;
+	}
+	
+	private TraitDataResponse getTraitDataJsonPrivate(List<String> speciesNames, List<String> traitNames, int start, int count) throws AekosApiRetrievalException {
+		// FIXME make real
+		return stubDelegate.getTraitDataJson(speciesNames, traitNames, start, count);
 	}
 	
 	String getProcessedSparql(List<String> speciesNames, int offset, int limit) {

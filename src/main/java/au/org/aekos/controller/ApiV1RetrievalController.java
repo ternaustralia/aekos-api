@@ -72,12 +72,7 @@ public class ApiV1RetrievalController {
     		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
     		@RequestParam(required=false, defaultValue=DEFAULT_ROWS) @ApiParam("result page size") int rows,
     		HttpServletResponse resp) {
-		try {
-			return retrievalService.getSpeciesDataJson(Arrays.asList(speciesNames), start, rows);
-		} catch (AekosApiRetrievalException e) {
-			resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			throw new RuntimeException(e);
-		}
+		return speciesDataDotJson(speciesNames, start, rows, resp);
     }
 
 	@RequestMapping(path="/speciesData.csv", method=RequestMethod.GET, produces=TEXT_CSV_MIME)
@@ -104,25 +99,21 @@ public class ApiV1RetrievalController {
 	
     @RequestMapping(path="/speciesData", method=RequestMethod.GET, produces=TEXT_CSV_MIME, headers="Accept="+TEXT_CSV_MIME)
     //FIXME what do I put in here? Do I copy from the other overloaded method?
-    @ApiOperation(value = "get species occurrence data",
+    @ApiOperation(value = "Get species occurrence data",
 			notes = "Gets species occurrence data in a Darwin Core compliant data format", tags="Data Retrieval")
     public void speciesDataCsv(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
     		@RequestParam(required=false, defaultValue=DEFAULT_ROWS) @ApiParam("result page size") int rows,
     		@ApiIgnore Writer responseWriter, HttpServletResponse resp) {
-    	resp.setContentType(TEXT_CSV_MIME);
-    	try {
-    		retrievalService.getSpeciesDataCsv(Arrays.asList(speciesNames), start, rows, responseWriter);
-    	} catch (AekosApiRetrievalException e) {
-			resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			throw new RuntimeException(e);
-		}
+    	boolean dontDownload = false;
+		speciesDataDotCsv(speciesNames, start, rows, dontDownload, responseWriter, resp);
     }
     
     @RequestMapping(path="/traitData.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Get all trait data for the specified species", notes = "TODO", tags="Data Retrieval")
-    public TraitDataResponse traitDataJson(
+    @ApiOperation(value = "Get trait data in JSON format",
+			notes = "Get trait data in a Darwin Core + traits format", tags="Data Retrieval")
+    public TraitDataResponse traitDataDotJson(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(name="traitName", required=false) String[] traitNames,
     		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
@@ -133,17 +124,75 @@ public class ApiV1RetrievalController {
     	// TODO validate start ! < 0
     	// TODO validate count > 0
     	String fullReqUrl = req.getRequestURL().toString() + "?" + req.getQueryString();
-    	TraitDataResponse result = retrievalService.getTraitData(Arrays.asList(speciesNames), traits, start, rows);
-    	resp.addHeader("Link", buildLinkHeader(UriComponentsBuilder.fromHttpUrl(fullReqUrl), result));
-		return result;
+    	TraitDataResponse result = retrievalService.getTraitDataJson(Arrays.asList(speciesNames), traits, start, rows);
+    	resp.addHeader("Link", buildLinkHeader(UriComponentsBuilder.fromHttpUrl(fullReqUrl), RetrievalResponseHeader.newInstance(result)));
+    	return result;
+    }
+    
+    @RequestMapping(path="/traitData", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Get trait data", notes = "TODO", tags="Data Retrieval")
+    public TraitDataResponse traitDataJson(
+    		@RequestParam(name="speciesName") String[] speciesNames,
+    		@RequestParam(name="traitName", required=false) String[] traitNames,
+    		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
+    		@RequestParam(required=false, defaultValue=DEFAULT_ROWS) @ApiParam("result page size") int rows,
+    		HttpServletRequest req, HttpServletResponse resp) throws AekosApiRetrievalException {
+		return traitDataDotJson(speciesNames, traitNames, start, rows, req, resp);
 	}
     
-    private String buildLinkHeader(UriComponentsBuilder fromPath, TraitDataResponse response) {
+    @RequestMapping(path="/traitData.csv", method=RequestMethod.GET, produces=TEXT_CSV_MIME)
+    @ApiOperation(value = "Get trait data in CSV format",
+    		notes = "TODO", tags="Data Retrieval")
+    public void traitDataDotCsv(
+    		@RequestParam(name="speciesName") String[] speciesNames,
+    		@RequestParam(name="traitName", required=false) String[] traitNames,
+    		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
+    		@RequestParam(required=false, defaultValue=DEFAULT_ROWS) @ApiParam("result page size") int rows,
+    		@RequestParam(required=false, defaultValue="false") @ApiParam(DL_PARAM_MSG) boolean download,
+    		HttpServletRequest req, HttpServletResponse resp, @ApiIgnore Writer responseWriter) throws AekosApiRetrievalException {
+    	resp.setContentType(TEXT_CSV_MIME);
+    	if (download) {
+    		resp.setHeader("Content-Disposition", "attachment;filename=aekosTraitData.csv"); // TODO give a more dynamic name
+    	}
+    	// TODO do we include units in the field name, as an extra value or as a header/metadata object in the resp
+    	List<String> traits = traitNames != null ? Arrays.asList(traitNames) : Collections.emptyList();
+    	// TODO validate start ! < 0
+    	// TODO validate count > 0
+    	String fullReqUrl = req.getRequestURL().toString() + "?" + req.getQueryString();
+    	// TODO figure out how to covert to CSV
+    	RetrievalResponseHeader header = retrievalService.getTraitDataCsv(Arrays.asList(speciesNames), traits, start, rows, responseWriter);
+    	// FIXME does it matter that we write the header after we write the body?
+    	resp.addHeader("Link", buildLinkHeader(UriComponentsBuilder.fromHttpUrl(fullReqUrl), header));
+    }
+    
+    @RequestMapping(path="/traitData", method=RequestMethod.GET, produces=TEXT_CSV_MIME)
+    @ApiOperation(value = "Get trait data",
+    		notes = "TODO", tags="Data Retrieval")
+    public void traitDataCsv(
+    		@RequestParam(name="speciesName") String[] speciesNames,
+    		@RequestParam(name="traitName", required=false) String[] traitNames,
+    		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
+    		@RequestParam(required=false, defaultValue=DEFAULT_ROWS) @ApiParam("result page size") int rows,
+    		HttpServletRequest req, HttpServletResponse resp, @ApiIgnore Writer responseWriter) throws AekosApiRetrievalException {
+    	traitDataDotCsv(speciesNames, traitNames, start, rows, false, req, resp, responseWriter);
+    }
+    
+    @RequestMapping(path="/environmentData.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Get all environment data for the specified species", notes = "TODO", tags="Data Retrieval")
+    public List<EnvironmentDataRecord> environmentDataJson(@RequestParam(name="speciesName") String[] speciesNames,
+    		@RequestParam(name="envVarName", required=false) String[] envVarNames, HttpServletResponse resp) throws AekosApiRetrievalException {
+    	// TODO do we include units in the field name, as an extra value or as a header/metadata object in the resp
+    	List<String> varNames = envVarNames != null ? Arrays.asList(envVarNames) : Collections.emptyList();
+		List<EnvironmentDataRecord> result = retrievalService.getEnvironmentalData(Arrays.asList(speciesNames), varNames);
+    	return result;
+	}
+    
+    private String buildLinkHeader(UriComponentsBuilder fromPath, RetrievalResponseHeader response) {
 		// FIXME can't handle weird params like start=2, rows=3
-    	int start = response.getResponseHeader().getParams().getStart();
-		int rows = response.getResponseHeader().getParams().getRows();
-		int pageNumber = response.getResponseHeader().getPageNumber();
-		int totalPages = response.getResponseHeader().getTotalPages();
+    	int start = response.getStart();
+		int rows = response.getRows();
+		int pageNumber = response.getPageNumber();
+		int totalPages = response.getTotalPages();
 		StringBuilder result = new StringBuilder();
 		boolean hasNextPage = pageNumber < totalPages;
 		if (hasNextPage) {
@@ -180,17 +229,46 @@ public class ApiV1RetrievalController {
         }
     }
 
-    public static String createLinkHeader(final String uri, final String rel) {
+    private static String createLinkHeader(final String uri, final String rel) {
         return "<" + uri + ">; rel=\"" + rel + "\"";
     }
+    
+    public static class RetrievalResponseHeader {
+    	private final int start;
+    	private final int rows;
+    	private final int pageNumber;
+    	private final int totalPages;
+    	
+		public RetrievalResponseHeader(int start, int rows, int pageNumber, int totalPages) {
+			this.start = start;
+			this.rows = rows;
+			this.pageNumber = pageNumber;
+			this.totalPages = totalPages;
+		}
 
-	@RequestMapping(path="/environmentData.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Get all environment data for the specified species", notes = "TODO", tags="Data Retrieval")
-    public List<EnvironmentDataRecord> environmentDataJson(@RequestParam(name="speciesName") String[] speciesNames,
-    		@RequestParam(name="envVarName", required=false) String[] envVarNames, HttpServletResponse resp) throws AekosApiRetrievalException {
-    	// TODO do we include units in the field name, as an extra value or as a header/metadata object in the resp
-    	List<String> varNames = envVarNames != null ? Arrays.asList(envVarNames) : Collections.emptyList();
-		List<EnvironmentDataRecord> result = retrievalService.getEnvironmentalData(Arrays.asList(speciesNames), varNames);
-    	return result;
-	}
+		public static RetrievalResponseHeader newInstance(TraitDataResponse resp) {
+			RetrievalResponseHeader result = new RetrievalResponseHeader(
+					resp.getResponseHeader().getParams().getStart(),
+					resp.getResponseHeader().getParams().getRows(),
+					resp.getResponseHeader().getPageNumber(),
+					resp.getResponseHeader().getTotalPages());
+			return result;
+		}
+
+		public int getStart() {
+			return start;
+		}
+
+		public int getRows() {
+			return rows;
+		}
+
+		public int getPageNumber() {
+			return pageNumber;
+		}
+
+		public int getTotalPages() {
+			return totalPages;
+		}
+    }
 }

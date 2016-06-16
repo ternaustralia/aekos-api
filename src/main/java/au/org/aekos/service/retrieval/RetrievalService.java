@@ -3,6 +3,7 @@ package au.org.aekos.service.retrieval;
 import java.io.Writer;
 import java.util.List;
 
+import au.org.aekos.controller.ApiV1RetrievalController.RetrievalResponseHeader;
 import au.org.aekos.model.EnvironmentDataRecord;
 import au.org.aekos.model.SpeciesOccurrenceRecord;
 import au.org.aekos.model.TraitDataResponse;
@@ -32,7 +33,7 @@ public interface RetrievalService {
 	void getSpeciesDataCsv(List<String> speciesNames, int start, int rows, Writer responseWriter) throws AekosApiRetrievalException;
 
 	/**
-	 * Retrieves trait data for the specified species.
+	 * Retrieves JSON serialised trait data for the specified species.
 	 * 
 	 * The traits can be filtered by supplying <code>traitNames</code>. The result data is
 	 * Darwin Core (as per {@link #getSpeciesDataJson(List, int, int)} plus trait data.
@@ -44,7 +45,22 @@ public interface RetrievalService {
 	 * @return				specified number of records for the specified species filtered by the supplied trait name list
 	 * @throws AekosApiRetrievalException when something goes wrong
 	 */
-	TraitDataResponse getTraitData(List<String> speciesNames, List<String> traitNames, int start, int rows) throws AekosApiRetrievalException;
+	TraitDataResponse getTraitDataJson(List<String> speciesNames, List<String> traitNames, int start, int rows) throws AekosApiRetrievalException;
+	
+	/**
+	 * Retrieves CSV serialised trait data for the specified species.
+	 * 
+	 * Same as {@link #getTraitDataJson(List, List, int, int)}
+	 * 
+	 * @param speciesNames	names of the species to retrieve data for
+	 * @param traitNames	list of trait names to filter by or an empty list to get all traits
+	 * @param start			offset to start retrieving records
+	 * @param rows			number of rows to return (page size), 0 means all 
+	 * @param respWriter 	writer to write result rows to
+	 * @return				header object with details for HATEOAS header generation
+	 * @throws AekosApiRetrievalException when something goes wrong
+	 */
+	RetrievalResponseHeader getTraitDataCsv(List<String> speciesNames, List<String> traitNames, int start, int rows, Writer respWriter) throws AekosApiRetrievalException;
 
 	/**
 	 * @param speciesNames					names of the species to retrieve data for

@@ -191,8 +191,8 @@ public class TraitDataRecordWrapper {
 	}
 
 	public TraitDataRecord toRecord() {
-		TraitDataRecord result = new TraitDataRecord(decimalLatitude, decimalLongitude, locationID, scientificName, collectionFormat,
-				eventDate, year, month, bibliographicCitation, datasetID);
+		TraitDataRecord result = new TraitDataRecord(decimalLatitude, decimalLongitude, "not supplied", locationID, scientificName, 13,
+				eventDate, Integer.parseInt(year), Integer.parseInt(month), bibliographicCitation, datasetID);
 		result.addTraitValue(new Entry(trait, traitValue));
 		return result;
 	}
