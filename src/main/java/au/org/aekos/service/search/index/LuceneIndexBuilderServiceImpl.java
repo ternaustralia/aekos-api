@@ -55,7 +55,6 @@ public class LuceneIndexBuilderServiceImpl implements LuceneIndexBuilderService 
 			IndexWriter writer = new IndexWriter(idx, conf);
 			int commitCounter = 0;
 			int commitLimit = 1000;
-			
 			String line = null; 
 			while ((line = reader.readLine()) != null){
 				Document doc = createIndexDocument(line);
@@ -65,7 +64,6 @@ public class LuceneIndexBuilderServiceImpl implements LuceneIndexBuilderService 
 					commitCounter = 0;
 				}
 			}
-				
 			writer.commit();
 	        writer.close();
 		}catch(IOException e){

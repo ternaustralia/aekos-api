@@ -6,9 +6,12 @@ import java.nio.file.Paths;
 
 import org.apache.commons.lang.SystemUtils;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.IndexableField;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.SimpleFSDirectory;
@@ -34,6 +37,9 @@ public class TermIndexManagerImpl implements TermIndexManager, InitializingBean{
 	@Value("${lucene.index.createMode}")
 	private boolean createMode;
 	
+	@Value("${lucene.index.writer.commitLimit}")
+	private int commitLimit = 1000;
+	
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		// TODO Auto-generated method stub
@@ -49,7 +55,7 @@ public class TermIndexManagerImpl implements TermIndexManager, InitializingBean{
 	
 	private void initialiseIndexDirectory() throws IOException{
 		ensureIndexPathExists();
-		termIndex = FSDirectory.open(Paths.get(indexPath));
+		termIndex = FSDirectory.open(Paths.get(getIndexPath()));
 	}
 
 	public String getIndexPath(){
@@ -88,6 +94,20 @@ public class TermIndexManagerImpl implements TermIndexManager, InitializingBean{
 	public IndexReader getIndexReader() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	//Not threadsafe today . . . 
+	private int commitCounter = 0;
+	
+	public void writeDocument(Document doc, IndexWriter writer) throws IOException{
+		IndexableField uidField = doc.getField(IndexConstants.FLD_UNIQUE_ID);
+		if(uidField != null){
+		    String uid = uidField.stringValue();
+		    writer.updateDocument(new Term("id", uid), doc);
+		}else{
+			writer.addDocument(doc);
+		}
+		
 	}
 	
 
