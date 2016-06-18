@@ -12,9 +12,12 @@
             http://www.springframework.org/schema/util
             http://www.springframework.org/schema/util/spring-util-4.2.xsd">
 	
-	<context:property-placeholder location="classpath:/au/org/aekos/test-context.properties" />
+	<context:property-placeholder location="classpath:/au/org/aekos/test-context.properties,file://${user.home}/aekos-api.properties" />
 	
-	<context:component-scan base-package="au.org.aekos.service.retrieval" />
+	<context:component-scan base-package="au.org.aekos.service.retrieval">
+		<context:exclude-filter type="assignable" expression="au.org.aekos.service.retrieval.JenaRetrievalService"/>
+	</context:component-scan>
+	
 	
 	
 </beans>

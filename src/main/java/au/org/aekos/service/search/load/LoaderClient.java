@@ -1,5 +1,6 @@
 package au.org.aekos.service.search.load;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -22,20 +23,13 @@ public interface LoaderClient {
 	 */
 	public void endLoad();
 	
-	public void addSpeciesTraitTermsToIndex(String species, List<String> traits);
+	public void addSpeciesTraitTermsToIndex(String species, List<String> traits) throws IOException;
 	
-	public void addTraitSpeciesTermsToIndex(String trait, List<String> species);
+	public void addTraitSpeciesTermsToIndex(String trait, List<String> species) throws IOException;
 	
-	public void addSpeciesTraitTermToIndex(String species, String trait);
+	public void addSpeciesTraitTermToIndex(String species, String trait) throws IOException;
 	
-	public void addSpeciesEnvironmentTermsToIndex(String species, List<String> environmentTraits);
+	public void addSpeciesEnvironmentTermsToIndex(String species, List<String> environmentTraits) throws IOException;
 	
-	public void addSpeciesEnvironmentTermsToIndex(String species, String environmentTrait);
-	
-	
-	
-	
-
-	
-	
+	public void addSpeciesEnvironmentTermToIndex(String species, String environmentTrait) throws IOException;
 }

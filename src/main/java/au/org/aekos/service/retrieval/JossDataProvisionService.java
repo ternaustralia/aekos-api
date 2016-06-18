@@ -1,6 +1,8 @@
 package au.org.aekos.service.retrieval;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.UUID;
@@ -12,11 +14,15 @@ import org.javaswift.joss.client.factory.AccountFactory;
 import org.javaswift.joss.model.Account;
 import org.javaswift.joss.model.Container;
 import org.javaswift.joss.model.StoredObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class JossDataProvisionService implements DataProvisionService {
+
+	private static final Logger logger = LoggerFactory.getLogger(JossDataProvisionService.class);
 
 	/**
 	 * Read the account settings 
@@ -49,8 +55,8 @@ public class JossDataProvisionService implements DataProvisionService {
 	//@Autowired
 	//private Account account;
 	
-	private final String AEKOS_BUCKET_NAME = "aekos-data-store";
-	private final String AEKOS_BUCKET_ITEM_STUB = "aekos-data-item";
+	public static final String AEKOS_BUCKET_NAME = "aekos-api-downloads-data-store";
+	public static final String AEKOS_BUCKET_ITEM_STUB = "aekos-api-downloads-";
 	
 	@PostConstruct
 	public void loginToAccount() {
@@ -67,7 +73,11 @@ public class JossDataProvisionService implements DataProvisionService {
 	}
 	
 	// Check to see if the container already exists and if not, create it
-	Container getContainer() {
+	public Container getContainer() {
+		
+		if (account == null) {
+			loginToAccount();
+		}
 		
 	    Collection<Container> containers = account.list();
 	    for (Container currentContainer : containers) {
@@ -76,21 +86,29 @@ public class JossDataProvisionService implements DataProvisionService {
 	        }	    
 	    }
         Container container = account.getContainer(AEKOS_BUCKET_NAME);
-	    container.create();
-	    container.makePublic();	
+        if (!container.exists()) {
+	        try {
+			    container.create();
+			    container.makePublic();	
+	        } catch (Exception e) {
+				e.printStackTrace();
+			}
+        }
 
 	    return container;
 	}
 	
 	
 	@Override
-	public URL storeData(InputStream is) {
+	public URL storeData(InputStream is) throws MalformedURLException {
 		Container container = getContainer();
 	    
 		String uuid = UUID.randomUUID().toString();
-	    StoredObject object = container.getObject(AEKOS_BUCKET_ITEM_STUB + "_" + uuid);
+	    StoredObject object = container.getObject(AEKOS_BUCKET_ITEM_STUB + uuid);
 	    object.uploadObject(is);
-	    System.out.println("Public URL: "+object.getPublicURL());
-	    return (null);
+	    URL url = new URL(object.getPublicURL());
+	    
+	    logger.debug("Public URL: " + url);
+	    return (url);
 	}
 }
