@@ -20,6 +20,9 @@ public class JossDataProvisionServiceTest {
 
 	@Value("${joss.csv.resourcePath}")
 	private String jossDataResourcePath;
+	
+	@Value("${joss.tenant-id}")
+	private String jossTenantId;
 
 	@Autowired
 	private JossDataProvisionService objectUnderTest;
@@ -30,7 +33,7 @@ public class JossDataProvisionServiceTest {
     	InputStream in = this.getClass().getClassLoader().getResourceAsStream(jossDataResourcePath);
     	URL handle = objectUnderTest.storeData(in);
 
-		String compareStr = "https://swift.rc.nectar.org.au:8888/v1/AUTH_027209fe9dd741aab6c1294f11ce1d09/aekos-api-downloads-data-store/aekos-api-downloads-";
+		String compareStr = "https://swift.rc.nectar.org.au:8888/v1/AUTH_" + jossTenantId + "/" + objectUnderTest.AEKOS_BUCKET_NAME + "/" + objectUnderTest.AEKOS_BUCKET_ITEM_STUB;
     	assertThat(handle.toString(), startsWith(compareStr));
 	}
 }

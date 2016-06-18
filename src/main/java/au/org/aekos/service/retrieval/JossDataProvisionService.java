@@ -55,8 +55,8 @@ public class JossDataProvisionService implements DataProvisionService {
 	//@Autowired
 	//private Account account;
 	
-	private final String AEKOS_BUCKET_NAME = "aekos-api-downloads-data-store";
-	private final String AEKOS_BUCKET_ITEM_STUB = "aekos-api-downloads-";
+	public static final String AEKOS_BUCKET_NAME = "aekos-api-downloads-data-store";
+	public static final String AEKOS_BUCKET_ITEM_STUB = "aekos-api-downloads-";
 	
 	@PostConstruct
 	public void loginToAccount() {
