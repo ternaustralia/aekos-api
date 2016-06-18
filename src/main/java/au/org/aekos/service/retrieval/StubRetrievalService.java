@@ -20,8 +20,13 @@ import org.springframework.stereotype.Service;
 import com.opencsv.CSVReader;
 
 import au.org.aekos.controller.ApiV1RetrievalController.RetrievalResponseHeader;
+import au.org.aekos.model.AbstractParams;
+import au.org.aekos.model.EnvironmentDataParams;
 import au.org.aekos.model.EnvironmentDataRecord;
+import au.org.aekos.model.EnvironmentDataResponse;
+import au.org.aekos.model.ResponseHeader;
 import au.org.aekos.model.SpeciesOccurrenceRecord;
+import au.org.aekos.model.TraitDataParams;
 import au.org.aekos.model.TraitDataRecord;
 import au.org.aekos.model.TraitDataRecord.Entry;
 import au.org.aekos.model.TraitDataRecordWrapper;
@@ -92,11 +97,9 @@ public class StubRetrievalService implements RetrievalService {
 			int numFound = records.size();
 			int toIndex = start+rows > numFound ? numFound : start+rows;
 			List<TraitDataRecord> recordPage = records.subList(start, toIndex);
-	    	int elapsedTime = (int) (new Date().getTime() - startTime);
-			int totalPages = calculateTotalPages(rows, numFound);
-			int pageNumber = calculatePageNumber(start, numFound, totalPages);
-			TraitDataResponse result = TraitDataResponse.newInstance(recordPage, start, rows, numFound, speciesNames, 
-					traitNames, elapsedTime, pageNumber, totalPages); // FIXME make factory
+			AbstractParams params = new TraitDataParams(start, rows, speciesNames, traitNames);
+			ResponseHeader responseHeader = ResponseHeader.newInstance(start, rows, numFound, startTime, params);
+			TraitDataResponse result = new TraitDataResponse(responseHeader, recordPage);
 			return result;
 		} catch (IOException e) {
 			String msg = "Server failed to retrieve trait data";
@@ -126,40 +129,56 @@ public class StubRetrievalService implements RetrievalService {
 		return RetrievalResponseHeader.newInstance(result);
 	}
 	
-	int calculateTotalPages(int rows, int numFound) {
-		return (int)Math.ceil((double)numFound / (double)rows);
-	}
-
-	int calculatePageNumber(int start, int numFound, int totalPages) {
-		if (start == 0) {
-			return 1;
-		}
-		double decimalProgress = ((double)start+1) / (double)numFound;
-		double decimalPageNumber = decimalProgress * (double)totalPages;
-		return (int)Math.ceil(decimalPageNumber);
-	}
-
 	@Override
-	public List<EnvironmentDataRecord> getEnvironmentalData(List<String> speciesNames,
-			List<String> environmentalVariableNames) throws AekosApiRetrievalException {
+	public EnvironmentDataResponse getEnvironmentalDataJson(List<String> speciesNames, List<String> environmentalVariableNames, int start, int rows)
+			throws AekosApiRetrievalException {
 		try {
+			long startTime = new Date().getTime();
 			CSVReader reader = new CSVReader(new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/au/org/aekos/AEKOS_BCCVL_import_example_envVariables.csv"))));
 			reader.readNext(); // Bin the header
 			String[] currLine;
-			List<EnvironmentDataRecord> result = new LinkedList<>();
+			List<EnvironmentDataRecord> records = new LinkedList<>();
 			while ((currLine = reader.readNext()) != null) {
 				String[] processedLine = replaceDatePlaceholder(currLine);
 				EnvironmentDataRecord record = EnvironmentDataRecord.deserialiseFrom(processedLine);
 				// FIXME support looking up which sites contain the requested species and only return data for them
-				result.add(record);
+				records.add(record);
 			}
 			reader.close();
+			int numFound = records.size();
+			AbstractParams params = new EnvironmentDataParams(start, rows, speciesNames, environmentalVariableNames);
+			ResponseHeader responseHeader = ResponseHeader.newInstance(start, rows, numFound, startTime, params);
+			int toIndex = start+rows > numFound ? numFound : start+rows;
+			List<EnvironmentDataRecord> recordPage = records.subList(start, toIndex);
+			EnvironmentDataResponse result = new EnvironmentDataResponse(responseHeader, recordPage);
 			return result;
 		} catch (IOException e) {
 			String msg = "Server failed to retrieve trait data";
 			logger.error(msg, e);
 			throw new AekosApiRetrievalException(msg, e);
 		}
+	}
+	
+	@Override
+	public RetrievalResponseHeader getEnvironmentalDataCsv(List<String> speciesNames,
+			List<String> environmentalVariableNames, int start, int rows, Writer respWriter)
+					throws AekosApiRetrievalException {
+		int checkedLimit = (start > 0) ? start : Integer.MAX_VALUE;
+		int rowsProcessed = 0;
+		EnvironmentDataResponse result = getEnvironmentalDataJson(speciesNames, environmentalVariableNames, start, rowsProcessed);
+		try {
+			for (EnvironmentDataRecord curr : result.getResponse()) {
+				respWriter.write(curr.toCsv());
+				respWriter.write("\n");
+				// FIXME doesn't support start
+				if (rowsProcessed++ >= checkedLimit) {
+					break;
+				}
+			}
+		} catch (IOException e) {
+			throw new AekosApiRetrievalException("Failed to get dummy trait data", e);
+		}
+		return RetrievalResponseHeader.newInstance(result);
 	}
 	
 	private void getSpeciesCsvDataHelper(List<String> speciesNames, int limit, Writer responseWriter) throws IOException {

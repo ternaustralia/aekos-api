@@ -1,29 +1,48 @@
 package au.org.aekos.model;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
+
 public class EnvironmentDataRecord {
 
+	private static final String CSV_SEPARATOR = ",";
 	private final double decimalLatitude;
     private final double decimalLongitude;
     private final String locationID;
     private final String eventDate;
     private final String year;
     private final String month;
-    private final String envVariable;
-    private final String envVariableValue;
+    private final Collection<Entry> variables = new LinkedList<>();
     private final String bibliographicCitation;
     private final String datasetID;
 
+    public static class Entry {
+    	private final String environmentalVariable;
+    	private final String environmentalVariableValue;
+		
+    	public Entry(String environmentalVariable, String environmentalVariableValue) {
+			this.environmentalVariable = environmentalVariable;
+			this.environmentalVariableValue = environmentalVariableValue;
+		}
+
+		public String getEnvironmentalVariable() {
+			return environmentalVariable;
+		}
+
+		public String getEnvironmentalVariableValue() {
+			return environmentalVariableValue;
+		}
+    }
+    
 	public EnvironmentDataRecord(double decimalLatitude, double decimalLongitude, String locationID, String eventDate,
-			String year, String month, String envVariable, String envVariableValue, String bibliographicCitation,
-			String datasetID) {
+			String year, String month, String bibliographicCitation, String datasetID) {
 		this.decimalLatitude = decimalLatitude;
 		this.decimalLongitude = decimalLongitude;
 		this.locationID = locationID;
 		this.eventDate = eventDate;
 		this.year = year;
 		this.month = month;
-		this.envVariable = envVariable;
-		this.envVariableValue = envVariableValue;
 		this.bibliographicCitation = bibliographicCitation;
 		this.datasetID = datasetID;
 	}
@@ -52,14 +71,6 @@ public class EnvironmentDataRecord {
 		return month;
 	}
 
-	public String getEnvVariable() {
-		return envVariable;
-	}
-
-	public String getEnvVariableValue() {
-		return envVariableValue;
-	}
-
 	public String getBibliographicCitation() {
 		return bibliographicCitation;
 	}
@@ -68,6 +79,14 @@ public class EnvironmentDataRecord {
 		return datasetID;
 	}
 
+	public Collection<Entry> getVariables() {
+		return Collections.unmodifiableCollection(variables);
+	}
+
+	public void addVariable(Entry entry) {
+		variables.add(entry);
+	}
+	
 	public static EnvironmentDataRecord deserialiseFrom(String[] fields) {
 		int fieldIndex = 0;
 		double decimalLatitudeField = Double.parseDouble(fields[fieldIndex++]);
@@ -81,8 +100,38 @@ public class EnvironmentDataRecord {
 		String bibliographicCitationField = fields[fieldIndex++];
 		String datasetIdField = fields[fieldIndex++];
 		EnvironmentDataRecord result = new EnvironmentDataRecord(decimalLatitudeField, decimalLongitudeField,
-				locationIdField, eventDateField, yearField, monthField, envVarField, envVarValueField,
-				bibliographicCitationField, datasetIdField);
+				locationIdField, eventDateField, yearField, monthField, bibliographicCitationField, datasetIdField);
+		result.addVariable(new Entry(envVarField, envVarValueField));
 		return result;
+	}
+
+	public String toCsv() {
+		StringBuilder result = new StringBuilder();
+		result.append(decimalLatitude);
+		result.append(CSV_SEPARATOR);
+		result.append(decimalLongitude);
+		result.append(CSV_SEPARATOR);
+		result.append(quote(locationID));
+		result.append(CSV_SEPARATOR);
+		result.append(quote(eventDate));
+		result.append(CSV_SEPARATOR);
+		result.append(year);
+		result.append(CSV_SEPARATOR);
+		result.append(month);
+		result.append(CSV_SEPARATOR);
+		result.append(quote(bibliographicCitation));
+		result.append(CSV_SEPARATOR);
+		result.append(quote(datasetID));
+		for (Entry curr : variables) {
+			result.append(CSV_SEPARATOR);
+			result.append(quote(curr.environmentalVariable));
+			result.append(CSV_SEPARATOR);
+			result.append(quote(curr.environmentalVariableValue));
+		}
+		return result.toString();
+	}
+
+	private String quote(String value) {
+		return "\"" + value + "\"";
 	}
 }

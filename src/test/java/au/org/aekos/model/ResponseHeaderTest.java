@@ -1,22 +1,21 @@
-package au.org.aekos.service.retrieval;
+package au.org.aekos.model;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-public class StubRetrievalServiceTest {
+public class ResponseHeaderTest {
 
 	/**
 	 * Can we tell when we're at the start of the first page when there are multiple pages?
 	 */
 	@Test
 	public void testCalculatePageNumber01() {
-		StubRetrievalService objectUnderTest = new StubRetrievalService();
 		int start = 0;
 		int numFound = 66;
 		int totalPages = 7;
-		int result = objectUnderTest.calculatePageNumber(start, numFound, totalPages);
+		int result = ResponseHeader.calculatePageNumber(start, numFound, totalPages);
 		assertThat(result, is(1));
 	}
 
@@ -25,11 +24,10 @@ public class StubRetrievalServiceTest {
 	 */
 	@Test
 	public void testCalculatePageNumber02() {
-		StubRetrievalService objectUnderTest = new StubRetrievalService();
 		int start = 0;
 		int numFound = 9;
 		int totalPages = 1;
-		int result = objectUnderTest.calculatePageNumber(start, numFound, totalPages);
+		int result = ResponseHeader.calculatePageNumber(start, numFound, totalPages);
 		assertThat(result, is(1));
 	}
 	
@@ -38,11 +36,10 @@ public class StubRetrievalServiceTest {
 	 */
 	@Test
 	public void testCalculatePageNumber03() {
-		StubRetrievalService objectUnderTest = new StubRetrievalService();
 		int start = 90;
 		int numFound = 99;
 		int totalPages = 10;
-		int result = objectUnderTest.calculatePageNumber(start, numFound, totalPages);
+		int result = ResponseHeader.calculatePageNumber(start, numFound, totalPages);
 		assertThat(result, is(10));
 	}
 	
@@ -51,11 +48,10 @@ public class StubRetrievalServiceTest {
 	 */
 	@Test
 	public void testCalculatePageNumber04() {
-		StubRetrievalService objectUnderTest = new StubRetrievalService();
 		int start = 50;
 		int numFound = 99;
 		int totalPages = 10;
-		int result = objectUnderTest.calculatePageNumber(start, numFound, totalPages);
+		int result = ResponseHeader.calculatePageNumber(start, numFound, totalPages);
 		assertThat(result, is(6));
 	}
 	
@@ -64,11 +60,10 @@ public class StubRetrievalServiceTest {
 	 */
 	@Test
 	public void testCalculatePageNumber05() {
-		StubRetrievalService objectUnderTest = new StubRetrievalService();
 		int start = 2;
 		int numFound = 6;
 		int totalPages = 3;
-		int result = objectUnderTest.calculatePageNumber(start, numFound, totalPages);
+		int result = ResponseHeader.calculatePageNumber(start, numFound, totalPages);
 		assertThat(result, is(2));
 	}
 	
@@ -77,10 +72,9 @@ public class StubRetrievalServiceTest {
 	 */
 	@Test
 	public void testCalculateTotalPages01() {
-		StubRetrievalService objectUnderTest = new StubRetrievalService();
 		int rows = 10;
 		int numFound = 100;
-		int result = objectUnderTest.calculateTotalPages(rows, numFound);
+		int result = ResponseHeader.calculateTotalPages(rows, numFound);
 		assertThat(result, is(10));
 	}
 	
@@ -89,10 +83,9 @@ public class StubRetrievalServiceTest {
 	 */
 	@Test
 	public void testCalculateTotalPages02() {
-		StubRetrievalService objectUnderTest = new StubRetrievalService();
 		int rows = 10;
 		int numFound = 10;
-		int result = objectUnderTest.calculateTotalPages(rows, numFound);
+		int result = ResponseHeader.calculateTotalPages(rows, numFound);
 		assertThat(result, is(1));
 	}
 	
@@ -101,10 +94,9 @@ public class StubRetrievalServiceTest {
 	 */
 	@Test
 	public void testCalculateTotalPages03() {
-		StubRetrievalService objectUnderTest = new StubRetrievalService();
 		int rows = 10;
 		int numFound = 6;
-		int result = objectUnderTest.calculateTotalPages(rows, numFound);
+		int result = ResponseHeader.calculateTotalPages(rows, numFound);
 		assertThat(result, is(1));
 	}
 	
@@ -113,10 +105,9 @@ public class StubRetrievalServiceTest {
 	 */
 	@Test
 	public void testCalculateTotalPages04() {
-		StubRetrievalService objectUnderTest = new StubRetrievalService();
 		int rows = 10;
 		int numFound = 101;
-		int result = objectUnderTest.calculateTotalPages(rows, numFound);
+		int result = ResponseHeader.calculateTotalPages(rows, numFound);
 		assertThat(result, is(11));
 	}
 }

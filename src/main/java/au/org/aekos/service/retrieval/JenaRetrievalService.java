@@ -19,7 +19,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import au.org.aekos.controller.ApiV1RetrievalController.RetrievalResponseHeader;
-import au.org.aekos.model.EnvironmentDataRecord;
+import au.org.aekos.model.EnvironmentDataResponse;
 import au.org.aekos.model.SpeciesOccurrenceRecord;
 import au.org.aekos.model.TraitDataRecord;
 import au.org.aekos.model.TraitDataResponse;
@@ -64,11 +64,20 @@ public class JenaRetrievalService implements RetrievalService {
 	}
 
 	@Override
-	public List<EnvironmentDataRecord> getEnvironmentalData(List<String> speciesNames, List<String> environmentalVariableNames) throws AekosApiRetrievalException {
+	public EnvironmentDataResponse getEnvironmentalDataJson(List<String> speciesNames,
+			List<String> environmentalVariableNames, int start, int rows) throws AekosApiRetrievalException {
 		// FIXME make real
-		return stubDelegate.getEnvironmentalData(speciesNames, environmentalVariableNames);
+		return stubDelegate.getEnvironmentalDataJson(speciesNames, environmentalVariableNames, start, rows);
 	}
 
+	@Override
+	public RetrievalResponseHeader getEnvironmentalDataCsv(List<String> speciesNames,
+			List<String> environmentalVariableNames, int start, int rows, Writer responseWriter)
+					throws AekosApiRetrievalException {
+		// TODO make real
+		return stubDelegate.getEnvironmentalDataCsv(speciesNames, environmentalVariableNames, start, rows, responseWriter);
+	}
+	
 	@Override
 	public TraitDataResponse getTraitDataJson(List<String> speciesNames, List<String> traitNames, int start, int count) throws AekosApiRetrievalException {
 		return getTraitDataJsonPrivate(speciesNames, traitNames, start, count);

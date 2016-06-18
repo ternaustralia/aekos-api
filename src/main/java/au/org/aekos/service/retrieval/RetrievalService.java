@@ -4,7 +4,7 @@ import java.io.Writer;
 import java.util.List;
 
 import au.org.aekos.controller.ApiV1RetrievalController.RetrievalResponseHeader;
-import au.org.aekos.model.EnvironmentDataRecord;
+import au.org.aekos.model.EnvironmentDataResponse;
 import au.org.aekos.model.SpeciesOccurrenceRecord;
 import au.org.aekos.model.TraitDataResponse;
 
@@ -63,10 +63,27 @@ public interface RetrievalService {
 	RetrievalResponseHeader getTraitDataCsv(List<String> speciesNames, List<String> traitNames, int start, int rows, Writer respWriter) throws AekosApiRetrievalException;
 
 	/**
+	 * TODO
+	 * 
 	 * @param speciesNames					names of the species to retrieve data for
-	 * @param environmentalVariableNames	list of environmental variable names to filter by or an empty list to get all variables
+	 * @param environmentalVariableNames	environmental variable names to filter by or an empty list to get all variables
+	 * @param start							offset to start retrieving records
+	 * @param rows							number of rows to return (page size), 0 means all 
 	 * @return								TODO
 	 * @throws AekosApiRetrievalException 	when something goes wrong
 	 */
-	List<EnvironmentDataRecord> getEnvironmentalData(List<String> speciesNames, List<String> environmentalVariableNames) throws AekosApiRetrievalException;
+	EnvironmentDataResponse getEnvironmentalDataJson(List<String> speciesNames, List<String> environmentalVariableNames, int start, int rows) throws AekosApiRetrievalException;
+
+	/**
+	 * TODO
+	 * 
+	 * @param speciesNames					names of the species to retrieve data for
+	 * @param environmentalVariableNames	environmental variable names to filter by or an empty list to get all variables
+	 * @param start							offset to start retrieving records
+	 * @param rows							number of rows to return (page size), 0 means all 
+	 * @param respWriter 					writer to write result rows to
+	 * @return
+	 * @throws AekosApiRetrievalException
+	 */
+	RetrievalResponseHeader getEnvironmentalDataCsv(List<String> speciesNames, List<String> environmentalVariableNames, int start, int rows, Writer responseWriter) throws AekosApiRetrievalException;
 }

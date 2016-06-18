@@ -1,8 +1,10 @@
 package au.org.aekos.model;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
+
+import au.org.aekos.model.EnvironmentDataRecord.Entry;
 
 public class EnvironmentDataRecordTest {
 
@@ -26,10 +28,12 @@ public class EnvironmentDataRecordTest {
 		assertEquals("23/11/12", result.getEventDate());
 		assertEquals("2012", result.getYear());
 		assertEquals("11", result.getMonth());
-		assertEquals("soilPh_10cm", result.getEnvVariable());
-		assertEquals("4.5", result.getEnvVariableValue());
 		assertEquals(citation, result.getBibliographicCitation());
 		assertEquals("http://aekos.org.au/collection/adelaide.edu.au/Koonamore/VegetationQuadrats/QFR2", result.getDatasetID());
+		assertEquals(1, result.getVariables().size());
+		Entry var1 = result.getVariables().iterator().next();
+		assertEquals("soilPh_10cm", var1.getEnvironmentalVariable());
+		assertEquals("4.5", var1.getEnvironmentalVariableValue());
 	}
 
 }

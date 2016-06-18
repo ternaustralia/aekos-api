@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -17,7 +18,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import au.org.aekos.model.AbstractResponse;
 import au.org.aekos.model.EnvironmentDataRecord;
+import au.org.aekos.model.EnvironmentDataResponse;
+import au.org.aekos.model.ResponseHeader;
 import au.org.aekos.model.SpeciesOccurrenceRecord;
 import au.org.aekos.model.TraitDataResponse;
 import au.org.aekos.service.retrieval.AekosApiRetrievalException;
@@ -123,12 +127,11 @@ public class ApiV1RetrievalController {
     	List<String> traits = traitNames != null ? Arrays.asList(traitNames) : Collections.emptyList();
     	// TODO validate start ! < 0
     	// TODO validate count > 0
-    	String fullReqUrl = req.getRequestURL().toString() + "?" + req.getQueryString();
     	TraitDataResponse result = retrievalService.getTraitDataJson(Arrays.asList(speciesNames), traits, start, rows);
-    	resp.addHeader("Link", buildLinkHeader(UriComponentsBuilder.fromHttpUrl(fullReqUrl), RetrievalResponseHeader.newInstance(result)));
+    	resp.addHeader(HttpHeaders.LINK, buildLinkHeader(UriComponentsBuilder.fromHttpUrl(extractFullUrl(req)), RetrievalResponseHeader.newInstance(result)));
     	return result;
     }
-    
+
     @RequestMapping(path="/traitData", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get trait data", notes = "TODO", tags="Data Retrieval")
     public TraitDataResponse traitDataJson(
@@ -158,11 +161,11 @@ public class ApiV1RetrievalController {
     	List<String> traits = traitNames != null ? Arrays.asList(traitNames) : Collections.emptyList();
     	// TODO validate start ! < 0
     	// TODO validate count > 0
-    	String fullReqUrl = req.getRequestURL().toString() + "?" + req.getQueryString();
+    	String fullReqUrl = extractFullUrl(req);
     	// TODO figure out how to covert to CSV
     	RetrievalResponseHeader header = retrievalService.getTraitDataCsv(Arrays.asList(speciesNames), traits, start, rows, responseWriter);
     	// FIXME does it matter that we write the header after we write the body?
-    	resp.addHeader("Link", buildLinkHeader(UriComponentsBuilder.fromHttpUrl(fullReqUrl), header));
+    	resp.addHeader(HttpHeaders.LINK, buildLinkHeader(UriComponentsBuilder.fromHttpUrl(fullReqUrl), header));
     }
     
     @RequestMapping(path="/traitData", method=RequestMethod.GET, produces=TEXT_CSV_MIME)
@@ -178,13 +181,57 @@ public class ApiV1RetrievalController {
     }
     
     @RequestMapping(path="/environmentData.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Get all environment data for the specified species", notes = "TODO", tags="Data Retrieval")
-    public List<EnvironmentDataRecord> environmentDataJson(@RequestParam(name="speciesName") String[] speciesNames,
-    		@RequestParam(name="envVarName", required=false) String[] envVarNames, HttpServletResponse resp) throws AekosApiRetrievalException {
+    @ApiOperation(value = "Get environmental variable data in JSON format", notes = "TODO", tags="Data Retrieval")
+    public EnvironmentDataResponse environmentDataDotJson(
+    		@RequestParam(name="speciesName") String[] speciesNames,
+    		@RequestParam(name="envVarName", required=false) String[] envVarNames,
+    		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
+    		@RequestParam(required=false, defaultValue=DEFAULT_ROWS) @ApiParam("result page size") int rows,
+    		HttpServletRequest req, HttpServletResponse resp) throws AekosApiRetrievalException {
     	// TODO do we include units in the field name, as an extra value or as a header/metadata object in the resp
+    	// TODO handle empty env vars
     	List<String> varNames = envVarNames != null ? Arrays.asList(envVarNames) : Collections.emptyList();
-		List<EnvironmentDataRecord> result = retrievalService.getEnvironmentalData(Arrays.asList(speciesNames), varNames);
+		EnvironmentDataResponse result = retrievalService.getEnvironmentalDataJson(Arrays.asList(speciesNames), varNames, start, rows);
+		resp.addHeader(HttpHeaders.LINK, buildLinkHeader(UriComponentsBuilder.fromHttpUrl(extractFullUrl(req)), RetrievalResponseHeader.newInstance(result)));
     	return result;
+	}
+    
+    @RequestMapping(path="/environmentData", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Get environmental variable data", notes = "TODO", tags="Data Retrieval")
+    public List<EnvironmentDataRecord> environmentDataJson(
+    		@RequestParam(name="speciesName") String[] speciesNames,
+    		@RequestParam(name="envVarName", required=false) String[] envVarNames,
+    		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
+    		@RequestParam(required=false, defaultValue=DEFAULT_ROWS) @ApiParam("result page size") int rows,
+    		HttpServletResponse resp) throws AekosApiRetrievalException {
+    	return environmentDataJson(speciesNames, envVarNames, start, rows, resp);
+	}
+    
+    @RequestMapping(path="/environmentData.csv", method=RequestMethod.GET, produces=TEXT_CSV_MIME)
+    @ApiOperation(value = "Get environmental variable data in CSV format", notes = "TODO", tags="Data Retrieval")
+    public void environmentDataDotCsv(
+    		@RequestParam(name="speciesName") String[] speciesNames,
+    		@RequestParam(name="envVarName", required=false) String[] envVarNames,
+    		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
+    		@RequestParam(required=false, defaultValue=DEFAULT_ROWS) @ApiParam("result page size") int rows,
+    		HttpServletRequest req, HttpServletResponse resp, @ApiIgnore Writer responseWriter) throws AekosApiRetrievalException {
+    	// TODO do we include units in the field name, as an extra value or as a header/metadata object in the resp
+    	// TODO handle empty env vars
+    	List<String> varNames = envVarNames != null ? Arrays.asList(envVarNames) : Collections.emptyList();
+    	RetrievalResponseHeader header = retrievalService.getEnvironmentalDataCsv(Arrays.asList(speciesNames), varNames, start, rows, responseWriter);
+		// FIXME move header up?
+		resp.addHeader(HttpHeaders.LINK, buildLinkHeader(UriComponentsBuilder.fromHttpUrl(extractFullUrl(req)), header));
+	}
+    
+    @RequestMapping(path="/environmentData", method=RequestMethod.GET, produces=TEXT_CSV_MIME)
+    @ApiOperation(value = "Get environmental variable data", notes = "TODO", tags="Data Retrieval")
+    public void environmentDataCsv(
+    		@RequestParam(name="speciesName") String[] speciesNames,
+    		@RequestParam(name="envVarName", required=false) String[] envVarNames,
+    		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
+    		@RequestParam(required=false, defaultValue=DEFAULT_ROWS) @ApiParam("result page size") int rows,
+    		HttpServletRequest req, HttpServletResponse resp, @ApiIgnore Writer responseWriter) throws AekosApiRetrievalException {
+    	environmentDataDotCsv(speciesNames, envVarNames, start, rows, req, resp, responseWriter);
 	}
     
     private String buildLinkHeader(UriComponentsBuilder fromPath, RetrievalResponseHeader response) {
@@ -229,6 +276,10 @@ public class ApiV1RetrievalController {
         }
     }
 
+    private String extractFullUrl(HttpServletRequest req) {
+		return req.getRequestURL().toString() + "?" + req.getQueryString();
+	}
+    
     private static String createLinkHeader(final String uri, final String rel) {
         return "<" + uri + ">; rel=\"" + rel + "\"";
     }
@@ -246,12 +297,13 @@ public class ApiV1RetrievalController {
 			this.totalPages = totalPages;
 		}
 
-		public static RetrievalResponseHeader newInstance(TraitDataResponse resp) {
+		public static RetrievalResponseHeader newInstance(AbstractResponse response) {
+			ResponseHeader responseHeader = response.getResponseHeader();
 			RetrievalResponseHeader result = new RetrievalResponseHeader(
-					resp.getResponseHeader().getParams().getStart(),
-					resp.getResponseHeader().getParams().getRows(),
-					resp.getResponseHeader().getPageNumber(),
-					resp.getResponseHeader().getTotalPages());
+					responseHeader.getParams().getStart(),
+					responseHeader.getParams().getRows(),
+					responseHeader.getPageNumber(),
+					responseHeader.getTotalPages());
 			return result;
 		}
 
