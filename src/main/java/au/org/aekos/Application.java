@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -56,7 +57,7 @@ public class Application extends SpringBootServletInitializer {
     }
     
     @Bean
-    public Model model(ModelLoader loader) {
+    public Model dataModel(ModelLoader loader) {
     	return loader.loadModel();
     }
     
@@ -66,5 +67,15 @@ public class Application extends SpringBootServletInitializer {
 		OutputStream out = new ByteArrayOutputStream();
 		StreamUtils.copy(sparqlIS, out);
 		return out.toString();
+    }
+    
+    @Bean
+    public Model metricsModel() {
+    	return ModelFactory.createDefaultModel();
+    }
+    
+    @Bean
+    public Model authModel() {
+    	return ModelFactory.createDefaultModel();
     }
 }

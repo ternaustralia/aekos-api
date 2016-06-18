@@ -32,7 +32,7 @@ public class JenaRetrievalService implements RetrievalService {
 	private static final String LIMIT_PLACEHOLDER = "%LIMIT_PLACEHOLDER%";
 	
 	@Autowired 
-	@Qualifier("model")
+	@Qualifier("dataModel")
 	private Model model;
 	
 	@Autowired

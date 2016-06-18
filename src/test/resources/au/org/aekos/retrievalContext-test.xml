@@ -51,14 +51,14 @@
 	
 	<bean id="modelLoader" class="au.org.aekos.util.ModelLoader" />
 	
-	<bean id="model" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+	<bean id="dataModel" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
 		<property name="targetObject" ref="modelLoader" />
 		<property name="targetMethod" value="loadModel" />
 	</bean>
 	
 	<!-- pre-populates the model -->
 	<bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-		<property name="targetObject" ref="model" />
+		<property name="targetObject" ref="dataModel" />
 		<property name="targetMethod" value="read" />
 		<property name="arguments">
 			<array>
