@@ -1,6 +1,7 @@
 package au.org.aekos.service.retrieval;
 
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
@@ -9,5 +10,5 @@ import java.net.URL;
  */
 public interface DataProvisionService {
 
-	URL storeData(InputStream is);
+	URL storeData(InputStream is) throws MalformedURLException;
 }
