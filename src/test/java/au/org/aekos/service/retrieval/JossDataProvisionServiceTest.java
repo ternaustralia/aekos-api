@@ -6,6 +6,7 @@ import static org.junit.Assert.assertThat;
 import java.io.InputStream;
 import java.net.URL;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,7 @@ public class JossDataProvisionServiceTest {
 	private JossDataProvisionService objectUnderTest;
 	
 	@Test
-	//@Ignore // needs to be modified before it can run everytime
+	@Ignore // needs to be modified before it can run everytime
 	public void testStoreData01() throws Throwable {
     	InputStream in = this.getClass().getClassLoader().getResourceAsStream(jossDataResourcePath);
     	URL handle = objectUnderTest.storeData(in);
