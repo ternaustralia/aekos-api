@@ -22,10 +22,14 @@ public class IndexConstants {
 	public static final String SPECIES_ENV = DocumentType.SPECIES_ENV.name();
 	public static final String SPECIES_SUMMARY = DocumentType.SPECIES_SUMMARY.name();
 	
+	//Unique term for loading unique checking
+	public static final String FLD_UNIQUE_ID = "uid";
 	
 	//Exact match field name
 	public static final String FLD_SPECIES = "species";
 	public static final String FLD_TRAIT = "trait";
+	
+	
 	
 	//public static final String TRAIT = "env_trait";
 	
