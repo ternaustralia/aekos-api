@@ -2,6 +2,7 @@ package au.org.aekos.service.search;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import org.apache.lucene.search.IndexSearcher;
@@ -70,18 +71,21 @@ public class LuceneSearchService implements SearchService {
 			TopDocs td = searcher.search(query, Integer.MAX_VALUE, new Sort(new SortField(IndexConstants.FLD_TRAIT, SortField.Type.STRING)));
 		    int totalTraits = td.totalHits;
 		    if(td.totalHits > 0){
+		    	LinkedHashSet<TraitVocabEntry> uniqueResults = new LinkedHashSet<>();
 		    	for(ScoreDoc scoreDoc : td.scoreDocs){
 		    		Document matchedDoc = searcher.doc(scoreDoc.doc);
 		    		String trait = matchedDoc.get(IndexConstants.FLD_TRAIT);
 		    		if(StringUtils.hasLength(trait)){
-		    			responseList.add(new TraitVocabEntry(trait, trait));
+		    			uniqueResults.add(new TraitVocabEntry(trait, trait));
 		    		}
 		    	}
+		    	responseList.addAll(uniqueResults);
 		    }
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
 		return responseList;
 	}
 	
