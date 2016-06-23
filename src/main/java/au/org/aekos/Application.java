@@ -70,6 +70,14 @@ public class Application extends SpringBootServletInitializer {
     }
     
     @Bean
+    public String environmentDataQueryTemplate() throws IOException {
+    	InputStream sparqlIS = Thread.currentThread().getContextClassLoader().getResourceAsStream("au/org/aekos/sparql/environment-data.rq");
+		OutputStream out = new ByteArrayOutputStream();
+		StreamUtils.copy(sparqlIS, out);
+		return out.toString();
+    }
+    
+    @Bean
     public Model metricsModel() {
     	return ModelFactory.createDefaultModel();
     }
