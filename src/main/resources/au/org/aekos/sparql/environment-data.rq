@@ -7,6 +7,9 @@ WHERE {
   ?s api:decimalLongitude ?decimalLongitude .
   ?s api:geodeticDatum ?geodeticDatum .
   ?s api:locationID ?locationID .
+  ?s api:eventDate ?eventDate .
+  ?s api:year ?year .
+  ?s api:month ?month .
   VALUES ?locationID { %LOCATION_ID_PLACEHOLDER% } .
 }
 ORDER BY ?s

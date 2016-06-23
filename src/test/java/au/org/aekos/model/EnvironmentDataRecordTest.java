@@ -17,13 +17,14 @@ public class EnvironmentDataRecordTest {
 				+ "(1925-present), Version 12 /2014. Persistent Hyperlink: http://www.aekos.org.au/collection/adelaide.edu.au/Koonamore/KangarooTransects. "
 				+ "ÆKOS Data Portal, rights owned by The University of Adelaide (www.adelaide.edu.au). Accessed [importDate].";
 		String[] fields = new String[] {
-				"-32.10841", "139.35191", "aekos.org.au/collection/adelaide.edu.au/Koonamore/VegetationQuadrats/QFR2", 
+				"-32.10841", "139.35191", "GDA94", "aekos.org.au/collection/adelaide.edu.au/Koonamore/VegetationQuadrats/QFR2", 
 				"23/11/12", "2012", "11", "soilPh_10cm", "4.5", citation,
 				"http://aekos.org.au/collection/adelaide.edu.au/Koonamore/VegetationQuadrats/QFR2"
 		};
 		EnvironmentDataRecord result = EnvironmentDataRecord.deserialiseFrom(fields);
 		assertEquals(-32.10841d, result.getDecimalLatitude(), 0.00001);
 		assertEquals(139.35191d, result.getDecimalLongitude(), 0.00001);
+		assertEquals("GDA94", result.getGeodeticDatum());
 		assertEquals("aekos.org.au/collection/adelaide.edu.au/Koonamore/VegetationQuadrats/QFR2", result.getLocationID());
 		assertEquals("23/11/12", result.getEventDate());
 		assertEquals(2012, result.getYear());

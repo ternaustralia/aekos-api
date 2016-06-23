@@ -2,6 +2,7 @@ package au.org.aekos.service.retrieval;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
 
 import java.io.StringWriter;
 import java.io.Writer;
@@ -121,12 +122,13 @@ public class JenaRetrievalServiceTestSpring {
 	@Test
 	public void testGetEnvironmentalDataCsv01() throws Throwable {
 		Writer writer = new StringWriter();
-		objectUnderTest.getEnvironmentalDataCsv(Arrays.asList("calotis hispidula"), Collections.emptyList(), 0, 20, writer);
+		objectUnderTest.getEnvironmentalDataCsv(Arrays.asList("Calotis hispidula"), Collections.emptyList(), 0, 20, writer);
 		String compareStr = testGetEnvironmentalDataCsv01_expected;
 		if(SystemUtils.IS_OS_WINDOWS){
 			compareStr = testGetEnvironmentalDataCsv01_expected.replaceAll("\r", System.lineSeparator());
 		}
-		assertThat(writer.toString(), is(compareStr));
+		assertEquals(compareStr, writer.toString());
+		// FIXME update expected to have all values
 	}
 	
 	/**
@@ -139,5 +141,12 @@ public class JenaRetrievalServiceTestSpring {
 		assertThat(response.size(), is(1));
 		EnvironmentDataRecord record = response.get(0);
 		assertThat(record.getDecimalLatitude(), is(-23.5318398476576d));
+		assertThat(record.getDecimalLongitude(), is(138.321378247854d));
+		assertThat(record.getGeodeticDatum(), is("GDA94"));
+		assertThat(record.getEventDate(), is("1990-03-30"));
+		assertThat(record.getMonth(), is(03));
+		assertThat(record.getYear(), is(1990));
+		assertThat(record.getLocationID(), is("aekos.org.au/collection/adelaide.edu.au/trend/SATFLB0025"));
+		// FIXME assert all values
 	}
 }

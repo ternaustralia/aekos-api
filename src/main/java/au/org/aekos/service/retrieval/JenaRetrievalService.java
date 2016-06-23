@@ -84,8 +84,20 @@ public class JenaRetrievalService implements RetrievalService {
 	@Override
 	public RetrievalResponseHeader getEnvironmentalDataCsv(List<String> speciesNames, List<String> environmentalVariableNames, 
 			int start, int rows, Writer responseWriter) throws AekosApiRetrievalException {
-		// TODO make real
-		return stubDelegate.getEnvironmentalDataCsv(speciesNames, environmentalVariableNames, start, rows, responseWriter);
+		// TODO write a header?
+		EnvironmentDataResponse jsonResponse = getEnvironmentalDataJsonPrivate(speciesNames, environmentalVariableNames, start, rows);
+		for (Iterator<EnvironmentDataRecord> it = jsonResponse.getResponse().iterator();it.hasNext();) {
+			EnvironmentDataRecord curr = it.next();
+			try {
+				responseWriter.write(curr.toCsv());
+				if (it.hasNext()) {
+					responseWriter.write("\n");
+				}
+			} catch (IOException e) {
+				throw new AekosApiRetrievalException("Failed to write to the supplied writer: " + responseWriter.getClass(), e);
+			}
+		}
+		return RetrievalResponseHeader.newInstance(jsonResponse);
 	}
 	
 	@Override
@@ -150,9 +162,9 @@ public class JenaRetrievalService implements RetrievalService {
 			for (; results.hasNext();) {
 				QuerySolution s = results.next();
 				records.add(new EnvironmentDataRecord(getDouble(s, "decimalLatitude"),
-						getDouble(s, "decimalLongitude"), getString(s, "locationID"), 
-						null,11,22,null,null //FIXME get all values into query and extract them
-//						getString(s, "eventDate"), getInt(s, "year"), getInt(s, "month"),
+						getDouble(s, "decimalLongitude"), getString(s, "geodeticDatum"), 
+						getString(s, "locationID"),getString(s, "eventDate"),getInt(s, "year"), getInt(s, "month"),
+						null, null //FIXME get all values into query and extract them
 //						getString(s, "bibliographicCitation"), getString(s, "datasetID")
 						));
 			}

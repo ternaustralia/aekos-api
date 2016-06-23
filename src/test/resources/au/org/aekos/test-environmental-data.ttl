@@ -5,9 +5,12 @@ api:location-db06dcd590c3097320c84ab7b16fa9feb95a80d0
         a       <http://www.aekos.org.au/api/1.0#location> ;
         api:decimalLatitude   "6289421"^^xsd:decimal ;
         api:decimalLongitude  "225657"^^xsd:decimal ;
+        api:eventDate         "2016-01-12" ;
         api:geodeticDatum     "Universal Transverse Mercator GDA94" ;
         api:locationID        "aekos.org.au/collection/adelaide.edu.au/trend/SATFLB0026" ;
-        api:otherEnv          <urn:otherenv:162903b9-f113-4264-b379-88bd2cfc8551> , <urn:otherenv:1ba9eea4-668c-443d-a450-3602073875d6> .
+        api:month             01 ;
+        api:otherEnv          <urn:otherenv:162903b9-f113-4264-b379-88bd2cfc8551> , <urn:otherenv:1ba9eea4-668c-443d-a450-3602073875d6> ;
+        api:year              2016 .
 
 <urn:otherenv:162903b9-f113-4264-b379-88bd2cfc8551>
         api:disturbanceEvidence  <urn:disturbance-evidence:8239e171-b1f4-4d13-ac46-617119d43a62> ;
@@ -47,10 +50,12 @@ api:location-284ab54489db265d8c1ef33d6661b45f925c6d7e
         a       <http://www.aekos.org.au/api/1.0#location> ;
         api:decimalLatitude   -23.5318398476576 ;
         api:decimalLongitude  138.321378247854 ;
-        api:eventDate         "1990-03-30T14:30:00Z"^^xsd:dateTime ;
+        api:eventDate         "1990-03-30" ;
         api:geodeticDatum     "GDA94" ;
         api:locationID        "aekos.org.au/collection/adelaide.edu.au/trend/SATFLB0025" ;
-        api:weather           <urn:weather:c1fac121-e206-467c-afe2-4f4310102ce4> , <urn:weather:162cae90-6f8b-4e47-869d-44019ae2c1be> .
+        api:month             03 ;
+        api:weather           <urn:weather:c1fac121-e206-467c-afe2-4f4310102ce4> , <urn:weather:162cae90-6f8b-4e47-869d-44019ae2c1be> ;
+        api:year              1990 .
         
 <urn:weather:c1fac121-e206-467c-afe2-4f4310102ce4>
         api:rainfallMean             0.013333333 ;

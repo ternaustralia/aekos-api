@@ -9,6 +9,7 @@ public class EnvironmentDataRecord {
 	private static final String CSV_SEPARATOR = ",";
 	private final double decimalLatitude;
     private final double decimalLongitude;
+    private final String geodeticDatum;
     private final String locationID;
     private final String eventDate;
     private final int year;
@@ -35,10 +36,11 @@ public class EnvironmentDataRecord {
 		}
     }
     
-	public EnvironmentDataRecord(double decimalLatitude, double decimalLongitude, String locationID, String eventDate,
-			int year, int month, String bibliographicCitation, String datasetID) {
+	public EnvironmentDataRecord(double decimalLatitude, double decimalLongitude, String geodeticDatum, String locationID,
+			String eventDate, int year, int month, String bibliographicCitation, String datasetID) {
 		this.decimalLatitude = decimalLatitude;
 		this.decimalLongitude = decimalLongitude;
+		this.geodeticDatum = geodeticDatum;
 		this.locationID = locationID;
 		this.eventDate = eventDate;
 		this.year = year;
@@ -53,6 +55,10 @@ public class EnvironmentDataRecord {
 
 	public double getDecimalLongitude() {
 		return decimalLongitude;
+	}
+
+	public String getGeodeticDatum() {
+		return geodeticDatum;
 	}
 
 	public String getLocationID() {
@@ -91,6 +97,7 @@ public class EnvironmentDataRecord {
 		int fieldIndex = 0;
 		double decimalLatitudeField = Double.parseDouble(fields[fieldIndex++]);
 		double decimalLongitudeField = Double.parseDouble(fields[fieldIndex++]);
+		String geodeticDatumField = fields[fieldIndex++];
 		String locationIdField = fields[fieldIndex++];
 		String eventDateField = fields[fieldIndex++];
 		int yearField = Integer.parseInt(fields[fieldIndex++]);
@@ -100,7 +107,7 @@ public class EnvironmentDataRecord {
 		String bibliographicCitationField = fields[fieldIndex++];
 		String datasetIdField = fields[fieldIndex++];
 		EnvironmentDataRecord result = new EnvironmentDataRecord(decimalLatitudeField, decimalLongitudeField,
-				locationIdField, eventDateField, yearField, monthField, bibliographicCitationField, datasetIdField);
+				geodeticDatumField, locationIdField, eventDateField, yearField, monthField, bibliographicCitationField, datasetIdField);
 		result.addVariable(new Entry(envVarField, envVarValueField));
 		return result;
 	}
@@ -110,6 +117,8 @@ public class EnvironmentDataRecord {
 		result.append(decimalLatitude);
 		result.append(CSV_SEPARATOR);
 		result.append(decimalLongitude);
+		result.append(CSV_SEPARATOR);
+		result.append(quote(geodeticDatum));
 		result.append(CSV_SEPARATOR);
 		result.append(quote(locationID));
 		result.append(CSV_SEPARATOR);
