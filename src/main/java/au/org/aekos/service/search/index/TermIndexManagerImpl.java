@@ -7,22 +7,25 @@ import java.nio.file.Paths;
 import org.apache.commons.lang.SystemUtils;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.SimpleFSDirectory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TermIndexManagerImpl implements TermIndexManager, InitializingBean{
+public class TermIndexManagerImpl implements TermIndexManager, InitializingBean, DisposableBean {
 
 	private static final Logger logger = LoggerFactory.getLogger(TermIndexManagerImpl.class);
 	
@@ -91,13 +94,10 @@ public class TermIndexManagerImpl implements TermIndexManager, InitializingBean{
 	}
 
 	@Override
-	public IndexReader getIndexReader() {
-		// TODO Auto-generated method stub
-		return null;
+	public IndexSearcher getIndexSearcher() throws IOException {
+		IndexSearcher searcher = new IndexSearcher( DirectoryReader.open(getTermIndex()) );
+		return searcher;
 	}
-	
-	//Not threadsafe today . . . 
-	private int commitCounter = 0;
 	
 	public void writeDocument(Document doc, IndexWriter writer) throws IOException{
 		IndexableField uidField = doc.getField(IndexConstants.FLD_UNIQUE_ID);
@@ -109,6 +109,24 @@ public class TermIndexManagerImpl implements TermIndexManager, InitializingBean{
 		}
 		
 	}
+
+	private void closeTermIndex() throws IOException{
+		if(termIndex != null){
+			try {
+				termIndex.close();
+			} catch (IOException e) {
+				logger.error("Issue with Term Index",e);
+				throw e;
+			}
+			termIndex = null;
+		}
+	}
+	
+	@Override
+	public void destroy() throws Exception {
+		closeTermIndex();
+	}
+	
 	
 
 }
