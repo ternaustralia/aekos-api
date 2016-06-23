@@ -1,0 +1,71 @@
+@prefix api:   <http://www.aekos.org.au/api/1.0#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+
+api:location-db06dcd590c3097320c84ab7b16fa9feb95a80d0
+        a       <http://www.aekos.org.au/api/1.0#location> ;
+        api:decimalLatitude   "6289421"^^xsd:decimal ;
+        api:decimalLongitude  "225657"^^xsd:decimal ;
+        api:geodeticDatum     "Universal Transverse Mercator GDA94" ;
+        api:locationID        "aekos.org.au/collection/adelaide.edu.au/trend/SATFLB0026" ;
+        api:otherEnv          <urn:otherenv:162903b9-f113-4264-b379-88bd2cfc8551> , <urn:otherenv:1ba9eea4-668c-443d-a450-3602073875d6> .
+
+<urn:otherenv:162903b9-f113-4264-b379-88bd2cfc8551>
+        api:disturbanceEvidence  <urn:disturbance-evidence:8239e171-b1f4-4d13-ac46-617119d43a62> ;
+        api:landscape            <urn:landscape:12f76d56-94d4-4a22-ab45-4be594149190> ;
+        api:soil                 <urn:soil:57f1c7a0-1ff4-4116-9803-7faeb9f85e2d> .
+
+<urn:landscape:12f76d56-94d4-4a22-ab45-4be594149190>
+        api:aspectUnits  "degrees" ;
+        api:aspectValue  "230"^^xsd:decimal ;
+        api:slopeUnits   "degrees" ;
+        api:slopeValue   "10"^^xsd:decimal .
+        
+<urn:otherenv:1ba9eea4-668c-443d-a450-3602073875d6>
+        api:disturbanceEvidence  <urn:disturbance-evidence:8239e171-b1f4-4d13-ac46-617119d43a62> ;
+        api:landscape            <urn:landscape:a35e323d-70f2-4a5b-9d51-b8920cc0608b> ;
+        api:soil                 <urn:soil:57f1c7a0-1ff4-4116-9803-7faeb9f85e2d> .
+        
+<urn:disturbance-evidence:8239e171-b1f4-4d13-ac46-617119d43a62>
+        api:type  "No effective disturbance" .
+        
+<urn:landscape:12f76d56-94d4-4a22-ab45-4be594149190>
+        api:aspectUnits  "degrees" ;
+        api:aspectValue  "230"^^xsd:decimal ;
+        api:slopeUnits   "degrees" ;
+        api:slopeValue   "10"^^xsd:decimal .
+        
+<urn:soil:57f1c7a0-1ff4-4116-9803-7faeb9f85e2d>
+        api:electricalConductivityUnits
+                "millisiemens per metre" ;
+        api:electricalConductivityValue
+                "4"^^xsd:decimal ;
+        api:pH                       5.4 ;
+        api:totalOrganicCarbonUnits  "percent" ;
+        api:totalOrganicCarbonValue  1.34 .
+        
+api:location-284ab54489db265d8c1ef33d6661b45f925c6d7e
+        a       <http://www.aekos.org.au/api/1.0#location> ;
+        api:decimalLatitude   -23.5318398476576 ;
+        api:decimalLongitude  138.321378247854 ;
+        api:eventDate         "1990-03-30T14:30:00Z"^^xsd:dateTime ;
+        api:geodeticDatum     "GDA94" ;
+        api:locationID        "aekos.org.au/collection/adelaide.edu.au/trend/SATFLB0025" ;
+        api:weather           <urn:weather:c1fac121-e206-467c-afe2-4f4310102ce4> , <urn:weather:162cae90-6f8b-4e47-869d-44019ae2c1be> .
+        
+<urn:weather:c1fac121-e206-467c-afe2-4f4310102ce4>
+        api:rainfallMean             0.013333333 ;
+        api:rainfallMeanUnits        "millilitres" ;
+        api:rainfallTotal            0.4 ;
+        api:rainfallTotalUnits       "millilitres" ;
+        api:temperatureMaximum       38.03157895 ;
+        api:temperatureMaximumUnits  "degrees Celcius" ;
+        api:temperatureMean          28.12631579 ;
+        api:temperatureMeanUnits     "degrees Celcius" ;
+        api:temperatureMinimum       16.86315789 ;
+        api:temperatureMinimumUnits  "degrees Celcius" .
+        
+<urn:weather:162cae90-6f8b-4e47-869d-44019ae2c1be>
+        api:rainfallMean        1.606451613 ;
+        api:rainfallMeanUnits   "millilitres" ;
+        api:rainfallTotal       49.8 ;
+        api:rainfallTotalUnits  "millilitres" .

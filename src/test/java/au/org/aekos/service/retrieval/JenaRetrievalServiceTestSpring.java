@@ -6,6 +6,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang.SystemUtils;
@@ -16,6 +17,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import au.org.aekos.model.EnvironmentDataRecord;
+import au.org.aekos.model.EnvironmentDataResponse;
 import au.org.aekos.model.SpeciesOccurrenceRecord;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -36,6 +39,10 @@ public class JenaRetrievalServiceTestSpring {
 	@Autowired
 	@Qualifier("testGetSpeciesDataCsv03_expected")
 	private String testGetSpeciesDataCsv03_expected;
+
+	@Autowired
+	@Qualifier("testGetEnvironmentalDataCsv01_expected")
+	private String testGetEnvironmentalDataCsv01_expected;
 	
 	/**
 	 * Can we get all the records that are available for the specified species?
@@ -106,5 +113,31 @@ public class JenaRetrievalServiceTestSpring {
 			compareStr = testGetSpeciesDataCsv03_expected.replaceAll("\r", "");
 		}
 		assertThat(writer.toString(), is(compareStr));
+	}
+	
+	/**
+	 * Can we get all the environmental data records that are available for the specified species?
+	 */
+	@Test
+	public void testGetEnvironmentalDataCsv01() throws Throwable {
+		Writer writer = new StringWriter();
+		objectUnderTest.getEnvironmentalDataCsv(Arrays.asList("calotis hispidula"), Collections.emptyList(), 0, 20, writer);
+		String compareStr = testGetEnvironmentalDataCsv01_expected;
+		if(SystemUtils.IS_OS_WINDOWS){
+			compareStr = testGetEnvironmentalDataCsv01_expected.replaceAll("\r", System.lineSeparator());
+		}
+		assertThat(writer.toString(), is(compareStr));
+	}
+	
+	/**
+	 * Can we get all the environmental data records that are available for the specified species?
+	 */
+	@Test
+	public void testGetEnvironmentalDataJson01() throws Throwable {
+		EnvironmentDataResponse result = objectUnderTest.getEnvironmentalDataJson(Arrays.asList("Calotis hispidula"), Collections.emptyList(), 0, 20);
+		List<EnvironmentDataRecord> response = result.getResponse();
+		assertThat(response.size(), is(1));
+		EnvironmentDataRecord record = response.get(0);
+		assertThat(record.getDecimalLatitude(), is(-23.5318398476576d));
 	}
 }

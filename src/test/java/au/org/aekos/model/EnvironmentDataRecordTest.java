@@ -26,8 +26,8 @@ public class EnvironmentDataRecordTest {
 		assertEquals(139.35191d, result.getDecimalLongitude(), 0.00001);
 		assertEquals("aekos.org.au/collection/adelaide.edu.au/Koonamore/VegetationQuadrats/QFR2", result.getLocationID());
 		assertEquals("23/11/12", result.getEventDate());
-		assertEquals("2012", result.getYear());
-		assertEquals("11", result.getMonth());
+		assertEquals(2012, result.getYear());
+		assertEquals(11, result.getMonth());
 		assertEquals(citation, result.getBibliographicCitation());
 		assertEquals("http://aekos.org.au/collection/adelaide.edu.au/Koonamore/VegetationQuadrats/QFR2", result.getDatasetID());
 		assertEquals(1, result.getVariables().size());

@@ -11,8 +11,8 @@ public class EnvironmentDataRecord {
     private final double decimalLongitude;
     private final String locationID;
     private final String eventDate;
-    private final String year;
-    private final String month;
+    private final int year;
+    private final int month;
     private final Collection<Entry> variables = new LinkedList<>();
     private final String bibliographicCitation;
     private final String datasetID;
@@ -36,7 +36,7 @@ public class EnvironmentDataRecord {
     }
     
 	public EnvironmentDataRecord(double decimalLatitude, double decimalLongitude, String locationID, String eventDate,
-			String year, String month, String bibliographicCitation, String datasetID) {
+			int year, int month, String bibliographicCitation, String datasetID) {
 		this.decimalLatitude = decimalLatitude;
 		this.decimalLongitude = decimalLongitude;
 		this.locationID = locationID;
@@ -63,11 +63,11 @@ public class EnvironmentDataRecord {
 		return eventDate;
 	}
 
-	public String getYear() {
+	public int getYear() {
 		return year;
 	}
 
-	public String getMonth() {
+	public int getMonth() {
 		return month;
 	}
 
@@ -93,8 +93,8 @@ public class EnvironmentDataRecord {
 		double decimalLongitudeField = Double.parseDouble(fields[fieldIndex++]);
 		String locationIdField = fields[fieldIndex++];
 		String eventDateField = fields[fieldIndex++];
-		String yearField = fields[fieldIndex++];
-		String monthField = fields[fieldIndex++];
+		int yearField = Integer.parseInt(fields[fieldIndex++]);
+		int monthField = Integer.parseInt(fields[fieldIndex++]);
 		String envVarField = fields[fieldIndex++];
 		String envVarValueField = fields[fieldIndex++];
 		String bibliographicCitationField = fields[fieldIndex++];

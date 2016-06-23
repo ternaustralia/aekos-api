@@ -1,0 +1,14 @@
+PREFIX api: <http://www.aekos.org.au/api/1.0#>
+
+SELECT *
+WHERE {
+  ?s a api:location .
+  ?s api:decimalLatitude ?decimalLatitude .
+  ?s api:decimalLongitude ?decimalLongitude .
+  ?s api:geodeticDatum ?geodeticDatum .
+  ?s api:locationID ?locationID .
+  VALUES ?locationID { %LOCATION_ID_PLACEHOLDER% } .
+}
+ORDER BY ?s
+OFFSET %OFFSET_PLACEHOLDER%
+LIMIT %LIMIT_PLACEHOLDER%
