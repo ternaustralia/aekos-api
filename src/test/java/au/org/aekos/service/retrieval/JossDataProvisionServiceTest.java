@@ -28,7 +28,7 @@ public class JossDataProvisionServiceTest {
 	private JossDataProvisionService objectUnderTest;
 	
 	@Test
-	@Ignore // needs to be modified before it can run everytime
+	//@Ignore // needs to be modified before it can run everytime
 	public void testStoreData01() throws Throwable {
     	InputStream in = this.getClass().getClassLoader().getResourceAsStream(jossDataResourcePath);
     	URL handle = objectUnderTest.storeData(in);
