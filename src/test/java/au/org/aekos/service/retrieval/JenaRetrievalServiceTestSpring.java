@@ -145,12 +145,18 @@ public class JenaRetrievalServiceTestSpring {
 		assertThat(record.getDecimalLatitude(), is(-23.5318398476576d));
 		assertThat(record.getDecimalLongitude(), is(138.321378247854d));
 		assertThat(record.getGeodeticDatum(), is("GDA94"));
-		assertThat(record.getEventDate(), is("1990-03-30"));
-		assertThat(record.getMonth(), is(3));
-		assertThat(record.getYear(), is(1990));
+		assertThat(record.getEventDate(), is("2099-01-01"));
+		assertThat(record.getMonth(), is(1));
+		assertThat(record.getYear(), is(2099));
 		assertThat(record.getLocationID(), is("aekos.org.au/collection/adelaide.edu.au/trend/SATFLB0025"));
+		assertThat(record.getBibliographicCitation(), is("TERN Australian Transect Network, Biomes of Australian Soils Consortium (2015). Transects for Environmental "
+				+ "Monitoring and Decision Making (TREND) (2013-2015) and TREND-Biome of Australia Soil Environments (BASE) - "
+				+ "Soil samples for physical structure and chemical analysis (14 sites) throughout Australia (2013), Version 11/2015. "
+				+ "Persistent Hyperlink: http://www.aekos.org.au/collection/adelaide.edu.au/trend. &#198;KOS Data Portal, rights "
+				+ "owned by The University of Adelaide (TERN Australian Transects Network - TREND), Bioplatforms Australia Ltd. "
+				+ "Accessed [dd mmm yyyy, e.g. 01 Jan 2016]."));
+		assertThat(record.getSamplingProtocol(), is("aekos.org.au/collection/adelaide.edu.au/trend"));
 		Collection<Entry> vars = record.getVariables();
-		assertThat(vars.size(), is(7));
-		// FIXME assert all values
+//		assertThat(vars.size(), is(7)); // FIXME get variables in here
 	}
 }

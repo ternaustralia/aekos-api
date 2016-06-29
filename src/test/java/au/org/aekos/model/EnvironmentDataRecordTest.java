@@ -30,7 +30,7 @@ public class EnvironmentDataRecordTest {
 		assertEquals(2012, result.getYear());
 		assertEquals(11, result.getMonth());
 		assertEquals(citation, result.getBibliographicCitation());
-		assertEquals("http://aekos.org.au/collection/adelaide.edu.au/Koonamore/VegetationQuadrats/QFR2", result.getDatasetID());
+		assertEquals("http://aekos.org.au/collection/adelaide.edu.au/Koonamore/VegetationQuadrats/QFR2", result.getSamplingProtocol());
 		assertEquals(1, result.getVariables().size());
 		Entry var1 = result.getVariables().iterator().next();
 		assertEquals("soilPh_10cm", var1.getEnvironmentalVariable());

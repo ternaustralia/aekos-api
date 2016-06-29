@@ -3,11 +3,11 @@ package au.org.aekos.service.retrieval;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.jena.query.Query;
@@ -91,20 +91,20 @@ public class JenaRetrievalService implements RetrievalService {
 	@Override
 	public RetrievalResponseHeader getEnvironmentalDataCsv(List<String> speciesNames, List<String> environmentalVariableNames, 
 			int start, int rows, Writer responseWriter) throws AekosApiRetrievalException {
-		// TODO write a header?
-		EnvironmentDataResponse jsonResponse = getEnvironmentalDataJsonPrivate(speciesNames, environmentalVariableNames, start, rows);
-		for (Iterator<EnvironmentDataRecord> it = jsonResponse.getResponse().iterator();it.hasNext();) {
-			EnvironmentDataRecord curr = it.next();
-			try {
+		try {
+			responseWriter.write(EnvironmentDataRecord.getCsvHeader() + "\n"); // FIXME need to handle all the vars
+			EnvironmentDataResponse jsonResponse = getEnvironmentalDataJsonPrivate(speciesNames, environmentalVariableNames, start, rows);
+			for (Iterator<EnvironmentDataRecord> it = jsonResponse.getResponse().iterator();it.hasNext();) {
+				EnvironmentDataRecord curr = it.next();
 				responseWriter.write(curr.toCsv());
 				if (it.hasNext()) {
 					responseWriter.write("\n");
 				}
-			} catch (IOException e) {
-				throw new AekosApiRetrievalException("Failed to write to the supplied writer: " + responseWriter.getClass(), e);
 			}
-		}
 		return RetrievalResponseHeader.newInstance(jsonResponse);
+		} catch (IOException e) {
+			throw new AekosApiRetrievalException("Failed to write to the supplied writer: " + responseWriter.getClass(), e);
+		}
 	}
 	
 	@Override
@@ -161,7 +161,7 @@ public class JenaRetrievalService implements RetrievalService {
 			int rows) throws AekosApiRetrievalException {
 		long startTime = new Date().getTime();
 		List<EnvironmentDataRecord> records = new LinkedList<>();
-		Set<String> locationIds = getLocations(speciesNames);
+		Map<String, LocationInfo> locationIds = getLocations(speciesNames);
 		logger.debug(String.format("Found %d locations", locationIds.size()));
 		// TODO query using all required keys (location, time ?)
 		String sparql = getProcessedEnvDataSparql(locationIds, start, rows);
@@ -172,13 +172,12 @@ public class JenaRetrievalService implements RetrievalService {
 			if (results.hasNext()) {
 				for (; results.hasNext();) {
 					QuerySolution s = results.next();
+					String locationID = getString(s, "locationID");
 					records.add(new EnvironmentDataRecord(getDouble(s, "decimalLatitude"),
 							getDouble(s, "decimalLongitude"), getString(s, "geodeticDatum"), 
-							replaceSpaces(getString(s, "locationID")), "2099-01-01", 1, 1,
-							//getString(s, "eventDate"), getInt(s, "year"), getInt(s, "month"),
-							"FIXME add citation", "FIXME add samplingProtocol" //FIXME get all values into query and extract them
-	//						getString(s, "bibliographicCitation"), getString(s, "datasetID")
-							));
+							replaceSpaces(locationID), "2099-01-01", 2099, 1,
+							//getString(s, "eventDate"), getInt(s, "year"), getInt(s, "month"), // FIXME get dates working
+							locationIds.get(locationID).bibliographicCitation, locationIds.get(locationID).samplingProtocol));
 				}
 			}
 		}
@@ -188,12 +187,22 @@ public class JenaRetrievalService implements RetrievalService {
 		return new EnvironmentDataResponse(responseHeader, records);
 	}
 
-	private Set<String> getLocations(List<String> speciesNames) throws AekosApiRetrievalException {
-		Set<String> result = new LinkedHashSet<>();
+	private class LocationInfo {
+		private final String samplingProtocol;
+		private final String bibliographicCitation;
+		public LocationInfo(String samplingProtocol, String bibliographicCitation) {
+			this.samplingProtocol = samplingProtocol;
+			this.bibliographicCitation = bibliographicCitation;
+		}
+	}
+	
+	private Map<String, LocationInfo> getLocations(List<String> speciesNames) throws AekosApiRetrievalException {
+		Map<String, LocationInfo> result = new HashMap<>();
 		SpeciesDataResponse speciesRecords = getSpeciesDataJson(speciesNames, 0, Integer.MAX_VALUE); // FIXME should we page this?
 		for (SpeciesOccurrenceRecord currSpeciesRecord : speciesRecords.getResponse()) {
-			result.add(currSpeciesRecord.getLocationID());
-			// FIXME get more info?
+			String locationID = currSpeciesRecord.getLocationID();
+			LocationInfo item = new LocationInfo(currSpeciesRecord.getSamplingProtocol(), currSpeciesRecord.getBibliographicCitation());
+			result.put(locationID, item);
 		}
 		return result;
 	}
@@ -212,8 +221,8 @@ public class JenaRetrievalService implements RetrievalService {
 		return processedSparql;
 	}
 	
-	private String getProcessedEnvDataSparql(Set<String> locationIds, int offset, int limit) {
-		String locationIDValueList = locationIds.stream().collect(Collectors.joining("\" \"", "\"", "\""));
+	private String getProcessedEnvDataSparql(Map<String, LocationInfo> locationIds, int offset, int limit) {
+		String locationIDValueList = locationIds.keySet().stream().collect(Collectors.joining("\" \"", "\"", "\""));
 		String processedSparql = environmentDataQueryTemplate
 				.replace(LOCATION_ID_PLACEHOLDER, locationIDValueList)
 				.replace(OFFSET_PLACEHOLDER, String.valueOf(offset))
