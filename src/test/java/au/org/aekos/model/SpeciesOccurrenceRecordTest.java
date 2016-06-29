@@ -31,7 +31,7 @@ public class SpeciesOccurrenceRecordTest {
 		assertEquals(2012, result.getYear());
 		assertEquals(11, result.getMonth());
 		assertEquals(citation, result.getBibliographicCitation());
-		assertEquals("http://aekos.org.au/collection/adelaide.edu.au/Koonamore/Photopoints/pp28A", result.getDatasetID());
+		assertEquals("http://aekos.org.au/collection/adelaide.edu.au/Koonamore/Photopoints/pp28A", result.getSamplingProtocol());
 	}
 	
 	/**

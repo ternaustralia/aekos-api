@@ -7,6 +7,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -19,8 +20,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import au.org.aekos.model.EnvironmentDataRecord;
+import au.org.aekos.model.EnvironmentDataRecord.Entry;
 import au.org.aekos.model.EnvironmentDataResponse;
-import au.org.aekos.model.SpeciesOccurrenceRecord;
+import au.org.aekos.model.SpeciesDataResponse;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("classpath:/au/org/aekos/retrievalContext-test.xml")
@@ -50,8 +52,8 @@ public class JenaRetrievalServiceTestSpring {
 	 */
 	@Test
 	public void testGetSpeciesDataJson01() throws Throwable {
-		List<SpeciesOccurrenceRecord> result = objectUnderTest.getSpeciesDataJson(Arrays.asList("Calotis hispidula"), 0, 10);
-		assertThat(result.size(), is(2));
+		SpeciesDataResponse result = objectUnderTest.getSpeciesDataJson(Arrays.asList("Calotis hispidula"), 0, 10);
+		assertThat(result.getResponse().size(), is(2));
 	}
 
 	/**
@@ -59,8 +61,8 @@ public class JenaRetrievalServiceTestSpring {
 	 */
 	@Test
 	public void testGetSpeciesDataJson02() throws Throwable {
-		List<SpeciesOccurrenceRecord> result = objectUnderTest.getSpeciesDataJson(Arrays.asList("Calotis hispidula", "Goodenia havilandii"), 0, 10);
-		assertThat(result.size(), is(3));
+		SpeciesDataResponse result = objectUnderTest.getSpeciesDataJson(Arrays.asList("Calotis hispidula", "Goodenia havilandii"), 0, 10);
+		assertThat(result.getResponse().size(), is(3));
 	}
 
 	/**
@@ -69,8 +71,8 @@ public class JenaRetrievalServiceTestSpring {
 	@Test
 	public void testGetSpeciesDataJson03() throws Throwable {
 		int onlyOne = 1;
-		List<SpeciesOccurrenceRecord> result = objectUnderTest.getSpeciesDataJson(Arrays.asList("Calotis hispidula"), 0, onlyOne);
-		assertThat(result.size(), is(1));
+		SpeciesDataResponse result = objectUnderTest.getSpeciesDataJson(Arrays.asList("Calotis hispidula"), 0, onlyOne);
+		assertThat(result.getResponse().size(), is(1));
 	}
 
 	/**
@@ -144,9 +146,11 @@ public class JenaRetrievalServiceTestSpring {
 		assertThat(record.getDecimalLongitude(), is(138.321378247854d));
 		assertThat(record.getGeodeticDatum(), is("GDA94"));
 		assertThat(record.getEventDate(), is("1990-03-30"));
-		assertThat(record.getMonth(), is(03));
+		assertThat(record.getMonth(), is(3));
 		assertThat(record.getYear(), is(1990));
 		assertThat(record.getLocationID(), is("aekos.org.au/collection/adelaide.edu.au/trend/SATFLB0025"));
+		Collection<Entry> vars = record.getVariables();
+		assertThat(vars.size(), is(7));
 		// FIXME assert all values
 	}
 }
