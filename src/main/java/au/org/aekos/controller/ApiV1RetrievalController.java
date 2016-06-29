@@ -207,7 +207,7 @@ public class ApiV1RetrievalController {
     		@RequestParam(required=false, defaultValue=DEFAULT_ROWS) @ApiParam("result page size") int rows,
     		HttpServletRequest req, HttpServletResponse resp, @ApiIgnore Writer responseWriter) throws AekosApiRetrievalException {
     	// TODO do we include units in the field name, as an extra value or as a header/metadata object in the resp
-    	// TODO handle empty env vars
+    	resp.setContentType(TEXT_CSV_MIME);
     	List<String> varNames = envVarNames != null ? Arrays.asList(envVarNames) : Collections.emptyList();
     	RetrievalResponseHeader header = retrievalService.getEnvironmentalDataCsv(Arrays.asList(speciesNames), varNames, start, rows, responseWriter);
 		// FIXME move header up?
