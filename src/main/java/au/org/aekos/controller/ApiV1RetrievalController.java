@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import au.org.aekos.model.AbstractResponse;
-import au.org.aekos.model.EnvironmentDataRecord;
 import au.org.aekos.model.EnvironmentDataResponse;
 import au.org.aekos.model.ResponseHeader;
 import au.org.aekos.model.SpeciesDataResponse;
@@ -190,13 +189,13 @@ public class ApiV1RetrievalController {
     
     @RequestMapping(path="/environmentData", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get environmental variable data", notes = "TODO", tags="Data Retrieval")
-    public List<EnvironmentDataRecord> environmentDataJson(
+    public EnvironmentDataResponse environmentDataJson(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(name="envVarName", required=false) String[] envVarNames,
     		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
     		@RequestParam(required=false, defaultValue=DEFAULT_ROWS) @ApiParam("result page size") int rows,
-    		HttpServletResponse resp) throws AekosApiRetrievalException {
-    	return environmentDataJson(speciesNames, envVarNames, start, rows, resp);
+    		HttpServletRequest req, HttpServletResponse resp) throws AekosApiRetrievalException {
+    	return environmentDataDotJson(speciesNames, envVarNames, start, rows, req, resp);
 	}
     
     @RequestMapping(path="/environmentData.csv", method=RequestMethod.GET, produces=TEXT_CSV_MIME)

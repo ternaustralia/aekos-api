@@ -17,6 +17,8 @@ import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -36,6 +38,7 @@ import au.org.aekos.model.TraitDataResponse;
 @Service
 public class JenaRetrievalService implements RetrievalService {
 
+	private static final Logger logger = LoggerFactory.getLogger(JenaRetrievalService.class);
 	static final String SCIENTIFIC_NAME_PLACEHOLDER = "%SCIENTIFIC_NAME_PLACEHOLDER%";
 	private static final String OFFSET_PLACEHOLDER = "%OFFSET_PLACEHOLDER%";
 	private static final String LIMIT_PLACEHOLDER = "%LIMIT_PLACEHOLDER%";
@@ -133,6 +136,7 @@ public class JenaRetrievalService implements RetrievalService {
 		long startTime = new Date().getTime();
 		List<SpeciesOccurrenceRecord> records = new LinkedList<>();
 		String sparql = getProcessedDarwinCoreSparql(speciesNames, start, rows);
+		logger.debug("Species data SPARQL: " + sparql);
 		Query query = QueryFactory.create(sparql);
 		try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
 			ResultSet results = qexec.execSelect();
@@ -158,8 +162,10 @@ public class JenaRetrievalService implements RetrievalService {
 		long startTime = new Date().getTime();
 		List<EnvironmentDataRecord> records = new LinkedList<>();
 		Set<String> locationIds = getLocations(speciesNames);
+		logger.debug(String.format("Found %d locations", locationIds.size()));
 		// TODO query using all required keys (location, time ?)
 		String sparql = getProcessedEnvDataSparql(locationIds, start, rows);
+		logger.debug("Environmental data SPARQL: " + sparql);
 		Query query = QueryFactory.create(sparql);
 		try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
 			ResultSet results = qexec.execSelect();
@@ -168,8 +174,9 @@ public class JenaRetrievalService implements RetrievalService {
 					QuerySolution s = results.next();
 					records.add(new EnvironmentDataRecord(getDouble(s, "decimalLatitude"),
 							getDouble(s, "decimalLongitude"), getString(s, "geodeticDatum"), 
-							replaceSpaces(getString(s, "locationID")),getString(s, "eventDate"),getInt(s, "year"), getInt(s, "month"),
-							null, null //FIXME get all values into query and extract them
+							replaceSpaces(getString(s, "locationID")), "2099-01-01", 1, 1,
+							//getString(s, "eventDate"), getInt(s, "year"), getInt(s, "month"),
+							"FIXME add citation", "FIXME add samplingProtocol" //FIXME get all values into query and extract them
 	//						getString(s, "bibliographicCitation"), getString(s, "datasetID")
 							));
 				}
