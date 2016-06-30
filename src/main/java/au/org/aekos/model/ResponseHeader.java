@@ -45,6 +45,9 @@ public class ResponseHeader {
 	}
 
 	static int calculatePageNumber(int start, int numFound, int totalPages) {
+		if (numFound == 0) {
+			return 0;
+		}
 		if (start == 0) {
 			return 1;
 		}

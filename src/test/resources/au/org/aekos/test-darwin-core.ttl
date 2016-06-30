@@ -1,4 +1,5 @@
 <urn:uuid:7e263a89-b013-4e24-ab16-bc9907bc1ad1>
+        a       <http://www.aekos.org.au/api/1.0#DarwinCoreRecord> ;
         <http://www.aekos.org.au/api/1.0#decimalLatitude>
                 6591827.848 ;
         <http://www.aekos.org.au/api/1.0#decimalLongitude>
@@ -23,6 +24,7 @@
                 2013 .
 
 <urn:uuid:7e263a89-b013-4e24-ab16-bc9907bc1333>
+        a       <http://www.aekos.org.au/api/1.0#DarwinCoreRecord> ;
         <http://www.aekos.org.au/api/1.0#decimalLatitude>
                 6591827.848 ;
         <http://www.aekos.org.au/api/1.0#decimalLongitude>
@@ -53,6 +55,7 @@
                 "aekos.org.au/collection/adelaide.edu.au/trend" .
 
 <urn:uuid:2cf5b61a-35de-4c19-9a87-322b8dd0ff88>
+        a       <http://www.aekos.org.au/api/1.0#DarwinCoreRecord> ;
         <http://www.aekos.org.au/api/1.0#decimalLatitude>
                 6137169.857 ;
         <http://www.aekos.org.au/api/1.0#decimalLongitude>
@@ -77,6 +80,7 @@
                 2014 .
 
 <urn:uuid:bff32657-2c05-4d11-8b08-14f668458069>
+        a       <http://www.aekos.org.au/api/1.0#DarwinCoreRecord> ;
         <http://www.aekos.org.au/api/1.0#decimalLatitude>
                 6634889.271 ;
         <http://www.aekos.org.au/api/1.0#decimalLongitude>

@@ -53,8 +53,16 @@ public class JenaRetrievalService implements RetrievalService {
 	private String darwinCoreQueryTemplate;
 	
 	@Autowired
+	@Qualifier("darwinCoreCountQueryTemplate")
+	private String darwinCoreCountQueryTemplate;
+	
+	@Autowired
 	@Qualifier("environmentDataQueryTemplate")
 	private String environmentDataQueryTemplate;
+	
+	@Autowired
+	@Qualifier("environmentDataCountQueryTemplate")
+	private String environmentDataCountQueryTemplate;
 	
 	@Autowired
 	private StubRetrievalService stubDelegate;
@@ -151,12 +159,25 @@ public class JenaRetrievalService implements RetrievalService {
 				}
 			}
 		}
-		int numFound = records.size(); // FIXME need to get total count
+		int numFound = getTotalNumFoundForSpeciesData(speciesNames);
 		AbstractParams params = new SpeciesDataParams(start, rows, speciesNames);
 		ResponseHeader responseHeader = ResponseHeader.newInstance(start, rows, numFound, startTime, params);
 		return new SpeciesDataResponse(responseHeader, records);
 	}
 	
+	private int getTotalNumFoundForSpeciesData(List<String> speciesNames) {
+		String sparql = getProcessedDarwinCoreCountSparql(speciesNames);
+		logger.debug("Species data count SPARQL: " + sparql);
+		Query query = QueryFactory.create(sparql);
+		try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
+			ResultSet results = qexec.execSelect();
+			if (!results.hasNext()) {
+				throw new IllegalStateException("Programmer error: a count query should always return something");
+			}
+			return getInt(results.next(), "count");
+		}
+	}
+
 	private EnvironmentDataResponse getEnvironmentalDataJsonPrivate(List<String> speciesNames, List<String> environmentalVariableNames, int start, 
 			int rows) throws AekosApiRetrievalException {
 		long startTime = new Date().getTime();
@@ -178,13 +199,28 @@ public class JenaRetrievalService implements RetrievalService {
 							replaceSpaces(locationID), "2099-01-01", 2099, 1,
 							//getString(s, "eventDate"), getInt(s, "year"), getInt(s, "month"), // FIXME get dates working
 							locationIds.get(locationID).bibliographicCitation, locationIds.get(locationID).samplingProtocol));
+					// FIXME filter env vars if supplied
 				}
 			}
 		}
-		int numFound = records.size(); // FIXME need to get total count
+		int numFound = getTotalNumFoundEnvironmentData(locationIds);
 		AbstractParams params = new EnvironmentDataParams(start, rows, speciesNames, environmentalVariableNames);
 		ResponseHeader responseHeader = ResponseHeader.newInstance(start, rows, numFound, startTime, params);
 		return new EnvironmentDataResponse(responseHeader, records);
+	}
+
+	private int getTotalNumFoundEnvironmentData(Map<String, LocationInfo> locationIds) {
+		// FIXME need to be sure this is all the IDs
+		String sparql = getProcessedEnvDataCountSparql(locationIds);
+		logger.debug("Environment data count SPARQL: " + sparql);
+		Query query = QueryFactory.create(sparql);
+		try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
+			ResultSet results = qexec.execSelect();
+			if (!results.hasNext()) {
+				throw new IllegalStateException("Programmer error: a count query should always return something");
+			}
+			return getInt(results.next(), "count");
+		}
 	}
 
 	private class LocationInfo {
@@ -221,12 +257,26 @@ public class JenaRetrievalService implements RetrievalService {
 		return processedSparql;
 	}
 	
+	private String getProcessedDarwinCoreCountSparql(List<String> speciesNames) {
+		String scientificNameValueList = speciesNames.stream().collect(Collectors.joining("\" \"", "\"", "\""));
+		String processedSparql = darwinCoreCountQueryTemplate
+				.replace(SCIENTIFIC_NAME_PLACEHOLDER, scientificNameValueList);
+		return processedSparql;
+	}
+	
 	private String getProcessedEnvDataSparql(Map<String, LocationInfo> locationIds, int offset, int limit) {
 		String locationIDValueList = locationIds.keySet().stream().collect(Collectors.joining("\" \"", "\"", "\""));
 		String processedSparql = environmentDataQueryTemplate
 				.replace(LOCATION_ID_PLACEHOLDER, locationIDValueList)
 				.replace(OFFSET_PLACEHOLDER, String.valueOf(offset))
 				.replace(LIMIT_PLACEHOLDER, String.valueOf(limit == 0 ? Integer.MAX_VALUE : limit));
+		return processedSparql;
+	}
+	
+	private String getProcessedEnvDataCountSparql(Map<String, LocationInfo> locationIds) {
+		String locationIDValueList = locationIds.keySet().stream().collect(Collectors.joining("\" \"", "\"", "\""));
+		String processedSparql = environmentDataCountQueryTemplate
+				.replace(LOCATION_ID_PLACEHOLDER, locationIDValueList);
 		return processedSparql;
 	}
 

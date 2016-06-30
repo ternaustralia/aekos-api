@@ -63,19 +63,30 @@ public class Application extends SpringBootServletInitializer {
     
     @Bean
     public String darwinCoreQueryTemplate() throws IOException {
-    	InputStream sparqlIS = Thread.currentThread().getContextClassLoader().getResourceAsStream("au/org/aekos/sparql/darwin-core.rq");
-		OutputStream out = new ByteArrayOutputStream();
-		StreamUtils.copy(sparqlIS, out);
-		return out.toString();
+		return getSparqlQuery("darwin-core.rq");
+    }
+    
+    @Bean
+    public String darwinCoreCountQueryTemplate() throws IOException {
+		return getSparqlQuery("darwin-core-count.rq");
     }
     
     @Bean
     public String environmentDataQueryTemplate() throws IOException {
-    	InputStream sparqlIS = Thread.currentThread().getContextClassLoader().getResourceAsStream("au/org/aekos/sparql/environment-data.rq");
+    	return getSparqlQuery("environment-data.rq");
+    }
+    
+    @Bean
+    public String environmentDataCountQueryTemplate() throws IOException {
+    	return getSparqlQuery("environment-data-count.rq");
+    }
+
+	private String getSparqlQuery(String fileName) throws IOException {
+		InputStream sparqlIS = Thread.currentThread().getContextClassLoader().getResourceAsStream("au/org/aekos/sparql/" + fileName);
 		OutputStream out = new ByteArrayOutputStream();
 		StreamUtils.copy(sparqlIS, out);
 		return out.toString();
-    }
+	}
     
     @Bean
     public Model metricsModel() {

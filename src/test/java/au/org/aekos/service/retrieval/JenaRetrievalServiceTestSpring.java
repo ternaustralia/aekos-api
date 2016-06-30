@@ -73,6 +73,7 @@ public class JenaRetrievalServiceTestSpring {
 		int onlyOne = 1;
 		SpeciesDataResponse result = objectUnderTest.getSpeciesDataJson(Arrays.asList("Calotis hispidula"), 0, onlyOne);
 		assertThat(result.getResponse().size(), is(1));
+		assertThat(result.getResponseHeader().getNumFound(), is(2));
 	}
 
 	/**
@@ -158,5 +159,15 @@ public class JenaRetrievalServiceTestSpring {
 		assertThat(record.getSamplingProtocol(), is("aekos.org.au/collection/adelaide.edu.au/trend"));
 		Collection<Entry> vars = record.getVariables();
 //		assertThat(vars.size(), is(7)); // FIXME get variables in here
+	}
+	
+	/**
+	 * Can we get the total numFound?
+	 */
+	@Test
+	public void testGetEnvironmentalDataJson02() throws Throwable {
+		EnvironmentDataResponse result = objectUnderTest.getEnvironmentalDataJson(Arrays.asList("Calotis hispidula", "Rosa canina"), Collections.emptyList(), 0, 1);
+		assertThat(result.getResponse().size(), is(1));
+		assertThat(result.getResponseHeader().getNumFound(), is(2));
 	}
 }
