@@ -20,7 +20,7 @@ Or, an alternate way if you like to run the steps yourself:
     cd aekos-api/
     mvn clean package
     java -jar target/aekos-api-X.Y.jar # replace X.Y with the version
-Then you'll be able to see the endpoint at http://localhost:8099/
+Then you'll be able to see the endpoint at https://localhost:8099/. Note it runs on HTTPS so if you don't add the https:// prefix, it won't load.
 
 You can build a docker container that's configured to run this webapp with:
 
@@ -29,4 +29,4 @@ You can build a docker container that's configured to run this webapp with:
     # instructions on how to use it will be printed to the console
 
 ## Interacting with the endpoint
-Documentation is automatically generated using Swagger. You will be redirected to the documentation when you do a GET on the root of the webapp. You can also look at the production documentation at http://api.aekos.org.au:8099/
+Documentation is automatically generated using Swagger. You will be redirected to the documentation when you do a GET on the root of the webapp. You can also look at the production documentation at https://api.aekos.org.au:8099/
