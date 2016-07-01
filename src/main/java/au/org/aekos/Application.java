@@ -12,7 +12,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.web.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -24,7 +23,6 @@ import org.springframework.web.servlet.mvc.method.annotation.AbstractJsonpRespon
 import au.org.aekos.util.ModelLoader;
 
 @SpringBootApplication
-@ImportResource("application-context.xml")
 @PropertySource("classpath:/au/org/aekos/aekos-api.properties")
 @PropertySource(value="file://${user.home}/aekos-api.properties", ignoreResourceNotFound=true)
 public class Application extends SpringBootServletInitializer {
