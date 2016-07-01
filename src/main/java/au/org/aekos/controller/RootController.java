@@ -1,11 +1,12 @@
 package au.org.aekos.controller;
 
+import org.springframework.boot.autoconfigure.web.ErrorController;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 @Controller
-public class RootController {
+public class RootController implements ErrorController {
 	    
 	@RequestMapping(path="/doco")
     public ModelAndView root() {
@@ -16,14 +17,27 @@ public class RootController {
     public String home() {
 		return "home";
 	}
-	
-	// Q for Tom - 
-	// Should this set of methods be moved to the Metrics controller? They seem to not serve static content when there.
 
+	// 404
+	@RequestMapping(path="/error")
+    public String error() {
+		return "error";
+	}
+
+    @Override
+    public String getErrorPath() {
+        return "/error";
+    }
+	
 	// User requesting a key
 	@RequestMapping(path="/access")
     public String access() {
 		return "access";
+	}
+	
+	@RequestMapping(path="/signedup")
+    public String signedup() {
+		return "signedup";
 	}
 	
 	// The system metrics (not usage, but threads etc)
