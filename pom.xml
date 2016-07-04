@@ -118,6 +118,16 @@
 	</properties>
 
 	<build>
+		<!-- override the parent filtering so running in Eclipse uses application.properties -->
+		<resources>
+			<resource>
+				<directory>${basedir}/src/main/resources</directory>
+				<filtering>false</filtering>
+				<includes>
+					<!-- empty on purpose -->
+				</includes>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

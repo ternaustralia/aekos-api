@@ -129,7 +129,8 @@ public class Application extends SpringBootServletInitializer {
 		connector.setScheme("http");
 		connector.setSecure(false);
 		Integer serverPort = environment.getProperty("server.port", Integer.class, 8443);
-		connector.setPort(8080);
+		Integer serverHttpPort = environment.getProperty("server.http.port", Integer.class, 8080);
+		connector.setPort(serverHttpPort);
 		connector.setRedirectPort(serverPort);
 		return connector;
 	}
