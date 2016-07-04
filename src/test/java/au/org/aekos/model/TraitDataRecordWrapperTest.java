@@ -28,11 +28,11 @@ public class TraitDataRecordWrapperTest {
 		assertEquals("Senna artemisioides subsp. petiolaris", result.getScientificName());
 		assertEquals("Individuals", result.getCollectionFormat());
 		assertEquals("23/11/12", result.getEventDate());
-		assertEquals("2012", result.getYear());
-		assertEquals("11", result.getMonth());
+		assertEquals(2012, result.getYear());
+		assertEquals(11, result.getMonth());
 		assertEquals("height", result.getTrait());
 		assertEquals("2", result.getTraitValue());
 		assertEquals(citation, result.getBibliographicCitation());
-		assertEquals("http://aekos.org.au/collection/adelaide.edu.au/Koonamore/VegetationQuadrats/QFR2", result.getDatasetID());
+		assertEquals("http://aekos.org.au/collection/adelaide.edu.au/Koonamore/VegetationQuadrats/QFR2", result.getSamplingProtocol());
 	}
 }

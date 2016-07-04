@@ -10,16 +10,16 @@ public class TraitDataRecordWrapper {
     private final String scientificName;
     private final String collectionFormat;
     private final String eventDate;
-    private final String year;
-    private final String month;
+    private final int year;
+    private final int month;
     private final String trait;
     private final String traitValue;
     private final String bibliographicCitation;
-    private final String datasetID;
+    private final String samplingProtocol;
 
 	public TraitDataRecordWrapper(double decimalLatitude, double decimalLongitude, String locationID,
-			String scientificName, String collectionFormat, String eventDate, String year, String month, String trait,
-			String traitValue, String bibliographicCitation, String datasetID) {
+			String scientificName, String collectionFormat, String eventDate, int year, int month, String trait,
+			String traitValue, String bibliographicCitation, String samplingProtocol) {
 		this.decimalLatitude = decimalLatitude;
 		this.decimalLongitude = decimalLongitude;
 		this.locationID = locationID;
@@ -31,7 +31,7 @@ public class TraitDataRecordWrapper {
 		this.trait = trait;
 		this.traitValue = traitValue;
 		this.bibliographicCitation = bibliographicCitation;
-		this.datasetID = datasetID;
+		this.samplingProtocol = samplingProtocol;
 	}
 
 	public double getDecimalLatitude() {
@@ -58,11 +58,11 @@ public class TraitDataRecordWrapper {
 		return eventDate;
 	}
 
-	public String getYear() {
+	public int getYear() {
 		return year;
 	}
 
-	public String getMonth() {
+	public int getMonth() {
 		return month;
 	}
 
@@ -78,8 +78,8 @@ public class TraitDataRecordWrapper {
 		return bibliographicCitation;
 	}
 
-	public String getDatasetID() {
-		return datasetID;
+	public String getSamplingProtocol() {
+		return samplingProtocol;
 	}
 
 	public static TraitDataRecordWrapper deserialiseFrom(String[] fields) {
@@ -89,15 +89,15 @@ public class TraitDataRecordWrapper {
 		String scientificNameField = fields[3];
 		String collectionFormatField = fields[4];
 		String eventDateField = fields[5];
-		String yearField = fields[6];
-		String monthField = fields[7];
+		int yearField = Integer.parseInt(fields[6]);
+		int monthField = Integer.parseInt(fields[7]);
 		String traitField = fields[8];
 		String traitValueField = fields[9];
 		String bibliographicCitationField = fields[10];
-		String datasetIdField = fields[11];
+		String samplingProtocolField = fields[11];
 		TraitDataRecordWrapper result = new TraitDataRecordWrapper(decimalLatitudeField, decimalLongitudeField, locationIdField,
 				scientificNameField, collectionFormatField, eventDateField, yearField, monthField, traitField,
-				traitValueField, bibliographicCitationField, datasetIdField);
+				traitValueField, bibliographicCitationField, samplingProtocolField);
 		return result;
     }
 	
@@ -108,10 +108,10 @@ public class TraitDataRecordWrapper {
 	    private final String scientificName;
 	    private final String collectionFormat;
 	    private final String eventDate;
-	    private final String year;
-	    private final String month;
+	    private final int year;
+	    private final int month;
 		public TraitDataRecordKey(double decimalLatitude, double decimalLongitude, String locationID,
-				String scientificName, String collectionFormat, String eventDate, String year, String month) {
+				String scientificName, String collectionFormat, String eventDate, int year, int month) {
 			this.decimalLatitude = decimalLatitude;
 			this.decimalLongitude = decimalLongitude;
 			this.locationID = locationID;
@@ -133,9 +133,9 @@ public class TraitDataRecordWrapper {
 			result = prime * result + (int) (temp ^ (temp >>> 32));
 			result = prime * result + ((eventDate == null) ? 0 : eventDate.hashCode());
 			result = prime * result + ((locationID == null) ? 0 : locationID.hashCode());
-			result = prime * result + ((month == null) ? 0 : month.hashCode());
+			result = prime * result + month;
 			result = prime * result + ((scientificName == null) ? 0 : scientificName.hashCode());
-			result = prime * result + ((year == null) ? 0 : year.hashCode());
+			result = prime * result + year;
 			return result;
 		}
 		@Override
@@ -166,20 +166,14 @@ public class TraitDataRecordWrapper {
 					return false;
 			} else if (!locationID.equals(other.locationID))
 				return false;
-			if (month == null) {
-				if (other.month != null)
-					return false;
-			} else if (!month.equals(other.month))
+			if (month != other.month)
 				return false;
 			if (scientificName == null) {
 				if (other.scientificName != null)
 					return false;
 			} else if (!scientificName.equals(other.scientificName))
 				return false;
-			if (year == null) {
-				if (other.year != null)
-					return false;
-			} else if (!year.equals(other.year))
+			if (year != other.year)
 				return false;
 			return true;
 		}
@@ -192,7 +186,7 @@ public class TraitDataRecordWrapper {
 
 	public TraitDataRecord toRecord() {
 		TraitDataRecord result = new TraitDataRecord(decimalLatitude, decimalLongitude, "not supplied", locationID, scientificName, 13,
-				eventDate, Integer.parseInt(year), Integer.parseInt(month), bibliographicCitation, datasetID);
+				eventDate, year, month, bibliographicCitation, samplingProtocol);
 		result.addTraitValue(new Entry(trait, traitValue));
 		return result;
 	}
