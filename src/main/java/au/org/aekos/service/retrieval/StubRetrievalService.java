@@ -9,7 +9,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -22,8 +21,6 @@ import com.opencsv.CSVReader;
 
 import au.org.aekos.controller.ApiV1RetrievalController.RetrievalResponseHeader;
 import au.org.aekos.model.AbstractParams;
-import au.org.aekos.model.EnvironmentDataParams;
-import au.org.aekos.model.EnvironmentDataRecord;
 import au.org.aekos.model.EnvironmentDataResponse;
 import au.org.aekos.model.ResponseHeader;
 import au.org.aekos.model.SpeciesDataResponse;
@@ -119,53 +116,14 @@ public class StubRetrievalService implements RetrievalService {
 	@Override
 	public EnvironmentDataResponse getEnvironmentalDataJson(List<String> speciesNames, List<String> environmentalVariableNames, int start, int rows)
 			throws AekosApiRetrievalException {
-		try {
-			long startTime = new Date().getTime();
-			CSVReader reader = new CSVReader(new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/au/org/aekos/AEKOS_BCCVL_import_example_envVariables.csv"))));
-			reader.readNext(); // Bin the header
-			String[] currLine;
-			List<EnvironmentDataRecord> records = new LinkedList<>();
-			while ((currLine = reader.readNext()) != null) {
-				String[] processedLine = replaceDatePlaceholder(currLine);
-				EnvironmentDataRecord record = EnvironmentDataRecord.deserialiseFrom(processedLine);
-				// FIXME support looking up which sites contain the requested species and only return data for them
-				records.add(record);
-			}
-			reader.close();
-			int numFound = records.size();
-			AbstractParams params = new EnvironmentDataParams(start, rows, speciesNames, environmentalVariableNames);
-			ResponseHeader responseHeader = ResponseHeader.newInstance(start, rows, numFound, startTime, params);
-			int toIndex = start+rows > numFound ? numFound : start+rows;
-			List<EnvironmentDataRecord> recordPage = records.subList(start, toIndex);
-			EnvironmentDataResponse result = new EnvironmentDataResponse(responseHeader, recordPage);
-			return result;
-		} catch (IOException e) {
-			String msg = "Server failed to retrieve trait data";
-			logger.error(msg, e);
-			throw new AekosApiRetrievalException(msg, e);
-		}
+		throw new NotImplementedException();
 	}
 	
 	@Override
 	public RetrievalResponseHeader getEnvironmentalDataCsv(List<String> speciesNames,
 			List<String> environmentalVariableNames, int start, int rows, Writer respWriter)
 					throws AekosApiRetrievalException {
-		int checkedLimit = (start > 0) ? start : Integer.MAX_VALUE;
-		int rowsProcessed = 0;
-		EnvironmentDataResponse result = getEnvironmentalDataJson(speciesNames, environmentalVariableNames, start, rowsProcessed);
-		try {
-			for (EnvironmentDataRecord curr : result.getResponse()) {
-				respWriter.write(curr.toCsv());
-				respWriter.write("\n");
-				// FIXME doesn't support start
-				if (rowsProcessed++ >= checkedLimit) {
-					break;
-				}
-			}
-		} catch (IOException e) {
-			throw new AekosApiRetrievalException("Failed to get dummy trait data", e);
-		}
-		return RetrievalResponseHeader.newInstance(result);
+		throw new NotImplementedException();
 	}
 	
 	private boolean speciesIsRequested(String currSpeciesName, List<String> speciesNames) {

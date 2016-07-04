@@ -9,9 +9,13 @@ import java.io.Writer;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.lang.SystemUtils;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +24,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import au.org.aekos.model.EnvironmentDataRecord;
-import au.org.aekos.model.EnvironmentDataRecord.Entry;
+import au.org.aekos.model.EnvironmentDataRecord.EnvironmentalVariable;
 import au.org.aekos.model.EnvironmentDataResponse;
 import au.org.aekos.model.SpeciesDataResponse;
 
@@ -146,9 +150,9 @@ public class JenaRetrievalServiceTestSpring {
 		assertThat(record.getDecimalLatitude(), is(-23.5318398476576d));
 		assertThat(record.getDecimalLongitude(), is(138.321378247854d));
 		assertThat(record.getGeodeticDatum(), is("GDA94"));
-		assertThat(record.getEventDate(), is("2099-01-01"));
-		assertThat(record.getMonth(), is(1));
-		assertThat(record.getYear(), is(2099));
+		assertThat(record.getEventDate(), is("1990-03-30"));
+		assertThat(record.getMonth(), is(3));
+		assertThat(record.getYear(), is(1990));
 		assertThat(record.getLocationID(), is("aekos.org.au/collection/adelaide.edu.au/trend/SATFLB0025"));
 		assertThat(record.getBibliographicCitation(), is("TERN Australian Transect Network, Biomes of Australian Soils Consortium (2015). Transects for Environmental "
 				+ "Monitoring and Decision Making (TREND) (2013-2015) and TREND-Biome of Australia Soil Environments (BASE) - "
@@ -157,9 +161,50 @@ public class JenaRetrievalServiceTestSpring {
 				+ "owned by The University of Adelaide (TERN Australian Transects Network - TREND), Bioplatforms Australia Ltd. "
 				+ "Accessed [dd mmm yyyy, e.g. 01 Jan 2016]."));
 		assertThat(record.getSamplingProtocol(), is("aekos.org.au/collection/adelaide.edu.au/trend"));
-		Collection<Entry> vars = record.getVariables();
-//		assertThat(vars.size(), is(7)); // FIXME get variables in here
+		Collection<EnvironmentalVariable> vars = record.getVariables();
+		assertThat(vars.size(), is(7));
+		Iterator<EnvironmentalVariable> varsIterator = vars.iterator();
+		assertThat(varsIterator.next(), isVar("rainfallTotal", "0.4", "millilitres"));
+		assertThat(varsIterator.next(), isVar("rainfallTotal", "49.8", "millilitres"));
+		assertThat(varsIterator.next(), isVar("rainfallMean", "0.013333333", "millilitres"));
+		assertThat(varsIterator.next(), isVar("rainfallMean", "1.606451613", "millilitres"));
+		assertThat(varsIterator.next(), isVar("temperatureMean", "28.12631579", "degrees Celcius"));
+		assertThat(varsIterator.next(), isVar("temperatureMaximum", "38.03157895", "degrees Celcius"));
+		assertThat(varsIterator.next(), isVar("temperatureMinimum", "16.86315789", "degrees Celcius"));
 	}
+	
+	private Matcher<EnvironmentalVariable> isVar(String name, String value, String units) {
+		return new EnvVarMatcher(name, value, units);
+	}
+
+	private class EnvVarMatcher extends BaseMatcher<EnvironmentalVariable> {
+		private final String name;
+		private final String value;
+		private final String units;
+		
+		public EnvVarMatcher(String name, String value, String units) {
+			this.name = name;
+			this.value = value;
+			this.units = units;
+		}
+
+		@Override
+		public boolean matches(Object item) {
+			if (item == null) {
+				return false;
+			}
+			EnvironmentalVariable castItem = (EnvironmentalVariable) item;
+			if (name.equals(castItem.getName()) && value.equals(castItem.getValue()) && units.equals(castItem.getUnits())) {
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public void describeTo(Description description) {
+			description.appendText(String.format("a '%s' variable with '%s' '%s'", name, value, units));
+		}
+	};
 	
 	/**
 	 * Can we get the total numFound?

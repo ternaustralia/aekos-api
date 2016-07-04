@@ -17,6 +17,9 @@ import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.StmtIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +30,7 @@ import au.org.aekos.controller.ApiV1RetrievalController.RetrievalResponseHeader;
 import au.org.aekos.model.AbstractParams;
 import au.org.aekos.model.EnvironmentDataParams;
 import au.org.aekos.model.EnvironmentDataRecord;
+import au.org.aekos.model.EnvironmentDataRecord.EnvironmentalVariable;
 import au.org.aekos.model.EnvironmentDataResponse;
 import au.org.aekos.model.ResponseHeader;
 import au.org.aekos.model.SpeciesDataParams;
@@ -100,8 +104,20 @@ public class JenaRetrievalService implements RetrievalService {
 	public RetrievalResponseHeader getEnvironmentalDataCsv(List<String> speciesNames, List<String> environmentalVariableNames, 
 			int start, int rows, Writer responseWriter) throws AekosApiRetrievalException {
 		try {
-			responseWriter.write(EnvironmentDataRecord.getCsvHeader() + "\n"); // FIXME need to handle all the vars
 			EnvironmentDataResponse jsonResponse = getEnvironmentalDataJsonPrivate(speciesNames, environmentalVariableNames, start, rows);
+			responseWriter.write(EnvironmentDataRecord.getCsvHeader());
+			int maxVars = 0;
+			// FIXME is there a way to avoid looping through the records twice?
+			for (Iterator<EnvironmentDataRecord> it = jsonResponse.getResponse().iterator();it.hasNext();) {
+				EnvironmentDataRecord curr = it.next();
+				maxVars = Math.max(maxVars, curr.getVariables().size());
+			}
+			for (int i = 1; i<=maxVars; i++) {
+				responseWriter.write(",\"var" + i + "Name\"");
+				responseWriter.write(",\"var" + i + "Value\"");
+				responseWriter.write(",\"var" + i + "Units\"");
+			}
+			responseWriter.write("\n");
 			for (Iterator<EnvironmentDataRecord> it = jsonResponse.getResponse().iterator();it.hasNext();) {
 				EnvironmentDataRecord curr = it.next();
 				responseWriter.write(curr.toCsv());
@@ -140,7 +156,7 @@ public class JenaRetrievalService implements RetrievalService {
 	}
 	
 	private SpeciesDataResponse getSpeciesDataJsonPrivate(List<String> speciesNames, int start, int rows) {
-		// FIXME make species names case insensitive
+		// FIXME make species names case insensitive (try binding an LCASE(?scientificName) and using that
 		long startTime = new Date().getTime();
 		List<SpeciesOccurrenceRecord> records = new LinkedList<>();
 		String sparql = getProcessedDarwinCoreSparql(speciesNames, start, rows);
@@ -186,27 +202,53 @@ public class JenaRetrievalService implements RetrievalService {
 		logger.debug(String.format("Found %d locations", locationIds.size()));
 		// TODO query using all required keys (location, time ?)
 		String sparql = getProcessedEnvDataSparql(locationIds, start, rows);
+		AbstractParams params = new EnvironmentDataParams(start, rows, speciesNames, environmentalVariableNames);
 		logger.debug("Environmental data SPARQL: " + sparql);
 		Query query = QueryFactory.create(sparql);
 		try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
 			ResultSet results = qexec.execSelect();
-			if (results.hasNext()) {
-				for (; results.hasNext();) {
-					QuerySolution s = results.next();
-					String locationID = getString(s, "locationID");
-					records.add(new EnvironmentDataRecord(getDouble(s, "decimalLatitude"),
-							getDouble(s, "decimalLongitude"), getString(s, "geodeticDatum"), 
-							replaceSpaces(locationID), "2099-01-01", 2099, 1,
-							//getString(s, "eventDate"), getInt(s, "year"), getInt(s, "month"), // FIXME get dates working
-							locationIds.get(locationID).bibliographicCitation, locationIds.get(locationID).samplingProtocol));
-					// FIXME filter env vars if supplied
-				}
+			if (!results.hasNext()) {
+				int foundNothing = 0;
+				ResponseHeader responseHeader = ResponseHeader.newInstance(start, rows, foundNothing, startTime, params);
+				return new EnvironmentDataResponse(responseHeader, records);
+			}
+			for (; results.hasNext();) {
+				QuerySolution s = results.next();
+				processEnvDataSolution(records, locationIds, s);
 			}
 		}
 		int numFound = getTotalNumFoundEnvironmentData(locationIds);
-		AbstractParams params = new EnvironmentDataParams(start, rows, speciesNames, environmentalVariableNames);
 		ResponseHeader responseHeader = ResponseHeader.newInstance(start, rows, numFound, startTime, params);
 		return new EnvironmentDataResponse(responseHeader, records);
+	}
+
+	private void processEnvDataSolution(List<EnvironmentDataRecord> records, Map<String, LocationInfo> locationIds, QuerySolution s) {
+		String locationID = getString(s, "locationID");
+		EnvironmentDataRecord record = new EnvironmentDataRecord(getDouble(s, "decimalLatitude"),
+			getDouble(s, "decimalLongitude"), getString(s, "geodeticDatum"), replaceSpaces(locationID),
+			getString(s, "eventDate"), getInt(s, "year"), getInt(s, "month"),
+			locationIds.get(locationID).bibliographicCitation,
+			locationIds.get(locationID).samplingProtocol);
+		records.add(record);
+		processEnvDataVars(s, record, "rainfallVars");
+		processEnvDataVars(s, record, "temperatureVars");
+	}
+
+	private void processEnvDataVars(QuerySolution s, EnvironmentDataRecord record, String propName) {
+		Resource locationSubject = s.get("s").asResource();
+		StmtIterator varsIterator = locationSubject.listProperties(prop(propName));
+		while (varsIterator.hasNext()) {
+			Resource currVar = varsIterator.next().getResource();
+			String name = currVar.getProperty(prop("name")).getString();
+			String value = currVar.getProperty(prop("value")).getString();
+			String units = currVar.getProperty(prop("units")).getString();
+			record.addVariable(new EnvironmentalVariable(name, value, units));
+		}
+	}
+
+	private Property prop(String localPropName) {
+		String namespace = "http://www.aekos.org.au/api/1.0#"; // FIXME move to config
+		return model.createProperty(namespace + localPropName);
 	}
 
 	private int getTotalNumFoundEnvironmentData(Map<String, LocationInfo> locationIds) {
