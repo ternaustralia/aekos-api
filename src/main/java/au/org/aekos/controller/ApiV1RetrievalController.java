@@ -58,6 +58,7 @@ public class ApiV1RetrievalController {
     		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
     		@RequestParam(required=false, defaultValue=DEFAULT_ROWS) @ApiParam("result page size") int rows,
     		HttpServletRequest req, HttpServletResponse resp) throws AekosApiRetrievalException {
+		// FIXME why do we never get more than 1 page when we use 0-20?
 		SpeciesDataResponse result = retrievalService.getSpeciesDataJson(Arrays.asList(speciesNames), start, rows);
 		resp.addHeader(HttpHeaders.LINK, buildLinkHeader(UriComponentsBuilder.fromHttpUrl(extractFullUrl(req)), RetrievalResponseHeader.newInstance(result)));
     	return result;
