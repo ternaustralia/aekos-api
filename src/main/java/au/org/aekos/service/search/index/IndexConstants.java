@@ -33,7 +33,7 @@ public class IndexConstants {
 	
 	//public static final String TRAIT = "env_trait";
 	
-	public static final String FLD_EVIRONMENT = "environment";
+	public static final String FLD_ENVIRONMENT = "environment";
 	
 	//public static final String SUM_SPECIES = sum_species
 	

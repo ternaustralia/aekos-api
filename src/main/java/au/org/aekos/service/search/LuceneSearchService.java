@@ -42,12 +42,40 @@ public class LuceneSearchService implements SearchService {
 	
 	@Autowired
 	private TermIndexManager termIndexManager;
-
-	
 	//Max of 1024 species names??  or split into 2 or more queries . . . . 
 	
 	@Override //TODO throw a nice exception to perhaps return a tidy error in the json response?
 	public List<TraitVocabEntry> getTraitBySpecies(List<String> speciesNames) {
+		Query query = buildFieldOrQuery(speciesNames, IndexConstants.FLD_SPECIES, DocumentType.TRAIT_SPECIES);
+		return performSpeciesTraitSearch(query);
+	}
+	
+	@Override
+	public List<SpeciesName> getSpeciesByTrait(List<String> traitNames) {
+		Query query = buildFieldOrQuery(traitNames, IndexConstants.FLD_TRAIT, DocumentType.TRAIT_SPECIES);
+		return performTraitSpeciesSearch(query );
+	}
+	
+	@Override
+	public List<EnvironmentVariable> getEnvironmentBySpecies(List<String> speciesNames) {
+		Query query = buildFieldOrQuery(speciesNames, IndexConstants.FLD_SPECIES, DocumentType.SPECIES_ENV);
+		return performSpeciesEnvironmentSearch(query);
+	}
+
+	private Query buildFieldOrQuery(List<String> fieldStrings, String searchField, DocumentType documentType) {
+		BooleanQuery.Builder queryBuilder = new BooleanQuery.Builder();
+		Query docTypeQuery = new TermQuery(new Term(IndexConstants.FLD_DOC_INDEX_TYPE, documentType.name()));
+		queryBuilder.add(docTypeQuery, Occur.MUST);
+		queryBuilder.setMinimumNumberShouldMatch(1); //For optional field matches- i.e. the OR condition
+		for(String fieldString : fieldStrings ){
+			Query q = new TermQuery(new Term(searchField, fieldString));
+			queryBuilder.add(q, Occur.SHOULD);
+		}
+		Query query = queryBuilder.build();
+		return query;
+	}
+	
+	private List<TraitVocabEntry> performSpeciesTraitSearch(Query query ){
 		List<TraitVocabEntry> responseList = new ArrayList<TraitVocabEntry>();
 		IndexSearcher searcher = null;
 		try {
@@ -56,17 +84,6 @@ public class LuceneSearchService implements SearchService {
 			logger.error("Can't search trait by species - IOException - returning empty list", e);
 			return responseList;
 		}
-		
-		BooleanQuery.Builder queryBuilder = new BooleanQuery.Builder();
-		Query docTypeQuery = new TermQuery(new Term(IndexConstants.FLD_DOC_INDEX_TYPE, DocumentType.TRAIT_SPECIES.name()));
-		queryBuilder.add(docTypeQuery, Occur.MUST);
-		queryBuilder.setMinimumNumberShouldMatch(1); //For optional field matches- i.e. the OR condition
-		for(String speciesName : speciesNames ){
-			Query q = new TermQuery(new Term(IndexConstants.FLD_SPECIES, speciesName));
-			queryBuilder.add(q, Occur.SHOULD);
-		}
-		Query query = queryBuilder.build();
-		//We want all of the results so num results MAX_VALUE
 		try {
 			TopDocs td = searcher.search(query, Integer.MAX_VALUE, new Sort(new SortField(IndexConstants.FLD_TRAIT, SortField.Type.STRING)));
 		    int totalTraits = td.totalHits;
@@ -81,27 +98,78 @@ public class LuceneSearchService implements SearchService {
 		    	}
 		    	responseList.addAll(uniqueResults);
 		    }
+		    termIndexManager.releaseIndexSearcher(searcher);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 		return responseList;
 	}
 	
-	@Override
-	public List<SpeciesName> getSpeciesByTrait(List<String> traitNames) {
-		// TODO Auto-generated method stub
-		return null;
+	private List<SpeciesName> performTraitSpeciesSearch(Query query ){
+		List<SpeciesName> responseList = new ArrayList<SpeciesName>();
+		IndexSearcher searcher = null;
+		try {
+			searcher = termIndexManager.getIndexSearcher();
+		} catch (IOException e) {
+			logger.error("Can't search trait by species - IOException - returning empty list", e);
+			return responseList;
+		}
+		try {
+			TopDocs td = searcher.search(query, Integer.MAX_VALUE, new Sort(new SortField(IndexConstants.FLD_SPECIES, SortField.Type.STRING)));
+		    int totalSpecies = td.totalHits;
+		    if(td.totalHits > 0){
+		    	LinkedHashSet<SpeciesName> uniqueResults = new LinkedHashSet<>();
+		    	for(ScoreDoc scoreDoc : td.scoreDocs){
+		    		Document matchedDoc = searcher.doc(scoreDoc.doc);
+		    		String speciesName = matchedDoc.get(IndexConstants.FLD_SPECIES);
+		    		if(StringUtils.hasLength(speciesName)){
+		    			uniqueResults.add(new SpeciesName(speciesName));
+		    		}
+		    	}
+		    	responseList.addAll(uniqueResults);
+		    }
+		    termIndexManager.releaseIndexSearcher(searcher);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return responseList;
 	}
-
-
-	@Override
-	public List<EnvironmentVariable> getEnvironmentBySpecies(List<String> speciesNames) {
-		// TODO Auto-generated method stub
-		return null;
+	
+	private List<EnvironmentVariable> performSpeciesEnvironmentSearch(Query query ){
+		List<EnvironmentVariable> responseList = new ArrayList<EnvironmentVariable>();
+		IndexSearcher searcher = null;
+		try {
+			searcher = termIndexManager.getIndexSearcher();
+		} catch (IOException e) {
+			logger.error("Can't search trait by species - IOException - returning empty list", e);
+			return responseList;
+		}
+		
+		try {
+			TopDocs td = searcher.search(query, Integer.MAX_VALUE, new Sort(new SortField(IndexConstants.FLD_ENVIRONMENT, SortField.Type.STRING)));
+		    int totalTraits = td.totalHits;
+		    if(td.totalHits > 0){
+		    	LinkedHashSet<EnvironmentVariable> uniqueResults = new LinkedHashSet<>();
+		    	for(ScoreDoc scoreDoc : td.scoreDocs){
+		    		Document matchedDoc = searcher.doc(scoreDoc.doc);
+		    		String environment = matchedDoc.get(IndexConstants.FLD_ENVIRONMENT);
+		    		if(StringUtils.hasLength(environment)){
+		    			uniqueResults.add(new EnvironmentVariable(environment, environment));
+		    		}
+		    	}
+		    	responseList.addAll(uniqueResults);
+		    }
+			termIndexManager.releaseIndexSearcher(searcher);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return responseList;
 	}
-
+	
+	
 	@Override
 	public List<SpeciesName> autocompleteSpeciesName(String partialSpeciesName) {
 		try {

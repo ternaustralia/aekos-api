@@ -34,7 +34,7 @@ public class AekosTermDocumentBuilder {
 	public static Document buildSpeciesEnvironmentTermDocument(String species, String environment){
 		Document doc = new Document();
 		addStringFieldAndSort(IndexConstants.FLD_SPECIES, species, doc);
-		addStringFieldAndSort(IndexConstants.FLD_EVIRONMENT, environment, doc);
+		addStringFieldAndSort(IndexConstants.FLD_ENVIRONMENT, environment, doc);
 		addDocumentType(DocumentType.SPECIES_ENV, doc);
 		addUidField(species, environment, DocumentType.SPECIES_ENV.name(), doc);
 		return doc;

@@ -10,7 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import au.org.aekos.model.EnvironmentVariable;
+import au.org.aekos.model.SpeciesName;
 import au.org.aekos.model.TraitVocabEntry;
+import au.org.aekos.service.search.index.TermIndexManager;
 import au.org.aekos.service.search.load.LoaderClient;
 import org.junit.Assert;
 
@@ -19,11 +22,15 @@ import org.junit.Assert;
 public class LuceneSearchServiceTest {
 	@Autowired
 	LoaderClient loader;
+	
 	@Autowired
 	SearchService searchService;
 	
+	@Autowired
+	TermIndexManager indexManager;
+	
    @Test
-	public void test() throws IOException{
+	public void testTraitSpeciesTermsSearches() throws IOException{
 	   loader.beginLoad();
 	   loader.addSpeciesTraitTermToIndex("species", "traitOne");
 	   loader.addSpeciesTraitTermToIndex("species", "traitTwo");
@@ -41,10 +48,27 @@ public class LuceneSearchServiceTest {
 	   List<TraitVocabEntry> results2 = searchService.getTraitBySpecies(Arrays.asList("species","speciesxx","speciesxxx"));
 	   System.out.println(results2.size() + "*************************************************");
 	   
+	   List<SpeciesName> speciesList = searchService.getSpeciesByTrait(Arrays.asList("traitOne"));
+	   Assert.assertEquals(3, speciesList.size());
 	   
+	   speciesList = searchService.getSpeciesByTrait(Arrays.asList("traitOne","traitTwo","traitThree"));
+	   Assert.assertEquals(3, speciesList.size());
 	   
-	   
+	   indexManager.closeTermIndex();
 	}
+   
+    @Test
+	public void testSpeciesEnvironmentTermsSearches() throws IOException{
+	   loader.beginLoad();
+	   loader.addSpeciesEnvironmentTermToIndex("species", "environmentOne");
+	   loader.addSpeciesEnvironmentTermToIndex("species", "environmentOne");
+	   loader.addSpeciesEnvironmentTermToIndex("species", "environmentTwo");
+	   loader.endLoad();
+	   
+	   List<EnvironmentVariable> environmentList = searchService.getEnvironmentBySpecies(Arrays.asList("species"));
+	   Assert.assertEquals(2, environmentList.size());
+	   indexManager.closeTermIndex();
+	   
 	
-	
+    }
 }
