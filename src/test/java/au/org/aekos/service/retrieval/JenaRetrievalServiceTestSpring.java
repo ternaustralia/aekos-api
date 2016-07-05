@@ -132,7 +132,7 @@ public class JenaRetrievalServiceTestSpring {
 		objectUnderTest.getEnvironmentalDataCsv(Arrays.asList("Calotis hispidula"), Collections.emptyList(), 0, 20, writer);
 		String compareStr = testGetEnvironmentalDataCsv01_expected;
 		if(SystemUtils.IS_OS_WINDOWS){
-			compareStr = testGetEnvironmentalDataCsv01_expected.replaceAll("\r", System.lineSeparator());
+			compareStr = testGetEnvironmentalDataCsv01_expected.replaceAll("\r", "");
 		}
 		assertEquals(compareStr, writer.toString());
 		// FIXME update expected to have all values
