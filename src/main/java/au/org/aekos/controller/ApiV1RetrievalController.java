@@ -19,10 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import au.org.aekos.model.AbstractResponse;
-import au.org.aekos.model.EnvironmentDataRecord;
 import au.org.aekos.model.EnvironmentDataResponse;
 import au.org.aekos.model.ResponseHeader;
-import au.org.aekos.model.SpeciesOccurrenceRecord;
+import au.org.aekos.model.SpeciesDataResponse;
 import au.org.aekos.model.TraitDataResponse;
 import au.org.aekos.service.retrieval.AekosApiRetrievalException;
 import au.org.aekos.service.retrieval.RetrievalService;
@@ -46,7 +45,6 @@ public class ApiV1RetrievalController {
 	// TODO add lots more Swagger doco
 	// TODO figure out how to get Swagger to support content negotiation with overloaded methods
 	// TODO am I doing content negotiation correctly?
-	// TODO define coord ref system
 	// TODO do we accept LSID/species ID and/or a species name for the species related services?
 	
 	@Autowired
@@ -55,28 +53,26 @@ public class ApiV1RetrievalController {
 	
 	@RequestMapping(path="/speciesData.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get species data in JSON format", notes = "Gets Aekos data", tags="Data Retrieval")
-    public List<SpeciesOccurrenceRecord> speciesDataDotJson(
+    public SpeciesDataResponse speciesDataDotJson(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
     		@RequestParam(required=false, defaultValue=DEFAULT_ROWS) @ApiParam("result page size") int rows,
-    		HttpServletResponse resp) {
-		try {
-			return retrievalService.getSpeciesDataJson(Arrays.asList(speciesNames), start, rows);
-		} catch (AekosApiRetrievalException e) {
-			resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			throw new RuntimeException(e);
-		}
+    		HttpServletRequest req, HttpServletResponse resp) throws AekosApiRetrievalException {
+		// FIXME why do we never get more than 1 page when we use 0-20?
+		SpeciesDataResponse result = retrievalService.getSpeciesDataJson(Arrays.asList(speciesNames), start, rows);
+		resp.addHeader(HttpHeaders.LINK, buildLinkHeader(UriComponentsBuilder.fromHttpUrl(extractFullUrl(req)), RetrievalResponseHeader.newInstance(result)));
+    	return result;
 	}
 	
 	@RequestMapping(path="/speciesData", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE,
     		headers="Accept="+MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get species data", notes = "Gets Aekos data", tags="Data Retrieval")
-    public List<SpeciesOccurrenceRecord> speciesDataJson(
+    public SpeciesDataResponse speciesDataJson(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
     		@RequestParam(required=false, defaultValue=DEFAULT_ROWS) @ApiParam("result page size") int rows,
-    		HttpServletResponse resp) {
-		return speciesDataDotJson(speciesNames, start, rows, resp);
+    		HttpServletRequest req, HttpServletResponse resp) throws AekosApiRetrievalException {
+		return speciesDataDotJson(speciesNames, start, rows, req, resp);
     }
 
 	@RequestMapping(path="/speciesData.csv", method=RequestMethod.GET, produces=TEXT_CSV_MIME)
@@ -88,17 +84,13 @@ public class ApiV1RetrievalController {
     		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
     		@RequestParam(required=false, defaultValue=DEFAULT_ROWS) @ApiParam("result page size") int rows,
     		@RequestParam(required=false, defaultValue="false") @ApiParam(DL_PARAM_MSG) boolean download,
-    		@ApiIgnore Writer responseWriter, HttpServletResponse resp) {
+    		@ApiIgnore Writer responseWriter, HttpServletRequest req, HttpServletResponse resp) throws AekosApiRetrievalException {
 		resp.setContentType(TEXT_CSV_MIME);
     	if (download) {
     		resp.setHeader("Content-Disposition", "attachment;filename=aekosSpeciesData.csv"); // TODO give a more dynamic name
     	}
-		try {
-			retrievalService.getSpeciesDataCsv(Arrays.asList(speciesNames), start, rows, responseWriter);
-		} catch (AekosApiRetrievalException e) {
-			resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			throw new RuntimeException(e);
-		}
+		RetrievalResponseHeader header = retrievalService.getSpeciesDataCsv(Arrays.asList(speciesNames), start, rows, responseWriter);
+		resp.addHeader(HttpHeaders.LINK, buildLinkHeader(UriComponentsBuilder.fromHttpUrl(extractFullUrl(req)), header));
     }
 	
     @RequestMapping(path="/speciesData", method=RequestMethod.GET, produces=TEXT_CSV_MIME, headers="Accept="+TEXT_CSV_MIME)
@@ -109,9 +101,9 @@ public class ApiV1RetrievalController {
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
     		@RequestParam(required=false, defaultValue=DEFAULT_ROWS) @ApiParam("result page size") int rows,
-    		@ApiIgnore Writer responseWriter, HttpServletResponse resp) {
+    		@ApiIgnore Writer responseWriter, HttpServletRequest req, HttpServletResponse resp) throws AekosApiRetrievalException {
     	boolean dontDownload = false;
-		speciesDataDotCsv(speciesNames, start, rows, dontDownload, responseWriter, resp);
+		speciesDataDotCsv(speciesNames, start, rows, dontDownload, responseWriter, req, resp);
     }
     
     @RequestMapping(path="/traitData.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
@@ -198,13 +190,13 @@ public class ApiV1RetrievalController {
     
     @RequestMapping(path="/environmentData", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get environmental variable data", notes = "TODO", tags="Data Retrieval")
-    public List<EnvironmentDataRecord> environmentDataJson(
+    public EnvironmentDataResponse environmentDataJson(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(name="envVarName", required=false) String[] envVarNames,
     		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
     		@RequestParam(required=false, defaultValue=DEFAULT_ROWS) @ApiParam("result page size") int rows,
-    		HttpServletResponse resp) throws AekosApiRetrievalException {
-    	return environmentDataJson(speciesNames, envVarNames, start, rows, resp);
+    		HttpServletRequest req, HttpServletResponse resp) throws AekosApiRetrievalException {
+    	return environmentDataDotJson(speciesNames, envVarNames, start, rows, req, resp);
 	}
     
     @RequestMapping(path="/environmentData.csv", method=RequestMethod.GET, produces=TEXT_CSV_MIME)
@@ -216,7 +208,7 @@ public class ApiV1RetrievalController {
     		@RequestParam(required=false, defaultValue=DEFAULT_ROWS) @ApiParam("result page size") int rows,
     		HttpServletRequest req, HttpServletResponse resp, @ApiIgnore Writer responseWriter) throws AekosApiRetrievalException {
     	// TODO do we include units in the field name, as an extra value or as a header/metadata object in the resp
-    	// TODO handle empty env vars
+    	resp.setContentType(TEXT_CSV_MIME);
     	List<String> varNames = envVarNames != null ? Arrays.asList(envVarNames) : Collections.emptyList();
     	RetrievalResponseHeader header = retrievalService.getEnvironmentalDataCsv(Arrays.asList(speciesNames), varNames, start, rows, responseWriter);
 		// FIXME move header up?

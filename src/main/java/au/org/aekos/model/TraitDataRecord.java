@@ -18,7 +18,7 @@ public class TraitDataRecord {
     private final int month;
     private final String bibliographicCitation;
     private final Collection<Entry> traits = new LinkedList<>();
-    private final String datasetID;
+    private final String samplingProtocol;
 
     public static class Entry {
     	private final String trait;
@@ -51,7 +51,7 @@ public class TraitDataRecord {
 		this.year = year;
 		this.month = month;
 		this.bibliographicCitation = bibliographicCitation;
-		this.datasetID = datasetID;
+		this.samplingProtocol = datasetID;
 	}
 
 	public double getDecimalLatitude() {
@@ -99,7 +99,7 @@ public class TraitDataRecord {
 	}
 
 	public String getDatasetID() {
-		return datasetID;
+		return samplingProtocol;
 	}
 	
 	public void addTraitValue(Entry entry) {
@@ -128,7 +128,7 @@ public class TraitDataRecord {
 		result.append(CSV_SEPARATOR);
 		result.append(quote(bibliographicCitation));
 		result.append(CSV_SEPARATOR);
-		result.append(quote(datasetID));
+		result.append(quote(samplingProtocol));
 		for (Entry curr : traits) {
 			// FIXME are we doing variable width file or repeated rows?
 			result.append(CSV_SEPARATOR);

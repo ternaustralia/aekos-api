@@ -5,7 +5,7 @@ import java.util.List;
 
 import au.org.aekos.controller.ApiV1RetrievalController.RetrievalResponseHeader;
 import au.org.aekos.model.EnvironmentDataResponse;
-import au.org.aekos.model.SpeciesOccurrenceRecord;
+import au.org.aekos.model.SpeciesDataResponse;
 import au.org.aekos.model.TraitDataResponse;
 
 public interface RetrievalService {
@@ -16,10 +16,10 @@ public interface RetrievalService {
 	 * @param speciesNames	names of the species to retrieve data for
 	 * @param start			offset to start retrieving records
 	 * @param rows			number of rows to return (page size), 0 means all
-	 * @return				specified number of records for the specific species
+	 * @return				some metadata and specified number of requested records
 	 * @throws AekosApiRetrievalException	when something goes wrong
 	 */
-	List<SpeciesOccurrenceRecord> getSpeciesDataJson(List<String> speciesNames, int start, int rows) throws AekosApiRetrievalException;
+	SpeciesDataResponse getSpeciesDataJson(List<String> speciesNames, int start, int rows) throws AekosApiRetrievalException;
 
 	/**
 	 * Retrieves CSV serialised Darwin Core compliant records for the specified species.
@@ -27,10 +27,11 @@ public interface RetrievalService {
 	 * @param speciesNames	names of the species to retrieve data for
 	 * @param start			offset to start retrieving records
 	 * @param rows			number of rows to return (page size), 0 means all
-	 * @param responseWriter writer to write records to
+	 * @param respWriter 	writer to write records to
+	 * @return				metadata about the response
 	 * @throws AekosApiRetrievalException 
 	 */
-	void getSpeciesDataCsv(List<String> speciesNames, int start, int rows, Writer responseWriter) throws AekosApiRetrievalException;
+	RetrievalResponseHeader getSpeciesDataCsv(List<String> speciesNames, int start, int rows, Writer respWriter) throws AekosApiRetrievalException;
 
 	/**
 	 * Retrieves JSON serialised trait data for the specified species.
@@ -42,7 +43,7 @@ public interface RetrievalService {
 	 * @param traitNames	list of trait names to filter by or an empty list to get all traits
 	 * @param start			offset to start retrieving records
 	 * @param rows			number of rows to return (page size), 0 means all 
-	 * @return				specified number of records for the specified species filtered by the supplied trait name list
+	 * @return				some metadata and specified number of records for the specified species filtered by the supplied trait name list
 	 * @throws AekosApiRetrievalException when something goes wrong
 	 */
 	TraitDataResponse getTraitDataJson(List<String> speciesNames, List<String> traitNames, int start, int rows) throws AekosApiRetrievalException;
@@ -57,32 +58,32 @@ public interface RetrievalService {
 	 * @param start			offset to start retrieving records
 	 * @param rows			number of rows to return (page size), 0 means all 
 	 * @param respWriter 	writer to write result rows to
-	 * @return				header object with details for HATEOAS header generation
+	 * @return				metadata about the response
 	 * @throws AekosApiRetrievalException when something goes wrong
 	 */
 	RetrievalResponseHeader getTraitDataCsv(List<String> speciesNames, List<String> traitNames, int start, int rows, Writer respWriter) throws AekosApiRetrievalException;
 
 	/**
-	 * TODO
+	 * Retrieves JSON serialised environmental variable data for the site that the specified species occur in
 	 * 
 	 * @param speciesNames					names of the species to retrieve data for
 	 * @param environmentalVariableNames	environmental variable names to filter by or an empty list to get all variables
 	 * @param start							offset to start retrieving records
 	 * @param rows							number of rows to return (page size), 0 means all 
-	 * @return								TODO
+	 * @return								some metadata and specified number of records for the specified species filtered by the supplied variable name list
 	 * @throws AekosApiRetrievalException 	when something goes wrong
 	 */
 	EnvironmentDataResponse getEnvironmentalDataJson(List<String> speciesNames, List<String> environmentalVariableNames, int start, int rows) throws AekosApiRetrievalException;
 
 	/**
-	 * TODO
+	 * Retrieves JSON serialised environmental variable data for the site that the specified species occur in
 	 * 
 	 * @param speciesNames					names of the species to retrieve data for
 	 * @param environmentalVariableNames	environmental variable names to filter by or an empty list to get all variables
 	 * @param start							offset to start retrieving records
 	 * @param rows							number of rows to return (page size), 0 means all 
 	 * @param respWriter 					writer to write result rows to
-	 * @return
+	 * @return								metadata about the response
 	 * @throws AekosApiRetrievalException
 	 */
 	RetrievalResponseHeader getEnvironmentalDataCsv(List<String> speciesNames, List<String> environmentalVariableNames, int start, int rows, Writer responseWriter) throws AekosApiRetrievalException;

@@ -9,10 +9,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -21,11 +21,9 @@ import com.opencsv.CSVReader;
 
 import au.org.aekos.controller.ApiV1RetrievalController.RetrievalResponseHeader;
 import au.org.aekos.model.AbstractParams;
-import au.org.aekos.model.EnvironmentDataParams;
-import au.org.aekos.model.EnvironmentDataRecord;
 import au.org.aekos.model.EnvironmentDataResponse;
 import au.org.aekos.model.ResponseHeader;
-import au.org.aekos.model.SpeciesOccurrenceRecord;
+import au.org.aekos.model.SpeciesDataResponse;
 import au.org.aekos.model.TraitDataParams;
 import au.org.aekos.model.TraitDataRecord;
 import au.org.aekos.model.TraitDataRecord.Entry;
@@ -42,27 +40,13 @@ public class StubRetrievalService implements RetrievalService {
 	private SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
 	
 	@Override
-	public List<SpeciesOccurrenceRecord> getSpeciesDataJson(List<String> speciesNames, int start, int rows) throws AekosApiRetrievalException {
-    	int checkedLimit = (start > 0) ? start : Integer.MAX_VALUE;
-    	try {
-    		return getSpeciesDataJsonHelper(speciesNames, checkedLimit);
-		} catch (IOException e) {
-			String msg = "Server failed to retrieve species JSON data";
-			logger.error(msg, e);
-			throw new AekosApiRetrievalException(msg, e);
-		}
+	public SpeciesDataResponse getSpeciesDataJson(List<String> speciesNames, int start, int rows) throws AekosApiRetrievalException {
+    	throw new NotImplementedException();
 	}
 
 	@Override
-	public void getSpeciesDataCsv(List<String> speciesNames, int start, int rows, Writer responseWriter) throws AekosApiRetrievalException {
-		int checkedLimit = (start > 0) ? start : Integer.MAX_VALUE;
-    	try {
-    		getSpeciesCsvDataHelper(speciesNames, checkedLimit, responseWriter);
-		} catch (IOException e) {
-			String msg = "Server failed to retrieve species CSV data";
-			logger.error(msg, e);
-			throw new AekosApiRetrievalException(msg, e);
-		}
+	public RetrievalResponseHeader getSpeciesDataCsv(List<String> speciesNames, int start, int rows, Writer responseWriter) throws AekosApiRetrievalException {
+		throw new NotImplementedException();
 	}
 	
 	@Override
@@ -132,95 +116,14 @@ public class StubRetrievalService implements RetrievalService {
 	@Override
 	public EnvironmentDataResponse getEnvironmentalDataJson(List<String> speciesNames, List<String> environmentalVariableNames, int start, int rows)
 			throws AekosApiRetrievalException {
-		try {
-			long startTime = new Date().getTime();
-			CSVReader reader = new CSVReader(new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/au/org/aekos/AEKOS_BCCVL_import_example_envVariables.csv"))));
-			reader.readNext(); // Bin the header
-			String[] currLine;
-			List<EnvironmentDataRecord> records = new LinkedList<>();
-			while ((currLine = reader.readNext()) != null) {
-				String[] processedLine = replaceDatePlaceholder(currLine);
-				EnvironmentDataRecord record = EnvironmentDataRecord.deserialiseFrom(processedLine);
-				// FIXME support looking up which sites contain the requested species and only return data for them
-				records.add(record);
-			}
-			reader.close();
-			int numFound = records.size();
-			AbstractParams params = new EnvironmentDataParams(start, rows, speciesNames, environmentalVariableNames);
-			ResponseHeader responseHeader = ResponseHeader.newInstance(start, rows, numFound, startTime, params);
-			int toIndex = start+rows > numFound ? numFound : start+rows;
-			List<EnvironmentDataRecord> recordPage = records.subList(start, toIndex);
-			EnvironmentDataResponse result = new EnvironmentDataResponse(responseHeader, recordPage);
-			return result;
-		} catch (IOException e) {
-			String msg = "Server failed to retrieve trait data";
-			logger.error(msg, e);
-			throw new AekosApiRetrievalException(msg, e);
-		}
+		throw new NotImplementedException();
 	}
 	
 	@Override
 	public RetrievalResponseHeader getEnvironmentalDataCsv(List<String> speciesNames,
 			List<String> environmentalVariableNames, int start, int rows, Writer respWriter)
 					throws AekosApiRetrievalException {
-		int checkedLimit = (start > 0) ? start : Integer.MAX_VALUE;
-		int rowsProcessed = 0;
-		EnvironmentDataResponse result = getEnvironmentalDataJson(speciesNames, environmentalVariableNames, start, rowsProcessed);
-		try {
-			for (EnvironmentDataRecord curr : result.getResponse()) {
-				respWriter.write(curr.toCsv());
-				respWriter.write("\n");
-				// FIXME doesn't support start
-				if (rowsProcessed++ >= checkedLimit) {
-					break;
-				}
-			}
-		} catch (IOException e) {
-			throw new AekosApiRetrievalException("Failed to get dummy trait data", e);
-		}
-		return RetrievalResponseHeader.newInstance(result);
-	}
-	
-	private void getSpeciesCsvDataHelper(List<String> speciesNames, int limit, Writer responseWriter) throws IOException {
-		BufferedReader in = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/au/org/aekos/AEKOS_BCCVL_import_example_speciesOccurrence.csv")));
-		String currLine;
-		int dontCountHeader = -1;
-		int lineCounter = dontCountHeader;
-		while (lineCounter < limit && (currLine = in.readLine()) != null) {
-			boolean isHeaderNotProcessed = lineCounter == dontCountHeader;
-			if (isHeaderNotProcessed) {
-				responseWriter.write(replaceDatePlaceholder(currLine) + "\n");
-				responseWriter.flush();
-				lineCounter++;
-				continue;
-			}
-			String speciesNameInCurrLine = currLine.split(",")[3];
-			if (!speciesIsRequested(speciesNameInCurrLine, speciesNames)) {
-				continue;
-			}
-			responseWriter.write(replaceDatePlaceholder(currLine) + "\n");
-			responseWriter.flush(); // TODO is it efficient to flush every row?
-			lineCounter++;
-		}
-	}
-	
-	private List<SpeciesOccurrenceRecord> getSpeciesDataJsonHelper(List<String> speciesNames, int limit) throws IOException {
-		CSVReader reader = new CSVReader(new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/au/org/aekos/AEKOS_BCCVL_import_example_speciesOccurrence.csv"))));
-		reader.readNext(); // Bin the header
-		String[] currLine;
-		int lineCounter = 0;
-		List<SpeciesOccurrenceRecord> result = new LinkedList<>();
-		while (lineCounter < limit && (currLine = reader.readNext()) != null) {
-			String[] processedLine = replaceDatePlaceholder(currLine);
-			SpeciesOccurrenceRecord record = SpeciesOccurrenceRecord.deserialiseFrom(processedLine);
-			if (!speciesIsRequested(record.getScientificName(), speciesNames)) {
-				continue;
-			}
-			result.add(record);
-			lineCounter++;
-		}
-		reader.close();
-		return result;
+		throw new NotImplementedException();
 	}
 	
 	private boolean speciesIsRequested(String currSpeciesName, List<String> speciesNames) {
@@ -241,13 +144,6 @@ public class StubRetrievalService implements RetrievalService {
 		return false;
 	}
 	
-	private String replaceDatePlaceholder(String line) {
-		if (!line.contains(DATE_PLACEHOLDER)) {
-			return line;
-		}
-		return line.replace(DATE_PLACEHOLDER, sdf.format(new Date()));
-	}
-
 	private String[] replaceDatePlaceholder(String[] line) {
 		for (int i = 0; i<line.length;i++) {
 			String currField = line[i];

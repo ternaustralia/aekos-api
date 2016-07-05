@@ -14,30 +14,41 @@ public class EnvironmentDataRecord {
     private final String eventDate;
     private final int year;
     private final int month;
-    private final Collection<Entry> variables = new LinkedList<>();
+    private final Collection<EnvironmentalVariable> variables = new LinkedList<>();
     private final String bibliographicCitation;
-    private final String datasetID;
+    private final String samplingProtocol;
 
-    public static class Entry {
-    	private final String environmentalVariable;
-    	private final String environmentalVariableValue;
+    public static class EnvironmentalVariable {
+    	private final String name;
+    	private final String value;
+    	private final String units;
 		
-    	public Entry(String environmentalVariable, String environmentalVariableValue) {
-			this.environmentalVariable = environmentalVariable;
-			this.environmentalVariableValue = environmentalVariableValue;
+    	public EnvironmentalVariable(String name, String value, String units) {
+			this.name = name;
+			this.value = value;
+			this.units = units;
 		}
 
-		public String getEnvironmentalVariable() {
-			return environmentalVariable;
+		public String getName() {
+			return name;
 		}
 
-		public String getEnvironmentalVariableValue() {
-			return environmentalVariableValue;
+		public String getValue() {
+			return value;
+		}
+
+		public String getUnits() {
+			return units;
+		}
+
+		@Override
+		public String toString() {
+			return "[" + name + "=" + value + " " + units + "]";
 		}
     }
     
 	public EnvironmentDataRecord(double decimalLatitude, double decimalLongitude, String geodeticDatum, String locationID,
-			String eventDate, int year, int month, String bibliographicCitation, String datasetID) {
+			String eventDate, int year, int month, String bibliographicCitation, String samplingProtocol) {
 		this.decimalLatitude = decimalLatitude;
 		this.decimalLongitude = decimalLongitude;
 		this.geodeticDatum = geodeticDatum;
@@ -46,7 +57,7 @@ public class EnvironmentDataRecord {
 		this.year = year;
 		this.month = month;
 		this.bibliographicCitation = bibliographicCitation;
-		this.datasetID = datasetID;
+		this.samplingProtocol = samplingProtocol;
 	}
 
 	public double getDecimalLatitude() {
@@ -81,35 +92,16 @@ public class EnvironmentDataRecord {
 		return bibliographicCitation;
 	}
 
-	public String getDatasetID() {
-		return datasetID;
+	public String getSamplingProtocol() {
+		return samplingProtocol;
 	}
 
-	public Collection<Entry> getVariables() {
+	public Collection<EnvironmentalVariable> getVariables() {
 		return Collections.unmodifiableCollection(variables);
 	}
 
-	public void addVariable(Entry entry) {
+	public void addVariable(EnvironmentalVariable entry) {
 		variables.add(entry);
-	}
-	
-	public static EnvironmentDataRecord deserialiseFrom(String[] fields) {
-		int fieldIndex = 0;
-		double decimalLatitudeField = Double.parseDouble(fields[fieldIndex++]);
-		double decimalLongitudeField = Double.parseDouble(fields[fieldIndex++]);
-		String geodeticDatumField = fields[fieldIndex++];
-		String locationIdField = fields[fieldIndex++];
-		String eventDateField = fields[fieldIndex++];
-		int yearField = Integer.parseInt(fields[fieldIndex++]);
-		int monthField = Integer.parseInt(fields[fieldIndex++]);
-		String envVarField = fields[fieldIndex++];
-		String envVarValueField = fields[fieldIndex++];
-		String bibliographicCitationField = fields[fieldIndex++];
-		String datasetIdField = fields[fieldIndex++];
-		EnvironmentDataRecord result = new EnvironmentDataRecord(decimalLatitudeField, decimalLongitudeField,
-				geodeticDatumField, locationIdField, eventDateField, yearField, monthField, bibliographicCitationField, datasetIdField);
-		result.addVariable(new Entry(envVarField, envVarValueField));
-		return result;
 	}
 
 	public String toCsv() {
@@ -130,17 +122,39 @@ public class EnvironmentDataRecord {
 		result.append(CSV_SEPARATOR);
 		result.append(quote(bibliographicCitation));
 		result.append(CSV_SEPARATOR);
-		result.append(quote(datasetID));
-		for (Entry curr : variables) {
+		result.append(quote(samplingProtocol));
+		for (EnvironmentalVariable curr : variables) {
 			result.append(CSV_SEPARATOR);
-			result.append(quote(curr.environmentalVariable));
+			result.append(quote(curr.name));
 			result.append(CSV_SEPARATOR);
-			result.append(quote(curr.environmentalVariableValue));
+			result.append(quote(curr.value));
 		}
 		return result.toString();
 	}
 
-	private String quote(String value) {
+	private static String quote(String value) {
 		return "\"" + value + "\"";
+	}
+
+	public static String getCsvHeader() {
+		StringBuilder result = new StringBuilder();
+		result.append(quote("decimalLatitude"));
+		result.append(CSV_SEPARATOR);
+		result.append(quote("decimalLongitude"));
+		result.append(CSV_SEPARATOR);
+		result.append(quote("geodeticDatum"));
+		result.append(CSV_SEPARATOR);
+		result.append(quote("locationID"));
+		result.append(CSV_SEPARATOR);
+		result.append(quote("eventDate"));
+		result.append(CSV_SEPARATOR);
+		result.append(quote("year"));
+		result.append(CSV_SEPARATOR);
+		result.append(quote("month"));
+		result.append(CSV_SEPARATOR);
+		result.append(quote("bibliographicCitation"));
+		result.append(CSV_SEPARATOR);
+		result.append(quote("samplingProtocol"));
+		return result.toString();
 	}
 }

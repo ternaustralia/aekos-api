@@ -57,4 +57,14 @@ public class JenaRetrievalServiceTest {
 		assertThat(result, is("SELECT * WHERE {?s ?p ?o . VALUES ?s { \"Rosa canina\" }"
 				+ " OFFSET 0 LIMIT " + Integer.MAX_VALUE + " }"));
 	}
+	
+	/**
+	 * Can we replace spaces in a URL?
+	 */
+	@Test
+	public void testReplaceSpaces01() {
+		String locationID = "aekos.org.au/collection/sydney.edu.au/DERG/Cravens Peak";
+		String result = JenaRetrievalService.replaceSpaces(locationID);
+		assertThat(result, is("aekos.org.au/collection/sydney.edu.au/DERG/Cravens%20Peak"));
+	}
 }

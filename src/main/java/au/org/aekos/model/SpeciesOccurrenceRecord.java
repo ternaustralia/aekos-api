@@ -13,11 +13,11 @@ public class SpeciesOccurrenceRecord {
     private final int year;
     private final int month;
     private final String bibliographicCitation;
-    private final String datasetID;
+    private final String samplingProtocol;
 
 	public SpeciesOccurrenceRecord(double decimalLatitude, double decimalLongitude, String geodeticDatum, String locationID,
 			String scientificName, int individualCount, String eventDate, int year, int month, String bibliographicCitation,
-			String datasetID) {
+			String samplingProtocol) {
 		this.decimalLatitude = decimalLatitude;
 		this.decimalLongitude = decimalLongitude;
 		this.geodeticDatum = geodeticDatum;
@@ -28,7 +28,7 @@ public class SpeciesOccurrenceRecord {
 		this.year = year;
 		this.month = month;
 		this.bibliographicCitation = bibliographicCitation;
-		this.datasetID = datasetID;
+		this.samplingProtocol = samplingProtocol;
 	}
 
 	public double getDecimalLatitude() {
@@ -63,8 +63,8 @@ public class SpeciesOccurrenceRecord {
 		return bibliographicCitation;
 	}
 
-	public String getDatasetID() {
-		return datasetID;
+	public String getSamplingProtocol() {
+		return samplingProtocol;
 	}
 
 	public String getGeodeticDatum() {
@@ -86,10 +86,10 @@ public class SpeciesOccurrenceRecord {
 		int yearField = Integer.parseInt(fields[7]);
 		int monthField = Integer.parseInt(fields[8]);
 		String bibliographicCitationField = fields[9];
-		String datasetIdField = fields[10];
+		String samplingProtocolField = fields[10];
 		SpeciesOccurrenceRecord result = new SpeciesOccurrenceRecord(decimalLatitudeField, decimalLongitudeField,
 				geodeticDatumField, locationIdField, scientificNameField, individualCountField, eventDateField,
-				yearField, monthField, bibliographicCitationField, datasetIdField);
+				yearField, monthField, bibliographicCitationField, samplingProtocolField);
 		return result;
     }
 
@@ -115,11 +115,37 @@ public class SpeciesOccurrenceRecord {
 		result.append(CSV_SEPARATOR);
 		result.append(quote(bibliographicCitation));
 		result.append(CSV_SEPARATOR);
-		result.append(quote(datasetID));
+		result.append(quote(samplingProtocol));
 		return result.toString();
 	}
 
-	private String quote(String value) {
+	public static String getCsvHeader() {
+		StringBuilder result = new StringBuilder();
+		result.append(quote("decimalLatitude"));
+		result.append(CSV_SEPARATOR);
+		result.append(quote("decimalLongitude"));
+		result.append(CSV_SEPARATOR);
+		result.append(quote("geodeticDatum"));
+		result.append(CSV_SEPARATOR);
+		result.append(quote("locationID"));
+		result.append(CSV_SEPARATOR);
+		result.append(quote("scientificName"));
+		result.append(CSV_SEPARATOR);
+		result.append(quote("individualCount"));
+		result.append(CSV_SEPARATOR);
+		result.append(quote("eventDate"));
+		result.append(CSV_SEPARATOR);
+		result.append(quote("year"));
+		result.append(CSV_SEPARATOR);
+		result.append(quote("month"));
+		result.append(CSV_SEPARATOR);
+		result.append(quote("bibliographicCitation"));
+		result.append(CSV_SEPARATOR);
+		result.append(quote("samplingProtocol"));
+		return result.toString();
+	}
+	
+	private static String quote(String value) {
 		return "\"" + value + "\"";
 	}
 }
