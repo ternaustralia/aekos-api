@@ -5,6 +5,10 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 
+import org.apache.lucene.document.Document;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.search.BooleanClause.Occur;
+import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
@@ -12,18 +16,13 @@ import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.index.Term;
-import org.apache.lucene.search.BooleanClause.Occur;
-import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.DocValuesTermsQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import au.org.aekos.model.EnvironmentVariable;
+import au.org.aekos.model.EnvironmentDataRecord.EnvironmentalVariable;
 import au.org.aekos.model.SpeciesName;
 import au.org.aekos.model.SpeciesSummary;
 import au.org.aekos.model.TraitVocabEntry;
@@ -57,7 +56,7 @@ public class LuceneSearchService implements SearchService {
 	}
 	
 	@Override
-	public List<EnvironmentVariable> getEnvironmentBySpecies(List<String> speciesNames) {
+	public List<EnvironmentalVariable> getEnvironmentBySpecies(List<String> speciesNames) {
 		Query query = buildFieldOrQuery(speciesNames, IndexConstants.FLD_SPECIES, DocumentType.SPECIES_ENV);
 		return performSpeciesEnvironmentSearch(query);
 	}
@@ -137,8 +136,8 @@ public class LuceneSearchService implements SearchService {
 		return responseList;
 	}
 	
-	private List<EnvironmentVariable> performSpeciesEnvironmentSearch(Query query ){
-		List<EnvironmentVariable> responseList = new ArrayList<EnvironmentVariable>();
+	private List<EnvironmentalVariable> performSpeciesEnvironmentSearch(Query query ){
+		List<EnvironmentalVariable> responseList = new ArrayList<EnvironmentalVariable>();
 		IndexSearcher searcher = null;
 		try {
 			searcher = termIndexManager.getIndexSearcher();
@@ -151,12 +150,12 @@ public class LuceneSearchService implements SearchService {
 			TopDocs td = searcher.search(query, Integer.MAX_VALUE, new Sort(new SortField(IndexConstants.FLD_ENVIRONMENT, SortField.Type.STRING)));
 		    int totalTraits = td.totalHits;
 		    if(td.totalHits > 0){
-		    	LinkedHashSet<EnvironmentVariable> uniqueResults = new LinkedHashSet<>();
+		    	LinkedHashSet<EnvironmentalVariable> uniqueResults = new LinkedHashSet<>();
 		    	for(ScoreDoc scoreDoc : td.scoreDocs){
 		    		Document matchedDoc = searcher.doc(scoreDoc.doc);
 		    		String environment = matchedDoc.get(IndexConstants.FLD_ENVIRONMENT);
 		    		if(StringUtils.hasLength(environment)){
-		    			uniqueResults.add(new EnvironmentVariable(environment, environment));
+		    			uniqueResults.add(new EnvironmentalVariable(environment, environment, "FIXME")); //FIXME get correct values
 		    		}
 		    	}
 		    	responseList.addAll(uniqueResults);

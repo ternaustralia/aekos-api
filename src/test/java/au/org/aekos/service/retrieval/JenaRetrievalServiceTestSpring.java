@@ -1,5 +1,7 @@
 package au.org.aekos.service.retrieval;
 
+import static au.org.aekos.EnvVarMatcher.isVar;
+import static au.org.aekos.TraitDataMatcher.isTrait;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -13,9 +15,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.lang.SystemUtils;
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +25,11 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import au.org.aekos.model.EnvironmentDataRecord;
 import au.org.aekos.model.EnvironmentDataRecord.EnvironmentalVariable;
 import au.org.aekos.model.EnvironmentDataResponse;
+import au.org.aekos.model.ResponseHeader;
 import au.org.aekos.model.SpeciesDataResponse;
+import au.org.aekos.model.TraitDataRecord;
+import au.org.aekos.model.TraitDataRecord.Entry;
+import au.org.aekos.model.TraitDataResponse;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("classpath:/au/org/aekos/retrievalContext-test.xml")
@@ -218,36 +221,41 @@ public class JenaRetrievalServiceTestSpring {
 		assertThat(varsIterator.next(), isVar("windMaximumMean", "30", "km/h"));
 	}
 	
-	private Matcher<EnvironmentalVariable> isVar(String name, String value, String units) {
-		return new EnvVarMatcher(name, value, units);
+	/**
+	 * Can we map all the variables for a trait data record?
+	 */
+	@Test
+	public void testGetTraitDataJson01() throws Throwable {
+		TraitDataResponse result = objectUnderTest.getTraitDataJson(Arrays.asList("Goodenia havilandii"), Collections.emptyList(), 0, 20);
+		ResponseHeader header = result.getResponseHeader();
+		assertThat(header.getPageNumber(), is(1));
+		assertThat(header.getTotalPages(), is(1));
+		assertThat(header.getNumFound(), is(1));
+		List<TraitDataRecord> response = result.getResponse();
+		assertThat(response.size(), is(1));
+		TraitDataRecord record = response.get(0);
+		Collection<Entry> traits = record.getTraits();
+		assertThat(traits.size(), is(3));
+		Iterator<Entry> traitsIterator = traits.iterator();
+		assertThat(traitsIterator.next(), isTrait("phenology", "1", "thingies"));
+		assertThat(traitsIterator.next(), isTrait("totalLength", "0.3", "meters"));
+		assertThat(traitsIterator.next(), isTrait("heightOfBreak", "5", "meters"));
 	}
-
-	private class EnvVarMatcher extends BaseMatcher<EnvironmentalVariable> {
-		private final String name;
-		private final String value;
-		private final String units;
-		
-		public EnvVarMatcher(String name, String value, String units) {
-			this.name = name;
-			this.value = value;
-			this.units = units;
-		}
-
-		@Override
-		public boolean matches(Object item) {
-			if (item == null) {
-				return false;
-			}
-			EnvironmentalVariable castItem = (EnvironmentalVariable) item;
-			if (name.equals(castItem.getName()) && value.equals(castItem.getValue()) && units.equals(castItem.getUnits())) {
-				return true;
-			}
-			return false;
-		}
-
-		@Override
-		public void describeTo(Description description) {
-			description.appendText(String.format("a '%s' variable with '%s' '%s'", name, value, units));
-		}
-	};
+	
+	/**
+	 * Can we correctly filter for trait names?
+	 */
+	@Test
+	public void testGetTraitDataJson02() throws Throwable {
+		TraitDataResponse result1 = objectUnderTest.getTraitDataJson(Arrays.asList("Calotis hispidula"), Collections.emptyList(), 0, 20);
+		assertThat(result1.getResponseHeader().getNumFound(), is(2));
+		TraitDataResponse result2 = objectUnderTest.getTraitDataJson(Arrays.asList("Calotis hispidula"), Arrays.asList("lifeStage"), 0, 20);
+		assertThat(result2.getResponseHeader().getNumFound(), is(1));
+		List<TraitDataRecord> response = result2.getResponse();
+		assertThat(response.size(), is(1));
+		TraitDataRecord record = response.get(0);
+		assertThat(record.getYear(), is(2013));
+	}
+	
+	// TODO test env data filtering
 }

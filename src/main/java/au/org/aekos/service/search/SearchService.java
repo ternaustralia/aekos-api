@@ -2,7 +2,7 @@ package au.org.aekos.service.search;
 
 import java.util.List;
 
-import au.org.aekos.model.EnvironmentVariable;
+import au.org.aekos.model.EnvironmentDataRecord.EnvironmentalVariable;
 import au.org.aekos.model.SpeciesName;
 import au.org.aekos.model.SpeciesSummary;
 import au.org.aekos.model.TraitVocabEntry;
@@ -37,7 +37,7 @@ public interface SearchService {
 	 * @param speciesNames 	species to look up environment variables for
 	 * @return				list of environment variables available for the supplied species
 	 */
-	List<EnvironmentVariable> getEnvironmentBySpecies(List<String> speciesNames);
+	List<EnvironmentalVariable> getEnvironmentBySpecies(List<String> speciesNames);
 	
 	/**
 	 * Looks up the species that have data recorded for the supplied trait names.

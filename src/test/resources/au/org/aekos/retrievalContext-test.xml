@@ -49,6 +49,14 @@
 	    </constructor-arg>
 	</bean>
 	
+	<bean id="traitDataCountQueryTemplate" class="java.lang.String">
+	    <constructor-arg>
+	        <bean class="org.springframework.util.FileCopyUtils" factory-method="copyToByteArray">
+	            <constructor-arg value="classpath:au/org/aekos/sparql/trait-data-count.rq" type="java.io.InputStream" />
+	        </bean>     
+	    </constructor-arg>
+	</bean>
+	
 	<bean id="testGetSpeciesDataCsv01_expected" class="java.lang.String">
 	    <constructor-arg>
 	        <bean class="org.springframework.util.FileCopyUtils" factory-method="copyToByteArray">
@@ -87,13 +95,13 @@
 		<property name="targetMethod" value="loadModel" />
 	</bean>
 	
-	<!-- pre-populate the model with Darwin Core data -->
+	<!-- pre-populate the model with Darwin Core and trait data -->
 	<bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
 		<property name="targetObject" ref="dataModel" />
 		<property name="targetMethod" value="read" />
 		<property name="arguments">
 			<array>
-				<value type="java.io.InputStream">classpath:au/org/aekos/test-darwin-core.ttl</value>
+				<value type="java.io.InputStream">classpath:au/org/aekos/test-darwin-core-plus-traits.ttl</value>
 				<value>null</value>
 				<value>TTL</value>
 			</array>

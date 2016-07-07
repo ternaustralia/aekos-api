@@ -37,7 +37,9 @@ import au.org.aekos.model.ResponseHeader;
 import au.org.aekos.model.SpeciesDataParams;
 import au.org.aekos.model.SpeciesDataResponse;
 import au.org.aekos.model.SpeciesOccurrenceRecord;
+import au.org.aekos.model.TraitDataParams;
 import au.org.aekos.model.TraitDataRecord;
+import au.org.aekos.model.TraitDataRecord.Entry;
 import au.org.aekos.model.TraitDataResponse;
 
 @Service
@@ -48,6 +50,7 @@ public class JenaRetrievalService implements RetrievalService {
 	private static final String OFFSET_PLACEHOLDER = "%OFFSET_PLACEHOLDER%";
 	private static final String LIMIT_PLACEHOLDER = "%LIMIT_PLACEHOLDER%";
 	private static final String LOCATION_ID_PLACEHOLDER = "%LOCATION_ID_PLACEHOLDER%";
+	private static final String TRAIT_NAME_PLACEHOLDER = "%TRAIT_NAME_PLACEHOLDER%";
 	
 	@Autowired 
 	@Qualifier("dataModel")
@@ -70,7 +73,8 @@ public class JenaRetrievalService implements RetrievalService {
 	private String environmentDataCountQueryTemplate;
 	
 	@Autowired
-	private StubRetrievalService stubDelegate;
+	@Qualifier("traitDataCountQueryTemplate")
+	private String traitDataCountQueryTemplate;
 	
 	@Override
 	public SpeciesDataResponse getSpeciesDataJson(List<String> speciesNames, int start, int rows) throws AekosApiRetrievalException {
@@ -168,11 +172,7 @@ public class JenaRetrievalService implements RetrievalService {
 			if (results.hasNext()) {
 				for (; results.hasNext();) {
 					QuerySolution s = results.next();
-					records.add(new SpeciesOccurrenceRecord(getDouble(s, "decimalLatitude"),
-							getDouble(s, "decimalLongitude"), getString(s, "geodeticDatum"), replaceSpaces(getString(s, "locationID")),
-							getString(s, "scientificName"), getInt(s, "individualCount"), getString(s, "eventDate"),
-							getInt(s, "year"), getInt(s, "month"), getString(s, "bibliographicCitation"),
-							getString(s, "samplingProtocol")));
+					records.add(processSpeciesDataSolution(s));
 				}
 			}
 		}
@@ -181,7 +181,16 @@ public class JenaRetrievalService implements RetrievalService {
 		ResponseHeader responseHeader = ResponseHeader.newInstance(start, rows, numFound, startTime, params);
 		return new SpeciesDataResponse(responseHeader, records);
 	}
-	
+
+	private TraitDataRecord processSpeciesDataSolution(QuerySolution s) {
+		// FIXME this is probably a bit confusing as it says species data but actually return a trait data record with no vars
+		return new TraitDataRecord(getDouble(s, "decimalLatitude"),
+			getDouble(s, "decimalLongitude"), getString(s, "geodeticDatum"), replaceSpaces(getString(s, "locationID")),
+			getString(s, "scientificName"), getInt(s, "individualCount"), getString(s, "eventDate"),
+			getInt(s, "year"), getInt(s, "month"), getString(s, "bibliographicCitation"),
+			getString(s, "samplingProtocol"));
+	}
+
 	private int getTotalNumFoundForSpeciesData(List<String> speciesNames) {
 		String sparql = getProcessedDarwinCoreCountSparql(speciesNames);
 		logger.debug("Species data count SPARQL: " + sparql);
@@ -249,11 +258,6 @@ public class JenaRetrievalService implements RetrievalService {
 		}
 	}
 
-	private Property prop(String localPropName) {
-		String namespace = "http://www.aekos.org.au/api/1.0#"; // FIXME move to config
-		return model.createProperty(namespace + localPropName);
-	}
-
 	private int getTotalNumFoundEnvironmentData(Map<String, LocationInfo> locationIds) {
 		// FIXME need to be sure this is all the IDs
 		String sparql = getProcessedEnvDataCountSparql(locationIds);
@@ -288,9 +292,78 @@ public class JenaRetrievalService implements RetrievalService {
 		return result;
 	}
 
-	private TraitDataResponse getTraitDataJsonPrivate(List<String> speciesNames, List<String> traitNames, int start, int count) throws AekosApiRetrievalException {
-		// FIXME make real
-		return stubDelegate.getTraitDataJson(speciesNames, traitNames, start, count);
+	private TraitDataResponse getTraitDataJsonPrivate(List<String> speciesNames, List<String> traitNames, int start, int rows) throws AekosApiRetrievalException {
+		// FIXME make species names case insensitive (try binding an LCASE(?scientificName) and using that
+		long startTime = new Date().getTime();
+		List<TraitDataRecord> records = new LinkedList<>();
+		String sparql = getProcessedDarwinCoreSparql(speciesNames, start, rows);
+		logger.debug("Trait data SPARQL: " + sparql);
+		AbstractParams params = new TraitDataParams(start, rows, speciesNames, traitNames);
+		Query query = QueryFactory.create(sparql);
+		try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
+			ResultSet results = qexec.execSelect();
+			if (!results.hasNext()) {
+				int foundNothing = 0;
+				ResponseHeader responseHeader = ResponseHeader.newInstance(start, rows, foundNothing, startTime, params);
+				return new TraitDataResponse(responseHeader, records);
+			}
+			for (; results.hasNext();) {
+				QuerySolution s = results.next();
+				processTraitDataSolution(traitNames, records, s);
+			}
+		}
+		boolean isTraitFilterEnabled = traitNames.size() > 0;
+		int numFound = isTraitFilterEnabled ? getTotalNumFoundForTraitData(speciesNames, traitNames) : getTotalNumFoundForSpeciesData(speciesNames);
+		ResponseHeader responseHeader = ResponseHeader.newInstance(start, rows, numFound, startTime, params);
+		return new TraitDataResponse(responseHeader, records);
+	}
+	
+	private void processTraitDataSolution(List<String> traitNames, List<TraitDataRecord> records, QuerySolution s) {
+		TraitDataRecord record = processSpeciesDataSolution(s);
+		processTraitDataVars(s, record, "trait", traitNames);
+		boolean isTraitFilterEnabled = traitNames.size() > 0;
+		if (isTraitFilterEnabled && !record.matchesTraitFilter(traitNames)) {
+			return;
+		}
+		records.add(record);
+	}
+
+	private void processTraitDataVars(QuerySolution s, TraitDataRecord record, String propName, List<String> traitNames) {
+		Resource speciesEntity = s.get("s").asResource();
+		StmtIterator varsIterator = speciesEntity.listProperties(prop(propName));
+		boolean isTraitFilterEnabled = traitNames.size() > 0;
+		while (varsIterator.hasNext()) {
+			Resource currVar = varsIterator.next().getResource();
+			String name = currVar.getProperty(prop("name")).getString();
+			if (isTraitFilterEnabled && !traitNames.contains(name)) {
+				continue;
+			}
+			String value = currVar.getProperty(prop("value")).getString();
+			String units = currVar.getProperty(prop("units")).getString();
+			record.addTraitValue(new Entry(name, value, units));
+		}
+	}
+
+	private int getTotalNumFoundForTraitData(List<String> speciesNames, List<String> traitNames) {
+		String sparql = getProcessedTraitDataCountSparql(speciesNames, traitNames);
+		logger.debug("Trait data count SPARQL: " + sparql);
+		Query query = QueryFactory.create(sparql);
+		try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
+			ResultSet results = qexec.execSelect();
+			if (!results.hasNext()) {
+				throw new IllegalStateException("Programmer error: a count query should always return something");
+			}
+			return getInt(results.next(), "count");
+		}
+	}
+	
+	private String getProcessedTraitDataCountSparql(List<String> speciesNames, List<String> traitNames) {
+		String scientificNameValueList = speciesNames.stream().collect(Collectors.joining("\" \"", "\"", "\""));
+		String traitNameValueList = traitNames.stream().collect(Collectors.joining("\" \"", "\"", "\""));;
+		String processedSparql = traitDataCountQueryTemplate
+				.replace(SCIENTIFIC_NAME_PLACEHOLDER, scientificNameValueList)
+				.replace(TRAIT_NAME_PLACEHOLDER, traitNameValueList);
+		return processedSparql;
 	}
 	
 	String getProcessedDarwinCoreSparql(List<String> speciesNames, int offset, int limit) {
@@ -325,6 +398,11 @@ public class JenaRetrievalService implements RetrievalService {
 		return processedSparql;
 	}
 
+	private Property prop(String localPropName) {
+		String namespace = "http://www.aekos.org.au/api/1.0#"; // FIXME move to config
+		return model.createProperty(namespace + localPropName);
+	}
+	
 	private int getInt(QuerySolution soln, String variableName) {
 		return soln.get(variableName).asLiteral().getInt();
 	}

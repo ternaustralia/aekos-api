@@ -4,18 +4,18 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import au.org.aekos.model.EnvironmentVariable;
+import au.org.aekos.model.EnvironmentDataRecord.EnvironmentalVariable;
 import au.org.aekos.model.SpeciesName;
 import au.org.aekos.model.TraitVocabEntry;
 import au.org.aekos.service.search.index.TermIndexManager;
 import au.org.aekos.service.search.load.LoaderClient;
-import org.junit.Assert;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("classpath:/au/org/aekos/indexContext-test.xml")
@@ -65,10 +65,8 @@ public class LuceneSearchServiceTest {
 	   loader.addSpeciesEnvironmentTermToIndex("species", "environmentTwo");
 	   loader.endLoad();
 	   
-	   List<EnvironmentVariable> environmentList = searchService.getEnvironmentBySpecies(Arrays.asList("species"));
+	   List<EnvironmentalVariable> environmentList = searchService.getEnvironmentBySpecies(Arrays.asList("species"));
 	   Assert.assertEquals(2, environmentList.size());
 	   indexManager.closeTermIndex();
-	   
-	
     }
 }

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import au.org.aekos.model.EnvironmentVariable;
+import au.org.aekos.model.EnvironmentDataRecord.EnvironmentalVariable;
 import au.org.aekos.model.SpeciesName;
 import au.org.aekos.model.SpeciesSummary;
 import au.org.aekos.model.TraitVocabEntry;
@@ -70,7 +70,7 @@ public class ApiV1SearchController {
 	
 	@RequestMapping(path="/getEnvironmentBySpecies.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ApiOperation(value = "Get all available environment variable names for specified species", notes = "TODO", tags="Search")
-    public List<EnvironmentVariable> getEnvironmentBySpecies(@RequestParam(name="speciesName") String[] speciesNames, HttpServletResponse resp) {
+    public List<EnvironmentalVariable> getEnvironmentBySpecies(@RequestParam(name="speciesName") String[] speciesNames, HttpServletResponse resp) {
 		return searchService.getEnvironmentBySpecies(Arrays.asList(speciesNames));
 	}
 	
