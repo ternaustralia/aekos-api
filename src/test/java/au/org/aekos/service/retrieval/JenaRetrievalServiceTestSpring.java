@@ -173,6 +173,51 @@ public class JenaRetrievalServiceTestSpring {
 		assertThat(varsIterator.next(), isVar("temperatureMinimum", "16.86315789", "degrees Celcius"));
 	}
 	
+	/**
+	 * Can we get the total numFound?
+	 */
+	@Test
+	public void testGetEnvironmentalDataJson02() throws Throwable {
+		EnvironmentDataResponse result = objectUnderTest.getEnvironmentalDataJson(Arrays.asList("Calotis hispidula", "Rosa canina"), Collections.emptyList(), 0, 1);
+		assertThat(result.getResponse().size(), is(1));
+		assertThat(result.getResponseHeader().getNumFound(), is(2));
+	}
+	
+	/**
+	 * Can we get all the environmental data variables that aren't already tested?
+	 */
+	@Test
+	public void testGetEnvironmentalDataJson03() throws Throwable {
+		EnvironmentDataResponse result = objectUnderTest.getEnvironmentalDataJson(Arrays.asList("Rosa canina"), Collections.emptyList(), 0, 20);
+		List<EnvironmentDataRecord> response = result.getResponse();
+		assertThat(response.size(), is(1));
+		EnvironmentDataRecord record = response.get(0);
+		assertThat(record.getLocationID(), is("aekos.org.au/collection/adelaide.edu.au/trend/SATFLB0026"));
+		Collection<EnvironmentalVariable> vars = record.getVariables();
+		assertThat(vars.size(), is(20));
+		Iterator<EnvironmentalVariable> varsIterator = vars.iterator();
+		assertThat(varsIterator.next(), isVar("disturbanceEvidenceCover", "50", "percent"));
+		assertThat(varsIterator.next(), isVar("slope", "10", "degrees"));
+		assertThat(varsIterator.next(), isVar("aspect", "230", "degrees"));
+		assertThat(varsIterator.next(), isVar("erosionEvidenceType", "No evidence", ""));
+		assertThat(varsIterator.next(), isVar("surfaceType", "Flat", ""));
+		assertThat(varsIterator.next(), isVar("erosionEvidenceState", "Good", ""));
+		assertThat(varsIterator.next(), isVar("visibleFireEvidence", "No evidence", ""));
+		assertThat(varsIterator.next(), isVar("soilTexture", "Coarse", ""));
+		assertThat(varsIterator.next(), isVar("soilType", "Clay", ""));
+		assertThat(varsIterator.next(), isVar("disturbanceEvidenceType", "No effective disturbance", ""));
+		assertThat(varsIterator.next(), isVar("latestLandUse", "Farming", ""));
+		assertThat(varsIterator.next(), isVar("ph", "5.4", "pH"));
+		assertThat(varsIterator.next(), isVar("silt", "A lot", "siltiness"));
+		assertThat(varsIterator.next(), isVar("clay", "Very", "dunno"));
+		assertThat(varsIterator.next(), isVar("sand", "it's everywhere", "sandiness"));
+		assertThat(varsIterator.next(), isVar("totalOrganicCarbon", "1.34", "percent"));
+		assertThat(varsIterator.next(), isVar("electricalConductivity", "4", "millisiemens per metre"));
+		assertThat(varsIterator.next(), isVar("windMeanAverageDirection", "270", "degrees"));
+		assertThat(varsIterator.next(), isVar("windMeanAverage", "13", "km/h"));
+		assertThat(varsIterator.next(), isVar("windMaximumMean", "30", "km/h"));
+	}
+	
 	private Matcher<EnvironmentalVariable> isVar(String name, String value, String units) {
 		return new EnvVarMatcher(name, value, units);
 	}
@@ -205,14 +250,4 @@ public class JenaRetrievalServiceTestSpring {
 			description.appendText(String.format("a '%s' variable with '%s' '%s'", name, value, units));
 		}
 	};
-	
-	/**
-	 * Can we get the total numFound?
-	 */
-	@Test
-	public void testGetEnvironmentalDataJson02() throws Throwable {
-		EnvironmentDataResponse result = objectUnderTest.getEnvironmentalDataJson(Arrays.asList("Calotis hispidula", "Rosa canina"), Collections.emptyList(), 0, 1);
-		assertThat(result.getResponse().size(), is(1));
-		assertThat(result.getResponseHeader().getNumFound(), is(2));
-	}
 }

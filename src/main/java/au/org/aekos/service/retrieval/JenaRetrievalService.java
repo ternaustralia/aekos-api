@@ -2,6 +2,7 @@ package au.org.aekos.service.retrieval;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -230,8 +231,10 @@ public class JenaRetrievalService implements RetrievalService {
 			locationIds.get(locationID).bibliographicCitation,
 			locationIds.get(locationID).samplingProtocol);
 		records.add(record);
-		processEnvDataVars(s, record, "rainfallVars");
-		processEnvDataVars(s, record, "temperatureVars");
+		for (String currVarProp : Arrays.asList("disturbanceEvidenceVars", "landscapeVars", "noUnitVars", 
+				"rainfallVars", "soilVars", "temperatureVars", "windVars")) {
+			processEnvDataVars(s, record, currVarProp);
+		}
 	}
 
 	private void processEnvDataVars(QuerySolution s, EnvironmentDataRecord record, String propName) {
