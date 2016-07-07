@@ -31,7 +31,6 @@ import au.org.aekos.controller.ApiV1RetrievalController.RetrievalResponseHeader;
 import au.org.aekos.model.AbstractParams;
 import au.org.aekos.model.EnvironmentDataParams;
 import au.org.aekos.model.EnvironmentDataRecord;
-import au.org.aekos.model.EnvironmentDataRecord.EnvironmentalVariable;
 import au.org.aekos.model.EnvironmentDataResponse;
 import au.org.aekos.model.ResponseHeader;
 import au.org.aekos.model.SpeciesDataParams;
@@ -39,8 +38,8 @@ import au.org.aekos.model.SpeciesDataResponse;
 import au.org.aekos.model.SpeciesOccurrenceRecord;
 import au.org.aekos.model.TraitDataParams;
 import au.org.aekos.model.TraitDataRecord;
-import au.org.aekos.model.TraitDataRecord.Entry;
 import au.org.aekos.model.TraitDataResponse;
+import au.org.aekos.model.TraitOrEnvironmentalVariable;
 
 @Service
 public class JenaRetrievalService implements RetrievalService {
@@ -51,6 +50,8 @@ public class JenaRetrievalService implements RetrievalService {
 	private static final String LIMIT_PLACEHOLDER = "%LIMIT_PLACEHOLDER%";
 	private static final String LOCATION_ID_PLACEHOLDER = "%LOCATION_ID_PLACEHOLDER%";
 	private static final String TRAIT_NAME_PLACEHOLDER = "%TRAIT_NAME_PLACEHOLDER%";
+	private static final String ENV_VAR_PLACEHOLDER = "%ENV_VAR_PLACEHOLDER%";
+	private static final String ENV_VAR_SWITCH_PLACEHOLDER = "#OFF";
 	
 	@Autowired 
 	@Qualifier("dataModel")
@@ -144,20 +145,32 @@ public class JenaRetrievalService implements RetrievalService {
 	@Override
 	public RetrievalResponseHeader getTraitDataCsv(List<String> speciesNames, List<String> traitNames, int start,
 			int count, Writer respWriter) throws AekosApiRetrievalException {
-		// TODO write header and deal with varying with schema
-		TraitDataResponse result = getTraitDataJsonPrivate(speciesNames, traitNames, start, count);
-		for (Iterator<TraitDataRecord> it = result.getResponse().iterator();it.hasNext();) {
-			TraitDataRecord curr = it.next();
-			try {
+		try {
+			TraitDataResponse jsonResponse = getTraitDataJsonPrivate(speciesNames, traitNames, start, count);
+			respWriter.write(TraitDataRecord.getCsvHeader());
+			int maxTraits = 0;
+			// FIXME is there a way to avoid looping through the records twice?
+			for (Iterator<TraitDataRecord> it = jsonResponse.getResponse().iterator();it.hasNext();) {
+				TraitDataRecord curr = it.next();
+				maxTraits = Math.max(maxTraits, curr.getTraits().size());
+			}
+			for (int i = 1; i<=maxTraits; i++) {
+				respWriter.write(",\"trait" + i + "Name\"");
+				respWriter.write(",\"trait" + i + "Value\"");
+				respWriter.write(",\"trait" + i + "Units\"");
+			}
+			respWriter.write("\n");
+			for (Iterator<TraitDataRecord> it = jsonResponse.getResponse().iterator();it.hasNext();) {
+				TraitDataRecord curr = it.next();
 				respWriter.write(curr.toCsv());
 				if (it.hasNext()) {
 					respWriter.write("\n");
 				}
-			} catch (IOException e) {
-				throw new AekosApiRetrievalException("Failed to write to the supplied writer: " + respWriter.getClass(), e);
 			}
+			return RetrievalResponseHeader.newInstance(jsonResponse);
+		} catch (IOException e) {
+			throw new AekosApiRetrievalException("Failed to write to the supplied writer: " + respWriter.getClass(), e);
 		}
-		return RetrievalResponseHeader.newInstance(result);
 	}
 	
 	private SpeciesDataResponse getSpeciesDataJsonPrivate(List<String> speciesNames, int start, int rows) {
@@ -224,43 +237,51 @@ public class JenaRetrievalService implements RetrievalService {
 			}
 			for (; results.hasNext();) {
 				QuerySolution s = results.next();
-				processEnvDataSolution(records, locationIds, s);
+				processEnvDataSolution(environmentalVariableNames, records, locationIds, s);
 			}
 		}
-		int numFound = getTotalNumFoundEnvironmentData(locationIds);
+		int numFound = getTotalNumFoundEnvironmentData(environmentalVariableNames, locationIds);
 		ResponseHeader responseHeader = ResponseHeader.newInstance(start, rows, numFound, startTime, params);
 		return new EnvironmentDataResponse(responseHeader, records);
 	}
 
-	private void processEnvDataSolution(List<EnvironmentDataRecord> records, Map<String, LocationInfo> locationIds, QuerySolution s) {
+	private void processEnvDataSolution(List<String> varNames, List<EnvironmentDataRecord> records, Map<String, LocationInfo> locationIds, QuerySolution s) {
 		String locationID = getString(s, "locationID");
 		EnvironmentDataRecord record = new EnvironmentDataRecord(getDouble(s, "decimalLatitude"),
 			getDouble(s, "decimalLongitude"), getString(s, "geodeticDatum"), replaceSpaces(locationID),
 			getString(s, "eventDate"), getInt(s, "year"), getInt(s, "month"),
 			locationIds.get(locationID).bibliographicCitation,
 			locationIds.get(locationID).samplingProtocol);
-		records.add(record);
 		for (String currVarProp : Arrays.asList("disturbanceEvidenceVars", "landscapeVars", "noUnitVars", 
 				"rainfallVars", "soilVars", "temperatureVars", "windVars")) {
-			processEnvDataVars(s, record, currVarProp);
+			processEnvDataVars(varNames, s, record, currVarProp);
 		}
+		boolean isEnvVarFilterEnabled = varNames.size() > 0;
+		if (isEnvVarFilterEnabled && !record.matchesTraitFilter(varNames)) {
+			return;
+		}
+		records.add(record);
 	}
 
-	private void processEnvDataVars(QuerySolution s, EnvironmentDataRecord record, String propName) {
+	private void processEnvDataVars(List<String> varNames, QuerySolution s, EnvironmentDataRecord record, String propName) {
 		Resource locationSubject = s.get("s").asResource();
 		StmtIterator varsIterator = locationSubject.listProperties(prop(propName));
 		while (varsIterator.hasNext()) {
 			Resource currVar = varsIterator.next().getResource();
 			String name = currVar.getProperty(prop("name")).getString();
+			boolean isEnvVarFilterEnabled = varNames.size() > 0;
+			if (isEnvVarFilterEnabled && !varNames.contains(name)) {
+				continue;
+			}
 			String value = currVar.getProperty(prop("value")).getString();
 			String units = currVar.getProperty(prop("units")).getString();
-			record.addVariable(new EnvironmentalVariable(name, value, units));
+			record.addVariable(new TraitOrEnvironmentalVariable(name, value, units));
 		}
 	}
 
-	private int getTotalNumFoundEnvironmentData(Map<String, LocationInfo> locationIds) {
+	private int getTotalNumFoundEnvironmentData(List<String> environmentalVariableNames, Map<String, LocationInfo> locationIds) {
 		// FIXME need to be sure this is all the IDs
-		String sparql = getProcessedEnvDataCountSparql(locationIds);
+		String sparql = getProcessedEnvDataCountSparql(environmentalVariableNames, locationIds);
 		logger.debug("Environment data count SPARQL: " + sparql);
 		Query query = QueryFactory.create(sparql);
 		try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
@@ -340,7 +361,7 @@ public class JenaRetrievalService implements RetrievalService {
 			}
 			String value = currVar.getProperty(prop("value")).getString();
 			String units = currVar.getProperty(prop("units")).getString();
-			record.addTraitValue(new Entry(name, value, units));
+			record.addTraitValue(new TraitOrEnvironmentalVariable(name, value, units));
 		}
 	}
 
@@ -391,10 +412,18 @@ public class JenaRetrievalService implements RetrievalService {
 		return processedSparql;
 	}
 	
-	private String getProcessedEnvDataCountSparql(Map<String, LocationInfo> locationIds) {
+	private String getProcessedEnvDataCountSparql(List<String> environmentalVariableNames, Map<String, LocationInfo> locationIds) {
 		String locationIDValueList = locationIds.keySet().stream().collect(Collectors.joining("\" \"", "\"", "\""));
 		String processedSparql = environmentDataCountQueryTemplate
 				.replace(LOCATION_ID_PLACEHOLDER, locationIDValueList);
+		boolean isEnvVarFilterNotEnabled = environmentalVariableNames.size() == 0;
+		if (isEnvVarFilterNotEnabled) {
+			return processedSparql;
+		}
+		String envVarValueList = environmentalVariableNames.stream().collect(Collectors.joining("\" \"", "\"", "\""));;
+		processedSparql = processedSparql
+				.replace(ENV_VAR_PLACEHOLDER, envVarValueList)
+				.replace(ENV_VAR_SWITCH_PLACEHOLDER, "    ");
 		return processedSparql;
 	}
 

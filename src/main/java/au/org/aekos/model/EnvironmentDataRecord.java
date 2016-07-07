@@ -3,6 +3,7 @@ package au.org.aekos.model;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 
 public class EnvironmentDataRecord {
 
@@ -14,40 +15,11 @@ public class EnvironmentDataRecord {
     private final String eventDate;
     private final int year;
     private final int month;
-    private final Collection<EnvironmentalVariable> variables = new LinkedList<>();
+    private final Collection<TraitOrEnvironmentalVariable> variables = new LinkedList<>();
     private final String bibliographicCitation;
     private final String samplingProtocol;
 
-    public static class EnvironmentalVariable {
-    	private final String name;
-    	private final String value;
-    	private final String units;
-		
-    	public EnvironmentalVariable(String name, String value, String units) {
-			this.name = name;
-			this.value = value;
-			this.units = units;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public String getValue() {
-			return value;
-		}
-
-		public String getUnits() {
-			return units;
-		}
-
-		@Override
-		public String toString() {
-			return "[" + name + "=" + value + " " + units + "]";
-		}
-    }
-    
-	public EnvironmentDataRecord(double decimalLatitude, double decimalLongitude, String geodeticDatum, String locationID,
+    public EnvironmentDataRecord(double decimalLatitude, double decimalLongitude, String geodeticDatum, String locationID,
 			String eventDate, int year, int month, String bibliographicCitation, String samplingProtocol) {
 		this.decimalLatitude = decimalLatitude;
 		this.decimalLongitude = decimalLongitude;
@@ -96,11 +68,11 @@ public class EnvironmentDataRecord {
 		return samplingProtocol;
 	}
 
-	public Collection<EnvironmentalVariable> getVariables() {
+	public Collection<TraitOrEnvironmentalVariable> getVariables() {
 		return Collections.unmodifiableCollection(variables);
 	}
 
-	public void addVariable(EnvironmentalVariable entry) {
+	public void addVariable(TraitOrEnvironmentalVariable entry) {
 		variables.add(entry);
 	}
 
@@ -123,11 +95,13 @@ public class EnvironmentDataRecord {
 		result.append(quote(bibliographicCitation));
 		result.append(CSV_SEPARATOR);
 		result.append(quote(samplingProtocol));
-		for (EnvironmentalVariable curr : variables) {
+		for (TraitOrEnvironmentalVariable curr : variables) {
 			result.append(CSV_SEPARATOR);
-			result.append(quote(curr.name));
+			result.append(quote(curr.getName()));
 			result.append(CSV_SEPARATOR);
-			result.append(quote(curr.value));
+			result.append(quote(curr.getValue()));
+			result.append(CSV_SEPARATOR);
+			result.append(quote(curr.getUnits()));
 		}
 		return result.toString();
 	}
@@ -156,5 +130,9 @@ public class EnvironmentDataRecord {
 		result.append(CSV_SEPARATOR);
 		result.append(quote("samplingProtocol"));
 		return result.toString();
+	}
+
+	public boolean matchesTraitFilter(List<String> varNames) {
+		return Helper.matchesFilter(varNames, variables);
 	}
 }

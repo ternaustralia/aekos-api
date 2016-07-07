@@ -1,7 +1,6 @@
 package au.org.aekos.service.retrieval;
 
-import static au.org.aekos.EnvVarMatcher.isVar;
-import static au.org.aekos.TraitDataMatcher.isTrait;
+import static au.org.aekos.TraitOrEnvVarMatcher.isTraitOrVar;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -23,13 +22,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import au.org.aekos.model.EnvironmentDataRecord;
-import au.org.aekos.model.EnvironmentDataRecord.EnvironmentalVariable;
 import au.org.aekos.model.EnvironmentDataResponse;
 import au.org.aekos.model.ResponseHeader;
 import au.org.aekos.model.SpeciesDataResponse;
 import au.org.aekos.model.TraitDataRecord;
-import au.org.aekos.model.TraitDataRecord.Entry;
 import au.org.aekos.model.TraitDataResponse;
+import au.org.aekos.model.TraitOrEnvironmentalVariable;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("classpath:/au/org/aekos/retrievalContext-test.xml")
@@ -53,6 +51,10 @@ public class JenaRetrievalServiceTestSpring {
 	@Autowired
 	@Qualifier("testGetEnvironmentalDataCsv01_expected")
 	private String testGetEnvironmentalDataCsv01_expected;
+
+	@Autowired
+	@Qualifier("testGetTraitDataCsv01_expected")
+	private String testGetTraitDataCsv01_expected;
 	
 	/**
 	 * Can we get all the records that are available for the specified species?
@@ -138,7 +140,6 @@ public class JenaRetrievalServiceTestSpring {
 			compareStr = testGetEnvironmentalDataCsv01_expected.replaceAll("\r", "");
 		}
 		assertEquals(compareStr, writer.toString());
-		// FIXME update expected to have all values
 	}
 	
 	/**
@@ -164,16 +165,16 @@ public class JenaRetrievalServiceTestSpring {
 				+ "owned by The University of Adelaide (TERN Australian Transects Network - TREND), Bioplatforms Australia Ltd. "
 				+ "Accessed [dd mmm yyyy, e.g. 01 Jan 2016]."));
 		assertThat(record.getSamplingProtocol(), is("aekos.org.au/collection/adelaide.edu.au/trend"));
-		Collection<EnvironmentalVariable> vars = record.getVariables();
+		Collection<TraitOrEnvironmentalVariable> vars = record.getVariables();
 		assertThat(vars.size(), is(7));
-		Iterator<EnvironmentalVariable> varsIterator = vars.iterator();
-		assertThat(varsIterator.next(), isVar("rainfallTotal", "0.4", "millilitres"));
-		assertThat(varsIterator.next(), isVar("rainfallTotal", "49.8", "millilitres"));
-		assertThat(varsIterator.next(), isVar("rainfallMean", "0.013333333", "millilitres"));
-		assertThat(varsIterator.next(), isVar("rainfallMean", "1.606451613", "millilitres"));
-		assertThat(varsIterator.next(), isVar("temperatureMean", "28.12631579", "degrees Celcius"));
-		assertThat(varsIterator.next(), isVar("temperatureMaximum", "38.03157895", "degrees Celcius"));
-		assertThat(varsIterator.next(), isVar("temperatureMinimum", "16.86315789", "degrees Celcius"));
+		Iterator<TraitOrEnvironmentalVariable> varsIterator = vars.iterator();
+		assertThat(varsIterator.next(), isTraitOrVar("rainfallTotal", "0.4", "millilitres"));
+		assertThat(varsIterator.next(), isTraitOrVar("rainfallTotal", "49.8", "millilitres"));
+		assertThat(varsIterator.next(), isTraitOrVar("rainfallMean", "0.013333333", "millilitres"));
+		assertThat(varsIterator.next(), isTraitOrVar("rainfallMean", "1.606451613", "millilitres"));
+		assertThat(varsIterator.next(), isTraitOrVar("temperatureMean", "28.12631579", "degrees Celcius"));
+		assertThat(varsIterator.next(), isTraitOrVar("temperatureMaximum", "38.03157895", "degrees Celcius"));
+		assertThat(varsIterator.next(), isTraitOrVar("temperatureMinimum", "16.86315789", "degrees Celcius"));
 	}
 	
 	/**
@@ -196,29 +197,49 @@ public class JenaRetrievalServiceTestSpring {
 		assertThat(response.size(), is(1));
 		EnvironmentDataRecord record = response.get(0);
 		assertThat(record.getLocationID(), is("aekos.org.au/collection/adelaide.edu.au/trend/SATFLB0026"));
-		Collection<EnvironmentalVariable> vars = record.getVariables();
+		Collection<TraitOrEnvironmentalVariable> vars = record.getVariables();
 		assertThat(vars.size(), is(20));
-		Iterator<EnvironmentalVariable> varsIterator = vars.iterator();
-		assertThat(varsIterator.next(), isVar("disturbanceEvidenceCover", "50", "percent"));
-		assertThat(varsIterator.next(), isVar("slope", "10", "degrees"));
-		assertThat(varsIterator.next(), isVar("aspect", "230", "degrees"));
-		assertThat(varsIterator.next(), isVar("erosionEvidenceType", "No evidence", ""));
-		assertThat(varsIterator.next(), isVar("surfaceType", "Flat", ""));
-		assertThat(varsIterator.next(), isVar("erosionEvidenceState", "Good", ""));
-		assertThat(varsIterator.next(), isVar("visibleFireEvidence", "No evidence", ""));
-		assertThat(varsIterator.next(), isVar("soilTexture", "Coarse", ""));
-		assertThat(varsIterator.next(), isVar("soilType", "Clay", ""));
-		assertThat(varsIterator.next(), isVar("disturbanceEvidenceType", "No effective disturbance", ""));
-		assertThat(varsIterator.next(), isVar("latestLandUse", "Farming", ""));
-		assertThat(varsIterator.next(), isVar("ph", "5.4", "pH"));
-		assertThat(varsIterator.next(), isVar("silt", "A lot", "siltiness"));
-		assertThat(varsIterator.next(), isVar("clay", "Very", "dunno"));
-		assertThat(varsIterator.next(), isVar("sand", "it's everywhere", "sandiness"));
-		assertThat(varsIterator.next(), isVar("totalOrganicCarbon", "1.34", "percent"));
-		assertThat(varsIterator.next(), isVar("electricalConductivity", "4", "millisiemens per metre"));
-		assertThat(varsIterator.next(), isVar("windMeanAverageDirection", "270", "degrees"));
-		assertThat(varsIterator.next(), isVar("windMeanAverage", "13", "km/h"));
-		assertThat(varsIterator.next(), isVar("windMaximumMean", "30", "km/h"));
+		Iterator<TraitOrEnvironmentalVariable> varsIterator = vars.iterator();
+		assertThat(varsIterator.next(), isTraitOrVar("disturbanceEvidenceCover", "50", "percent"));
+		assertThat(varsIterator.next(), isTraitOrVar("slope", "10", "degrees"));
+		assertThat(varsIterator.next(), isTraitOrVar("aspect", "230", "degrees"));
+		assertThat(varsIterator.next(), isTraitOrVar("erosionEvidenceType", "No evidence", ""));
+		assertThat(varsIterator.next(), isTraitOrVar("surfaceType", "Flat", ""));
+		assertThat(varsIterator.next(), isTraitOrVar("erosionEvidenceState", "Good", ""));
+		assertThat(varsIterator.next(), isTraitOrVar("visibleFireEvidence", "No evidence", ""));
+		assertThat(varsIterator.next(), isTraitOrVar("soilTexture", "Coarse", ""));
+		assertThat(varsIterator.next(), isTraitOrVar("soilType", "Clay", ""));
+		assertThat(varsIterator.next(), isTraitOrVar("disturbanceEvidenceType", "No effective disturbance", ""));
+		assertThat(varsIterator.next(), isTraitOrVar("latestLandUse", "Farming", ""));
+		assertThat(varsIterator.next(), isTraitOrVar("ph", "5.4", "pH"));
+		assertThat(varsIterator.next(), isTraitOrVar("silt", "A lot", "siltiness"));
+		assertThat(varsIterator.next(), isTraitOrVar("clay", "Very", "dunno"));
+		assertThat(varsIterator.next(), isTraitOrVar("sand", "it's everywhere", "sandiness"));
+		assertThat(varsIterator.next(), isTraitOrVar("totalOrganicCarbon", "1.34", "percent"));
+		assertThat(varsIterator.next(), isTraitOrVar("electricalConductivity", "4", "millisiemens per metre"));
+		assertThat(varsIterator.next(), isTraitOrVar("windMeanAverageDirection", "270", "degrees"));
+		assertThat(varsIterator.next(), isTraitOrVar("windMeanAverage", "13", "km/h"));
+		assertThat(varsIterator.next(), isTraitOrVar("windMaximumMean", "30", "km/h"));
+	}
+	
+	/**
+	 * Can we filter the variables that are returned?
+	 */
+	@Test
+	public void testGetEnvironmentalDataJson04() throws Throwable {
+		EnvironmentDataResponse result = objectUnderTest.getEnvironmentalDataJson(Arrays.asList("Calotis hispidula", "Rosa canina"), 
+				Arrays.asList("aspect", "soilType", "sand"), 0, 20);
+		assertThat(result.getResponseHeader().getNumFound(), is(1));
+		List<EnvironmentDataRecord> response = result.getResponse();
+		assertThat(response.size(), is(1));
+		EnvironmentDataRecord record = response.get(0);
+		assertThat(record.getLocationID(), is("aekos.org.au/collection/adelaide.edu.au/trend/SATFLB0026"));
+		Collection<TraitOrEnvironmentalVariable> vars = record.getVariables();
+		assertThat(vars.size(), is(3));
+		Iterator<TraitOrEnvironmentalVariable> varsIterator = vars.iterator();
+		assertThat(varsIterator.next(), isTraitOrVar("aspect", "230", "degrees"));
+		assertThat(varsIterator.next(), isTraitOrVar("soilType", "Clay", ""));
+		assertThat(varsIterator.next(), isTraitOrVar("sand", "it's everywhere", "sandiness"));
 	}
 	
 	/**
@@ -234,12 +255,12 @@ public class JenaRetrievalServiceTestSpring {
 		List<TraitDataRecord> response = result.getResponse();
 		assertThat(response.size(), is(1));
 		TraitDataRecord record = response.get(0);
-		Collection<Entry> traits = record.getTraits();
+		Collection<TraitOrEnvironmentalVariable> traits = record.getTraits();
 		assertThat(traits.size(), is(3));
-		Iterator<Entry> traitsIterator = traits.iterator();
-		assertThat(traitsIterator.next(), isTrait("phenology", "1", "thingies"));
-		assertThat(traitsIterator.next(), isTrait("totalLength", "0.3", "meters"));
-		assertThat(traitsIterator.next(), isTrait("heightOfBreak", "5", "meters"));
+		Iterator<TraitOrEnvironmentalVariable> traitsIterator = traits.iterator();
+		assertThat(traitsIterator.next(), isTraitOrVar("phenology", "1", "thingies"));
+		assertThat(traitsIterator.next(), isTraitOrVar("totalLength", "0.3", "meters"));
+		assertThat(traitsIterator.next(), isTraitOrVar("heightOfBreak", "5", "meters"));
 	}
 	
 	/**
@@ -257,5 +278,17 @@ public class JenaRetrievalServiceTestSpring {
 		assertThat(record.getYear(), is(2013));
 	}
 	
-	// TODO test env data filtering
+	/**
+	 * Can we get the trait data CSV?
+	 */
+	@Test
+	public void testGetTraitDataCsv01() throws Throwable {
+		Writer writer = new StringWriter();
+		objectUnderTest.getTraitDataCsv(Arrays.asList("Calotis hispidula"), Collections.emptyList(), 0, 20, writer);
+		String compareStr = testGetTraitDataCsv01_expected;
+		if(SystemUtils.IS_OS_WINDOWS){
+			compareStr = testGetTraitDataCsv01_expected.replaceAll("\r", "");
+		}
+		assertEquals(compareStr, writer.toString());
+	}
 }

@@ -4,14 +4,14 @@ import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 
-import au.org.aekos.model.TraitDataRecord;
+import au.org.aekos.model.TraitOrEnvironmentalVariable;
 
-public class TraitDataMatcher extends BaseMatcher<TraitDataRecord.Entry> {
+public class TraitOrEnvVarMatcher extends BaseMatcher<TraitOrEnvironmentalVariable> {
 	private final String name;
 	private final String value;
 	private final String units;
 	
-	public TraitDataMatcher(String name, String value, String units) {
+	public TraitOrEnvVarMatcher(String name, String value, String units) {
 		this.name = name;
 		this.value = value;
 		this.units = units;
@@ -22,7 +22,7 @@ public class TraitDataMatcher extends BaseMatcher<TraitDataRecord.Entry> {
 		if (item == null) {
 			return false;
 		}
-		TraitDataRecord.Entry castItem = (TraitDataRecord.Entry) item;
+		TraitOrEnvironmentalVariable castItem = (TraitOrEnvironmentalVariable) item;
 		if (name.equals(castItem.getName()) && value.equals(castItem.getValue()) && units.equals(castItem.getUnits())) {
 			return true;
 		}
@@ -34,7 +34,7 @@ public class TraitDataMatcher extends BaseMatcher<TraitDataRecord.Entry> {
 		description.appendText(String.format("a '%s' variable with '%s' '%s'", name, value, units));
 	}
 	
-	public static Matcher<TraitDataRecord.Entry> isTrait(String name, String value, String units) {
-		return new TraitDataMatcher(name, value, units);
+	public static Matcher<TraitOrEnvironmentalVariable> isTraitOrVar(String name, String value, String units) {
+		return new TraitOrEnvVarMatcher(name, value, units);
 	}
 }

@@ -22,9 +22,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import au.org.aekos.model.EnvironmentDataRecord.EnvironmentalVariable;
 import au.org.aekos.model.SpeciesName;
 import au.org.aekos.model.SpeciesSummary;
+import au.org.aekos.model.TraitOrEnvironmentalVariable;
 import au.org.aekos.model.TraitVocabEntry;
 import au.org.aekos.service.search.index.DocumentType;
 import au.org.aekos.service.search.index.IndexConstants;
@@ -56,7 +56,7 @@ public class LuceneSearchService implements SearchService {
 	}
 	
 	@Override
-	public List<EnvironmentalVariable> getEnvironmentBySpecies(List<String> speciesNames) {
+	public List<TraitOrEnvironmentalVariable> getEnvironmentBySpecies(List<String> speciesNames) {
 		Query query = buildFieldOrQuery(speciesNames, IndexConstants.FLD_SPECIES, DocumentType.SPECIES_ENV);
 		return performSpeciesEnvironmentSearch(query);
 	}
@@ -136,8 +136,8 @@ public class LuceneSearchService implements SearchService {
 		return responseList;
 	}
 	
-	private List<EnvironmentalVariable> performSpeciesEnvironmentSearch(Query query ){
-		List<EnvironmentalVariable> responseList = new ArrayList<EnvironmentalVariable>();
+	private List<TraitOrEnvironmentalVariable> performSpeciesEnvironmentSearch(Query query ){
+		List<TraitOrEnvironmentalVariable> responseList = new ArrayList<TraitOrEnvironmentalVariable>();
 		IndexSearcher searcher = null;
 		try {
 			searcher = termIndexManager.getIndexSearcher();
@@ -150,12 +150,12 @@ public class LuceneSearchService implements SearchService {
 			TopDocs td = searcher.search(query, Integer.MAX_VALUE, new Sort(new SortField(IndexConstants.FLD_ENVIRONMENT, SortField.Type.STRING)));
 		    int totalTraits = td.totalHits;
 		    if(td.totalHits > 0){
-		    	LinkedHashSet<EnvironmentalVariable> uniqueResults = new LinkedHashSet<>();
+		    	LinkedHashSet<TraitOrEnvironmentalVariable> uniqueResults = new LinkedHashSet<>();
 		    	for(ScoreDoc scoreDoc : td.scoreDocs){
 		    		Document matchedDoc = searcher.doc(scoreDoc.doc);
 		    		String environment = matchedDoc.get(IndexConstants.FLD_ENVIRONMENT);
 		    		if(StringUtils.hasLength(environment)){
-		    			uniqueResults.add(new EnvironmentalVariable(environment, environment, "FIXME")); //FIXME get correct values
+		    			uniqueResults.add(new TraitOrEnvironmentalVariable(environment, environment, "FIXME")); //FIXME get correct values
 		    		}
 		    	}
 		    	responseList.addAll(uniqueResults);
