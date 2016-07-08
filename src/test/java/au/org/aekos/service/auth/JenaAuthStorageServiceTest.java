@@ -77,8 +77,6 @@ public class JenaAuthStorageServiceTest {
 		assertFalse("Should be invalid because the key is disabled", result);
 	}
 	
-	// TODO string comparison disableKey test
-	
 	/**
 	 * Can we enable a disabled key?
 	 */
@@ -95,5 +93,85 @@ public class JenaAuthStorageServiceTest {
 		objectUnderTest.enableKey(key);
 		boolean result2 = objectUnderTest.isValidKey(key);
 		assertTrue("Should be valid again because we enabled it", result2);
+	}
+	
+	/**
+	 * Does enabling a key that doesn't exist have no effect (especially not creating the key in the store)?
+	 */
+	@Test
+	public void testEnableKey02() throws InvalidKeyException {
+		JenaAuthStorageService objectUnderTest = new JenaAuthStorageService();
+		Model authModel = ModelFactory.createDefaultModel();
+		objectUnderTest.setAuthModel(authModel);
+		AekosApiAuthKey key = new AekosApiAuthKey("AAABBB123");
+		assertTrue("There should be no keys in the store", authModel.isEmpty());
+		objectUnderTest.enableKey(key);
+		assertTrue("There should STILL be no keys in the store", authModel.isEmpty());
+	}
+	
+	/**
+	 * Does disabling a key that doesn't exist have no effect (especially not creating the key in the store)?
+	 */
+	@Test
+	public void testDisableKey01() throws InvalidKeyException {
+		JenaAuthStorageService objectUnderTest = new JenaAuthStorageService();
+		Model authModel = ModelFactory.createDefaultModel();
+		objectUnderTest.setAuthModel(authModel);
+		AekosApiAuthKey key = new AekosApiAuthKey("AAABBB123");
+		assertTrue("There should be no keys in the store", authModel.isEmpty());
+		objectUnderTest.disableKey(key);
+		assertTrue("There should STILL be no keys in the store", authModel.isEmpty());
+	}
+	
+	/**
+	 * Does disabling a key write what we expect to the data store?
+	 */
+	@Test
+	public void testDisableKey02() throws InvalidKeyException {
+		JenaAuthStorageService objectUnderTest = new JenaAuthStorageService();
+		Model authModel = ModelFactory.createDefaultModel();
+		objectUnderTest.setAuthModel(authModel);
+		AekosApiAuthKey key = new AekosApiAuthKey("AAABBB123");
+		objectUnderTest.storeNewKey("test@example.com", key, SignupMethod.GOOGLE);
+		objectUnderTest.disableKey(key);
+		Writer out = new StringWriter();
+		authModel.write(out, "TURTLE");
+		assertThat(out.toString(), is(
+			"<http://www.aekos.org.au/api/1.0/auth#AAABBB123>\n" +
+			"        a       <http://www.aekos.org.au/api/1.0/auth#AekosApiAuthKey> ;\n" +
+			"        <http://www.aekos.org.au/api/1.0/auth#disabled>\n" +
+			"                true ;\n" +
+			"        <http://www.aekos.org.au/api/1.0/auth#ownedBy>\n" +
+			"                \"test@example.com\" ;\n" +
+			"        <http://www.aekos.org.au/api/1.0/auth#signupMethod>\n" +
+			"                \"GOOGLE\" .\n"));
+	}
+	
+	/**
+	 * Can we tell when a key exists?
+	 */
+	@Test
+	public void testExists01() throws InvalidKeyException {
+		JenaAuthStorageService objectUnderTest = new JenaAuthStorageService();
+		Model authModel = ModelFactory.createDefaultModel();
+		objectUnderTest.setAuthModel(authModel);
+		AekosApiAuthKey key = new AekosApiAuthKey("AAABBB123");
+		objectUnderTest.storeNewKey("test@example.com", key, SignupMethod.EMAIL);
+		boolean result = objectUnderTest.exists(key);
+		assertTrue("Should exist because we just created it", result);
+	}
+	
+	/**
+	 * Can we tell when a key doesn't exist?
+	 */
+	@Test
+	public void testExists02() throws InvalidKeyException {
+		JenaAuthStorageService objectUnderTest = new JenaAuthStorageService();
+		Model authModel = ModelFactory.createDefaultModel();
+		objectUnderTest.setAuthModel(authModel);
+		AekosApiAuthKey key = new AekosApiAuthKey("AAABBB123");
+		assertTrue(authModel.isEmpty());
+		boolean result = objectUnderTest.exists(key);
+		assertFalse("Should NOT exist because we never stored it", result);
 	}
 }

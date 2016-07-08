@@ -8,6 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+/**
+ * Implementation that uses Apache Jena as the storage mechanism.
+ * Depending on which model is wired in, this could be an in-memory model or a
+ * TDB backed one. 
+ */
 @Service
 public class JenaAuthStorageService implements AuthStorageService {
 
@@ -48,7 +53,9 @@ public class JenaAuthStorageService implements AuthStorageService {
 	
 	@Override
 	public void disableKey(AekosApiAuthKey key) {
-		// TODO check if key exists
+		if (!existsPrivate(key)) {
+			return;
+		}
 		Resource subject = authModel.createResource(AUTH_NAMESPACE + key.getKeyStringValue());
 		Property disabledProp = authModel.createProperty(DISABLED_PROP);
 		Statement keyDisabledStatement = subject.getProperty(disabledProp);
@@ -60,7 +67,6 @@ public class JenaAuthStorageService implements AuthStorageService {
 
 	@Override
 	public void enableKey(AekosApiAuthKey key) {
-		// TODO check if key exists
 		Resource subject = authModel.createResource(AUTH_NAMESPACE + key.getKeyStringValue());
 		Property disabledProp = authModel.createProperty(DISABLED_PROP);
 		Statement keyDisabledStatement = subject.getProperty(disabledProp);
@@ -68,6 +74,19 @@ public class JenaAuthStorageService implements AuthStorageService {
 			return;
 		}
 		keyDisabledStatement.remove();
+	}
+	
+	@Override
+	public boolean exists(AekosApiAuthKey key) {
+		return existsPrivate(key);
+	}
+
+	private boolean existsPrivate(AekosApiAuthKey key) {
+		Resource subject = authModel.createResource(AUTH_NAMESPACE + key.getKeyStringValue());
+		if (authModel.containsResource(subject)) {
+			return true;
+		}
+		return false;
 	}
 
 	public void setAuthModel(Model authModel) {

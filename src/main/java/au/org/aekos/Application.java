@@ -28,6 +28,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.AbstractJsonpResponseBodyAdvice;
 
+import au.org.aekos.service.auth.AuthModelFactory;
 import au.org.aekos.util.ModelLoader;
 
 @SpringBootApplication
@@ -108,8 +109,8 @@ public class Application extends SpringBootServletInitializer {
     }
     
     @Bean
-    public Model authModel() {
-    	return ModelFactory.createDefaultModel();
+    public Model authModel(AuthModelFactory factory) {
+    	return factory.getInstance();
     }
     
 	@Bean
