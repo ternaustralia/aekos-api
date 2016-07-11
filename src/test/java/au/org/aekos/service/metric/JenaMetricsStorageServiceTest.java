@@ -1,7 +1,7 @@
 package au.org.aekos.service.metric;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static au.org.aekos.TestUtils.loadMetric;
+import static org.junit.Assert.assertEquals;
 
 import java.io.StringWriter;
 import java.io.Writer;
@@ -27,16 +27,17 @@ public class JenaMetricsStorageServiceTest {
 		JenaMetricsStorageService objectUnderTest = new JenaMetricsStorageService();
 		Model metricsModel = ModelFactory.createDefaultModel();
 		objectUnderTest.setMetricsModel(metricsModel);
+		objectUnderTest.setIdProvider(new IdProvider() {
+			@Override
+			public String nextId() {
+				return "urn:cbfbaccb-43c6-47a9-bddf-93a4c0077963";
+			}
+		});
 		AbstractParams params = new TraitDataParams(0, 20, Arrays.asList("atriplex vesicaria"), Arrays.asList("Height"));
 		AekosApiAuthKey authKey = new AekosApiAuthKey("CAFEBABE1234");
 		objectUnderTest.recordRequest(authKey, RequestType.TRAIT_DATA, params);
 		Writer out = new StringWriter();
 		metricsModel.write(out, "TURTLE");
-		assertThat(out.toString(), is(
-			"[ <http://www.aekos.org.au/api/1.0/metrics#authKey>\n" +
-			"          \"CAFEBABE1234\" ;\n" +
-			"  <http://www.aekos.org.au/api/1.0/metrics#requestType>\n" +
-			"          \"TRAIT_DATA\"\n] .\n"));
-		// TODO more assertions
+		assertEquals(loadMetric("testRecordResponse01_expected.ttl"), out.toString());
 	}
 }

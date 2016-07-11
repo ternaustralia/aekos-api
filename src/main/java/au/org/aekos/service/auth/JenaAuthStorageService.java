@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import au.org.aekos.Application;
+
 /**
  * Implementation that uses Apache Jena as the storage mechanism.
  * Depending on which model is wired in, this could be an in-memory model or a
@@ -16,10 +18,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class JenaAuthStorageService implements AuthStorageService {
 
-	private static final String AUTH_NAMESPACE = "http://www.aekos.org.au/api/1.0/auth#";
-	private static final String OWNED_BY_PROP = AUTH_NAMESPACE + "ownedBy";
-	private static final String SIGNUP_METHOD_PROP = AUTH_NAMESPACE + "signupMethod";
-	private static final String DISABLED_PROP = AUTH_NAMESPACE + "disabled";
+	private static final String AUTH_NAMESPACE_V1_0 = Application.API_NAMESPACE_V1_0 + "auth#";
+	private static final String OWNED_BY_PROP = AUTH_NAMESPACE_V1_0 + "ownedBy";
+	private static final String SIGNUP_METHOD_PROP = AUTH_NAMESPACE_V1_0 + "signupMethod";
+	private static final String DISABLED_PROP = AUTH_NAMESPACE_V1_0 + "disabled";
 	
 	@Autowired
 	@Qualifier("authModel")
@@ -29,15 +31,15 @@ public class JenaAuthStorageService implements AuthStorageService {
 	public void storeNewKey(String emailAddress, AekosApiAuthKey key, SignupMethod signupMethod) {
 		Property ownedByProp = authModel.createProperty(OWNED_BY_PROP);
 		Property signupMethodProp = authModel.createProperty(SIGNUP_METHOD_PROP);
-		Resource keyEntityType = authModel.createResource(AUTH_NAMESPACE + key.getClass().getSimpleName());
-		Resource subject = authModel.createResource(AUTH_NAMESPACE + key.getKeyStringValue(), keyEntityType);
+		Resource keyEntityType = authModel.createResource(AUTH_NAMESPACE_V1_0 + key.getClass().getSimpleName());
+		Resource subject = authModel.createResource(AUTH_NAMESPACE_V1_0 + key.getKeyStringValue(), keyEntityType);
 		subject.addLiteral(ownedByProp, emailAddress);
 		subject.addLiteral(signupMethodProp, signupMethod.toString());
 	}
 
 	@Override
 	public boolean isValidKey(AekosApiAuthKey key) {
-		Resource subject = authModel.createResource(AUTH_NAMESPACE + key.getKeyStringValue());
+		Resource subject = authModel.createResource(AUTH_NAMESPACE_V1_0 + key.getKeyStringValue());
 		boolean resourceDoesNotExist = subject.listProperties().toList().size() == 0;
 		if (resourceDoesNotExist) {
 			return false;
@@ -56,7 +58,7 @@ public class JenaAuthStorageService implements AuthStorageService {
 		if (!existsPrivate(key)) {
 			return;
 		}
-		Resource subject = authModel.createResource(AUTH_NAMESPACE + key.getKeyStringValue());
+		Resource subject = authModel.createResource(AUTH_NAMESPACE_V1_0 + key.getKeyStringValue());
 		Property disabledProp = authModel.createProperty(DISABLED_PROP);
 		Statement keyDisabledStatement = subject.getProperty(disabledProp);
 		if (keyDisabledStatement != null) {
@@ -67,7 +69,7 @@ public class JenaAuthStorageService implements AuthStorageService {
 
 	@Override
 	public void enableKey(AekosApiAuthKey key) {
-		Resource subject = authModel.createResource(AUTH_NAMESPACE + key.getKeyStringValue());
+		Resource subject = authModel.createResource(AUTH_NAMESPACE_V1_0 + key.getKeyStringValue());
 		Property disabledProp = authModel.createProperty(DISABLED_PROP);
 		Statement keyDisabledStatement = subject.getProperty(disabledProp);
 		if (keyDisabledStatement == null) {
@@ -82,7 +84,7 @@ public class JenaAuthStorageService implements AuthStorageService {
 	}
 
 	private boolean existsPrivate(AekosApiAuthKey key) {
-		Resource subject = authModel.createResource(AUTH_NAMESPACE + key.getKeyStringValue());
+		Resource subject = authModel.createResource(AUTH_NAMESPACE_V1_0 + key.getKeyStringValue());
 		if (authModel.containsResource(subject)) {
 			return true;
 		}

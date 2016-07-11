@@ -36,6 +36,8 @@ import au.org.aekos.util.ModelLoader;
 @PropertySource(value="file://${user.home}/aekos-api.properties", ignoreResourceNotFound=true)
 public class Application extends SpringBootServletInitializer {
 
+	public static final String API_NAMESPACE_V1_0 = "urn:api.aekos.org.au/1.0/";
+	
 	@Autowired
 	private Environment environment;
 	
