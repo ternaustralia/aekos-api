@@ -96,11 +96,11 @@
 	        </bean>     
 	    </constructor-arg>
 	</bean>	
-	<bean id="modelLoader" class="au.org.aekos.util.ModelLoader" />
+	<bean id="modelLoader" class="au.org.aekos.util.CoreDataAekosJenaModelFactory" />
 	
 	<bean id="dataModel" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
 		<property name="targetObject" ref="modelLoader" />
-		<property name="targetMethod" value="loadModel" />
+		<property name="targetMethod" value="getInstance" />
 	</bean>
 	
 	<!-- pre-populate the model with Darwin Core and trait data -->

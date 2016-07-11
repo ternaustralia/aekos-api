@@ -8,7 +8,6 @@ import java.io.OutputStream;
 import org.apache.catalina.Context;
 import org.apache.catalina.connector.Connector;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.tomcat.util.descriptor.web.SecurityCollection;
 import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +27,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.AbstractJsonpResponseBodyAdvice;
 
-import au.org.aekos.service.auth.AuthModelFactory;
-import au.org.aekos.util.ModelLoader;
+import au.org.aekos.util.AuthAekosJenaModelFactory;
+import au.org.aekos.util.CoreDataAekosJenaModelFactory;
+import au.org.aekos.util.MetricsAekosJenaModelFactory;
 
 @SpringBootApplication
 @PropertySource("classpath:/au/org/aekos/aekos-api.properties")
@@ -69,8 +69,8 @@ public class Application extends SpringBootServletInitializer {
     }
     
     @Bean
-    public Model dataModel(ModelLoader loader) {
-    	return loader.loadModel();
+    public Model dataModel(CoreDataAekosJenaModelFactory loader) {
+    	return loader.getInstance();
     }
     
     @Bean
@@ -106,12 +106,12 @@ public class Application extends SpringBootServletInitializer {
 	}
     
     @Bean
-    public Model metricsModel() {
-    	return ModelFactory.createDefaultModel();
+    public Model metricsModel(MetricsAekosJenaModelFactory factory) {
+    	return factory.getInstance();
     }
     
     @Bean
-    public Model authModel(AuthModelFactory factory) {
+    public Model authModel(AuthAekosJenaModelFactory factory) {
     	return factory.getInstance();
     }
     
