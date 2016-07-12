@@ -6,21 +6,22 @@ import java.io.InputStream;
 import org.springframework.util.FileCopyUtils;
 
 import au.org.aekos.service.metric.JenaMetricsStorageServiceTest;
+import au.org.aekos.util.WinCRUtil;
 
 public class TestUtils {
 
 	private TestUtils() { }
 	
 	public static String loadRetrieval(String filename) {
-		return load("retrieval/" + filename);
+		return WinCRUtil.cleanse(load("retrieval/" + filename));
 	}
 	
 	public static String loadAuth(String filename) {
-		return load("auth/" + filename);
+		return WinCRUtil.cleanse(load("auth/" + filename));
 	}
 	
 	public static String loadMetric(String filename) {
-		return load("metric/" + filename);
+		return WinCRUtil.cleanse(load("metric/" + filename));
 	}
 	
 	private static String load(String filename) {

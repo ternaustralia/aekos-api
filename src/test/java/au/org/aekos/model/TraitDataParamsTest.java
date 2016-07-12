@@ -12,6 +12,8 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.junit.Test;
 
+import au.org.aekos.util.WinCRUtil;
+
 public class TraitDataParamsTest {
 
 	/**

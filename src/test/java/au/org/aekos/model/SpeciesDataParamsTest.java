@@ -12,6 +12,8 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.junit.Test;
 
+import au.org.aekos.util.WinCRUtil;
+
 public class SpeciesDataParamsTest {
 
 	/**
@@ -25,6 +27,7 @@ public class SpeciesDataParamsTest {
 		objectUnderTest.appendTo(subject, metricsModel);
 		Writer out = new StringWriter();
 		metricsModel.write(out, "TURTLE");
+		
 		assertEquals(loadMetric("SpeciesDataParamsTest_testAppendTo01_expected.ttl"), out.toString());
 	}
 }

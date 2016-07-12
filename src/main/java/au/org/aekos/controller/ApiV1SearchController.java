@@ -56,7 +56,7 @@ public class ApiV1SearchController {
 
 	@RequestMapping(path="/getTraitsBySpecies.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ApiOperation(value = "Get all available traits for specified species", notes = "TODO", tags="Search")
-    public List<TraitVocabEntry> getTraitsBySpecies(@RequestParam(name="speciesName", required=true) 
+    public List<TraitOrEnvironmentalVariableVocabEntry> getTraitsBySpecies(@RequestParam(name="speciesName", required=true) 
     												String[] speciesNames,
 										    		@RequestParam(name="page", required = false)
     												int page , 

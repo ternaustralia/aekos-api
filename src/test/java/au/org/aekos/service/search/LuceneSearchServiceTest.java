@@ -38,19 +38,21 @@ public class LuceneSearchServiceTest {
 	   loader.addSpeciesTraitTermToIndex("speciesxxx", "traitOne");
 	   loader.endLoad();
 	   
-	   List<TraitOrEnvironmentalVariableVocabEntry> results = searchService.getTraitBySpecies(Arrays.asList("species"));
+	   PageRequest pr = new PageRequest(0, 0);
+	   
+	   List<TraitOrEnvironmentalVariableVocabEntry> results = searchService.getTraitBySpecies(Arrays.asList("species"), pr);
 	   Assert.assertTrue(results != null && results.size() == 3);
 	   Assert.assertEquals("traitOne", results.get(0).getCode());
 	   Assert.assertEquals("traitThree", results.get(1).getCode());
 	   Assert.assertEquals("traitTwo", results.get(2).getCode());
 	   
-	   List<TraitOrEnvironmentalVariableVocabEntry> results2 = searchService.getTraitBySpecies(Arrays.asList("species","speciesxx","speciesxxx"));
+	   List<TraitOrEnvironmentalVariableVocabEntry> results2 = searchService.getTraitBySpecies(Arrays.asList("species","speciesxx","speciesxxx"),pr);
 	   System.out.println(results2.size() + "*************************************************");
 	   
-	   List<SpeciesName> speciesList = searchService.getSpeciesByTrait(Arrays.asList("traitOne"));
+	   List<SpeciesName> speciesList = searchService.getSpeciesByTrait(Arrays.asList("traitOne"),pr);
 	   Assert.assertEquals(3, speciesList.size());
 	   
-	   speciesList = searchService.getSpeciesByTrait(Arrays.asList("traitOne","traitTwo","traitThree"));
+	   speciesList = searchService.getSpeciesByTrait(Arrays.asList("traitOne","traitTwo","traitThree"),pr);
 	   Assert.assertEquals(3, speciesList.size());
 	   
 	   indexManager.closeTermIndex();
@@ -64,7 +66,7 @@ public class LuceneSearchServiceTest {
 	   loader.addSpeciesEnvironmentTermToIndex("species", "environmentTwo");
 	   loader.endLoad();
 	   
-	   List<TraitOrEnvironmentalVariableVocabEntry> environmentList = searchService.getEnvironmentBySpecies(Arrays.asList("species"));
+	   List<TraitOrEnvironmentalVariableVocabEntry> environmentList = searchService.getEnvironmentBySpecies(Arrays.asList("species"), null);
 	   Assert.assertEquals(2, environmentList.size());
 	   indexManager.closeTermIndex();
     }

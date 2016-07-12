@@ -73,8 +73,8 @@ public class LuceneSearchService implements SearchService {
 		return query;
 	}
 	
-	private List<TraitVocabEntry> performSpeciesTraitSearchX(Query query, PageRequest pagination ){
-		List<TraitVocabEntry> responseList = new ArrayList<TraitVocabEntry>();
+	private List<TraitOrEnvironmentalVariableVocabEntry> performSpeciesTraitSearchX(Query query, PageRequest pagination ){
+		List<TraitOrEnvironmentalVariableVocabEntry> responseList = new ArrayList<TraitOrEnvironmentalVariableVocabEntry>();
 		IndexSearcher searcher = null;
 		PageResultMetadata pageMeta = new PageResultMetadata();
 		
@@ -89,14 +89,14 @@ public class LuceneSearchService implements SearchService {
 			TopDocs td = searcher.search(query, Integer.MAX_VALUE, new Sort(new SortField(IndexConstants.FLD_TRAIT, SortField.Type.STRING)));
 			pageMeta.totalResults = td.totalHits;
 		    if(td.totalHits > 0){
-		    	LinkedHashSet<TraitVocabEntry> uniqueResults = new LinkedHashSet<>();
+		    	LinkedHashSet<TraitOrEnvironmentalVariableVocabEntry> uniqueResults = new LinkedHashSet<>();
 		    	
 		    	
 		    	for(ScoreDoc scoreDoc : td.scoreDocs){
 		    		Document matchedDoc = searcher.doc(scoreDoc.doc);
 		    		String trait = matchedDoc.get(IndexConstants.FLD_TRAIT);
 		    		if(StringUtils.hasLength(trait)){
-		    			uniqueResults.add(new TraitVocabEntry(trait, trait));
+		    			uniqueResults.add(new TraitOrEnvironmentalVariableVocabEntry(trait, trait));
 		    		}
 		    	}
 		    	
@@ -113,8 +113,7 @@ public class LuceneSearchService implements SearchService {
 	}
 	
 	private List<TraitOrEnvironmentalVariableVocabEntry> performSpeciesTraitSearch(Query query, PageRequest pagination ){
-		List<List<TraitOrEnvironmentalVariableVocabEntry> responseList = new ArrayList<List<TraitOrEnvironmentalVariableVocabEntry>
-		>();
+		List<TraitOrEnvironmentalVariableVocabEntry> responseList = new ArrayList<>();
 		IndexSearcher searcher = null;
 		PageResultMetadata pageMeta = new PageResultMetadata();
 		try {
