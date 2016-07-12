@@ -20,9 +20,9 @@ import org.springframework.util.StringUtils;
 
 import com.opencsv.CSVReader;
 
-import au.org.aekos.model.EnvironmentVariable;
 import au.org.aekos.model.SpeciesName;
 import au.org.aekos.model.SpeciesSummary;
+import au.org.aekos.model.TraitOrEnvironmentalVariable;
 import au.org.aekos.model.TraitVocabEntry;
 
 @Service
@@ -32,7 +32,7 @@ public class StubSearchService implements SearchService {
 	private Map<SpeciesName, List<TraitVocabEntry>> traitBySpecies;
 	private List<TraitVocabEntry> traitVocabs;
 	private Map<String, List<SpeciesName>> speciesByTrait;
-	private Map<SpeciesName, List<EnvironmentVariable>> environmentBySpecies;
+	private Map<SpeciesName, List<TraitOrEnvironmentalVariable>> environmentBySpecies;
 	
 	@Value("${data-file.trait-vocab}")
 	private String dataFilePath;
@@ -74,10 +74,10 @@ public class StubSearchService implements SearchService {
 	}
 	
 	@Override
-	public List<EnvironmentVariable> getEnvironmentBySpecies(List<String> speciesNames) {
-		List<EnvironmentVariable> result = new ArrayList<>();
+	public List<TraitOrEnvironmentalVariable> getEnvironmentBySpecies(List<String> speciesNames) {
+		List<TraitOrEnvironmentalVariable> result = new ArrayList<>();
 		for (String curr : speciesNames) {
-			List<EnvironmentVariable> envForCurr = getEnvironmentBySpeciesHelper().get(new SpeciesName(curr));
+			List<TraitOrEnvironmentalVariable> envForCurr = getEnvironmentBySpeciesHelper().get(new SpeciesName(curr));
 			if (envForCurr == null) {
 				continue;
 			}
@@ -142,7 +142,7 @@ public class StubSearchService implements SearchService {
 		return speciesByTrait;
 	}
 	
-	private Map<SpeciesName, List<EnvironmentVariable>> getEnvironmentBySpeciesHelper() {
+	private Map<SpeciesName, List<TraitOrEnvironmentalVariable>> getEnvironmentBySpeciesHelper() {
 		if (environmentBySpecies == null) {
 			environmentBySpecies = initEnvironmentBySpecies();
 		}
@@ -185,8 +185,8 @@ public class StubSearchService implements SearchService {
 		return result;
 	}
 	
-	private Map<SpeciesName, List<EnvironmentVariable>> initEnvironmentBySpecies() {
-		Map<SpeciesName, List<EnvironmentVariable>> result = new HashMap<>();
+	private Map<SpeciesName, List<TraitOrEnvironmentalVariable>> initEnvironmentBySpecies() {
+		Map<SpeciesName, List<TraitOrEnvironmentalVariable>> result = new HashMap<>();
 		for (Entry<SpeciesName, Data> currEntry : initMainData().entrySet()) {
 			SpeciesName speciesName = currEntry.getKey();
 			result.put(speciesName, currEntry.getValue().envList);
@@ -205,20 +205,20 @@ public class StubSearchService implements SearchService {
 	
 	private class Data {
 		private List<TraitVocabEntry> traitList;
-		private List<EnvironmentVariable> envList;
+		private List<TraitOrEnvironmentalVariable> envList;
 
-		public Data(List<TraitVocabEntry> traitList, List<EnvironmentVariable> envList) {
+		public Data(List<TraitVocabEntry> traitList, List<TraitOrEnvironmentalVariable> envList) {
 			this.traitList = traitList;
 			this.envList = envList;
 		}
 	}
 	
-	private List<EnvironmentVariable> envList(String...envLabels) {
-		List<EnvironmentVariable> result = new ArrayList<>();
+	private List<TraitOrEnvironmentalVariable> envList(String...envLabels) {
+		List<TraitOrEnvironmentalVariable> result = new ArrayList<>();
 		for (String curr : envLabels) {
 			String noSpaces = curr.replaceAll("\\s", "");
 			String code = noSpaces.substring(0, 1).toLowerCase() + noSpaces.substring(1);
-			result.add(new EnvironmentVariable(code, curr));
+			result.add(new TraitOrEnvironmentalVariable(code, curr, "FIXME"));
 		}
 		return result;
 	}

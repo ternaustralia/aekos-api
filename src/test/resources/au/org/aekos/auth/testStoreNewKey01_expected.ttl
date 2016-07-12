@@ -1,0 +1,6 @@
+<urn:api.aekos.org.au/1.0/auth#AAABBB123>
+        a       <urn:api.aekos.org.au/1.0/auth#AekosApiAuthKey> ;
+        <urn:api.aekos.org.au/1.0/auth#ownedBy>
+                "test@example.com" ;
+        <urn:api.aekos.org.au/1.0/auth#signupMethod>
+                "EMAIL" .

@@ -14,6 +14,10 @@ public interface MetricsStorageService {
 		SPECIES_DATA,
 		TRAIT_DATA,
 		ENVIRONMENT_DATA;
+
+		public String getFullnamespace() {
+			return JenaMetricsStorageService.METRICS_NAMESPACE_V1_0 + name();
+		}
 	}
 	
 	void recordRequest(AekosApiAuthKey authKey, RequestType reqType, AbstractParams params);

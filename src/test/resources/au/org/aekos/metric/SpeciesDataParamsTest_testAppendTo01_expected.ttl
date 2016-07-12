@@ -1,0 +1,7 @@
+[ <urn:api.aekos.org.au/1.0/metrics#paramRows>
+          "20"^^<http://www.w3.org/2001/XMLSchema#int> ;
+  <urn:api.aekos.org.au/1.0/metrics#paramSpeciesNames>
+          "Species Two" , "Species One" ;
+  <urn:api.aekos.org.au/1.0/metrics#paramStart>
+          "0"^^<http://www.w3.org/2001/XMLSchema#int>
+] .

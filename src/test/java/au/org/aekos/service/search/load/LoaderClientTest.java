@@ -27,8 +27,6 @@ public class LoaderClientTest {
 		loaderClient.beginLoad();
 		
 		List<String> traits = Arrays.asList("Trait1","Trait2","Trait3","Trait4","Trait5");
-		
-		
 		loaderClient.addSpeciesTraitTermsToIndex("mySpecies", traits);
 		
 		loaderClient.endLoad();

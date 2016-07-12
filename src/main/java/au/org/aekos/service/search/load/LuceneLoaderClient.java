@@ -55,8 +55,10 @@ public class LuceneLoaderClient implements LoaderClient {
 	public void endLoad() {
 		try {
 			indexWriter.commit();
+			indexWriter.flush();
 			indexWriter.close();
-			
+			indexManager.flushDeletions();
+			//indexManager.getTermIndex().
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

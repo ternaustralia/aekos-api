@@ -2,7 +2,7 @@ package au.org.aekos.model;
 
 public class SpeciesOccurrenceRecord {
 
-	private static final String CSV_SEPARATOR = ",";
+	static final String CSV_SEPARATOR = ",";
 	private final double decimalLatitude;
     private final double decimalLongitude;
     private final String geodeticDatum;
@@ -75,24 +75,6 @@ public class SpeciesOccurrenceRecord {
 		return individualCount;
 	}
 
-	public static SpeciesOccurrenceRecord deserialiseFrom(String[] fields) {
-    	double decimalLatitudeField = Double.parseDouble(fields[0]);
-		double decimalLongitudeField = Double.parseDouble(fields[1]);
-		String geodeticDatumField = fields[2];
-		String locationIdField = fields[3];
-		String scientificNameField = fields[4];
-		int individualCountField = Integer.parseInt(fields[5]);
-		String eventDateField = fields[6];
-		int yearField = Integer.parseInt(fields[7]);
-		int monthField = Integer.parseInt(fields[8]);
-		String bibliographicCitationField = fields[9];
-		String samplingProtocolField = fields[10];
-		SpeciesOccurrenceRecord result = new SpeciesOccurrenceRecord(decimalLatitudeField, decimalLongitudeField,
-				geodeticDatumField, locationIdField, scientificNameField, individualCountField, eventDateField,
-				yearField, monthField, bibliographicCitationField, samplingProtocolField);
-		return result;
-    }
-
 	public String toCsv() {
 		StringBuilder result = new StringBuilder();
 		result.append(decimalLatitude);
@@ -145,7 +127,7 @@ public class SpeciesOccurrenceRecord {
 		return result.toString();
 	}
 	
-	private static String quote(String value) {
+	static String quote(String value) {
 		return "\"" + value + "\"";
 	}
 }

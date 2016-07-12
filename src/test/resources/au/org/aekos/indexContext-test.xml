@@ -17,7 +17,4 @@
 	<context:component-scan base-package="au.org.aekos.service.search" use-default-filters="true">
 	    <context:exclude-filter type="regex" expression="au.org.aekos.service.search.StubSearchService"/>
 	</context:component-scan>
-	
-	
-	
 </beans>

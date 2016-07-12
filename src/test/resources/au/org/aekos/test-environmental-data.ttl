@@ -3,48 +3,118 @@
 
 api:location-db06dcd590c3097320c84ab7b16fa9feb95a80d0
         a       <http://www.aekos.org.au/api/1.0#location> ;
-        api:decimalLatitude   "6289421"^^xsd:decimal ;
-        api:decimalLongitude  "225657"^^xsd:decimal ;
-        api:eventDate         "2016-01-12" ;
-        api:geodeticDatum     "Universal Transverse Mercator GDA94" ;
-        api:locationID        "aekos.org.au/collection/adelaide.edu.au/trend/SATFLB0026" ;
-        api:month             01 ;
-        api:otherEnv          <urn:otherenv:162903b9-f113-4264-b379-88bd2cfc8551> , <urn:otherenv:1ba9eea4-668c-443d-a450-3602073875d6> ;
-        api:year              2016 .
+        api:decimalLatitude         "6289421"^^xsd:decimal ;
+        api:decimalLongitude        "225657"^^xsd:decimal ;
+        api:disturbanceEvidenceVars <urn:disturbanceEvidenceCover:8239e171-b1f4-4d13-ac46-617119d43aaa> ;
+        api:eventDate               "2016-01-12" ;
+        api:geodeticDatum           "Universal Transverse Mercator GDA94" ;
+        api:landscapeVars           <urn:aspect:162903b9-f113-4264-b379-88bd2cfc8551> , <urn:slope:1ba9eea4-668c-443d-a450-3602073875d6> ;
+        api:locationID              "aekos.org.au/collection/adelaide.edu.au/trend/SATFLB0026" ;
+        api:month                   01 ;
+        api:noUnitVars              <urn:latestLandUse:8239e171-b1f4-4d13-ac46-617119d43aaa>, <urn:visibleFireEvidence:8239e171-b1f4-4d13-ac46-617119d43bbb>, <urn:soilType:8239e171-b1f4-4d13-ac46-617119d43ccc>, <urn:soilTexture:8239e171-b1f4-4d13-ac46-617119d43ddd>, <urn:surfaceType:8239e171-b1f4-4d13-ac46-617119d43eee>, <urn:disturbanceEvidenceType:8239e171-b1f4-4d13-ac46-617119d43fff>, <urn:erosionEvidenceType:8239e171-b1f4-4d13-ac46-617119d43ggg>, <urn:erosionEvidenceState:8239e171-b1f4-4d13-ac46-617119d43hhh> ;
+        api:soilVars                <urn:electricalConductivity:8239e171-b1f4-4d13-ac46-617119d43aaa>, <urn:totalOrganicCarbon:8239e171-b1f4-4d13-ac46-617119d43bbb>, <urn:clay:8239e171-b1f4-4d13-ac46-617119d43ccc>, <urn:ph:8239e171-b1f4-4d13-ac46-617119d43ddd>, <urn:silt:8239e171-b1f4-4d13-ac46-617119d43eee>, <urn:sand:8239e171-b1f4-4d13-ac46-617119d43fff> ;
+        api:windVars                <urn:windMaximumMean:1ba9eea4-668c-443d-a450-360207387aaa>, <urn:windMeanAverage:1ba9eea4-668c-443d-a450-360207387aab>, <urn:windMeanAverageDirection:1ba9eea4-668c-443d-a450-360207387aac> ;
+        api:year                    2016 .
 
-<urn:otherenv:162903b9-f113-4264-b379-88bd2cfc8551>
-        api:disturbanceEvidence  <urn:disturbance-evidence:8239e171-b1f4-4d13-ac46-617119d43a62> ;
-        api:landscape            <urn:landscape:12f76d56-94d4-4a22-ab45-4be594149190> ;
-        api:soil                 <urn:soil:57f1c7a0-1ff4-4116-9803-7faeb9f85e2d> .
+<urn:aspect:162903b9-f113-4264-b379-88bd2cfc8551>
+        api:name         "aspect" ;
+        api:units        "degrees" ;
+        api:value        "230"^^xsd:decimal .
+        
+<urn:slope:1ba9eea4-668c-443d-a450-3602073875d6>
+        api:name         "slope" ;
+        api:units        "degrees" ;
+        api:value        "10"^^xsd:decimal .
+        
+<urn:windMaximumMean:1ba9eea4-668c-443d-a450-360207387aaa>
+        api:name         "windMaximumMean" ;
+        api:units        "km/h" ;
+        api:value        "30"^^xsd:decimal .
+        
+<urn:windMeanAverage:1ba9eea4-668c-443d-a450-360207387aab>
+        api:name         "windMeanAverage" ;
+        api:units        "km/h" ;
+        api:value        "13"^^xsd:decimal .
+        
+<urn:windMeanAverageDirection:1ba9eea4-668c-443d-a450-360207387aac>
+        api:name         "windMeanAverageDirection" ;
+        api:units        "degrees" ;
+        api:value        "270"^^xsd:decimal .
 
-<urn:landscape:12f76d56-94d4-4a22-ab45-4be594149190>
-        api:aspectUnits  "degrees" ;
-        api:aspectValue  "230"^^xsd:decimal ;
-        api:slopeUnits   "degrees" ;
-        api:slopeValue   "10"^^xsd:decimal .
+<urn:latestLandUse:8239e171-b1f4-4d13-ac46-617119d43aaa>
+        api:name         "latestLandUse" ;
+        api:units        "" ;
+        api:value        "Farming" .
+
+<urn:visibleFireEvidence:8239e171-b1f4-4d13-ac46-617119d43bbb>
+        api:name         "visibleFireEvidence" ;
+        api:units        "" ;
+        api:value        "No evidence" .
+
+<urn:soilType:8239e171-b1f4-4d13-ac46-617119d43ccc>
+        api:name         "soilType" ;
+        api:units        "" ;
+        api:value        "Clay" .
+
+<urn:soilTexture:8239e171-b1f4-4d13-ac46-617119d43ddd>
+        api:name         "soilTexture" ;
+        api:units        "" ;
+        api:value        "Coarse" .
+
+<urn:surfaceType:8239e171-b1f4-4d13-ac46-617119d43eee>
+        api:name         "surfaceType" ;
+        api:units        "" ;
+        api:value        "Flat" .
+
+<urn:disturbanceEvidenceType:8239e171-b1f4-4d13-ac46-617119d43fff>
+        api:name         "disturbanceEvidenceType" ;
+        api:units        "" ;
+        api:value        "No effective disturbance" .
         
-<urn:otherenv:1ba9eea4-668c-443d-a450-3602073875d6>
-        api:disturbanceEvidence  <urn:disturbance-evidence:8239e171-b1f4-4d13-ac46-617119d43a62> ;
-        api:landscape            <urn:landscape:a35e323d-70f2-4a5b-9d51-b8920cc0608b> ;
-        api:soil                 <urn:soil:57f1c7a0-1ff4-4116-9803-7faeb9f85e2d> .
+<urn:erosionEvidenceType:8239e171-b1f4-4d13-ac46-617119d43ggg>
+        api:name         "erosionEvidenceType" ;
+        api:units        "" ;
+        api:value        "No evidence" .
         
-<urn:disturbance-evidence:8239e171-b1f4-4d13-ac46-617119d43a62>
-        api:type  "No effective disturbance" .
+<urn:erosionEvidenceState:8239e171-b1f4-4d13-ac46-617119d43hhh>
+        api:name         "erosionEvidenceState" ;
+        api:units        "" ;
+        api:value        "Good" .
         
-<urn:landscape:12f76d56-94d4-4a22-ab45-4be594149190>
-        api:aspectUnits  "degrees" ;
-        api:aspectValue  "230"^^xsd:decimal ;
-        api:slopeUnits   "degrees" ;
-        api:slopeValue   "10"^^xsd:decimal .
+<urn:electricalConductivity:8239e171-b1f4-4d13-ac46-617119d43aaa>
+        api:name         "electricalConductivity" ;
+        api:units        "millisiemens per metre" ;
+        api:value        "4"^^xsd:decimal .
         
-<urn:soil:57f1c7a0-1ff4-4116-9803-7faeb9f85e2d>
-        api:electricalConductivityUnits
-                "millisiemens per metre" ;
-        api:electricalConductivityValue
-                "4"^^xsd:decimal ;
-        api:pH                       5.4 ;
-        api:totalOrganicCarbonUnits  "percent" ;
-        api:totalOrganicCarbonValue  1.34 .
+<urn:totalOrganicCarbon:8239e171-b1f4-4d13-ac46-617119d43bbb>
+        api:name         "totalOrganicCarbon" ;
+        api:units        "percent" ;
+        api:value        1.34 .
+        
+<urn:clay:8239e171-b1f4-4d13-ac46-617119d43ccc>
+        api:name         "clay" ;
+        api:units        "dunno" ;
+        api:value        "Very" .
+        
+<urn:ph:8239e171-b1f4-4d13-ac46-617119d43ddd>
+        api:name         "ph" ;
+        api:units        "pH" ;
+        api:value        5.4 .
+        
+<urn:silt:8239e171-b1f4-4d13-ac46-617119d43eee>
+        api:name         "silt" ;
+        api:units        "siltiness" ;
+        api:value        "A lot" .
+        
+<urn:sand:8239e171-b1f4-4d13-ac46-617119d43fff>
+        api:name         "sand" ;
+        api:units        "sandiness" ;
+        api:value        "it's everywhere" .
+
+<urn:disturbanceEvidenceCover:8239e171-b1f4-4d13-ac46-617119d43aaa>
+        api:name         "disturbanceEvidenceCover" ;
+        api:units        "percent" ;
+        api:value        50 .
         
 api:location-284ab54489db265d8c1ef33d6661b45f925c6d7e
         a       <http://www.aekos.org.au/api/1.0#location> ;
@@ -54,23 +124,41 @@ api:location-284ab54489db265d8c1ef33d6661b45f925c6d7e
         api:geodeticDatum     "GDA94" ;
         api:locationID        "aekos.org.au/collection/adelaide.edu.au/trend/SATFLB0025" ;
         api:month             03 ;
-        api:weather           <urn:weather:c1fac121-e206-467c-afe2-4f4310102ce4> , <urn:weather:162cae90-6f8b-4e47-869d-44019ae2c1be> ;
+        api:rainfallVars      <urn:rainfallMean:162cae90-6f8b-4e47-869d-44019ae2c1be>, <urn:rainfallTotal:162cae90-6f8b-4e47-869d-44019ae2cddd>, <urn:rainfallMean:162cae90-6f8b-4e47-869d-44019ae2cccc>, <urn:rainfallTotal:162cae90-6f8b-4e47-869d-44019ae2ccee> ;
+        api:temperatureVars   <urn:temperatureMaximum:c1fac121-e206-467c-afe2-4f4310102ce4>, <urn:temperatureMean:c1fac121-e206-467c-afe2-4f4310102cff>, <urn:temperatureMinimum:c1fac121-e206-467c-afe2-4f4310102c33> ;
         api:year              1990 .
         
-<urn:weather:c1fac121-e206-467c-afe2-4f4310102ce4>
-        api:rainfallMean             0.013333333 ;
-        api:rainfallMeanUnits        "millilitres" ;
-        api:rainfallTotal            0.4 ;
-        api:rainfallTotalUnits       "millilitres" ;
-        api:temperatureMaximum       38.03157895 ;
-        api:temperatureMaximumUnits  "degrees Celcius" ;
-        api:temperatureMean          28.12631579 ;
-        api:temperatureMeanUnits     "degrees Celcius" ;
-        api:temperatureMinimum       16.86315789 ;
-        api:temperatureMinimumUnits  "degrees Celcius" .
+<urn:temperatureMaximum:c1fac121-e206-467c-afe2-4f4310102ce4>
+		api:name         "temperatureMaximum" ;
+        api:units        "degrees Celcius" ;
+        api:value        38.03157895 .
         
-<urn:weather:162cae90-6f8b-4e47-869d-44019ae2c1be>
-        api:rainfallMean        1.606451613 ;
-        api:rainfallMeanUnits   "millilitres" ;
-        api:rainfallTotal       49.8 ;
-        api:rainfallTotalUnits  "millilitres" .
+<urn:temperatureMean:c1fac121-e206-467c-afe2-4f4310102cff>
+		api:name         "temperatureMean" ;
+        api:units        "degrees Celcius" ;
+        api:value        28.12631579 .
+        
+<urn:temperatureMinimum:c1fac121-e206-467c-afe2-4f4310102c33>
+		api:name         "temperatureMinimum" ;
+        api:units        "degrees Celcius" ;
+        api:value        16.86315789 .
+
+<urn:rainfallMean:162cae90-6f8b-4e47-869d-44019ae2cccc>
+        api:name         "rainfallMean" ;
+        api:units        "millilitres" ;
+        api:value        0.013333333 .
+        
+<urn:rainfallTotal:162cae90-6f8b-4e47-869d-44019ae2ccee>
+        api:name         "rainfallTotal" ;
+        api:units        "millilitres" ;
+        api:value        0.4 .
+        
+<urn:rainfallMean:162cae90-6f8b-4e47-869d-44019ae2c1be>
+        api:name         "rainfallMean" ;
+        api:units        "millilitres" ;
+        api:value        1.606451613 .
+
+<urn:rainfallTotal:162cae90-6f8b-4e47-869d-44019ae2cddd>
+        api:name         "rainfallTotal" ;
+        api:units        "millilitres" ;
+        api:value        49.8 .

@@ -7,16 +7,16 @@ import java.nio.file.Paths;
 import org.apache.commons.lang.SystemUtils;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.SearcherFactory;
+import org.apache.lucene.search.SearcherManager;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.store.SimpleFSDirectory;
+import org.apache.lucene.store.NRTCachingDirectory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -29,7 +29,9 @@ public class TermIndexManagerImpl implements TermIndexManager, InitializingBean,
 
 	private static final Logger logger = LoggerFactory.getLogger(TermIndexManagerImpl.class);
 	
-	private Directory termIndex;
+	private FSDirectory termIndex;
+	
+	private SearcherManager searcherManager;
 	
 	@Value("${lucene.index.path}")
 	private String indexPath;
@@ -58,6 +60,7 @@ public class TermIndexManagerImpl implements TermIndexManager, InitializingBean,
 	
 	private void initialiseIndexDirectory() throws IOException{
 		ensureIndexPathExists();
+		//termIndex = new NRTCachingDirectory(FSDirectory.open(Paths.get(getIndexPath())), 5.0, 60.0);
 		termIndex = FSDirectory.open(Paths.get(getIndexPath()));
 	}
 
@@ -87,6 +90,7 @@ public class TermIndexManagerImpl implements TermIndexManager, InitializingBean,
 	
 	@Override
 	public IndexWriter getIndexWriter() throws IOException {
+		flushDeletions();
 		IndexWriterConfig config = new IndexWriterConfig(new StandardAnalyzer());
 		IndexWriterConfig.OpenMode openMode = createMode ? IndexWriterConfig.OpenMode.CREATE : IndexWriterConfig.OpenMode.CREATE_OR_APPEND;
 		config.setOpenMode(openMode);
@@ -95,8 +99,14 @@ public class TermIndexManagerImpl implements TermIndexManager, InitializingBean,
 
 	@Override
 	public IndexSearcher getIndexSearcher() throws IOException {
-		IndexSearcher searcher = new IndexSearcher( DirectoryReader.open(getTermIndex()) );
-		return searcher;
+		if(searcherManager == null){
+			searcherManager = new SearcherManager(getTermIndex(), new SearcherFactory());
+		}
+		return searcherManager.acquire();
+	}
+	
+	public void releaseIndexSearcher(IndexSearcher searcher) throws IOException{
+		searcherManager.release(searcher);
 	}
 	
 	public void writeDocument(Document doc, IndexWriter writer) throws IOException{
@@ -107,17 +117,22 @@ public class TermIndexManagerImpl implements TermIndexManager, InitializingBean,
 		}else{
 			writer.addDocument(doc);
 		}
-		
 	}
 
-	private void closeTermIndex() throws IOException{
+	public void closeTermIndex() throws IOException{
 		if(termIndex != null){
 			try {
+				flushDeletions();
+				if(searcherManager != null ){
+					searcherManager.close();
+				}
 				termIndex.close();
+				
 			} catch (IOException e) {
 				logger.error("Issue with Term Index",e);
 				throw e;
 			}
+			searcherManager = null;
 			termIndex = null;
 		}
 	}
@@ -125,6 +140,14 @@ public class TermIndexManagerImpl implements TermIndexManager, InitializingBean,
 	@Override
 	public void destroy() throws Exception {
 		closeTermIndex();
+	}
+
+	@Override
+	public void flushDeletions() throws IOException {
+		if(termIndex != null && termIndex.checkPendingDeletions()){
+			termIndex.deletePendingFiles();
+		}
+		
 	}
 	
 	

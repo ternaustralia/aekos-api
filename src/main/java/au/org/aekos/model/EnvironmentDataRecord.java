@@ -3,6 +3,7 @@ package au.org.aekos.model;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 
 public class EnvironmentDataRecord {
 
@@ -14,29 +15,11 @@ public class EnvironmentDataRecord {
     private final String eventDate;
     private final int year;
     private final int month;
-    private final Collection<Entry> variables = new LinkedList<>();
+    private final Collection<TraitOrEnvironmentalVariable> variables = new LinkedList<>();
     private final String bibliographicCitation;
     private final String samplingProtocol;
 
-    public static class Entry {
-    	private final String environmentalVariable;
-    	private final String environmentalVariableValue;
-		
-    	public Entry(String environmentalVariable, String environmentalVariableValue) {
-			this.environmentalVariable = environmentalVariable;
-			this.environmentalVariableValue = environmentalVariableValue;
-		}
-
-		public String getEnvironmentalVariable() {
-			return environmentalVariable;
-		}
-
-		public String getEnvironmentalVariableValue() {
-			return environmentalVariableValue;
-		}
-    }
-    
-	public EnvironmentDataRecord(double decimalLatitude, double decimalLongitude, String geodeticDatum, String locationID,
+    public EnvironmentDataRecord(double decimalLatitude, double decimalLongitude, String geodeticDatum, String locationID,
 			String eventDate, int year, int month, String bibliographicCitation, String samplingProtocol) {
 		this.decimalLatitude = decimalLatitude;
 		this.decimalLongitude = decimalLongitude;
@@ -85,31 +68,12 @@ public class EnvironmentDataRecord {
 		return samplingProtocol;
 	}
 
-	public Collection<Entry> getVariables() {
+	public Collection<TraitOrEnvironmentalVariable> getVariables() {
 		return Collections.unmodifiableCollection(variables);
 	}
 
-	public void addVariable(Entry entry) {
+	public void addVariable(TraitOrEnvironmentalVariable entry) {
 		variables.add(entry);
-	}
-	
-	public static EnvironmentDataRecord deserialiseFrom(String[] fields) {
-		int fieldIndex = 0;
-		double decimalLatitudeField = Double.parseDouble(fields[fieldIndex++]);
-		double decimalLongitudeField = Double.parseDouble(fields[fieldIndex++]);
-		String geodeticDatumField = fields[fieldIndex++];
-		String locationIdField = fields[fieldIndex++];
-		String eventDateField = fields[fieldIndex++];
-		int yearField = Integer.parseInt(fields[fieldIndex++]);
-		int monthField = Integer.parseInt(fields[fieldIndex++]);
-		String envVarField = fields[fieldIndex++];
-		String envVarValueField = fields[fieldIndex++];
-		String bibliographicCitationField = fields[fieldIndex++];
-		String samplingProtocolField = fields[fieldIndex++];
-		EnvironmentDataRecord result = new EnvironmentDataRecord(decimalLatitudeField, decimalLongitudeField,
-				geodeticDatumField, locationIdField, eventDateField, yearField, monthField, bibliographicCitationField, samplingProtocolField);
-		result.addVariable(new Entry(envVarField, envVarValueField));
-		return result;
 	}
 
 	public String toCsv() {
@@ -131,11 +95,13 @@ public class EnvironmentDataRecord {
 		result.append(quote(bibliographicCitation));
 		result.append(CSV_SEPARATOR);
 		result.append(quote(samplingProtocol));
-		for (Entry curr : variables) {
+		for (TraitOrEnvironmentalVariable curr : variables) {
 			result.append(CSV_SEPARATOR);
-			result.append(quote(curr.environmentalVariable));
+			result.append(quote(curr.getName()));
 			result.append(CSV_SEPARATOR);
-			result.append(quote(curr.environmentalVariableValue));
+			result.append(quote(curr.getValue()));
+			result.append(CSV_SEPARATOR);
+			result.append(quote(curr.getUnits()));
 		}
 		return result.toString();
 	}
@@ -163,8 +129,10 @@ public class EnvironmentDataRecord {
 		result.append(quote("bibliographicCitation"));
 		result.append(CSV_SEPARATOR);
 		result.append(quote("samplingProtocol"));
-		result.append(CSV_SEPARATOR);
-		result.append(quote("FIXME add all the vars")); // FIXME
 		return result.toString();
+	}
+
+	public boolean matchesTraitFilter(List<String> varNames) {
+		return Helper.matchesFilter(varNames, variables);
 	}
 }
