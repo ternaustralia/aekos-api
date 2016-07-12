@@ -1,0 +1,42 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-spring4-4.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>&AElig;KOS API - signup and API key</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+<script type="text/javascript" src="/thirdparty/startbootstrap-stylish-portfolio-1.0.4/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="/thirdparty/startbootstrap-stylish-portfolio-1.0.4/css/bootstrap.min.css" />
+<!-- Custom JS -->
+<script type="text/javascript" src="/js/aekos-api.js"></script>
+<!-- Custom CSS -->
+<link rel="stylesheet" href="/thirdparty/startbootstrap-stylish-portfolio-1.0.4/css/stylish-portfolio.css"/>
+<link rel="stylesheet" href="/css/aekos-api.css" />
+<!-- Custom Fonts -->
+<link href="/thirdparty/startbootstrap-stylish-portfolio-1.0.4/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
+<link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css"/>
+
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<style>
+.error-template {padding: 40px 15px;text-align: center;}
+.error-actions {margin-top:15px;margin-bottom:15px;}
+.error-actions .btn { margin-right:10px; }
+</style>
+</head>
+<body class="header">
+	<div class="container">
+	    <div class="row">
+	        <div class="col-md-12">
+	            <div class="error-template">
+	                <h1>
+	                    Welcome!</h1>
+	                <h2>
+	                    You've successfully signed up to use the &AElig;KOS API
+	                </h2>
+	                Your API key is ${application.keyUUIDString}.
+	                We will insert more usage info soon.
+	            </div>
+	        </div>
+	    </div>
+	</div>	
+</body>
+</html>

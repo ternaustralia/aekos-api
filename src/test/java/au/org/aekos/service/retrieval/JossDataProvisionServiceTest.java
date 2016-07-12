@@ -33,7 +33,7 @@ public class JossDataProvisionServiceTest {
     	InputStream in = this.getClass().getClassLoader().getResourceAsStream(jossDataResourcePath);
     	URL handle = objectUnderTest.storeData(in);
 
-		String compareStr = "https://swift.rc.nectar.org.au:8888/v1/AUTH_" + jossTenantId + "/" + objectUnderTest.AEKOS_BUCKET_NAME + "/" + objectUnderTest.AEKOS_BUCKET_ITEM_STUB;
+		String compareStr = "https://swift.rc.nectar.org.au:8888/v1/AUTH_" + jossTenantId + "/" + JossDataProvisionService.AEKOS_BUCKET_NAME + "/" + JossDataProvisionService.AEKOS_BUCKET_ITEM_STUB;
     	assertThat(handle.toString(), startsWith(compareStr));
 	}
 }
