@@ -2,6 +2,8 @@ package au.org.aekos;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -23,7 +25,11 @@ import static com.google.common.collect.Lists.*;
 
 @Configuration
 @EnableSwagger2
-public class SwaggerConfig {                                    
+public class SwaggerConfig {   
+	
+	@Value("${aekos-api.version}")
+	private String apiVersion;
+	
 	@Bean
 	public Docket api() { 
 		return new Docket(DocumentationType.SWAGGER_2)  
@@ -71,10 +77,10 @@ public class SwaggerConfig {
 	
 	private ApiInfo apiInfo() {
 		ApiInfo apiInfo = new ApiInfo(
-				"Aekos REST API",
-				"TODO - A custom description of Aekos API.",
-				"TODO - Version", 
-				"TODO - Aekos API TOS",
+				"ÆKOS REST API",
+				"The ÆKOS API is used for M2M REST access to ÆKOS ecological data.",
+				apiVersion, 
+				"TODO - ÆKOS API TOS",
 				new Contact("TERN Ecoinformatics", "http://www.aekos.org.au", "api@aekos.org.au"),
 				"TODO - License of API",
 				"http://api.aekos.org.au");
