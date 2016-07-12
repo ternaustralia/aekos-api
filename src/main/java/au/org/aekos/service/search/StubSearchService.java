@@ -47,7 +47,7 @@ public class StubSearchService implements SearchService {
 	}
 	
 	@Override
-	public List<TraitVocabEntry> getTraitBySpecies(List<String> speciesNames) {
+	public List<TraitVocabEntry> getTraitBySpecies(List<String> speciesNames, PageRequest pagination) {
 		List<TraitVocabEntry> result = new ArrayList<>();
 		Map<SpeciesName, List<TraitVocabEntry>> traitBySpeciesData = getTraitBySpeciesHelper();
 		for (String curr : speciesNames) {
@@ -61,7 +61,7 @@ public class StubSearchService implements SearchService {
 	}
 
 	@Override
-	public List<SpeciesName> getSpeciesByTrait(List<String> traitNames) {
+	public List<SpeciesName> getSpeciesByTrait(List<String> traitNames, PageRequest pagination) {
 		List<SpeciesName> result = new ArrayList<>();
 		for (String curr : traitNames) {
 			List<SpeciesName> speciesForCurr = getSpeciesByTraitHelper().get(curr);
@@ -74,7 +74,7 @@ public class StubSearchService implements SearchService {
 	}
 	
 	@Override
-	public List<TraitOrEnvironmentalVariable> getEnvironmentBySpecies(List<String> speciesNames) {
+	public List<TraitOrEnvironmentalVariable> getEnvironmentBySpecies(List<String> speciesNames, PageRequest pagination) {
 		List<TraitOrEnvironmentalVariable> result = new ArrayList<>();
 		for (String curr : speciesNames) {
 			List<TraitOrEnvironmentalVariable> envForCurr = getEnvironmentBySpeciesHelper().get(new SpeciesName(curr));

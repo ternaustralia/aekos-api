@@ -44,21 +44,21 @@ public class LuceneSearchService implements SearchService {
 	//Max of 1024 species names??  or split into 2 or more queries . . . . 
 	
 	@Override //TODO throw a nice exception to perhaps return a tidy error in the json response?
-	public List<TraitVocabEntry> getTraitBySpecies(List<String> speciesNames) {
+	public List<TraitVocabEntry> getTraitBySpecies(List<String> speciesNames, PageRequest pagination) {
 		Query query = buildFieldOrQuery(speciesNames, IndexConstants.FLD_SPECIES, DocumentType.TRAIT_SPECIES);
-		return performSpeciesTraitSearch(query);
+		return performSpeciesTraitSearch(query, pagination);
 	}
 	
 	@Override
-	public List<SpeciesName> getSpeciesByTrait(List<String> traitNames) {
+	public List<SpeciesName> getSpeciesByTrait(List<String> traitNames,PageRequest pagination) {
 		Query query = buildFieldOrQuery(traitNames, IndexConstants.FLD_TRAIT, DocumentType.TRAIT_SPECIES);
-		return performTraitSpeciesSearch(query );
+		return performTraitSpeciesSearch(query, pagination );
 	}
 	
 	@Override
-	public List<TraitOrEnvironmentalVariable> getEnvironmentBySpecies(List<String> speciesNames) {
+	public List<TraitOrEnvironmentalVariable> getEnvironmentBySpecies(List<String> speciesNames,PageRequest pagination) {
 		Query query = buildFieldOrQuery(speciesNames, IndexConstants.FLD_SPECIES, DocumentType.SPECIES_ENV);
-		return performSpeciesEnvironmentSearch(query);
+		return performSpeciesEnvironmentSearch(query, pagination);
 	}
 
 	private Query buildFieldOrQuery(List<String> fieldStrings, String searchField, DocumentType documentType) {
@@ -74,20 +74,25 @@ public class LuceneSearchService implements SearchService {
 		return query;
 	}
 	
-	private List<TraitVocabEntry> performSpeciesTraitSearch(Query query ){
+	private List<TraitVocabEntry> performSpeciesTraitSearchX(Query query, PageRequest pagination ){
 		List<TraitVocabEntry> responseList = new ArrayList<TraitVocabEntry>();
 		IndexSearcher searcher = null;
+		PageResultMetadata pageMeta = new PageResultMetadata();
+		
 		try {
 			searcher = termIndexManager.getIndexSearcher();
 		} catch (IOException e) {
 			logger.error("Can't search trait by species - IOException - returning empty list", e);
 			return responseList;
 		}
+		
 		try {
 			TopDocs td = searcher.search(query, Integer.MAX_VALUE, new Sort(new SortField(IndexConstants.FLD_TRAIT, SortField.Type.STRING)));
-		    int totalTraits = td.totalHits;
+			pageMeta.totalResults = td.totalHits;
 		    if(td.totalHits > 0){
 		    	LinkedHashSet<TraitVocabEntry> uniqueResults = new LinkedHashSet<>();
+		    	
+		    	
 		    	for(ScoreDoc scoreDoc : td.scoreDocs){
 		    		Document matchedDoc = searcher.doc(scoreDoc.doc);
 		    		String trait = matchedDoc.get(IndexConstants.FLD_TRAIT);
@@ -95,6 +100,9 @@ public class LuceneSearchService implements SearchService {
 		    			uniqueResults.add(new TraitVocabEntry(trait, trait));
 		    		}
 		    	}
+		    	
+		    	
+		    	
 		    	responseList.addAll(uniqueResults);
 		    }
 		    termIndexManager.releaseIndexSearcher(searcher);
@@ -105,7 +113,44 @@ public class LuceneSearchService implements SearchService {
 		return responseList;
 	}
 	
-	private List<SpeciesName> performTraitSpeciesSearch(Query query ){
+	private List<TraitVocabEntry> performSpeciesTraitSearch(Query query, PageRequest pagination ){
+		List<TraitVocabEntry> responseList = new ArrayList<TraitVocabEntry>();
+		IndexSearcher searcher = null;
+		PageResultMetadata pageMeta = new PageResultMetadata();
+		try {
+			searcher = termIndexManager.getIndexSearcher();
+		} catch (IOException e) {
+			logger.error("Can't search trait by species - IOException - returning empty list", e);
+			return responseList;
+		}
+		try {
+			TopDocs td = searcher.search(query, Integer.MAX_VALUE, new Sort(new SortField(IndexConstants.FLD_TRAIT, SortField.Type.STRING)));
+			pageMeta.totalResults = td.totalHits;
+		    if(td.totalHits > 0){
+		    	LinkedHashSet<TraitVocabEntry> uniqueResults = new LinkedHashSet<>();
+		    	
+		    	
+		    	for(ScoreDoc scoreDoc : td.scoreDocs){
+		    		Document matchedDoc = searcher.doc(scoreDoc.doc);
+		    		String trait = matchedDoc.get(IndexConstants.FLD_TRAIT);
+		    		if(StringUtils.hasLength(trait)){
+		    			uniqueResults.add(new TraitVocabEntry(trait, trait));
+		    		}
+		    	}
+		    	
+		    	
+		    	
+		    	responseList.addAll(uniqueResults);
+		    }
+		    termIndexManager.releaseIndexSearcher(searcher);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return responseList;
+	}
+	
+	private List<SpeciesName> performTraitSpeciesSearch(Query query, PageRequest pagination ){
 		List<SpeciesName> responseList = new ArrayList<SpeciesName>();
 		IndexSearcher searcher = null;
 		try {
@@ -136,13 +181,14 @@ public class LuceneSearchService implements SearchService {
 		return responseList;
 	}
 	
-	private List<TraitOrEnvironmentalVariable> performSpeciesEnvironmentSearch(Query query ){
+	private List<TraitOrEnvironmentalVariable> performSpeciesEnvironmentSearch(Query query, PageRequest pagination ){
 		List<TraitOrEnvironmentalVariable> responseList = new ArrayList<TraitOrEnvironmentalVariable>();
 		IndexSearcher searcher = null;
+		
 		try {
 			searcher = termIndexManager.getIndexSearcher();
 		} catch (IOException e) {
-			logger.error("Can't search trait by species - IOException - returning empty list", e);
+			logger.error("Can't search species by environment - IOException - returning empty list", e);
 			return responseList;
 		}
 		

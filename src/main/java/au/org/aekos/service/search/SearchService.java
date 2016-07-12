@@ -23,29 +23,31 @@ public interface SearchService {
 	 * species X does have a value recorded for trait Y.
 	 * 
 	 * @param speciesNames 	species to look up traits for
+	 * @param pageReq       pagination request
 	 * @return				list of traits available for the supplied species
 	 */
-	List<TraitVocabEntry> getTraitBySpecies(List<String> speciesNames);
+	List<TraitVocabEntry> getTraitBySpecies(List<String> speciesNames, PageRequest pageReq);
 
 	/**
 	 * Looks up the environment variables that have data recorded for the supplied species names.
 	 * 
 	 * The values of these environment variables are NOT returned, this is only to know that
 	 * species X does have a value recorded for environment variable Z. More accurately,
-	 * species X occurs at site Y, which has environment variable Z.
-	 * 
-	 * @param speciesNames 	species to look up environment variables for
-	 * @return				list of environment variables available for the supplied species
+	 * species X occurs at site Y, which has environment variable Z.	 * 
+	 * @param speciesNames  species to look up environment variables for
+	 * @param pageReq       pagination request
+	 * @return              list of environment variables available for the supplied species
 	 */
-	List<TraitOrEnvironmentalVariable> getEnvironmentBySpecies(List<String> speciesNames);
+	List<TraitOrEnvironmentalVariable> getEnvironmentBySpecies(List<String> speciesNames, PageRequest pageReq);
 	
 	/**
 	 * Looks up the species that have data recorded for the supplied trait names.
 	 * 
 	 * @param traitNames	trait names to search for
+	 * @param pageReq       pagination request
 	 * @return				species names that have data recorded for the supplied traits
 	 */
-	List<SpeciesName> getSpeciesByTrait(List<String> traitNames);
+	List<SpeciesName> getSpeciesByTrait(List<String> traitNames, PageRequest pageReq);
 
 	/**
 	 * Finds possible species name matches for the supplied partial name.
