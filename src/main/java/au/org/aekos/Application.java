@@ -97,6 +97,11 @@ public class Application extends SpringBootServletInitializer {
     public String traitDataCountQueryTemplate() throws IOException {
 		return getSparqlQuery("trait-data-count.rq");
     }
+    
+    @Bean
+    public String indexLoaderQuery() throws IOException {
+		return getSparqlQuery("index-loader.rq");
+    }
 
 	private String getSparqlQuery(String fileName) throws IOException {
 		InputStream sparqlIS = Thread.currentThread().getContextClassLoader().getResourceAsStream("au/org/aekos/sparql/" + fileName);

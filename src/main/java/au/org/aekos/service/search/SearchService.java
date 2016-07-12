@@ -4,17 +4,20 @@ import java.util.List;
 
 import au.org.aekos.model.SpeciesName;
 import au.org.aekos.model.SpeciesSummary;
-import au.org.aekos.model.TraitOrEnvironmentalVariable;
-import au.org.aekos.model.TraitVocabEntry;
+import au.org.aekos.model.TraitOrEnvironmentalVariableVocabEntry;
 
 public interface SearchService {
 
 	/**
 	 * Gets the whole trait vocabulary.
 	 * 
-	 * @return
+	 * The trait vocabulary is a distinct list of all the traits that appear in the
+	 * system. It can be used to populate a UI to aid in the *byTrait searches and for
+	 * supplying a filter list of traits to the retrieve service.
+	 * 
+	 * @return	distinct list of traits in the system
 	 */
-	List<TraitVocabEntry> getTraitVocabData();
+	List<TraitOrEnvironmentalVariableVocabEntry> getTraitVocabData();
 
 	/**
 	 * Looks up the traits that have data recorded for the supplied species names.
@@ -25,7 +28,7 @@ public interface SearchService {
 	 * @param speciesNames 	species to look up traits for
 	 * @return				list of traits available for the supplied species
 	 */
-	List<TraitVocabEntry> getTraitBySpecies(List<String> speciesNames);
+	List<TraitOrEnvironmentalVariableVocabEntry> getTraitBySpecies(List<String> speciesNames);
 
 	/**
 	 * Looks up the environment variables that have data recorded for the supplied species names.
@@ -37,7 +40,7 @@ public interface SearchService {
 	 * @param speciesNames 	species to look up environment variables for
 	 * @return				list of environment variables available for the supplied species
 	 */
-	List<TraitOrEnvironmentalVariable> getEnvironmentBySpecies(List<String> speciesNames);
+	List<TraitOrEnvironmentalVariableVocabEntry> getEnvironmentBySpecies(List<String> speciesNames);
 	
 	/**
 	 * Looks up the species that have data recorded for the supplied trait names.

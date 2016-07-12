@@ -3,12 +3,15 @@ package au.org.aekos.service.retrieval;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.jena.query.Query;
@@ -76,6 +79,10 @@ public class JenaRetrievalService implements RetrievalService {
 	@Autowired
 	@Qualifier("traitDataCountQueryTemplate")
 	private String traitDataCountQueryTemplate;
+	
+	@Autowired
+	@Qualifier("indexLoaderQuery")
+	private String indexLoaderQuery;
 	
 	@Override
 	public SpeciesDataResponse getSpeciesDataJson(List<String> speciesNames, int start, int rows) throws AekosApiRetrievalException {
@@ -173,6 +180,39 @@ public class JenaRetrievalService implements RetrievalService {
 		}
 	}
 	
+	@Override
+	public void getIndexStream(IndexLoaderCallback callback) {
+		String sparql = indexLoaderQuery;
+		logger.debug("Index loader SPARQL: " + sparql);
+		Query query = QueryFactory.create(sparql);
+		try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
+			ResultSet results = qexec.execSelect();
+			if (!results.hasNext()) {
+				throw new IllegalStateException("Data problem: no results were found.");
+			}
+			for (; results.hasNext();) {
+				QuerySolution s = results.next();
+				String scientificName = getString(s, "scientificName");
+				// env
+				EnvironmentDataRecord envRecord = new EnvironmentDataRecord(0, 0, "", "", "", 0, 0, "", "");
+				processEnvDataVars(Collections.emptyList(), s.get("loc").asResource(), envRecord, "noUnitsVars");
+				// traits
+				TraitDataRecord traitRecord = new TraitDataRecord(0, 0, "", "", "", 0, "", 0, 0, "", "");
+				processTraitDataVars(s.get("dwr").asResource(), traitRecord, "trait", Collections.emptyList());
+				Set<String> traitNames = new HashSet<>();
+				for (TraitOrEnvironmentalVariable curr : traitRecord.getTraits()) {
+					traitNames.add(curr.getName());
+				}
+				Set<String> envVarNames = new HashSet<>();
+				for (TraitOrEnvironmentalVariable curr : envRecord.getVariables()) {
+					envVarNames.add(curr.getName());
+				}
+				// result
+				callback.accept(new IndexLoaderRecord(scientificName, traitNames, envVarNames));
+			}
+		}
+	}
+	
 	private SpeciesDataResponse getSpeciesDataJsonPrivate(List<String> speciesNames, int start, int rows) {
 		// FIXME make species names case insensitive (try binding an LCASE(?scientificName) and using that
 		long startTime = new Date().getTime();
@@ -254,7 +294,7 @@ public class JenaRetrievalService implements RetrievalService {
 			locationIds.get(locationID).samplingProtocol);
 		for (String currVarProp : Arrays.asList("disturbanceEvidenceVars", "landscapeVars", "noUnitVars", 
 				"rainfallVars", "soilVars", "temperatureVars", "windVars")) {
-			processEnvDataVars(varNames, s, record, currVarProp);
+			processEnvDataVars(varNames, s.get("s").asResource(), record, currVarProp);
 		}
 		boolean isEnvVarFilterEnabled = varNames.size() > 0;
 		if (isEnvVarFilterEnabled && !record.matchesTraitFilter(varNames)) {
@@ -263,13 +303,12 @@ public class JenaRetrievalService implements RetrievalService {
 		records.add(record);
 	}
 
-	private void processEnvDataVars(List<String> varNames, QuerySolution s, EnvironmentDataRecord record, String propName) {
-		Resource locationSubject = s.get("s").asResource();
+	private void processEnvDataVars(List<String> varNames, Resource locationSubject, EnvironmentDataRecord record, String propName) {
 		StmtIterator varsIterator = locationSubject.listProperties(prop(propName));
+		boolean isEnvVarFilterEnabled = varNames.size() > 0;
 		while (varsIterator.hasNext()) {
 			Resource currVar = varsIterator.next().getResource();
 			String name = currVar.getProperty(prop("name")).getString();
-			boolean isEnvVarFilterEnabled = varNames.size() > 0;
 			if (isEnvVarFilterEnabled && !varNames.contains(name)) {
 				continue;
 			}
@@ -341,7 +380,7 @@ public class JenaRetrievalService implements RetrievalService {
 	
 	private void processTraitDataSolution(List<String> traitNames, List<TraitDataRecord> records, QuerySolution s) {
 		TraitDataRecord record = processSpeciesDataSolution(s);
-		processTraitDataVars(s, record, "trait", traitNames);
+		processTraitDataVars(s.get("s").asResource(), record, "trait", traitNames);
 		boolean isTraitFilterEnabled = traitNames.size() > 0;
 		if (isTraitFilterEnabled && !record.matchesTraitFilter(traitNames)) {
 			return;
@@ -349,8 +388,7 @@ public class JenaRetrievalService implements RetrievalService {
 		records.add(record);
 	}
 
-	private void processTraitDataVars(QuerySolution s, TraitDataRecord record, String propName, List<String> traitNames) {
-		Resource speciesEntity = s.get("s").asResource();
+	private void processTraitDataVars(Resource speciesEntity, TraitDataRecord record, String propName, List<String> traitNames) {
 		StmtIterator varsIterator = speciesEntity.listProperties(prop(propName));
 		boolean isTraitFilterEnabled = traitNames.size() > 0;
 		while (varsIterator.hasNext()) {
