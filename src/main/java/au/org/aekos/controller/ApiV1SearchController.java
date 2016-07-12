@@ -7,7 +7,6 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -16,8 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import au.org.aekos.model.SpeciesName;
 import au.org.aekos.model.SpeciesSummary;
-import au.org.aekos.model.TraitOrEnvironmentalVariable;
-import au.org.aekos.model.TraitVocabEntry;
+import au.org.aekos.model.TraitOrEnvironmentalVariableVocabEntry;
 import au.org.aekos.service.search.PageRequest;
 import au.org.aekos.service.search.SearchService;
 import au.org.aekos.service.search.index.SpeciesLookupIndexService;
@@ -36,7 +34,6 @@ public class ApiV1SearchController {
 	// TODO do we accept LSID/species ID and/or a species name for the species related services?
 	
 	@Autowired
-	@Qualifier("stubSearchService")
 	private SearchService searchService;
 	
 	@Autowired
@@ -45,7 +42,7 @@ public class ApiV1SearchController {
 	//Is this a list of all the traits?  I guess so . . .
 	@RequestMapping(path="/getTraitVocab.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ApiOperation(value = "Get trait vocabulary", notes = "TODO", tags="Search")
-    public List<TraitVocabEntry> getTraitVocab(HttpServletResponse resp) {
+    public List<TraitOrEnvironmentalVariableVocabEntry> getTraitVocab(HttpServletResponse resp) {
 		return searchService.getTraitVocabData();
 	}
 
@@ -84,7 +81,7 @@ public class ApiV1SearchController {
 	
 	@RequestMapping(path="/getEnvironmentBySpecies.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ApiOperation(value = "Get all available environment variable names for specified species", notes = "TODO", tags="Search")
-    public List<TraitOrEnvironmentalVariable> getEnvironmentBySpecies(@RequestParam(name="speciesName") String[] speciesNames,
+    public List<TraitOrEnvironmentalVariableVocabEntry> getEnvironmentBySpecies(@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(name="page", required = false)
 			int page , 
     		@RequestParam(name="numResults", required=false) 

@@ -1,0 +1,12 @@
+<urn:cbfbaccb-43c6-47a9-bddf-93a4c0077963>
+        a       <urn:api.aekos.org.au/1.0/metrics#TRAIT_DATA> ;
+        <urn:api.aekos.org.au/1.0/metrics#authKey>
+                "CAFEBABE1234" ;
+        <urn:api.aekos.org.au/1.0/metrics#paramRows>
+                "20"^^<http://www.w3.org/2001/XMLSchema#int> ;
+        <urn:api.aekos.org.au/1.0/metrics#paramSpeciesNames>
+                "atriplex vesicaria" ;
+        <urn:api.aekos.org.au/1.0/metrics#paramStart>
+                "0"^^<http://www.w3.org/2001/XMLSchema#int> ;
+        <urn:api.aekos.org.au/1.0/metrics#paramTraits>
+                "Height" .

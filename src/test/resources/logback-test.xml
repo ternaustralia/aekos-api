@@ -2,6 +2,7 @@
 <configuration>
     <include resource="org/springframework/boot/logging/logback/base.xml" />
     <logger name="au.org.aekos.service.retrieval.JenaRetrievalService" level="DEBUG" />
+    <logger name="au.org.aekos.util" level="DEBUG" />
     <logger name="au.org.aekos" level="INFO" />
     <root level="WARN" />
 </configuration>

@@ -57,6 +57,14 @@
 	    </constructor-arg>
 	</bean>
 	
+	<bean id="indexLoaderQuery" class="java.lang.String">
+	    <constructor-arg>
+	        <bean class="org.springframework.util.FileCopyUtils" factory-method="copyToByteArray">
+	            <constructor-arg value="classpath:au/org/aekos/sparql/index-loader.rq" type="java.io.InputStream" />
+	        </bean>     
+	    </constructor-arg>
+	</bean>
+	
 	<bean id="testGetSpeciesDataCsv01_expected" class="java.lang.String">
 	    <constructor-arg>
 	        <bean class="org.springframework.util.FileCopyUtils" factory-method="copyToByteArray">
@@ -96,11 +104,11 @@
 	        </bean>     
 	    </constructor-arg>
 	</bean>	
-	<bean id="modelLoader" class="au.org.aekos.util.ModelLoader" />
+	<bean id="modelLoader" class="au.org.aekos.util.CoreDataAekosJenaModelFactory" />
 	
 	<bean id="dataModel" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
 		<property name="targetObject" ref="modelLoader" />
-		<property name="targetMethod" value="loadModel" />
+		<property name="targetMethod" value="getInstance" />
 	</bean>
 	
 	<!-- pre-populate the model with Darwin Core and trait data -->

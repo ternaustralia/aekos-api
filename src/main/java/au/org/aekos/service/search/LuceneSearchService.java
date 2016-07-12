@@ -24,8 +24,7 @@ import org.springframework.util.StringUtils;
 
 import au.org.aekos.model.SpeciesName;
 import au.org.aekos.model.SpeciesSummary;
-import au.org.aekos.model.TraitOrEnvironmentalVariable;
-import au.org.aekos.model.TraitVocabEntry;
+import au.org.aekos.model.TraitOrEnvironmentalVariableVocabEntry;
 import au.org.aekos.service.search.index.DocumentType;
 import au.org.aekos.service.search.index.IndexConstants;
 import au.org.aekos.service.search.index.SpeciesLookupIndexService;
@@ -44,7 +43,7 @@ public class LuceneSearchService implements SearchService {
 	//Max of 1024 species names??  or split into 2 or more queries . . . . 
 	
 	@Override //TODO throw a nice exception to perhaps return a tidy error in the json response?
-	public List<TraitVocabEntry> getTraitBySpecies(List<String> speciesNames, PageRequest pagination) {
+	public List<TraitOrEnvironmentalVariableVocabEntry> getTraitBySpecies(List<String> speciesNames, PageRequest pagination) {
 		Query query = buildFieldOrQuery(speciesNames, IndexConstants.FLD_SPECIES, DocumentType.TRAIT_SPECIES);
 		return performSpeciesTraitSearch(query, pagination);
 	}
@@ -56,7 +55,7 @@ public class LuceneSearchService implements SearchService {
 	}
 	
 	@Override
-	public List<TraitOrEnvironmentalVariable> getEnvironmentBySpecies(List<String> speciesNames,PageRequest pagination) {
+	public List<TraitOrEnvironmentalVariableVocabEntry> getEnvironmentBySpecies(List<String> speciesNames,PageRequest pagination) {
 		Query query = buildFieldOrQuery(speciesNames, IndexConstants.FLD_SPECIES, DocumentType.SPECIES_ENV);
 		return performSpeciesEnvironmentSearch(query, pagination);
 	}
@@ -113,8 +112,9 @@ public class LuceneSearchService implements SearchService {
 		return responseList;
 	}
 	
-	private List<TraitVocabEntry> performSpeciesTraitSearch(Query query, PageRequest pagination ){
-		List<TraitVocabEntry> responseList = new ArrayList<TraitVocabEntry>();
+	private List<TraitOrEnvironmentalVariableVocabEntry> performSpeciesTraitSearch(Query query, PageRequest pagination ){
+		List<List<TraitOrEnvironmentalVariableVocabEntry> responseList = new ArrayList<List<TraitOrEnvironmentalVariableVocabEntry>
+		>();
 		IndexSearcher searcher = null;
 		PageResultMetadata pageMeta = new PageResultMetadata();
 		try {
@@ -127,14 +127,15 @@ public class LuceneSearchService implements SearchService {
 			TopDocs td = searcher.search(query, Integer.MAX_VALUE, new Sort(new SortField(IndexConstants.FLD_TRAIT, SortField.Type.STRING)));
 			pageMeta.totalResults = td.totalHits;
 		    if(td.totalHits > 0){
-		    	LinkedHashSet<TraitVocabEntry> uniqueResults = new LinkedHashSet<>();
+		    	LinkedHashSet<TraitOrEnvironmentalVariableVocabEntry> uniqueResults = new LinkedHashSet<>();
 		    	
 		    	
 		    	for(ScoreDoc scoreDoc : td.scoreDocs){
 		    		Document matchedDoc = searcher.doc(scoreDoc.doc);
 		    		String trait = matchedDoc.get(IndexConstants.FLD_TRAIT);
+		    		String title = "FIXME get title"; //FIXME get the title from the index
 		    		if(StringUtils.hasLength(trait)){
-		    			uniqueResults.add(new TraitVocabEntry(trait, trait));
+		    			uniqueResults.add(new TraitOrEnvironmentalVariableVocabEntry(trait, title));
 		    		}
 		    	}
 		    	
@@ -144,8 +145,7 @@ public class LuceneSearchService implements SearchService {
 		    }
 		    termIndexManager.releaseIndexSearcher(searcher);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Failed to query index", e);
 		}
 		return responseList;
 	}
@@ -175,14 +175,13 @@ public class LuceneSearchService implements SearchService {
 		    }
 		    termIndexManager.releaseIndexSearcher(searcher);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Failed to query index", e);
 		}
 		return responseList;
 	}
 	
-	private List<TraitOrEnvironmentalVariable> performSpeciesEnvironmentSearch(Query query, PageRequest pagination ){
-		List<TraitOrEnvironmentalVariable> responseList = new ArrayList<TraitOrEnvironmentalVariable>();
+	private List<TraitOrEnvironmentalVariableVocabEntry> performSpeciesEnvironmentSearch(Query query, PageRequest pagination ){
+		List<TraitOrEnvironmentalVariableVocabEntry> responseList = new ArrayList<TraitOrEnvironmentalVariableVocabEntry>();
 		IndexSearcher searcher = null;
 		
 		try {
@@ -196,12 +195,13 @@ public class LuceneSearchService implements SearchService {
 			TopDocs td = searcher.search(query, Integer.MAX_VALUE, new Sort(new SortField(IndexConstants.FLD_ENVIRONMENT, SortField.Type.STRING)));
 		    int totalTraits = td.totalHits;
 		    if(td.totalHits > 0){
-		    	LinkedHashSet<TraitOrEnvironmentalVariable> uniqueResults = new LinkedHashSet<>();
+		    	LinkedHashSet<TraitOrEnvironmentalVariableVocabEntry> uniqueResults = new LinkedHashSet<>();
 		    	for(ScoreDoc scoreDoc : td.scoreDocs){
 		    		Document matchedDoc = searcher.doc(scoreDoc.doc);
 		    		String environment = matchedDoc.get(IndexConstants.FLD_ENVIRONMENT);
+		    		String title = "FIXME get title"; //FIXME get the title from the index
 		    		if(StringUtils.hasLength(environment)){
-		    			uniqueResults.add(new TraitOrEnvironmentalVariable(environment, environment, "FIXME")); //FIXME get correct values
+		    			uniqueResults.add(new TraitOrEnvironmentalVariableVocabEntry(environment, title));
 		    		}
 		    	}
 		    	responseList.addAll(uniqueResults);
@@ -220,14 +220,13 @@ public class LuceneSearchService implements SearchService {
 		try {
 			return speciesSearchService.performSearch(partialSpeciesName, 50, false);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Failed to query index", e);
 		}
 		return null;
 	}
 	
-	@Override //TODO What is this one??
-	public List<TraitVocabEntry> getTraitVocabData() {
+	@Override //TODO What is this one?? See the superclass javadoc, just updated
+	public List<TraitOrEnvironmentalVariableVocabEntry> getTraitVocabData() {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -1,11 +1,11 @@
 package au.org.aekos.model;
 
-public class TraitVocabEntry {
+public class TraitOrEnvironmentalVariableVocabEntry {
 
 	private final String code;
 	private final String label;
 
-	public TraitVocabEntry(String code, String label) {
+	public TraitOrEnvironmentalVariableVocabEntry(String code, String label) {
 		this.code = code;
 		this.label = label;
 	}
@@ -14,13 +14,12 @@ public class TraitVocabEntry {
 		return code;
 	}
 
-
 	public String getLabel() {
 		return label;
 	}
 
-	public static TraitVocabEntry deserialiseFrom(String[] csvArray) {
-		return new TraitVocabEntry(csvArray[0], csvArray[1]);
+	public static TraitOrEnvironmentalVariableVocabEntry deserialiseFrom(String[] csvArray) {
+		return new TraitOrEnvironmentalVariableVocabEntry(csvArray[0], csvArray[1]);
 	}
 
 	@Override
@@ -40,7 +39,7 @@ public class TraitVocabEntry {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		TraitVocabEntry other = (TraitVocabEntry) obj;
+		TraitOrEnvironmentalVariableVocabEntry other = (TraitOrEnvironmentalVariableVocabEntry) obj;
 		if (code == null) {
 			if (other.code != null)
 				return false;
@@ -53,6 +52,4 @@ public class TraitVocabEntry {
 			return false;
 		return true;
 	}
-	
-	
 }

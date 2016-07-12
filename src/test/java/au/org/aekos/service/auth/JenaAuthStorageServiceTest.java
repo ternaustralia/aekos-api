@@ -1,6 +1,7 @@
 package au.org.aekos.service.auth;
 
 import static org.hamcrest.CoreMatchers.is;
+import static au.org.aekos.TestUtils.loadAuth;
 import static org.junit.Assert.*;
 
 import java.io.StringWriter;
@@ -26,13 +27,7 @@ public class JenaAuthStorageServiceTest {
 		objectUnderTest.storeNewKey("test@example.com", new AekosApiAuthKey("AAABBB123"), SignupMethod.EMAIL);
 		Writer out = new StringWriter();
 		authModel.write(out, "TURTLE");
-		assertThat(out.toString(), is(
-			"<http://www.aekos.org.au/api/1.0/auth#AAABBB123>\n" +
-			"        a       <http://www.aekos.org.au/api/1.0/auth#AekosApiAuthKey> ;\n" +
-			"        <http://www.aekos.org.au/api/1.0/auth#ownedBy>\n" +
-			"                \"test@example.com\" ;\n" +
-			"        <http://www.aekos.org.au/api/1.0/auth#signupMethod>\n" +
-			"                \"EMAIL\" .\n"));
+		assertThat(out.toString(), is(loadAuth("testStoreNewKey01_expected.ttl")));
 	}
 	
 	/**
@@ -136,15 +131,7 @@ public class JenaAuthStorageServiceTest {
 		objectUnderTest.disableKey(key);
 		Writer out = new StringWriter();
 		authModel.write(out, "TURTLE");
-		assertThat(out.toString(), is(
-			"<http://www.aekos.org.au/api/1.0/auth#AAABBB123>\n" +
-			"        a       <http://www.aekos.org.au/api/1.0/auth#AekosApiAuthKey> ;\n" +
-			"        <http://www.aekos.org.au/api/1.0/auth#disabled>\n" +
-			"                true ;\n" +
-			"        <http://www.aekos.org.au/api/1.0/auth#ownedBy>\n" +
-			"                \"test@example.com\" ;\n" +
-			"        <http://www.aekos.org.au/api/1.0/auth#signupMethod>\n" +
-			"                \"GOOGLE\" .\n"));
+		assertThat(out.toString(), is(loadAuth("testDisableKey02_expected.ttl")));
 	}
 	
 	/**
