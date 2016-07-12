@@ -75,7 +75,7 @@ public class SwaggerConfig {
 				"TODO - A custom description of Aekos API.",
 				"TODO - Version", 
 				"TODO - Aekos API TOS",
-				new Contact("Aekos API", "http://www.aekos.org.au", "api@aekos.org.au"),
+				new Contact("TERN Ecoinformatics", "http://www.aekos.org.au", "api@aekos.org.au"),
 				"TODO - License of API",
 				"http://api.aekos.org.au");
 		return apiInfo;

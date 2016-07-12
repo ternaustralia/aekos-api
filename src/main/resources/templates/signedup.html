@@ -42,17 +42,28 @@
 									class="glyphicon glyphicon-home"></span> Go home </a>
 							</div>
 						</div>
-						<div th:case="'failed'">
+						<div th:case="'captchafailure'">
 							<h1>Oh dear...</h1>
 							<div>
 								Signup to the &AElig;KOS API wasn't successful. Maybe the
 								captchya failed? <br />Please try again.
 							</div>
+							<br/><br/>
+							<div class="error-actions">
+								<a href="/access" class="btn btn-primary btn-lg"><span
+									class="glyphicon glyphicon-home"></span> Try again </a>
+							</div>
 						</div>
-						<br/><br/>
-						<div class="error-actions">
-							<a href="/access" class="btn btn-primary btn-lg"><span
-								class="glyphicon glyphicon-home"></span> Try again </a>
+						<div th:case="'internalfailure'">
+							<h1>Oh dear...</h1>
+							<div>
+								Signup to the &AElig;KOS API wasn't successful. There was an internal server error when generating your API key.  <br />We've logged the issue; email us if you experience this failure again.
+							</div>
+							<br/><br/>
+							<div class="error-actions">
+								<a href="/access" class="btn btn-primary btn-lg"><span
+									class="glyphicon glyphicon-home"></span> Try again </a>
+							</div>
 						</div>
 					</th:block>
 
