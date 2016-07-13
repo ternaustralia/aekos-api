@@ -1,9 +1,6 @@
 package au.org.aekos.service.metric;
 
-import java.util.List;
 import java.util.NoSuchElementException;
-
-import javax.servlet.http.HttpServletResponse;
 
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.AfterThrowing;
@@ -31,6 +28,7 @@ public class ApiMetricsAspect {
      * ApiV1SearchController
      */
 
+    
     // GetEnvironmentBySpecies
     @AfterReturning(pointcut = "execution(* au.org.aekos.controller.ApiV1SearchController.getEnvironmentBySpecies(..))")
     public void afterCallingGetEnvironmentBySpecies() {

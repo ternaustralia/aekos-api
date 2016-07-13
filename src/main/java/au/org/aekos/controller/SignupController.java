@@ -29,6 +29,7 @@ import au.org.aekos.service.auth.AekosApiAuthKey.InvalidKeyException;
 import au.org.aekos.service.auth.AuthStorageService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import springfox.documentation.annotations.ApiIgnore;
 
 @Api(value = "AekosV1", produces=MediaType.APPLICATION_JSON_VALUE)
 @RestController
@@ -66,7 +67,8 @@ public class SignupController {
     private RecaptchaValidator recaptchaValidator;
 
     @RequestMapping(path = "/signup", method = RequestMethod.POST)
-	@ApiOperation(value = "Process the captcha result", notes = "TODO", tags="Signup")
+    @ApiIgnore
+    @ApiOperation(value = "", notes = "This method is called to validate the captchya on signup.", tags="Signup")
     public ModelAndView validateCaptcha(HttpServletRequest request) {
         ValidationResult result = recaptchaValidator.validate(request);
         if (result.isSuccess()) {
