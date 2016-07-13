@@ -56,36 +56,32 @@ public class ApiV1SearchController {
 
 	@RequestMapping(path="/getTraitsBySpecies.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ApiOperation(value = "Get all available traits for specified species", notes = "TODO", tags="Search")
-    public List<TraitOrEnvironmentalVariableVocabEntry> getTraitsBySpecies(@RequestParam(name="speciesName", required=true) 
-    												String[] speciesNames,
-										    		@RequestParam(name="page", required = false)
-    												int page , 
-										    		@RequestParam(name="numResults", required=false) 
-    												int numResults, 
-										    		HttpServletResponse resp) {
+    public List<TraitOrEnvironmentalVariableVocabEntry> getTraitsBySpecies(
+    		@RequestParam(name="speciesName", required=true) String[] speciesNames,
+    		@RequestParam(name="page", required = false, defaultValue="0") int page,
+    		@RequestParam(name="numResults", required=false, defaultValue="20") int numResults, 
+    		HttpServletResponse resp) {
 		PageRequest pagination = new PageRequest(page, numResults);
 		return searchService.getTraitBySpecies(Arrays.asList(speciesNames), pagination);
 	}
 	
 	@RequestMapping(path="/getSpeciesByTrait.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ApiOperation(value = "Get all available species for specified traits", notes = "TODO", tags="Search")
-    public List<SpeciesName> getSpeciesByTrait(@RequestParam(name="traitName") String[] traitNames, 
-									    		@RequestParam(name="page", required = false)
-												int page , 
-									    		@RequestParam(name="numResults", required=false) 
-												int numResults, 
-												HttpServletResponse resp) {
+    public List<SpeciesName> getSpeciesByTrait(
+    		@RequestParam(name="traitName") String[] traitNames,
+    		@RequestParam(name="page", required = false, defaultValue="0") int page,
+    		@RequestParam(name="numResults", required=false, defaultValue="20") int numResults, 
+			HttpServletResponse resp) {
 		PageRequest pagination = new PageRequest(page, numResults);
 		return searchService.getSpeciesByTrait(Arrays.asList(traitNames), pagination);
 	}
 	
 	@RequestMapping(path="/getEnvironmentBySpecies.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ApiOperation(value = "Get all available environment variable names for specified species", notes = "TODO", tags="Search")
-    public List<TraitOrEnvironmentalVariableVocabEntry> getEnvironmentBySpecies(@RequestParam(name="speciesName") String[] speciesNames,
-    		@RequestParam(name="page", required = false)
-			int page , 
-    		@RequestParam(name="numResults", required=false) 
-			int numResults,   		
+    public List<TraitOrEnvironmentalVariableVocabEntry> getEnvironmentBySpecies(
+    		@RequestParam(name="speciesName") String[] speciesNames,
+    		@RequestParam(name="page", required = false, defaultValue="0") int page, 
+    		@RequestParam(name="numResults", required=false, defaultValue="20") int numResults,
     		HttpServletResponse resp) {
 		PageRequest pagination = new PageRequest(page, numResults);
 		return searchService.getEnvironmentBySpecies(Arrays.asList(speciesNames), pagination);
