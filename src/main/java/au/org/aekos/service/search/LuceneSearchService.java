@@ -32,6 +32,7 @@ import au.org.aekos.service.search.index.DocumentType;
 import au.org.aekos.service.search.index.IndexConstants;
 import au.org.aekos.service.search.index.SpeciesLookupIndexService;
 import au.org.aekos.service.search.index.TermIndexManager;
+import au.org.aekos.service.vocab.VocabService;
 
 @Service
 public class LuceneSearchService implements SearchService {
@@ -44,6 +45,9 @@ public class LuceneSearchService implements SearchService {
 	@Autowired
 	private TermIndexManager termIndexManager;
 	//Max of 1024 species names??  or split into 2 or more queries . . . . 
+	
+	@Autowired
+	private VocabService vocabService;
 	
 	@Override //TODO throw a nice exception to perhaps return a tidy error in the json response?
 	public List<TraitOrEnvironmentalVariableVocabEntry> getTraitBySpecies(List<String> speciesNames, PageRequest pagination) {
@@ -94,7 +98,7 @@ public class LuceneSearchService implements SearchService {
 		    	for(ScoreDoc scoreDoc : td.scoreDocs){
 		    		Document matchedDoc = searcher.doc(scoreDoc.doc);
 		    		String trait = matchedDoc.get(IndexConstants.FLD_TRAIT);
-		    		String title = "FIXME get title"; //FIXME get the title from the index
+		    		String title = vocabService.getLabelForPropertyCode(trait);
 		    		if(StringUtils.hasLength(trait)){
 		    			uniqueResults.add(new TraitOrEnvironmentalVariableVocabEntry(trait, title));
 		    		}
@@ -156,10 +160,10 @@ public class LuceneSearchService implements SearchService {
 		    	LinkedHashSet<TraitOrEnvironmentalVariableVocabEntry> uniqueResults = new LinkedHashSet<>();
 		    	for(ScoreDoc scoreDoc : td.scoreDocs){
 		    		Document matchedDoc = searcher.doc(scoreDoc.doc);
-		    		String environment = matchedDoc.get(IndexConstants.FLD_ENVIRONMENT);
-		    		String title = "FIXME get title"; //FIXME get the title from the index
-		    		if(StringUtils.hasLength(environment)){
-		    			uniqueResults.add(new TraitOrEnvironmentalVariableVocabEntry(environment, title));
+		    		String environmentalVariable = matchedDoc.get(IndexConstants.FLD_ENVIRONMENT);
+		    		String title = vocabService.getLabelForPropertyCode(environmentalVariable);
+		    		if(StringUtils.hasLength(environmentalVariable)){
+		    			uniqueResults.add(new TraitOrEnvironmentalVariableVocabEntry(environmentalVariable, title));
 		    		}
 		    	}
 		    	responseList.addAll(uniqueResults);

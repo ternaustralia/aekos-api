@@ -1,0 +1,19 @@
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+<http://www.aekos.org.au/ontology/1.0.0#averageHeight>
+        a             owl:DatatypeProperty ;
+        rdfs:comment  "Average height of a species organism group." , "Average height of an organism group." ;
+        rdfs:domain   <http://www.aekos.org.au/ontology/1.0.0#SpeciesOrganismGroup> , <http://www.aekos.org.au/ontology/1.0.0#OrganismAssemblage> ;
+        <http://www.aekos.org.au/ontology/1.0.0#code>
+                "averageHeight" ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "Average Height" .
+
+<http://www.aekos.org.au/ontology/1.0.0#DrainageType>
+        a                owl:Class ;
+        rdfs:subClassOf  <http://www.aekos.org.au/ontology/1.0.0#Concept> ;
+        <http://www.aekos.org.au/ontology/1.0.0#code>
+                "DrainageType" .

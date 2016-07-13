@@ -20,9 +20,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import au.org.aekos.model.TraitOrEnvironmentalVariableVocabEntry;
 import au.org.aekos.service.retrieval.IndexLoaderCallback;
 import au.org.aekos.service.retrieval.IndexLoaderRecord;
 import au.org.aekos.service.retrieval.RetrievalService;
+import au.org.aekos.service.search.SearchService;
 import au.org.aekos.service.search.load.LoaderClient;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -35,6 +37,9 @@ public class ApiV1MaintenanceController {
 	
 	@Autowired
 	private RetrievalService retrievalService;
+	
+	@Autowired
+	private SearchService searchService;
 	
 	@Autowired
 	private LoaderClient loader;
@@ -54,11 +59,9 @@ public class ApiV1MaintenanceController {
     @RequestMapping(path="/doIndexLoad", method=RequestMethod.GET, produces=MediaType.TEXT_PLAIN_VALUE)
     @ApiIgnore
     public void doIndexLoad(@RequestParam String password,
-    		HttpServletResponse resp, Writer responseWriter) throws IOException {
+    		HttpServletResponse resp, Writer responseWriter) {
     	//FIXME this is an interim measure but we might need to make a separate app from this function
-    	if (isProd || !indexLoadPassword.equals(password)) {
-    		responseWriter.write("These are not the droids you're looking for");
-    		resp.setStatus(HttpStatus.FORBIDDEN.value());
+    	if (isProdOrPasswordInvalid(password, responseWriter, resp)) {
     		return;
     	}
     	ProgressTracker tracker = new ProgressTracker();
@@ -78,12 +81,62 @@ public class ApiV1MaintenanceController {
 			}
 		});
     	loader.endLoad();
-		responseWriter.write(tracker.getFinishedMessage());
+		write(responseWriter, tracker.getFinishedMessage());
 		String path = indexPath;
 		if (SystemUtils.IS_OS_WINDOWS) {
 			path = windowsIndexPath;
 		}
-		responseWriter.write("Wrote index to " + path + System.lineSeparator());
+		write(responseWriter, "Wrote index to " + path);
+    }
+    
+    @RequestMapping(path="/doHealthCheck", method=RequestMethod.GET, produces=MediaType.TEXT_PLAIN_VALUE)
+    @ApiIgnore
+    public void doHealthCheck(@RequestParam String password,
+    		HttpServletResponse resp, Writer responseWriter) {
+    	if (isProdOrPasswordInvalid(password, responseWriter, resp)) {
+    		return;
+    	}
+    	checkTraitVocabMapping(responseWriter);
+    }
+
+	private void checkTraitVocabMapping(Writer responseWriter) {
+		write(responseWriter, "== Checking that all trait vocabs have a label ==");
+		int traitsChecked = 0;
+		for (TraitOrEnvironmentalVariableVocabEntry curr : searchService.getTraitVocabData()) {
+    		traitsChecked++;
+			if (curr.getLabel() == null) {
+    			write(responseWriter, "ERROR: " + curr.getCode() + " doesn't have a label");
+    		}
+    	}
+		write(responseWriter, "Checked " + traitsChecked + " traits.");
+		writeBlankLine(responseWriter);
+	}
+    
+	/**
+     * Writes a message and a new line to the writer
+     * 
+     * @param responseWriter	writer to write to
+     * @param msg				message to write
+     */
+    private void write(Writer responseWriter, String msg) {
+		try {
+			responseWriter.write(msg + System.lineSeparator());
+		} catch (IOException e) {
+			throw new RuntimeException("Failed to write to response writer", e);
+		}
+	}
+
+    private void writeBlankLine(Writer responseWriter) {
+		write(responseWriter, "");
+	}
+    
+	private boolean isProdOrPasswordInvalid(String password, Writer responseWriter, HttpServletResponse resp) {
+    	if (isProd || !indexLoadPassword.equals(password)) {
+    		write(responseWriter, "These are not the droids you're looking for");
+    		resp.setStatus(HttpStatus.FORBIDDEN.value());
+    		return true;
+    	}
+    	return false;
     }
     
     private class ProgressTracker {
@@ -96,7 +149,7 @@ public class ApiV1MaintenanceController {
     	
     	public String getFinishedMessage() {
     		long elapsedSeconds = (new Date().getTime() - start.getTime()) / 1000;
-    		return "Processed " + processedRecords + " records in " + elapsedSeconds + " seconds.\n";
+    		return "Processed " + processedRecords + " records in " + elapsedSeconds + " seconds.";
     	}
     }
 }

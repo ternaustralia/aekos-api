@@ -7,10 +7,13 @@ import java.io.OutputStream;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.connector.Connector;
+import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.tomcat.util.descriptor.web.SecurityCollection;
 import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -40,6 +43,9 @@ public class Application extends SpringBootServletInitializer {
 	
 	@Autowired
 	private Environment environment;
+	
+	@Value("${aekos-api.owl-file.location}")
+	private String owlFileLocation;
 	
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
@@ -118,6 +124,13 @@ public class Application extends SpringBootServletInitializer {
     @Bean
     public Model authModel(AuthAekosJenaModelFactory factory) {
     	return factory.getInstance();
+    }
+    
+    @Bean
+    public OntModel owlModel() {
+    	OntModel result = ModelFactory.createOntologyModel();
+    	result.read(getClass().getResourceAsStream(owlFileLocation), null, "TURTLE");
+    	return result;
     }
     
 	@Bean

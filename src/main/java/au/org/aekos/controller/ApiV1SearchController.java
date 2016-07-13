@@ -46,6 +46,8 @@ public class ApiV1SearchController {
 		return searchService.getTraitVocabData();
 	}
 
+	// TODO add a resource to get the EnvironmentalVariable vocab
+	
 	@RequestMapping(path="/speciesAutocomplete.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ApiOperation(value = "Autocomplete partial species names", notes = "TODO", tags="Search")
     public List<SpeciesName> speciesAutocomplete(@RequestParam(name="q") String partialSpeciesName, HttpServletResponse resp) throws IOException {
