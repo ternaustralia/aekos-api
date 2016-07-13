@@ -87,4 +87,11 @@ public interface RetrievalService {
 	 * @throws AekosApiRetrievalException
 	 */
 	RetrievalResponseHeader getEnvironmentalDataCsv(List<String> speciesNames, List<String> environmentalVariableNames, int start, int rows, Writer responseWriter) throws AekosApiRetrievalException;
+
+	/**
+	 * Gets the data required to build up the search index.
+	 * 
+	 * @param callback	processor to handle the found records
+	 */
+	void getIndexStream(IndexLoaderCallback callback);
 }

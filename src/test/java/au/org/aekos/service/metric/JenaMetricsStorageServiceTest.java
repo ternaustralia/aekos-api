@@ -16,6 +16,7 @@ import au.org.aekos.model.TraitDataParams;
 import au.org.aekos.service.auth.AekosApiAuthKey;
 import au.org.aekos.service.auth.AekosApiAuthKey.InvalidKeyException;
 import au.org.aekos.service.metric.MetricsStorageService.RequestType;
+import au.org.aekos.util.WinCRUtil;
 
 public class JenaMetricsStorageServiceTest {
 

@@ -7,6 +7,8 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.index.Term;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -29,6 +31,8 @@ import static au.org.aekos.service.search.index.AekosTermDocumentBuilder.*;
 @Component
 public class LuceneLoaderClient implements LoaderClient {
 
+	private static final Logger logger = LoggerFactory.getLogger(LuceneLoaderClient.class);
+	
 	@Value("${lucene.index.writer.commitLimit}")
 	private int commitLimit = 1000;
 	
@@ -46,9 +50,8 @@ public class LuceneLoaderClient implements LoaderClient {
 			indexWriter = indexManager.getIndexWriter();
 			commitCount = 0;
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("Failed to begin the load process", e);
 		}
-		
 	}
 	
 	@Override
@@ -60,7 +63,7 @@ public class LuceneLoaderClient implements LoaderClient {
 			indexManager.flushDeletions();
 			//indexManager.getTermIndex().
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("Failed to end the load process", e);
 		}
 	}
 	
@@ -76,15 +79,16 @@ public class LuceneLoaderClient implements LoaderClient {
 		for(String speciesStr : species){
 			addSpeciesTraitTermToIndex(speciesStr, trait);
 		}
-		
 	}
 
 	@Override
 	public void addSpeciesTraitTermToIndex(String species, String trait) throws IOException {
 		Document doc = buildTraitSpeciesTermDocument(trait, species);
 		writeDocument(doc, indexWriter);
+//		Document traitVocabDoc = buildTraitVocabTermDocument(trait);
+//		writeDocument(traitVocabDoc, indexWriter);
 	}
-	
+
 	@Override
 	public void addSpeciesEnvironmentTermsToIndex(String species, List<String> environmentTraits) throws IOException {
 		for(String environmentTrait : environmentTraits ){
@@ -96,7 +100,6 @@ public class LuceneLoaderClient implements LoaderClient {
 	public void addSpeciesEnvironmentTermToIndex(String species, String environmentTrait) throws IOException {
 		Document doc = buildSpeciesEnvironmentTermDocument(species, environmentTrait);
 		writeDocument(doc, indexWriter);
-		
 	}
 
 	public void writeDocument(Document doc, IndexWriter writer) throws IOException{
