@@ -7,7 +7,4 @@ public enum DocumentType {
 	TRAIT_SPECIES,
 	SPECIES_ENV,
 	SPECIES_SUMMARY;
-	
-	
-
 }

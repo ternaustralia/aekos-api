@@ -1,8 +1,11 @@
 package au.org.aekos.service.search;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.lucene.document.Document;
@@ -73,46 +76,7 @@ public class LuceneSearchService implements SearchService {
 		return query;
 	}
 	
-	private List<TraitOrEnvironmentalVariableVocabEntry> performSpeciesTraitSearchX(Query query, PageRequest pagination ){
-		List<TraitOrEnvironmentalVariableVocabEntry> responseList = new ArrayList<TraitOrEnvironmentalVariableVocabEntry>();
-		IndexSearcher searcher = null;
-		PageResultMetadata pageMeta = new PageResultMetadata();
-		
-		try {
-			searcher = termIndexManager.getIndexSearcher();
-		} catch (IOException e) {
-			logger.error("Can't search trait by species - IOException - returning empty list", e);
-			return responseList;
-		}
-		
-		try {
-			TopDocs td = searcher.search(query, Integer.MAX_VALUE, new Sort(new SortField(IndexConstants.FLD_TRAIT, SortField.Type.STRING)));
-			pageMeta.totalResults = td.totalHits;
-		    if(td.totalHits > 0){
-		    	LinkedHashSet<TraitOrEnvironmentalVariableVocabEntry> uniqueResults = new LinkedHashSet<>();
-		    	
-		    	
-		    	for(ScoreDoc scoreDoc : td.scoreDocs){
-		    		Document matchedDoc = searcher.doc(scoreDoc.doc);
-		    		String trait = matchedDoc.get(IndexConstants.FLD_TRAIT);
-		    		if(StringUtils.hasLength(trait)){
-		    			uniqueResults.add(new TraitOrEnvironmentalVariableVocabEntry(trait, trait));
-		    		}
-		    	}
-		    	
-		    	
-		    	
-		    	responseList.addAll(uniqueResults);
-		    }
-		    termIndexManager.releaseIndexSearcher(searcher);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return responseList;
-	}
-	
-	private List<TraitOrEnvironmentalVariableVocabEntry> performSpeciesTraitSearch(Query query, PageRequest pagination ){
+	private List<TraitOrEnvironmentalVariableVocabEntry> performSpeciesTraitSearch(Query query, PageRequest pagination){
 		List<TraitOrEnvironmentalVariableVocabEntry> responseList = new ArrayList<>();
 		IndexSearcher searcher = null;
 		PageResultMetadata pageMeta = new PageResultMetadata();
@@ -127,8 +91,6 @@ public class LuceneSearchService implements SearchService {
 			pageMeta.totalResults = td.totalHits;
 		    if(td.totalHits > 0){
 		    	LinkedHashSet<TraitOrEnvironmentalVariableVocabEntry> uniqueResults = new LinkedHashSet<>();
-		    	
-		    	
 		    	for(ScoreDoc scoreDoc : td.scoreDocs){
 		    		Document matchedDoc = searcher.doc(scoreDoc.doc);
 		    		String trait = matchedDoc.get(IndexConstants.FLD_TRAIT);
@@ -137,9 +99,6 @@ public class LuceneSearchService implements SearchService {
 		    			uniqueResults.add(new TraitOrEnvironmentalVariableVocabEntry(trait, title));
 		    		}
 		    	}
-		    	
-		    	
-		    	
 		    	responseList.addAll(uniqueResults);
 		    }
 		    termIndexManager.releaseIndexSearcher(searcher);
@@ -161,7 +120,7 @@ public class LuceneSearchService implements SearchService {
 		try {
 			TopDocs td = searcher.search(query, Integer.MAX_VALUE, new Sort(new SortField(IndexConstants.FLD_SPECIES, SortField.Type.STRING)));
 		    int totalSpecies = td.totalHits;
-		    if(td.totalHits > 0){
+		    if(totalSpecies > 0){
 		    	LinkedHashSet<SpeciesName> uniqueResults = new LinkedHashSet<>();
 		    	for(ScoreDoc scoreDoc : td.scoreDocs){
 		    		Document matchedDoc = searcher.doc(scoreDoc.doc);
@@ -193,7 +152,7 @@ public class LuceneSearchService implements SearchService {
 		try {
 			TopDocs td = searcher.search(query, Integer.MAX_VALUE, new Sort(new SortField(IndexConstants.FLD_ENVIRONMENT, SortField.Type.STRING)));
 		    int totalTraits = td.totalHits;
-		    if(td.totalHits > 0){
+		    if(totalTraits > 0){
 		    	LinkedHashSet<TraitOrEnvironmentalVariableVocabEntry> uniqueResults = new LinkedHashSet<>();
 		    	for(ScoreDoc scoreDoc : td.scoreDocs){
 		    		Document matchedDoc = searcher.doc(scoreDoc.doc);
@@ -207,8 +166,7 @@ public class LuceneSearchService implements SearchService {
 		    }
 			termIndexManager.releaseIndexSearcher(searcher);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Failed to query index", e);
 		}
 		return responseList;
 	}
@@ -224,15 +182,28 @@ public class LuceneSearchService implements SearchService {
 		return null;
 	}
 	
-	@Override //TODO What is this one?? See the superclass javadoc, just updated
+	@Override
 	public List<TraitOrEnvironmentalVariableVocabEntry> getTraitVocabData() {
-		// TODO Auto-generated method stub
-		return null;
+		BooleanQuery.Builder queryBuilder = new BooleanQuery.Builder();
+		Query docTypeQuery = new TermQuery(new Term(IndexConstants.FLD_DOC_INDEX_TYPE, DocumentType.TRAIT_SPECIES.name()));
+		queryBuilder.add(docTypeQuery, Occur.MUST);
+		Query allTraitToSpeciesDocumentsQuery = queryBuilder.build();
+		//FIXME will it perform with a full index? Should we pre-bake?
+		return performSpeciesTraitSearch(allTraitToSpeciesDocumentsQuery, new PageRequest(0, Integer.MAX_VALUE));
 	}
 	
 	@Override
 	public List<SpeciesSummary> getSpeciesSummary(List<String> speciesNames) {
-		// TODO Auto-generated method stub
-		return null;
+		// FIXME make this real
+		List<SpeciesSummary> result = new LinkedList<>();
+		for (String curr : speciesNames) {
+			try {
+				result.add(new SpeciesSummary(curr, "FIXME", "FIXME", -1, new URL("https://api.aekos.org.au/FIXME"), 
+						new URL("https://api.aekos.org.au/FIXME.jpg"), "FIXME"));
+			} catch (MalformedURLException e) {
+				logger.error("Failed to create a URL when processing " + speciesNames, e);
+			}
+		}
+		return result;
 	}
 }

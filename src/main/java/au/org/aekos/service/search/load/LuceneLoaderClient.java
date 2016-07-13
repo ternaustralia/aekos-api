@@ -85,8 +85,10 @@ public class LuceneLoaderClient implements LoaderClient {
 	public void addSpeciesTraitTermToIndex(String species, String trait) throws IOException {
 		Document doc = buildTraitSpeciesTermDocument(trait, species);
 		writeDocument(doc, indexWriter);
+//		Document traitVocabDoc = buildTraitVocabTermDocument(trait);
+//		writeDocument(traitVocabDoc, indexWriter);
 	}
-	
+
 	@Override
 	public void addSpeciesEnvironmentTermsToIndex(String species, List<String> environmentTraits) throws IOException {
 		for(String environmentTrait : environmentTraits ){

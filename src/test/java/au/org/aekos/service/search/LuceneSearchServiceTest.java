@@ -1,5 +1,7 @@
 package au.org.aekos.service.search;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -68,6 +70,21 @@ public class LuceneSearchServiceTest {
 	   
 	   List<TraitOrEnvironmentalVariableVocabEntry> environmentList = searchService.getEnvironmentBySpecies(Arrays.asList("species"), null);
 	   Assert.assertEquals(2, environmentList.size());
+	   indexManager.closeTermIndex();
+    }
+    
+    /**
+     * Can we get the trait vocab data when it exists?
+     */
+    @Test
+	public void testGetTraitVocabData01() throws IOException{
+	   loader.beginLoad();
+	   loader.addSpeciesTraitTermToIndex("species1", "trait one");
+	   loader.addSpeciesTraitTermToIndex("species1", "trait two");
+	   loader.addSpeciesTraitTermToIndex("species2", "trait two");
+	   loader.endLoad();
+	   List<TraitOrEnvironmentalVariableVocabEntry> result = searchService.getTraitVocabData();
+	   assertEquals(2, result.size());
 	   indexManager.closeTermIndex();
     }
 }
