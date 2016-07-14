@@ -1,8 +1,10 @@
 package au.org.aekos;
 
+import static com.google.common.collect.Lists.newArrayList;
+
+import java.io.Writer;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,22 +23,21 @@ import springfox.documentation.swagger.web.ApiKeyVehicle;
 import springfox.documentation.swagger.web.SecurityConfiguration;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-import static com.google.common.collect.Lists.*;
-
 @Configuration
 @EnableSwagger2
-public class SwaggerConfig {   
+public class SwaggerConfig {
 	
 	@Value("${aekos-api.version}")
 	private String apiVersion;
 	
 	@Bean
-	public Docket api() { 
-		return new Docket(DocumentationType.SWAGGER_2)  
+	public Docket api() {
+		return new Docket(DocumentationType.SWAGGER_2)
 				.apiInfo(apiInfo())
-				.select()                                  
-				.apis(RequestHandlerSelectors.any())              
-				.paths(PathSelectors.ant("/v1/*"))                          
+				.ignoredParameterTypes(Writer.class)
+				.select()
+				.apis(RequestHandlerSelectors.any())
+				.paths(PathSelectors.ant("/v1/*"))
 				.build()
 				.securitySchemes(newArrayList(apiKey()))
 		        .securityContexts(newArrayList(securityContext()));
@@ -70,8 +71,8 @@ public class SwaggerConfig {
 				"test-app-realm",
 				"test-app",
 				"apiKey",
-				ApiKeyVehicle.HEADER, 
-				"api_key", 
+				ApiKeyVehicle.HEADER,
+				"api_key",
 				"," /*scope separator*/);
 	}
 	
@@ -79,11 +80,11 @@ public class SwaggerConfig {
 		ApiInfo apiInfo = new ApiInfo(
 				"ÆKOS REST API",
 				"The ÆKOS API is used for M2M REST access to ÆKOS ecological data.",
-				apiVersion, 
+				apiVersion,
 				"TODO - ÆKOS API TOS",
 				new Contact("TERN Ecoinformatics", "http://www.aekos.org.au", "api@aekos.org.au"),
 				"TODO - License of API",
-				"http://api.aekos.org.au");
+				"https://api.aekos.org.au");
 		return apiInfo;
 	}
 }

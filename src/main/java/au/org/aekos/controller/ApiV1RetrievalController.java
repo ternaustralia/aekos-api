@@ -29,7 +29,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import springfox.documentation.annotations.ApiIgnore;
 
 @Api(description="Retrieve data using parameters from search", produces=MediaType.APPLICATION_JSON_VALUE, tags="Data Retrieval")
 @RestController
@@ -40,10 +39,9 @@ public class ApiV1RetrievalController {
 	private static final String TEXT_CSV_MIME = "text/csv";
 	private static final String DL_PARAM_MSG = "Makes the response trigger a downloadable file rather than streaming the response";
 
-	// TODO add content negotiation methods for all *data resources
 	// TODO add lots more Swagger doco
 	// TODO figure out how to get Swagger to support content negotiation with overloaded methods
-	// TODO am I doing content negotiation correctly?
+	//        see https://github.com/springfox/springfox/issues/1367 for more info about when this is coming.
 	// TODO do we accept LSID/species ID and/or a species name for the species related services?
 	
 	@Autowired
@@ -82,7 +80,7 @@ public class ApiV1RetrievalController {
     		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
     		@RequestParam(required=false, defaultValue=DEFAULT_ROWS) @ApiParam("result page size") int rows,
     		@RequestParam(required=false, defaultValue="false") @ApiParam(DL_PARAM_MSG) boolean download,
-    		@ApiIgnore Writer responseWriter, HttpServletRequest req, HttpServletResponse resp) throws AekosApiRetrievalException {
+    		Writer responseWriter, HttpServletRequest req, HttpServletResponse resp) throws AekosApiRetrievalException {
 		resp.setContentType(TEXT_CSV_MIME);
     	if (download) {
     		resp.setHeader("Content-Disposition", "attachment;filename=aekosSpeciesData.csv"); // TODO give a more dynamic name
@@ -99,7 +97,7 @@ public class ApiV1RetrievalController {
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
     		@RequestParam(required=false, defaultValue=DEFAULT_ROWS) @ApiParam("result page size") int rows,
-    		@ApiIgnore Writer responseWriter, HttpServletRequest req, HttpServletResponse resp) throws AekosApiRetrievalException {
+    		Writer responseWriter, HttpServletRequest req, HttpServletResponse resp) throws AekosApiRetrievalException {
     	boolean dontDownload = false;
 		speciesDataDotCsv(speciesNames, start, rows, dontDownload, responseWriter, req, resp);
     }
@@ -142,7 +140,7 @@ public class ApiV1RetrievalController {
     		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
     		@RequestParam(required=false, defaultValue=DEFAULT_ROWS) @ApiParam("result page size") int rows,
     		@RequestParam(required=false, defaultValue="false") @ApiParam(DL_PARAM_MSG) boolean download,
-    		HttpServletRequest req, HttpServletResponse resp, @ApiIgnore Writer responseWriter) throws AekosApiRetrievalException {
+    		HttpServletRequest req, HttpServletResponse resp, Writer responseWriter) throws AekosApiRetrievalException {
     	resp.setContentType(TEXT_CSV_MIME);
     	if (download) {
     		resp.setHeader("Content-Disposition", "attachment;filename=aekosTraitData.csv"); // TODO give a more dynamic name
@@ -166,7 +164,7 @@ public class ApiV1RetrievalController {
     		@RequestParam(name="traitName", required=false) String[] traitNames,
     		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
     		@RequestParam(required=false, defaultValue=DEFAULT_ROWS) @ApiParam("result page size") int rows,
-    		HttpServletRequest req, HttpServletResponse resp, @ApiIgnore Writer responseWriter) throws AekosApiRetrievalException {
+    		HttpServletRequest req, HttpServletResponse resp, Writer responseWriter) throws AekosApiRetrievalException {
     	traitDataDotCsv(speciesNames, traitNames, start, rows, false, req, resp, responseWriter);
     }
     
@@ -204,7 +202,7 @@ public class ApiV1RetrievalController {
     		@RequestParam(name="envVarName", required=false) String[] envVarNames,
     		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
     		@RequestParam(required=false, defaultValue=DEFAULT_ROWS) @ApiParam("result page size") int rows,
-    		HttpServletRequest req, HttpServletResponse resp, @ApiIgnore Writer responseWriter) throws AekosApiRetrievalException {
+    		HttpServletRequest req, HttpServletResponse resp, Writer responseWriter) throws AekosApiRetrievalException {
     	// TODO do we include units in the field name, as an extra value or as a header/metadata object in the resp
     	resp.setContentType(TEXT_CSV_MIME);
     	List<String> varNames = envVarNames != null ? Arrays.asList(envVarNames) : Collections.emptyList();
@@ -220,7 +218,7 @@ public class ApiV1RetrievalController {
     		@RequestParam(name="envVarName", required=false) String[] envVarNames,
     		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
     		@RequestParam(required=false, defaultValue=DEFAULT_ROWS) @ApiParam("result page size") int rows,
-    		HttpServletRequest req, HttpServletResponse resp, @ApiIgnore Writer responseWriter) throws AekosApiRetrievalException {
+    		HttpServletRequest req, HttpServletResponse resp, Writer responseWriter) throws AekosApiRetrievalException {
     	environmentDataDotCsv(speciesNames, envVarNames, start, rows, req, resp, responseWriter);
 	}
     

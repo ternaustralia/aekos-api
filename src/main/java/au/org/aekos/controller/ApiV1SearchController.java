@@ -29,7 +29,6 @@ public class ApiV1SearchController {
 
 	// TODO add lots more Swagger doco
 	// TODO figure out how to get Swagger to support content negotiation with overloaded methods
-	// TODO am I doing content negotiation correctly?
 	// TODO define coord ref system
 	// TODO do we accept LSID/species ID and/or a species name for the species related services?
 	
