@@ -16,16 +16,14 @@ import org.apache.lucene.search.SearcherFactory;
 import org.apache.lucene.search.SearcherManager;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.store.NRTCachingDirectory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TermIndexManagerImpl implements TermIndexManager, InitializingBean, DisposableBean {
+public class TermIndexManagerImpl implements TermIndexManager, DisposableBean {
 
 	private static final Logger logger = LoggerFactory.getLogger(TermIndexManagerImpl.class);
 	
@@ -44,12 +42,6 @@ public class TermIndexManagerImpl implements TermIndexManager, InitializingBean,
 	
 	@Value("${lucene.index.writer.commitLimit}")
 	private int commitLimit = 1000;
-	
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		// TODO Auto-generated method stub
-		
-	}
 
 	public Directory getTermIndex() throws IOException {
 		if(termIndex == null){
@@ -62,6 +54,13 @@ public class TermIndexManagerImpl implements TermIndexManager, InitializingBean,
 		ensureIndexPathExists();
 		//termIndex = new NRTCachingDirectory(FSDirectory.open(Paths.get(getIndexPath())), 5.0, 60.0);
 		termIndex = FSDirectory.open(Paths.get(getIndexPath()));
+		boolean isEmpty = termIndex.listAll().length == 0;
+		if (isEmpty) {
+			logger.warn("Index directory is empty, initialising the empty directory");
+			IndexWriter w = getIndexWriter();
+			w.commit();
+			w.close();
+		}
 	}
 
 	public String getIndexPath(){
@@ -86,8 +85,6 @@ public class TermIndexManagerImpl implements TermIndexManager, InitializingBean,
 		return true;
 	}
 
-	
-	
 	@Override
 	public IndexWriter getIndexWriter() throws IOException {
 		flushDeletions();
@@ -147,9 +144,5 @@ public class TermIndexManagerImpl implements TermIndexManager, InitializingBean,
 		if(termIndex != null && termIndex.checkPendingDeletions()){
 			termIndex.deletePendingFiles();
 		}
-		
 	}
-	
-	
-
 }
