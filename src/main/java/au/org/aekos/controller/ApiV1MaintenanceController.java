@@ -97,6 +97,7 @@ public class ApiV1MaintenanceController {
     		return;
     	}
     	checkTraitVocabMapping(responseWriter);
+    	checkEnvironmentalVariableVocabMapping(responseWriter);
     }
 
 	private void checkTraitVocabMapping(Writer responseWriter) {
@@ -112,6 +113,19 @@ public class ApiV1MaintenanceController {
 		writeBlankLine(responseWriter);
 	}
     
+	private void checkEnvironmentalVariableVocabMapping(Writer responseWriter) {
+		write(responseWriter, "== Checking that all environmental variable vocabs have a label ==");
+		int varsChecked = 0;
+		for (TraitOrEnvironmentalVariableVocabEntry curr : searchService.getEnvironmentalVariableVocabData()) {
+    		varsChecked++;
+			if (curr.getLabel() == null) {
+    			write(responseWriter, "ERROR: " + curr.getCode() + " doesn't have a label");
+    		}
+    	}
+		write(responseWriter, "Checked " + varsChecked + " environmental variables.");
+		writeBlankLine(responseWriter);
+	}
+	
 	/**
      * Writes a message and a new line to the writer
      * 
