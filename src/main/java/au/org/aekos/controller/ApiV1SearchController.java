@@ -48,7 +48,14 @@ public class ApiV1SearchController {
 		return searchService.getTraitVocabData();
 	}
 
-	// TODO add a resource to get the EnvironmentalVariable vocab
+	@RequestMapping(path="/getEnvironmentalVariableVocab.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+	@ApiOperation(value = "Get environmental variable vocabulary",
+			notes = "Gets a distinct list of all the environmental variables that appear in the system. The code and label are "
+					+ "supplied for each variable. The codes are required to use as parameters for other resources "
+					+ "and the label information is useful for creating UIs.")
+    public List<TraitOrEnvironmentalVariableVocabEntry> getEnvironmentalVariableVocab(HttpServletResponse resp) {
+		return searchService.getEnvironmentalVariableVocabData();
+	}
 	
 	@RequestMapping(path="/speciesAutocomplete.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ApiOperation(value = "Autocomplete partial species names", notes = "TODO")

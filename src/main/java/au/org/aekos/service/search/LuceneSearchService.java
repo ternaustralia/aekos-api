@@ -37,6 +37,8 @@ import au.org.aekos.service.vocab.VocabService;
 @Service
 public class LuceneSearchService implements SearchService {
 
+	private static final PageRequest EVERYTHING = new PageRequest(0, Integer.MAX_VALUE);
+
 	private static final Logger logger = LoggerFactory.getLogger(LuceneSearchService.class);
 	
 	@Autowired
@@ -188,12 +190,16 @@ public class LuceneSearchService implements SearchService {
 	
 	@Override
 	public List<TraitOrEnvironmentalVariableVocabEntry> getTraitVocabData() {
-		BooleanQuery.Builder queryBuilder = new BooleanQuery.Builder();
-		Query docTypeQuery = new TermQuery(new Term(IndexConstants.FLD_DOC_INDEX_TYPE, DocumentType.TRAIT_SPECIES.name()));
-		queryBuilder.add(docTypeQuery, Occur.MUST);
-		Query allTraitToSpeciesDocumentsQuery = queryBuilder.build();
+		Query allTraitToSpeciesDocumentsQuery = buildAllDocumentsOfTypeQuery(DocumentType.TRAIT_SPECIES);
 		//FIXME will it perform with a full index? Should we pre-bake?
-		return performSpeciesTraitSearch(allTraitToSpeciesDocumentsQuery, new PageRequest(0, Integer.MAX_VALUE));
+		return performSpeciesTraitSearch(allTraitToSpeciesDocumentsQuery, EVERYTHING);
+	}
+
+	@Override
+	public List<TraitOrEnvironmentalVariableVocabEntry> getEnvironmentalVariableVocabData() {
+		Query allEnvVarToSpeciesDocumentsQuery = buildAllDocumentsOfTypeQuery(DocumentType.SPECIES_ENV);
+		//FIXME will it perform with a full index? Should we pre-bake?
+		return performSpeciesEnvironmentSearch(allEnvVarToSpeciesDocumentsQuery, EVERYTHING);
 	}
 	
 	@Override
@@ -209,5 +215,13 @@ public class LuceneSearchService implements SearchService {
 			}
 		}
 		return result;
+	}
+	
+	private Query buildAllDocumentsOfTypeQuery(DocumentType documentType) {
+		BooleanQuery.Builder queryBuilder = new BooleanQuery.Builder();
+		Query docTypeQuery = new TermQuery(new Term(IndexConstants.FLD_DOC_INDEX_TYPE, documentType.name()));
+		queryBuilder.add(docTypeQuery, Occur.MUST);
+		Query allTraitToSpeciesDocumentsQuery = queryBuilder.build();
+		return allTraitToSpeciesDocumentsQuery;
 	}
 }

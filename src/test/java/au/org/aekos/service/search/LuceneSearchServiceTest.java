@@ -1,10 +1,13 @@
 package au.org.aekos.service.search;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.CoreMatchers.hasItems;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -84,7 +87,26 @@ public class LuceneSearchServiceTest {
 	   loader.addSpeciesTraitTermToIndex("species2", "trait two");
 	   loader.endLoad();
 	   List<TraitOrEnvironmentalVariableVocabEntry> result = searchService.getTraitVocabData();
-	   assertEquals(2, result.size());
+	   assertThat(result.size(), is(2));
+	   List<String> codes = result.stream().map(s -> s.getCode()).collect(Collectors.toList());
+	   assertThat(codes, hasItems("trait one", "trait two"));
+	   indexManager.closeTermIndex();
+    }
+    
+    /**
+     * Can we get the environmental variable vocab data when it exists?
+     */
+    @Test
+	public void testGetEnvironmentalVariableVocabData01() throws IOException{
+	   loader.beginLoad();
+	   loader.addSpeciesEnvironmentTermToIndex("species1", "env one");
+	   loader.addSpeciesEnvironmentTermToIndex("species1", "env two");
+	   loader.addSpeciesEnvironmentTermToIndex("species2", "env two");
+	   loader.endLoad();
+	   List<TraitOrEnvironmentalVariableVocabEntry> result = searchService.getEnvironmentalVariableVocabData();
+	   assertThat(result.size(), is(2));
+	   List<String> codes = result.stream().map(s -> s.getCode()).collect(Collectors.toList());
+	   assertThat(codes, hasItems("env one", "env two"));
 	   indexManager.closeTermIndex();
     }
 }

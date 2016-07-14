@@ -18,6 +18,18 @@ public interface SearchService {
 	 * @return	distinct list of traits in the system
 	 */
 	List<TraitOrEnvironmentalVariableVocabEntry> getTraitVocabData();
+	
+	/**
+	 * Gets the whole environmental variable vocabulary.
+	 * 
+	 * The environmental variable vocabulary is a distinct list of all the
+	 * traits that appear in the system. It can be used to populate a UI to aid
+	 * in the *byEnvironment searches and for supplying a filter list of
+	 * environmental variables to the retrieve service.
+	 * 
+	 * @return distinct list of environmental variables in the system
+	 */
+	List<TraitOrEnvironmentalVariableVocabEntry> getEnvironmentalVariableVocabData();
 
 	/**
 	 * Looks up the traits that have data recorded for the supplied species names.
