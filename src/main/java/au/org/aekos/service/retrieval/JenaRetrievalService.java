@@ -56,7 +56,7 @@ public class JenaRetrievalService implements RetrievalService {
 	private static final String ENV_VAR_PLACEHOLDER = "%ENV_VAR_PLACEHOLDER%";
 	private static final String ENV_VAR_SWITCH_PLACEHOLDER = "#OFF";
 	
-	@Autowired 
+	@Autowired
 	@Qualifier("dataModel")
 	private Model model;
 	
@@ -114,7 +114,7 @@ public class JenaRetrievalService implements RetrievalService {
 	}
 
 	@Override
-	public RetrievalResponseHeader getEnvironmentalDataCsv(List<String> speciesNames, List<String> environmentalVariableNames, 
+	public RetrievalResponseHeader getEnvironmentalDataCsv(List<String> speciesNames, List<String> environmentalVariableNames,
 			int start, int rows, Writer responseWriter) throws AekosApiRetrievalException {
 		try {
 			EnvironmentDataResponse jsonResponse = getEnvironmentalDataJsonPrivate(speciesNames, environmentalVariableNames, start, rows);
@@ -235,8 +235,19 @@ public class JenaRetrievalService implements RetrievalService {
 		return new SpeciesDataResponse(responseHeader, records);
 	}
 
-	private TraitDataRecord processSpeciesDataSolution(QuerySolution s) {
-		// FIXME this is probably a bit confusing as it says species data but actually return a trait data record with no vars
+	private SpeciesOccurrenceRecord processSpeciesDataSolution(QuerySolution s) {
+		return new SpeciesOccurrenceRecord(getDouble(s, "decimalLatitude"),
+			getDouble(s, "decimalLongitude"), getString(s, "geodeticDatum"), replaceSpaces(getString(s, "locationID")),
+			getString(s, "scientificName"), getInt(s, "individualCount"), getString(s, "eventDate"),
+			getInt(s, "year"), getInt(s, "month"), getString(s, "bibliographicCitation"),
+			getString(s, "samplingProtocol"));
+	}
+	
+	/*
+	 * We can't merge with #processSpeciesDataSolution() because then the JSON response has
+	 * an empty 'traits: []' field.
+	 */
+	private TraitDataRecord processTraitDataSolution(QuerySolution s) {
 		return new TraitDataRecord(getDouble(s, "decimalLatitude"),
 			getDouble(s, "decimalLongitude"), getString(s, "geodeticDatum"), replaceSpaces(getString(s, "locationID")),
 			getString(s, "scientificName"), getInt(s, "individualCount"), getString(s, "eventDate"),
@@ -257,7 +268,7 @@ public class JenaRetrievalService implements RetrievalService {
 		}
 	}
 
-	private EnvironmentDataResponse getEnvironmentalDataJsonPrivate(List<String> speciesNames, List<String> environmentalVariableNames, int start, 
+	private EnvironmentDataResponse getEnvironmentalDataJsonPrivate(List<String> speciesNames, List<String> environmentalVariableNames, int start,
 			int rows) throws AekosApiRetrievalException {
 		long startTime = new Date().getTime();
 		List<EnvironmentDataRecord> records = new LinkedList<>();
@@ -292,7 +303,7 @@ public class JenaRetrievalService implements RetrievalService {
 			getString(s, "eventDate"), getInt(s, "year"), getInt(s, "month"),
 			locationIds.get(locationID).bibliographicCitation,
 			locationIds.get(locationID).samplingProtocol);
-		for (String currVarProp : Arrays.asList("disturbanceEvidenceVars", "landscapeVars", "noUnitVars", 
+		for (String currVarProp : Arrays.asList("disturbanceEvidenceVars", "landscapeVars", "noUnitVars",
 				"rainfallVars", "soilVars", "temperatureVars", "windVars")) {
 			processEnvDataVars(varNames, s.get("s").asResource(), record, currVarProp);
 		}
@@ -379,7 +390,7 @@ public class JenaRetrievalService implements RetrievalService {
 	}
 	
 	private void processTraitDataSolution(List<String> traitNames, List<TraitDataRecord> records, QuerySolution s) {
-		TraitDataRecord record = processSpeciesDataSolution(s);
+		TraitDataRecord record = processTraitDataSolution(s);
 		processTraitDataVars(s.get("s").asResource(), record, "trait", traitNames);
 		boolean isTraitFilterEnabled = traitNames.size() > 0;
 		if (isTraitFilterEnabled && !record.matchesTraitFilter(traitNames)) {

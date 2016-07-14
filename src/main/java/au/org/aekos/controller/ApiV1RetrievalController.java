@@ -35,6 +35,10 @@ import io.swagger.annotations.ApiResponses;
 @RequestMapping("/v1")
 public class ApiV1RetrievalController {
 
+	private static final String TRAIT_FILTERING_FRAGMENT = " If you supply "
+						+ "trait names then the result will have the trait filtered to only list the traits "
+						+ "you've asked for, otherwise all traits are returned.";
+	private static final String CONTENT_NEGOTIATION_FRAGMENT = " using content negotation to determine the response type.";
 	private static final String DEFAULT_ROWS = "20";
 	private static final String TEXT_CSV_MIME = "text/csv";
 	private static final String DL_PARAM_MSG = "Makes the response trigger a downloadable file rather than streaming the response";
@@ -48,13 +52,13 @@ public class ApiV1RetrievalController {
 	private RetrievalService retrievalService;
 	
 	@RequestMapping(path="/speciesData.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Get species data in JSON format", notes = "Gets Aekos data")
+    @ApiOperation(value = "Get species data in JSON format",
+    		notes = "Gets Darwin Core records for the supplied species name(s) in JSON format.")
     public SpeciesDataResponse speciesDataDotJson(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
     		@RequestParam(required=false, defaultValue=DEFAULT_ROWS) @ApiParam("result page size") int rows,
     		HttpServletRequest req, HttpServletResponse resp) throws AekosApiRetrievalException {
-		// FIXME why do we never get more than 1 page when we use 0-20?
 		SpeciesDataResponse result = retrievalService.getSpeciesDataJson(Arrays.asList(speciesNames), start, rows);
 		resp.addHeader(HttpHeaders.LINK, buildLinkHeader(UriComponentsBuilder.fromHttpUrl(extractFullUrl(req)), RetrievalResponseHeader.newInstance(result)));
     	return result;
@@ -62,7 +66,8 @@ public class ApiV1RetrievalController {
 	
 	@RequestMapping(path="/speciesData", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE,
     		headers="Accept="+MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Get species data", notes = "Gets Aekos data")
+    @ApiOperation(value = "Get species data",
+    		notes = "Gets Darwin Core records for the supplied species name(s) using content negotation to determine the response type.")
     public SpeciesDataResponse speciesDataJson(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
@@ -73,7 +78,7 @@ public class ApiV1RetrievalController {
 
 	@RequestMapping(path="/speciesData.csv", method=RequestMethod.GET, produces=TEXT_CSV_MIME)
     @ApiOperation(value = "Get species occurrence data in CSV format",
-    		notes = "TODO")
+    		notes = "Gets Darwin Core records for the supplied species name(s) in CSV format.")
 	@ApiResponses(@ApiResponse(code=200, message="Data is returned")) // FIXME how do we word this FIXME are there status code int constants somewhere?
     public void speciesDataDotCsv(
     		@RequestParam(name="speciesName") @ApiParam(value="Scientific name(s) of species to retrieve data for", example="Atriplex vesicaria") String[] speciesNames,
@@ -90,9 +95,9 @@ public class ApiV1RetrievalController {
     }
 	
     @RequestMapping(path="/speciesData", method=RequestMethod.GET, produces=TEXT_CSV_MIME, headers="Accept="+TEXT_CSV_MIME)
-    //FIXME what do I put in here? Do I copy from the other overloaded method?
     @ApiOperation(value = "Get species occurrence data",
-			notes = "Gets species occurrence data in a Darwin Core compliant data format")
+		    //FIXME what do I put in here? Do I copy from the other overloaded method?
+    		notes = "Gets Darwin Core records for the supplied species name(s)" + CONTENT_NEGOTIATION_FRAGMENT)
     public void speciesDataCsv(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
@@ -104,14 +109,13 @@ public class ApiV1RetrievalController {
     
     @RequestMapping(path="/traitData.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get trait data in JSON format",
-			notes = "Get trait data in a Darwin Core + traits format")
+			notes = "Gets Darwin Core records with added trait information in JSON format." + TRAIT_FILTERING_FRAGMENT)
     public TraitDataResponse traitDataDotJson(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(name="traitName", required=false) String[] traitNames,
     		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
     		@RequestParam(required=false, defaultValue=DEFAULT_ROWS) @ApiParam("result page size") int rows,
     		HttpServletRequest req, HttpServletResponse resp) throws AekosApiRetrievalException {
-    	// TODO do we include units in the field name, as an extra value or as a header/metadata object in the resp
     	List<String> traits = traitNames != null ? Arrays.asList(traitNames) : Collections.emptyList();
     	// TODO validate start ! < 0
     	// TODO validate count > 0
@@ -121,7 +125,9 @@ public class ApiV1RetrievalController {
     }
 
     @RequestMapping(path="/traitData", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Get trait data", notes = "TODO")
+    @ApiOperation(value = "Get trait data",
+    		notes = "Gets Darwin Core records with added trait information for the supplied "
+    				+ "species name(s)" + CONTENT_NEGOTIATION_FRAGMENT + TRAIT_FILTERING_FRAGMENT)
     public TraitDataResponse traitDataJson(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(name="traitName", required=false) String[] traitNames,

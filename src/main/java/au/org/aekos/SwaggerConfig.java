@@ -2,12 +2,17 @@ package au.org.aekos;
 
 import static com.google.common.collect.Lists.newArrayList;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Writer;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.StreamUtils;
 
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
@@ -79,13 +84,24 @@ public class SwaggerConfig {
 	private ApiInfo apiInfo() {
 		ApiInfo apiInfo = new ApiInfo(
 				"ÆKOS REST API",
-				"The ÆKOS API is used for M2M REST access to ÆKOS ecological data.",
+				getDescription(),
 				apiVersion,
 				"TODO - ÆKOS API TOS",
 				new Contact("TERN Ecoinformatics", "http://www.aekos.org.au", "api@aekos.org.au"),
 				"TODO - License of API",
 				"https://api.aekos.org.au");
 		return apiInfo;
+	}
+
+	private String getDescription() {
+		try {
+			InputStream sparqlIS = Thread.currentThread().getContextClassLoader().getResourceAsStream("reference/api-description.html");
+			OutputStream out = new ByteArrayOutputStream();
+			StreamUtils.copy(sparqlIS, out);
+			return out.toString();
+		} catch (IOException e) {
+			throw new RuntimeException("Failed to load the API description", e);
+		}
 	}
 }
 

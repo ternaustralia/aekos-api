@@ -1,0 +1,15 @@
+The ÆKOS API is used for Machine2Machine(M2M) REST access to ÆKOS ecological data.<br />
+<h3>High level workflow</h3>
+<ul>
+	<li>Start with a trait or species</li>
+	<li>Find what species have that trait or what <i>traits</i>/<i>environmental variables</i> are available for that species</li>
+	<li>Use your traits/species/environmental variables to retrieve the data with the retrieval services</li>
+</ul>
+<h3>Detailed workflow</h3>
+<p>Firstly, start with the search services. You should either find a species with <code>speciesAutocomplete</code> 
+or find a trait with <code>getTraitVocab</code>. Then, for traits, find the species with that trait with 
+<code>getSpeciesByTrait</code>. For species, you can find what traits or environmental variables are available with
+<code>getEnvironmentBySpecies</code> or <code>getTraitsBySpecies</code>.</p>
+<p>Now you can retrieve the data. You can get Darwin Core species records (using species names), Darwin Core + traits
+(using species names and optionally filtering by trait names) or environmental variable records (using species names and
+optionally filtering by environmental variable names).</p>
