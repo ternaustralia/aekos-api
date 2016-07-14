@@ -31,7 +31,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import springfox.documentation.annotations.ApiIgnore;
 
-@Api(value = "AekosV1", produces=MediaType.APPLICATION_JSON_VALUE)
+@Api(description="Retrieve data using parameters from search", produces=MediaType.APPLICATION_JSON_VALUE, tags="Data Retrieval")
 @RestController
 @RequestMapping("/v1")
 public class ApiV1RetrievalController {
@@ -50,7 +50,7 @@ public class ApiV1RetrievalController {
 	private RetrievalService retrievalService;
 	
 	@RequestMapping(path="/speciesData.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Get species data in JSON format", notes = "Gets Aekos data", tags="Data Retrieval")
+    @ApiOperation(value = "Get species data in JSON format", notes = "Gets Aekos data")
     public SpeciesDataResponse speciesDataDotJson(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
@@ -64,7 +64,7 @@ public class ApiV1RetrievalController {
 	
 	@RequestMapping(path="/speciesData", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE,
     		headers="Accept="+MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Get species data", notes = "Gets Aekos data", tags="Data Retrieval")
+    @ApiOperation(value = "Get species data", notes = "Gets Aekos data")
     public SpeciesDataResponse speciesDataJson(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
@@ -75,7 +75,7 @@ public class ApiV1RetrievalController {
 
 	@RequestMapping(path="/speciesData.csv", method=RequestMethod.GET, produces=TEXT_CSV_MIME)
     @ApiOperation(value = "Get species occurrence data in CSV format",
-    		notes = "TODO", tags="Data Retrieval")
+    		notes = "TODO")
 	@ApiResponses(@ApiResponse(code=200, message="Data is returned")) // FIXME how do we word this FIXME are there status code int constants somewhere?
     public void speciesDataDotCsv(
     		@RequestParam(name="speciesName") @ApiParam(value="Scientific name(s) of species to retrieve data for", example="Atriplex vesicaria") String[] speciesNames,
@@ -94,7 +94,7 @@ public class ApiV1RetrievalController {
     @RequestMapping(path="/speciesData", method=RequestMethod.GET, produces=TEXT_CSV_MIME, headers="Accept="+TEXT_CSV_MIME)
     //FIXME what do I put in here? Do I copy from the other overloaded method?
     @ApiOperation(value = "Get species occurrence data",
-			notes = "Gets species occurrence data in a Darwin Core compliant data format", tags="Data Retrieval")
+			notes = "Gets species occurrence data in a Darwin Core compliant data format")
     public void speciesDataCsv(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
@@ -106,7 +106,7 @@ public class ApiV1RetrievalController {
     
     @RequestMapping(path="/traitData.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get trait data in JSON format",
-			notes = "Get trait data in a Darwin Core + traits format", tags="Data Retrieval")
+			notes = "Get trait data in a Darwin Core + traits format")
     public TraitDataResponse traitDataDotJson(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(name="traitName", required=false) String[] traitNames,
@@ -123,7 +123,7 @@ public class ApiV1RetrievalController {
     }
 
     @RequestMapping(path="/traitData", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Get trait data", notes = "TODO", tags="Data Retrieval")
+    @ApiOperation(value = "Get trait data", notes = "TODO")
     public TraitDataResponse traitDataJson(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(name="traitName", required=false) String[] traitNames,
@@ -135,7 +135,7 @@ public class ApiV1RetrievalController {
     
     @RequestMapping(path="/traitData.csv", method=RequestMethod.GET, produces=TEXT_CSV_MIME)
     @ApiOperation(value = "Get trait data in CSV format",
-    		notes = "TODO", tags="Data Retrieval")
+    		notes = "TODO")
     public void traitDataDotCsv(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(name="traitName", required=false) String[] traitNames,
@@ -160,7 +160,7 @@ public class ApiV1RetrievalController {
     
     @RequestMapping(path="/traitData", method=RequestMethod.GET, produces=TEXT_CSV_MIME)
     @ApiOperation(value = "Get trait data",
-    		notes = "TODO", tags="Data Retrieval")
+    		notes = "TODO")
     public void traitDataCsv(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(name="traitName", required=false) String[] traitNames,
@@ -171,7 +171,7 @@ public class ApiV1RetrievalController {
     }
     
     @RequestMapping(path="/environmentData.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Get environmental variable data in JSON format", notes = "TODO", tags="Data Retrieval")
+    @ApiOperation(value = "Get environmental variable data in JSON format", notes = "TODO")
     public EnvironmentDataResponse environmentDataDotJson(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(name="envVarName", required=false) String[] envVarNames,
@@ -187,7 +187,7 @@ public class ApiV1RetrievalController {
 	}
     
     @RequestMapping(path="/environmentData", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Get environmental variable data", notes = "TODO", tags="Data Retrieval")
+    @ApiOperation(value = "Get environmental variable data", notes = "TODO")
     public EnvironmentDataResponse environmentDataJson(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(name="envVarName", required=false) String[] envVarNames,
@@ -198,7 +198,7 @@ public class ApiV1RetrievalController {
 	}
     
     @RequestMapping(path="/environmentData.csv", method=RequestMethod.GET, produces=TEXT_CSV_MIME)
-    @ApiOperation(value = "Get environmental variable data in CSV format", notes = "TODO", tags="Data Retrieval")
+    @ApiOperation(value = "Get environmental variable data in CSV format", notes = "TODO")
     public void environmentDataDotCsv(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(name="envVarName", required=false) String[] envVarNames,
@@ -214,7 +214,7 @@ public class ApiV1RetrievalController {
 	}
     
     @RequestMapping(path="/environmentData", method=RequestMethod.GET, produces=TEXT_CSV_MIME)
-    @ApiOperation(value = "Get environmental variable data", notes = "TODO", tags="Data Retrieval")
+    @ApiOperation(value = "Get environmental variable data", notes = "TODO")
     public void environmentDataCsv(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(name="envVarName", required=false) String[] envVarNames,
