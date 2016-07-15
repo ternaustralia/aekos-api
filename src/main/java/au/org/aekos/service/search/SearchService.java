@@ -23,8 +23,7 @@ public interface SearchService {
 	 * Gets the whole environmental variable vocabulary.
 	 * 
 	 * The environmental variable vocabulary is a distinct list of all the
-	 * traits that appear in the system. It can be used to populate a UI to aid
-	 * in the *byEnvironment searches and for supplying a filter list of
+	 * traits that appear in the system. It can be used for supplying a filter list of
 	 * environmental variables to the retrieve service.
 	 * 
 	 * @return distinct list of environmental variables in the system
@@ -48,7 +47,7 @@ public interface SearchService {
 	 * 
 	 * The values of these environment variables are NOT returned, this is only to know that
 	 * species X does have a value recorded for environment variable Z. More accurately,
-	 * species X occurs at site Y, which has environment variable Z.	 * 
+	 * species X occurs at site Y, which has environment variable Z.	 *
 	 * @param speciesNames  species to look up environment variables for
 	 * @param pageReq       pagination request
 	 * @return              list of environment variables available for the supplied species

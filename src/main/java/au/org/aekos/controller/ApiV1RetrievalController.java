@@ -27,25 +27,24 @@ import au.org.aekos.service.retrieval.RetrievalService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 
 @Api(description="Retrieve data using parameters from search", produces=MediaType.APPLICATION_JSON_VALUE, tags="Data Retrieval")
 @RestController
 @RequestMapping("/v1")
 public class ApiV1RetrievalController {
 
+	private static final String SITE_FRAGMENT = "site/study location/plots";
 	private static final String TRAIT_FILTERING_FRAGMENT = " If you supply "
-						+ "trait names then the result will have the trait filtered to only list the traits "
+						+ "trait names then the result records will have the traits filtered down to only the traits "
 						+ "you've asked for, otherwise all traits are returned.";
+	private static final String ENVVAR_FILTERING_FRAGMENT = " If you supply "
+			+ "environmental variable names then the result will have the environmental variables filtered down to only the environmental variables "
+			+ "you've asked for, otherwise all environmental variables are returned.";
 	private static final String CONTENT_NEGOTIATION_FRAGMENT = " using content negotation to determine the response type.";
 	private static final String DEFAULT_ROWS = "20";
 	private static final String TEXT_CSV_MIME = "text/csv";
 	private static final String DL_PARAM_MSG = "Makes the response trigger a downloadable file rather than streaming the response";
 
-	// TODO add lots more Swagger doco
-	// TODO figure out how to get Swagger to support content negotiation with overloaded methods
-	//        see https://github.com/springfox/springfox/issues/1367 for more info about when this is coming.
 	// TODO do we accept LSID/species ID and/or a species name for the species related services?
 	
 	@Autowired
@@ -60,14 +59,16 @@ public class ApiV1RetrievalController {
     		@RequestParam(required=false, defaultValue=DEFAULT_ROWS) @ApiParam("result page size") int rows,
     		HttpServletRequest req, HttpServletResponse resp) throws AekosApiRetrievalException {
 		SpeciesDataResponse result = retrievalService.getSpeciesDataJson(Arrays.asList(speciesNames), start, rows);
-		resp.addHeader(HttpHeaders.LINK, buildLinkHeader(UriComponentsBuilder.fromHttpUrl(extractFullUrl(req)), RetrievalResponseHeader.newInstance(result)));
+		resp.addHeader(HttpHeaders.LINK, buildHateoasLinkHeader(UriComponentsBuilder.fromHttpUrl(extractFullUrl(req)), RetrievalResponseHeader.newInstance(result)));
     	return result;
 	}
 	
 	@RequestMapping(path="/speciesData", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE,
     		headers="Accept="+MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get species data",
-    		notes = "Gets Darwin Core records for the supplied species name(s) using content negotation to determine the response type.")
+    		notes = "Gets Darwin Core records for the supplied species name(s)" + CONTENT_NEGOTIATION_FRAGMENT
+    				+ " This resource honours <code>Accept</code> headers represented by any of the <code>/speciesData.*</code> resources.",
+    		produces=MediaType.APPLICATION_JSON_VALUE + ", " + TEXT_CSV_MIME) // Forcing Swagger content negotiation until support for two methods is in
     public SpeciesDataResponse speciesDataJson(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
@@ -79,7 +80,6 @@ public class ApiV1RetrievalController {
 	@RequestMapping(path="/speciesData.csv", method=RequestMethod.GET, produces=TEXT_CSV_MIME)
     @ApiOperation(value = "Get species occurrence data in CSV format",
     		notes = "Gets Darwin Core records for the supplied species name(s) in CSV format.")
-	@ApiResponses(@ApiResponse(code=200, message="Data is returned")) // FIXME how do we word this FIXME are there status code int constants somewhere?
     public void speciesDataDotCsv(
     		@RequestParam(name="speciesName") @ApiParam(value="Scientific name(s) of species to retrieve data for", example="Atriplex vesicaria") String[] speciesNames,
     		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
@@ -91,13 +91,12 @@ public class ApiV1RetrievalController {
     		resp.setHeader("Content-Disposition", "attachment;filename=aekosSpeciesData.csv"); // TODO give a more dynamic name
     	}
 		RetrievalResponseHeader header = retrievalService.getSpeciesDataCsv(Arrays.asList(speciesNames), start, rows, responseWriter);
-		resp.addHeader(HttpHeaders.LINK, buildLinkHeader(UriComponentsBuilder.fromHttpUrl(extractFullUrl(req)), header));
+		resp.addHeader(HttpHeaders.LINK, buildHateoasLinkHeader(UriComponentsBuilder.fromHttpUrl(extractFullUrl(req)), header));
     }
 	
     @RequestMapping(path="/speciesData", method=RequestMethod.GET, produces=TEXT_CSV_MIME, headers="Accept="+TEXT_CSV_MIME)
-    @ApiOperation(value = "Get species occurrence data",
-		    //FIXME what do I put in here? Do I copy from the other overloaded method?
-    		notes = "Gets Darwin Core records for the supplied species name(s)" + CONTENT_NEGOTIATION_FRAGMENT)
+    // Not defining another @ApiOperation as it won't generate the expected swagger doco.
+    // See https://github.com/springfox/springfox/issues/1367 for more info about when this is coming.
     public void speciesDataCsv(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
@@ -120,14 +119,16 @@ public class ApiV1RetrievalController {
     	// TODO validate start ! < 0
     	// TODO validate count > 0
     	TraitDataResponse result = retrievalService.getTraitDataJson(Arrays.asList(speciesNames), traits, start, rows);
-    	resp.addHeader(HttpHeaders.LINK, buildLinkHeader(UriComponentsBuilder.fromHttpUrl(extractFullUrl(req)), RetrievalResponseHeader.newInstance(result)));
+    	resp.addHeader(HttpHeaders.LINK, buildHateoasLinkHeader(UriComponentsBuilder.fromHttpUrl(extractFullUrl(req)), RetrievalResponseHeader.newInstance(result)));
     	return result;
     }
 
     @RequestMapping(path="/traitData", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get trait data",
     		notes = "Gets Darwin Core records with added trait information for the supplied "
-    				+ "species name(s)" + CONTENT_NEGOTIATION_FRAGMENT + TRAIT_FILTERING_FRAGMENT)
+    				+ "species name(s)" + CONTENT_NEGOTIATION_FRAGMENT + TRAIT_FILTERING_FRAGMENT
+    				+ " This resource honours <code>Accept</code> headers represented by any of the <code>/traitData.*</code> resources.",
+			produces=MediaType.APPLICATION_JSON_VALUE + ", " + TEXT_CSV_MIME) // Forcing Swagger content negotiation until support for two methods is in)
     public TraitDataResponse traitDataJson(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(name="traitName", required=false) String[] traitNames,
@@ -139,7 +140,7 @@ public class ApiV1RetrievalController {
     
     @RequestMapping(path="/traitData.csv", method=RequestMethod.GET, produces=TEXT_CSV_MIME)
     @ApiOperation(value = "Get trait data in CSV format",
-    		notes = "TODO")
+    		notes = "Gets Darwin Core records with added trait information in CSV format." + TRAIT_FILTERING_FRAGMENT)
     public void traitDataDotCsv(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(name="traitName", required=false) String[] traitNames,
@@ -151,20 +152,17 @@ public class ApiV1RetrievalController {
     	if (download) {
     		resp.setHeader("Content-Disposition", "attachment;filename=aekosTraitData.csv"); // TODO give a more dynamic name
     	}
-    	// TODO do we include units in the field name, as an extra value or as a header/metadata object in the resp
     	List<String> traits = traitNames != null ? Arrays.asList(traitNames) : Collections.emptyList();
     	// TODO validate start ! < 0
     	// TODO validate count > 0
     	String fullReqUrl = extractFullUrl(req);
-    	// TODO figure out how to covert to CSV
     	RetrievalResponseHeader header = retrievalService.getTraitDataCsv(Arrays.asList(speciesNames), traits, start, rows, responseWriter);
-    	// FIXME does it matter that we write the header after we write the body?
-    	resp.addHeader(HttpHeaders.LINK, buildLinkHeader(UriComponentsBuilder.fromHttpUrl(fullReqUrl), header));
+    	resp.addHeader(HttpHeaders.LINK, buildHateoasLinkHeader(UriComponentsBuilder.fromHttpUrl(fullReqUrl), header));
     }
     
     @RequestMapping(path="/traitData", method=RequestMethod.GET, produces=TEXT_CSV_MIME)
-    @ApiOperation(value = "Get trait data",
-    		notes = "TODO")
+	// Not defining another @ApiOperation as it won't generate the expected swagger doco.
+    // See https://github.com/springfox/springfox/issues/1367 for more info about when this is coming.
     public void traitDataCsv(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(name="traitName", required=false) String[] traitNames,
@@ -175,23 +173,27 @@ public class ApiV1RetrievalController {
     }
     
     @RequestMapping(path="/environmentData.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Get environmental variable data in JSON format", notes = "TODO")
+    @ApiOperation(value = "Get environmental variable data in JSON format",
+    		notes = "Gets environmental variable data records for the " + SITE_FRAGMENT + " that the supplied species "
+    				+ "name(s) appear at in JSON format.")
     public EnvironmentDataResponse environmentDataDotJson(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(name="envVarName", required=false) String[] envVarNames,
     		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
     		@RequestParam(required=false, defaultValue=DEFAULT_ROWS) @ApiParam("result page size") int rows,
     		HttpServletRequest req, HttpServletResponse resp) throws AekosApiRetrievalException {
-    	// TODO do we include units in the field name, as an extra value or as a header/metadata object in the resp
-    	// TODO handle empty env vars
     	List<String> varNames = envVarNames != null ? Arrays.asList(envVarNames) : Collections.emptyList();
 		EnvironmentDataResponse result = retrievalService.getEnvironmentalDataJson(Arrays.asList(speciesNames), varNames, start, rows);
-		resp.addHeader(HttpHeaders.LINK, buildLinkHeader(UriComponentsBuilder.fromHttpUrl(extractFullUrl(req)), RetrievalResponseHeader.newInstance(result)));
+		resp.addHeader(HttpHeaders.LINK, buildHateoasLinkHeader(UriComponentsBuilder.fromHttpUrl(extractFullUrl(req)), RetrievalResponseHeader.newInstance(result)));
     	return result;
 	}
     
     @RequestMapping(path="/environmentData", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Get environmental variable data", notes = "TODO")
+    @ApiOperation(value = "Get environmental variable data",
+			notes = "Gets environmental variable data records for the " + SITE_FRAGMENT + " that the supplied species "
+					+ "name(s) appear at " + CONTENT_NEGOTIATION_FRAGMENT + ENVVAR_FILTERING_FRAGMENT
+					+ " This resource honours <code>Accept</code> headers represented by any of the <code>/environmentData.*</code> resources.",
+			produces=MediaType.APPLICATION_JSON_VALUE + ", " + TEXT_CSV_MIME) // Forcing Swagger content negotiation until support for two methods is in)
     public EnvironmentDataResponse environmentDataJson(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(name="envVarName", required=false) String[] envVarNames,
@@ -202,23 +204,24 @@ public class ApiV1RetrievalController {
 	}
     
     @RequestMapping(path="/environmentData.csv", method=RequestMethod.GET, produces=TEXT_CSV_MIME)
-    @ApiOperation(value = "Get environmental variable data in CSV format", notes = "TODO")
+    @ApiOperation(value = "Get environmental variable data in CSV format",
+    		notes = "Gets environmental variable data records for the " + SITE_FRAGMENT + " that the supplied species "
+    				+ "name(s) appear at in CSV format.")
     public void environmentDataDotCsv(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(name="envVarName", required=false) String[] envVarNames,
     		@RequestParam(required=false, defaultValue="0") @ApiParam("0-indexed result page start") int start,
     		@RequestParam(required=false, defaultValue=DEFAULT_ROWS) @ApiParam("result page size") int rows,
     		HttpServletRequest req, HttpServletResponse resp, Writer responseWriter) throws AekosApiRetrievalException {
-    	// TODO do we include units in the field name, as an extra value or as a header/metadata object in the resp
     	resp.setContentType(TEXT_CSV_MIME);
     	List<String> varNames = envVarNames != null ? Arrays.asList(envVarNames) : Collections.emptyList();
     	RetrievalResponseHeader header = retrievalService.getEnvironmentalDataCsv(Arrays.asList(speciesNames), varNames, start, rows, responseWriter);
-		// FIXME move header up?
-		resp.addHeader(HttpHeaders.LINK, buildLinkHeader(UriComponentsBuilder.fromHttpUrl(extractFullUrl(req)), header));
+		resp.addHeader(HttpHeaders.LINK, buildHateoasLinkHeader(UriComponentsBuilder.fromHttpUrl(extractFullUrl(req)), header));
 	}
     
     @RequestMapping(path="/environmentData", method=RequestMethod.GET, produces=TEXT_CSV_MIME)
-    @ApiOperation(value = "Get environmental variable data", notes = "TODO")
+    // Not defining another @ApiOperation as it won't generate the expected swagger doco.
+    // See https://github.com/springfox/springfox/issues/1367 for more info about when this is coming.
     public void environmentDataCsv(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(name="envVarName", required=false) String[] envVarNames,
@@ -228,7 +231,7 @@ public class ApiV1RetrievalController {
     	environmentDataDotCsv(speciesNames, envVarNames, start, rows, req, resp, responseWriter);
 	}
     
-    private String buildLinkHeader(UriComponentsBuilder fromPath, RetrievalResponseHeader response) {
+    private String buildHateoasLinkHeader(UriComponentsBuilder fromPath, RetrievalResponseHeader response) {
 		// FIXME can't handle weird params like start=2, rows=3
     	int start = response.getStart();
 		int rows = response.getRows();
