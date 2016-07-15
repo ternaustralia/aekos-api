@@ -570,12 +570,12 @@
         <http://www.w3.org/2004/02/skos/core#prefLabel>
                 "Foilage Cover" .
 
-<http://www.aekos.org.au/ontology/1.0.0#windMeanAvegage>
+<http://www.aekos.org.au/ontology/1.0.0#windMeanAverage>
         a             owl:DatatypeProperty ;
         rdfs:comment  "Average daily mean wind speed per month." ;
         rdfs:domain   <http://www.aekos.org.au/ontology/1.0.0#Weather> ;
         <http://www.aekos.org.au/ontology/1.0.0#code>
-                "windMeanAvegage" ;
+                "windMeanAverage" ;
         <http://www.w3.org/2004/02/skos/core#prefLabel>
                 "Wind - average mean speed" .
 
@@ -16055,12 +16055,12 @@
         <http://www.w3.org/2004/02/skos/core#prefLabel>
                 "Methods" .
 
-<http://www.aekos.org.au/ontology/1.0.0#windMeanAvegageDirection>
+<http://www.aekos.org.au/ontology/1.0.0#windMeanAverageDirection>
         a             owl:DatatypeProperty ;
         rdfs:comment  "Average daily mean wind direction per month." ;
         rdfs:domain   <http://www.aekos.org.au/ontology/1.0.0#Weather> ;
         <http://www.aekos.org.au/ontology/1.0.0#code>
-                "windMeanAvegageDirection" ;
+                "windMeanAverageDirection" ;
         <http://www.w3.org/2004/02/skos/core#prefLabel>
                 "Wind - average mean direction" .
 
