@@ -67,7 +67,7 @@ public class SignupController {
     private RecaptchaValidator recaptchaValidator;
 
     @RequestMapping(path = "/signup", method = RequestMethod.POST)
-    @ApiIgnore
+    //@ApiIgnore
     @ApiOperation(value = "", notes = "This method is called to validate the captchya on signup.", tags="Signup")
     public ModelAndView validateCaptcha(HttpServletRequest request) {
         ValidationResult result = recaptchaValidator.validate(request);
@@ -75,7 +75,7 @@ public class SignupController {
         	logger.debug("Authenticated");
         	
         	String emailAddress = request.getParameter("email");
-        	logger.debug("emailAddress = " + emailAddress);
+        	logger.info("emailAddress = " + emailAddress);
 
         	String keyUUIDString = UUID.randomUUID().toString();
         	AekosApiAuthKey key;
@@ -83,11 +83,6 @@ public class SignupController {
 				key = new AekosApiAuthKey(keyUUIDString);
 	        	authStorageService.storeNewKey(emailAddress, key, AuthStorageService.SignupMethod.EMAIL);
 	        	
-	            final Context ctx = new Context(new Locale("en-AU"));
-	            ctx.setVariable("subject", subject);
-	            ctx.setVariable("bodyText", bodyText);
-	            ctx.setVariable("keyUUIDString", keyUUIDString);
-
 	            final MimeMessage mimeMessage = javaMailSender.createMimeMessage();
 	            MimeMessageHelper message;
 				try {
@@ -96,7 +91,12 @@ public class SignupController {
 		            message.setFrom(from);
 		        	message.setCc(cc);
 		            message.setSubject(subject);
-		            
+		        
+		            final Context ctx = new Context(new Locale("en-AU"));
+		            ctx.setVariable("subject", subject);
+		            ctx.setVariable("bodyText", bodyText);
+		            ctx.setVariable("keyUUIDString", keyUUIDString);
+
 		            final String htmlContent = this.templateEngine.process( "email-signup", ctx);
 		            message.setText(htmlContent, true);
 
