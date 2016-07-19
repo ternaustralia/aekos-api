@@ -6,8 +6,6 @@ import org.apache.lucene.document.SortedDocValuesField;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.util.BytesRef;
 
-//Try 2 types of document - preprocessed/ edit document
-//  or  occurence document
 public class AekosTermDocumentBuilder {
 	
 	//Species to trait metamodel  -  

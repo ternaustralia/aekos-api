@@ -77,6 +77,7 @@ public class ApiV1SearchController {
     		@RequestParam(name="numResults", required=false, defaultValue="20") int numResults,
     		HttpServletResponse resp) {
 		PageRequest pagination = new PageRequest(page, numResults);
+		
 		return searchService.getTraitBySpecies(Arrays.asList(speciesNames), pagination);
 	}
 	
