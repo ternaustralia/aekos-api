@@ -22,6 +22,7 @@ import org.apache.lucene.search.TopDocs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -37,7 +38,8 @@ import au.org.aekos.service.vocab.VocabService;
 @Service
 public class LuceneSearchService implements SearchService {
 
-	private static final PageRequest EVERYTHING = new PageRequest(0, Integer.MAX_VALUE);
+	//Can also pass in a null page request!!
+	public static final PageRequest EVERYTHING = new PageRequest(0, Integer.MAX_VALUE);
 
 	private static final Logger logger = LoggerFactory.getLogger(LuceneSearchService.class);
 	
@@ -47,6 +49,9 @@ public class LuceneSearchService implements SearchService {
 	@Autowired
 	private TermIndexManager termIndexManager;
 	//Max of 1024 species names??  or split into 2 or more queries . . . . 
+	
+	@Value("${lucene.page.defaultResutsPerPage}")
+	private int defaultResultsPerPage = 100;
 	
 	@Autowired
 	private VocabService vocabService;
@@ -97,13 +102,18 @@ public class LuceneSearchService implements SearchService {
 			pageMeta.totalResults = td.totalHits;
 		    if(td.totalHits > 0){
 		    	LinkedHashSet<TraitOrEnvironmentalVariableVocabEntry> uniqueResults = new LinkedHashSet<>();
-		    	for(ScoreDoc scoreDoc : td.scoreDocs){
-		    		Document matchedDoc = searcher.doc(scoreDoc.doc);
-		    		String trait = matchedDoc.get(IndexConstants.FLD_TRAIT);
-		    		String title = vocabService.getLabelForPropertyCode(trait);
-		    		if(StringUtils.hasLength(trait)){
-		    			uniqueResults.add(new TraitOrEnvironmentalVariableVocabEntry(trait, title));
-		    		}
+		    	int startDocIndex = getTopDocStartIndex(pagination, td.totalHits);
+		    	if(startDocIndex > -1){
+		    		int endDocIndex = getTopDocEndIndex(pagination, td.totalHits);
+		    		for(int x = startDocIndex; x <= endDocIndex; x++ ){
+			    	    ScoreDoc scoreDoc = td.scoreDocs[x];
+			    		Document matchedDoc = searcher.doc(scoreDoc.doc);
+			    		String trait = matchedDoc.get(IndexConstants.FLD_TRAIT);
+			    		String title = vocabService.getLabelForPropertyCode(trait);
+			    		if(StringUtils.hasLength(trait)){
+			    			uniqueResults.add(new TraitOrEnvironmentalVariableVocabEntry(trait, title));
+			    		}
+			    	}
 		    	}
 		    	responseList.addAll(uniqueResults);
 		    }
@@ -113,6 +123,9 @@ public class LuceneSearchService implements SearchService {
 		}
 		return responseList;
 	}
+	
+	
+	
 	
 	private List<SpeciesName> performTraitSpeciesSearch(Query query, PageRequest pagination ){
 		List<SpeciesName> responseList = new ArrayList<SpeciesName>();
@@ -128,12 +141,17 @@ public class LuceneSearchService implements SearchService {
 		    int totalSpecies = td.totalHits;
 		    if(totalSpecies > 0){
 		    	LinkedHashSet<SpeciesName> uniqueResults = new LinkedHashSet<>();
-		    	for(ScoreDoc scoreDoc : td.scoreDocs){
-		    		Document matchedDoc = searcher.doc(scoreDoc.doc);
-		    		String speciesName = matchedDoc.get(IndexConstants.FLD_SPECIES);
-		    		if(StringUtils.hasLength(speciesName)){
-		    			uniqueResults.add(new SpeciesName(speciesName));
-		    		}
+		    	int startDocIndex = getTopDocStartIndex(pagination, td.totalHits);
+		    	if(startDocIndex > -1){
+		    		int endDocIndex = getTopDocEndIndex(pagination, td.totalHits);
+		    		for(int x = startDocIndex; x <= endDocIndex; x++ ){
+			    	    ScoreDoc scoreDoc = td.scoreDocs[x];
+			    		Document matchedDoc = searcher.doc(scoreDoc.doc);
+			    		String speciesName = matchedDoc.get(IndexConstants.FLD_SPECIES);
+			    		if(StringUtils.hasLength(speciesName)){
+			    			uniqueResults.add(new SpeciesName(speciesName));
+			    		}
+			    	}
 		    	}
 		    	responseList.addAll(uniqueResults);
 		    }
@@ -160,13 +178,18 @@ public class LuceneSearchService implements SearchService {
 		    int totalTraits = td.totalHits;
 		    if(totalTraits > 0){
 		    	LinkedHashSet<TraitOrEnvironmentalVariableVocabEntry> uniqueResults = new LinkedHashSet<>();
-		    	for(ScoreDoc scoreDoc : td.scoreDocs){
-		    		Document matchedDoc = searcher.doc(scoreDoc.doc);
-		    		String environmentalVariable = matchedDoc.get(IndexConstants.FLD_ENVIRONMENT);
-		    		String title = vocabService.getLabelForPropertyCode(environmentalVariable);
-		    		if(StringUtils.hasLength(environmentalVariable)){
-		    			uniqueResults.add(new TraitOrEnvironmentalVariableVocabEntry(environmentalVariable, title));
-		    		}
+		    	int startDocIndex = getTopDocStartIndex(pagination, td.totalHits);
+		    	if(startDocIndex > -1){
+		    		int endDocIndex = getTopDocEndIndex(pagination, td.totalHits);
+		    		for(int x = startDocIndex; x <= endDocIndex; x++ ){
+			    	    ScoreDoc scoreDoc = td.scoreDocs[x];
+			    		Document matchedDoc = searcher.doc(scoreDoc.doc);
+			    		String environmentalVariable = matchedDoc.get(IndexConstants.FLD_ENVIRONMENT);
+			    		String title = vocabService.getLabelForPropertyCode(environmentalVariable);
+			    		if(StringUtils.hasLength(environmentalVariable)){
+			    			uniqueResults.add(new TraitOrEnvironmentalVariableVocabEntry(environmentalVariable, title));
+			    		}
+			    	}
 		    	}
 		    	responseList.addAll(uniqueResults);
 		    }
@@ -177,6 +200,48 @@ public class LuceneSearchService implements SearchService {
 		return responseList;
 	}
 	
+	/**
+	 * If requested pageNumber * resultsPerPage > totalHits return -1
+	 * @param pagination
+	 * @param totalHits
+	 * @return startIndex or -1 to signify return nothing
+	 */
+	
+	public int getTopDocStartIndex(PageRequest pagination, int totalHits){
+		if(pagination == null){
+			return 0;
+		}
+		int pageNumber = pagination.pageNumber;
+		if(pageNumber == -1 || pageNumber == 0 || pageNumber == 1){
+			return 0;
+		}
+		int resultsPerPage = pagination.resultsPerPage > 0 ?  pagination.resultsPerPage : defaultResultsPerPage;
+		int startIndex = ( pageNumber - 1 ) * resultsPerPage;
+		if(startIndex >= totalHits){
+			return -1; //
+		}
+	    return startIndex;
+	}
+	
+	public int getTopDocEndIndex(PageRequest pagination, int totalHits){
+		if(pagination == null ){ //Still might like to cap the everything query at a number of docs.
+			return totalHits - 1;
+		}
+		int pageNumber = pagination.pageNumber;
+		if(pageNumber == -1 ){
+			return -1;
+		}
+	    if(pageNumber == 0){ //zero index just in case
+	        pageNumber = 1;	
+	    }
+	    int resultsPerPage = pagination.resultsPerPage > 0 ?  pagination.resultsPerPage : defaultResultsPerPage;
+		int endIndex = (pageNumber * resultsPerPage) - 1;
+		if(endIndex > totalHits - 1){
+			endIndex = totalHits - 1; //If pagination too far startIndex should already be -1
+		}
+		return endIndex;
+		
+	}
 	
 	@Override
 	public List<SpeciesName> autocompleteSpeciesName(String partialSpeciesName) {

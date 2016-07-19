@@ -109,4 +109,37 @@ public class LuceneSearchServiceTest {
 	   assertThat(codes, hasItems("env one", "env two"));
 	   indexManager.closeTermIndex();
     }
+    
+    @Test
+    public void testPaginationStartAndEndIndex(){
+    	LuceneSearchService searchService = new LuceneSearchService();
+    	int stNdx = searchService.getTopDocStartIndex(null, 10);
+    	int eNdx = searchService.getTopDocEndIndex(null, 10);
+    	Assert.assertEquals(0, stNdx);
+    	Assert.assertEquals(9, eNdx);
+    	
+    	PageRequest page = new PageRequest(2,10);
+    	stNdx = searchService.getTopDocStartIndex(page, 100);
+    	eNdx = searchService.getTopDocEndIndex(page, 100);
+    	Assert.assertEquals(10, stNdx);
+    	Assert.assertEquals(19, eNdx);
+    	
+    	page = new PageRequest(11,10);
+    	stNdx = searchService.getTopDocStartIndex(page, 101);
+    	eNdx = searchService.getTopDocEndIndex(page, 101);
+    	Assert.assertEquals(100, stNdx);
+    	Assert.assertEquals(100, eNdx);
+    	
+    	page = new PageRequest(11,10);
+    	stNdx = searchService.getTopDocStartIndex(page, 90);
+    	eNdx = searchService.getTopDocEndIndex(page, 90);
+    	Assert.assertEquals(-1, stNdx);
+    	Assert.assertEquals(89, eNdx);
+    	
+    	page = searchService.EVERYTHING;
+    	stNdx = searchService.getTopDocStartIndex(page, 90);
+    	eNdx = searchService.getTopDocEndIndex(page, 90);
+    	Assert.assertEquals(0, stNdx);
+    	Assert.assertEquals(89, eNdx);
+    }
 }
