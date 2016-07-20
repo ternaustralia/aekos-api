@@ -87,6 +87,7 @@ public class ApiV1MaintenanceController {
 			path = windowsIndexPath;
 		}
 		write(responseWriter, "Wrote index to " + path);
+		write(responseWriter, "You need to restart the app so it can read the new index");
     }
     
     @RequestMapping(path="/doHealthCheck", method=RequestMethod.GET, produces=MediaType.TEXT_PLAIN_VALUE)
