@@ -101,7 +101,7 @@ public class ApiV1SearchController {
 					+ "of the environmental variables, it only shows that the supplied species have values for those variable. To get the"
 					+ "values, you need to use the Data Retrieval services.")
     public List<TraitOrEnvironmentalVariableVocabEntry> getEnvironmentBySpecies(
-    		@RequestParam(name="speciesNames") String[] speciesNames,
+    		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(name="page", required = false, defaultValue="0") int page,
     		@RequestParam(name="numResults", required=false, defaultValue="20") int numResults,
     		HttpServletResponse resp) {
