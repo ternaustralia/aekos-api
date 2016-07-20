@@ -1,5 +1,7 @@
 package au.org.aekos.service.metric;
 
+import java.util.Map;
+
 import au.org.aekos.controller.ApiV1SearchController;
 import au.org.aekos.model.AbstractParams;
 import au.org.aekos.service.auth.AekosApiAuthKey;
@@ -28,29 +30,50 @@ public interface MetricsStorageService {
 		}
 	}
 	
+	/**
+	 * Record a retrieval resource call.
+	 * 
+	 * @param authKey		key used to make the request
+	 * @param reqType		type of request
+	 * @param params		parameter object that was used in the request
+	 */
 	void recordRequest(AekosApiAuthKey authKey, RequestType reqType, AbstractParams params);
 	
+	/**
+	 * Record a resource call that has no parameters.
+	 * e.g: {@link ApiV1SearchController#getTraitVocab(javax.servlet.http.HttpServletResponse)}
+	 * 
+	 * @param authKey		key used to make the request
+	 * @param reqType		type of request
+	 */
 	void recordRequest(AekosApiAuthKey authKey, RequestType reqType);
 	
 	/**
-	 * Used to record resource calls that only need to supply species name(s).
+	 * Record a resource call that only need to supply species name(s).
 	 * e.g: {@link ApiV1SearchController#getSpeciesSummary(String[], javax.servlet.http.HttpServletResponse)}
 	 * 
-	 * @param authKey
-	 * @param reqType
-	 * @param speciesNames
+	 * @param authKey		key used to make the request
+	 * @param reqType		type of request
+	 * @param speciesNames	species name(s) supplied as parameters
 	 */
 	void recordRequest(AekosApiAuthKey authKey, RequestType reqType, String[] speciesNames);
 	
 	/**
-	 * Used to record resource calls that need to pass an array of string args (species/trait/environmental variable names)
+	 * Record a resource call that passes an array of string args (species/trait/environmental variable names)
 	 * and some paging information.
 	 * 
-	 * @param authKey
-	 * @param reqType
-	 * @param speciesOrTraitOrEnvVarNames
-	 * @param start
-	 * @param rows
+	 * @param authKey						key used to make the request
+	 * @param reqType						type of request
+	 * @param speciesOrTraitOrEnvVarNames	species/trait/environmental variable name(s) supplied as parameters
+	 * @param start							start param supplied
+	 * @param rows							rows param supplied
 	 */
 	void recordRequest(AekosApiAuthKey authKey, RequestType reqType, String[] speciesOrTraitOrEnvVarNames, int start, int rows);
+
+	/**
+	 * Get a summary of how many times each request type has been called.
+	 * 
+	 * @return	mapping of request type to call count
+	 */
+	Map<RequestType, Integer> getRequestSummary();
 }

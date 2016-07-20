@@ -9,7 +9,7 @@ import org.apache.jena.rdf.model.Resource;
 import au.org.aekos.service.metric.JenaMetricsStorageService;
 
 public class SpeciesDataParams extends AbstractParams {
-	private static final String SPECIES_NAMES_PROP = JenaMetricsStorageService.METRICS_NAMESPACE_V1_0 + "paramSpeciesNames";
+	public static final String SPECIES_NAMES_PROP = JenaMetricsStorageService.METRICS_NAMESPACE_V1_0 + "paramSpeciesNames";
 	
 	private final List<String> speciesNames;
 

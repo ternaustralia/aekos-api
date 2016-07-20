@@ -7,8 +7,8 @@ import org.apache.jena.rdf.model.Resource;
 import au.org.aekos.service.metric.JenaMetricsStorageService;
 
 public abstract class AbstractParams {
-	private static final String START_PROP = JenaMetricsStorageService.METRICS_NAMESPACE_V1_0 + "paramStart";
-	private static final String ROWS_PROP = JenaMetricsStorageService.METRICS_NAMESPACE_V1_0 + "paramRows";
+	public static final String START_PROP = JenaMetricsStorageService.METRICS_NAMESPACE_V1_0 + "paramStart";
+	public static final String ROWS_PROP = JenaMetricsStorageService.METRICS_NAMESPACE_V1_0 + "paramRows";
 	
 	private final int start;
 	private final int rows;
