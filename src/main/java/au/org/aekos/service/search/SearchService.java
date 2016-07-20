@@ -3,7 +3,6 @@ package au.org.aekos.service.search;
 import java.util.List;
 
 import au.org.aekos.model.SpeciesName;
-import au.org.aekos.model.SpeciesSummary;
 import au.org.aekos.model.TraitOrEnvironmentalVariableVocabEntry;
 
 public interface SearchService {
@@ -70,18 +69,4 @@ public interface SearchService {
 	 * @return						list of posssible matches ordered with the most likely match first
 	 */
 	List<SpeciesName> autocompleteSpeciesName(String partialSpeciesName);
-
-	/**
-	 * Gets a summary of each supplied species.
-	 * 
-	 * A summary explains what we (the system) know about that species.
-	 * Information such as how many records we hold, a URL for an image,
-	 * a URL for an information page in our portal, etc.
-	 * 
-	 * TODO how do we deal with the case when we don't have a 1:1 (missing summaries or multiple)?
-	 * 
-	 * @param speciesNames	species to retrieve a summary for
-	 * @return				list of summaries in the same order as species were supplied
-	 */
-	List<SpeciesSummary> getSpeciesSummary(List<String> speciesNames);
 }

@@ -2,6 +2,7 @@ package au.org.aekos.controller;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import au.org.aekos.model.SpeciesName;
 import au.org.aekos.model.SpeciesSummary;
 import au.org.aekos.model.TraitOrEnvironmentalVariableVocabEntry;
+import au.org.aekos.service.retrieval.RetrievalService;
 import au.org.aekos.service.search.PageRequest;
 import au.org.aekos.service.search.SearchService;
 import au.org.aekos.service.search.index.SpeciesLookupIndexService;
@@ -37,6 +39,9 @@ public class ApiV1SearchController {
 	
 	@Autowired
 	private SpeciesLookupIndexService speciesSearchService;
+	
+	@Autowired
+	private RetrievalService retrievalService;
 	
 	@RequestMapping(path="/getTraitVocab.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ApiOperation(value = "Get trait vocabulary",
@@ -109,13 +114,17 @@ public class ApiV1SearchController {
 		return searchService.getEnvironmentBySpecies(Arrays.asList(speciesNames), pagination);
 	}
 	
-	//species summary document??
 	@RequestMapping(path="/speciesSummary.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ApiOperation(value = "Get a summary of the specified species",
 			notes = "A summary of the information that the system holds on the supplied species name(s) "
-					+ "including thumbnail URLs and count of records.")
+					+ "including a count of records.")
     public List<SpeciesSummary> getSpeciesSummary(@RequestParam(name="speciesName") String[] speciesNames, HttpServletResponse resp) {
 		// TODO support searching/substring as the param, same as ALA
-		return searchService.getSpeciesSummary(Arrays.asList(speciesNames));
+		List<SpeciesSummary> result = new LinkedList<>();
+		for (String curr : speciesNames) {
+			int recordsHeld = retrievalService.getTotalRecordsHeldForSpeciesName(curr);
+			result.add(new SpeciesSummary(String.valueOf(curr.hashCode()), curr, recordsHeld));
+		}
+		return result;
 	}
 }
