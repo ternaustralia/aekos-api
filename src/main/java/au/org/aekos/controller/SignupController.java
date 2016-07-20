@@ -67,8 +67,8 @@ public class SignupController {
     private RecaptchaValidator recaptchaValidator;
 
     @RequestMapping(path = "/signup", method = RequestMethod.POST)
-    //@ApiIgnore
-    @ApiOperation(value = "", notes = "This method is called to validate the captchya on signup.", tags="Signup")
+    @ApiIgnore
+    @ApiOperation(value = "", notes = "This method is called to validate the captcha on signup.", tags="Signup")
     public ModelAndView validateCaptcha(HttpServletRequest request) {
         ValidationResult result = recaptchaValidator.validate(request);
         if (result.isSuccess()) {
