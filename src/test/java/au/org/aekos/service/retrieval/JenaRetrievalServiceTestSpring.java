@@ -227,7 +227,7 @@ public class JenaRetrievalServiceTestSpring {
 	 */
 	@Test
 	public void testGetEnvironmentalDataJson04() throws Throwable {
-		EnvironmentDataResponse result = objectUnderTest.getEnvironmentalDataJson(Arrays.asList("Calotis hispidula", "Rosa canina"), 
+		EnvironmentDataResponse result = objectUnderTest.getEnvironmentalDataJson(Arrays.asList("Calotis hispidula", "Rosa canina"),
 				Arrays.asList("aspect", "soilType", "sand"), 0, 20);
 		assertThat(result.getResponseHeader().getNumFound(), is(1));
 		List<EnvironmentDataRecord> response = result.getResponse();
@@ -290,5 +290,23 @@ public class JenaRetrievalServiceTestSpring {
 			compareStr = testGetTraitDataCsv01_expected.replaceAll("\r", "");
 		}
 		assertEquals(compareStr, writer.toString());
+	}
+	
+	/**
+	 * Can we count species records when there are some?
+	 */
+	@Test
+	public void testGetTotalRecordsHeldForSpeciesName01() {
+		int result = objectUnderTest.getTotalRecordsHeldForSpeciesName("Calotis hispidula");
+		assertThat(result, is(2));
+	}
+	
+	/**
+	 * Can we count species records when there are none?
+	 */
+	@Test
+	public void testGetTotalRecordsHeldForSpeciesName02() {
+		int result = objectUnderTest.getTotalRecordsHeldForSpeciesName("blah blah");
+		assertThat(result, is(0));
 	}
 }

@@ -29,7 +29,7 @@ public interface RetrievalService {
 	 * @param rows			number of rows to return (page size), 0 means all
 	 * @param respWriter 	writer to write records to
 	 * @return				metadata about the response
-	 * @throws AekosApiRetrievalException 
+	 * @throws AekosApiRetrievalException
 	 */
 	RetrievalResponseHeader getSpeciesDataCsv(List<String> speciesNames, int start, int rows, Writer respWriter) throws AekosApiRetrievalException;
 
@@ -42,7 +42,7 @@ public interface RetrievalService {
 	 * @param speciesNames	names of the species to retrieve data for
 	 * @param traitNames	list of trait names to filter by or an empty list to get all traits
 	 * @param start			offset to start retrieving records
-	 * @param rows			number of rows to return (page size), 0 means all 
+	 * @param rows			number of rows to return (page size), 0 means all
 	 * @return				some metadata and specified number of records for the specified species filtered by the supplied trait name list
 	 * @throws AekosApiRetrievalException when something goes wrong
 	 */
@@ -56,7 +56,7 @@ public interface RetrievalService {
 	 * @param speciesNames	names of the species to retrieve data for
 	 * @param traitNames	list of trait names to filter by or an empty list to get all traits
 	 * @param start			offset to start retrieving records
-	 * @param rows			number of rows to return (page size), 0 means all 
+	 * @param rows			number of rows to return (page size), 0 means all
 	 * @param respWriter 	writer to write result rows to
 	 * @return				metadata about the response
 	 * @throws AekosApiRetrievalException when something goes wrong
@@ -69,7 +69,7 @@ public interface RetrievalService {
 	 * @param speciesNames					names of the species to retrieve data for
 	 * @param environmentalVariableNames	environmental variable names to filter by or an empty list to get all variables
 	 * @param start							offset to start retrieving records
-	 * @param rows							number of rows to return (page size), 0 means all 
+	 * @param rows							number of rows to return (page size), 0 means all
 	 * @return								some metadata and specified number of records for the specified species filtered by the supplied variable name list
 	 * @throws AekosApiRetrievalException 	when something goes wrong
 	 */
@@ -81,7 +81,7 @@ public interface RetrievalService {
 	 * @param speciesNames					names of the species to retrieve data for
 	 * @param environmentalVariableNames	environmental variable names to filter by or an empty list to get all variables
 	 * @param start							offset to start retrieving records
-	 * @param rows							number of rows to return (page size), 0 means all 
+	 * @param rows							number of rows to return (page size), 0 means all
 	 * @param respWriter 					writer to write result rows to
 	 * @return								metadata about the response
 	 * @throws AekosApiRetrievalException
@@ -94,4 +94,12 @@ public interface RetrievalService {
 	 * @param callback	processor to handle the found records
 	 */
 	void getIndexStream(IndexLoaderCallback callback);
+
+	/**
+	 * Gets the total number of records we hold for the supplied species name.
+	 * 
+	 * @param speciesName	species name to count records for
+	 * @return				count of the records in the system for the supplied species name
+	 */
+	int getTotalRecordsHeldForSpeciesName(String speciesName);
 }

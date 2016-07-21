@@ -136,7 +136,7 @@ public class LuceneSearchServiceTest {
     	Assert.assertEquals(-1, stNdx);
     	Assert.assertEquals(89, eNdx);
     	
-    	page = searchService.EVERYTHING;
+    	page = LuceneSearchService.EVERYTHING;
     	stNdx = searchService.getTopDocStartIndex(page, 90);
     	eNdx = searchService.getTopDocEndIndex(page, 90);
     	Assert.assertEquals(0, stNdx);

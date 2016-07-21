@@ -1,11 +1,9 @@
 package au.org.aekos.service.search;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.lucene.document.Document;
@@ -27,7 +25,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import au.org.aekos.model.SpeciesName;
-import au.org.aekos.model.SpeciesSummary;
 import au.org.aekos.model.TraitOrEnvironmentalVariableVocabEntry;
 import au.org.aekos.service.search.index.DocumentType;
 import au.org.aekos.service.search.index.IndexConstants;
@@ -48,7 +45,7 @@ public class LuceneSearchService implements SearchService {
 	
 	@Autowired
 	private TermIndexManager termIndexManager;
-	//Max of 1024 species names??  or split into 2 or more queries . . . . 
+	//Max of 1024 species names??  or split into 2 or more queries . . . .
 	
 	@Value("${lucene.page.defaultResutsPerPage}")
 	private int defaultResultsPerPage = 100;
@@ -232,7 +229,7 @@ public class LuceneSearchService implements SearchService {
 			return -1;
 		}
 	    if(pageNumber == 0){ //zero index just in case
-	        pageNumber = 1;	
+	        pageNumber = 1;
 	    }
 	    int resultsPerPage = pagination.resultsPerPage > 0 ?  pagination.resultsPerPage : defaultResultsPerPage;
 		int endIndex = (pageNumber * resultsPerPage) - 1;
@@ -246,11 +243,12 @@ public class LuceneSearchService implements SearchService {
 	@Override
 	public List<SpeciesName> autocompleteSpeciesName(String partialSpeciesName) {
 		try {
-			return speciesSearchService.performSearch(partialSpeciesName, 50, false);
+			List<SpeciesName> result = speciesSearchService.performSearch(partialSpeciesName, 50, false);
+			return Collections.unmodifiableList(result);
 		} catch (IOException e) {
 			logger.error("Failed to query index", e);
 		}
-		return null;
+		return Collections.emptyList();
 	}
 	
 	@Override
@@ -265,21 +263,6 @@ public class LuceneSearchService implements SearchService {
 		Query allEnvVarToSpeciesDocumentsQuery = buildAllDocumentsOfTypeQuery(DocumentType.SPECIES_ENV);
 		//FIXME will it perform with a full index? Should we pre-bake?
 		return performSpeciesEnvironmentSearch(allEnvVarToSpeciesDocumentsQuery, EVERYTHING);
-	}
-	
-	@Override
-	public List<SpeciesSummary> getSpeciesSummary(List<String> speciesNames) {
-		// FIXME make this real
-		List<SpeciesSummary> result = new LinkedList<>();
-		for (String curr : speciesNames) {
-			try {
-				result.add(new SpeciesSummary(curr, "FIXME", "FIXME", -1, new URL("https://api.aekos.org.au/FIXME"), 
-						new URL("https://api.aekos.org.au/FIXME.jpg"), "FIXME"));
-			} catch (MalformedURLException e) {
-				logger.error("Failed to create a URL when processing " + speciesNames, e);
-			}
-		}
-		return result;
 	}
 	
 	private Query buildAllDocumentsOfTypeQuery(DocumentType documentType) {

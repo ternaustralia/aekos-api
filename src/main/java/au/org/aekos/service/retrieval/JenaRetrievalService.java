@@ -213,6 +213,11 @@ public class JenaRetrievalService implements RetrievalService {
 		}
 	}
 	
+	@Override
+	public int getTotalRecordsHeldForSpeciesName(String speciesName) {
+		return getTotalNumFoundForSpeciesData(Arrays.asList(speciesName));
+	}
+	
 	private SpeciesDataResponse getSpeciesDataJsonPrivate(List<String> speciesNames, int start, int rows) {
 		// FIXME make species names case insensitive (try binding an LCASE(?scientificName) and using that
 		long startTime = new Date().getTime();
@@ -254,7 +259,7 @@ public class JenaRetrievalService implements RetrievalService {
 			getInt(s, "year"), getInt(s, "month"), getString(s, "bibliographicCitation"),
 			getString(s, "samplingProtocol"));
 	}
-
+	
 	private int getTotalNumFoundForSpeciesData(List<String> speciesNames) {
 		String sparql = getProcessedDarwinCoreCountSparql(speciesNames);
 		logger.debug("Species data count SPARQL: " + sparql);
@@ -291,7 +296,7 @@ public class JenaRetrievalService implements RetrievalService {
 				processEnvDataSolution(environmentalVariableNames, records, locationIds, s);
 			}
 		}
-		int numFound = getTotalNumFoundEnvironmentData(environmentalVariableNames, locationIds);
+		int numFound = getTotalNumFoundForEnvironmentData(environmentalVariableNames, locationIds);
 		ResponseHeader responseHeader = ResponseHeader.newInstance(start, rows, numFound, startTime, params);
 		return new EnvironmentDataResponse(responseHeader, records);
 	}
@@ -329,7 +334,7 @@ public class JenaRetrievalService implements RetrievalService {
 		}
 	}
 
-	private int getTotalNumFoundEnvironmentData(List<String> environmentalVariableNames, Map<String, LocationInfo> locationIds) {
+	private int getTotalNumFoundForEnvironmentData(List<String> environmentalVariableNames, Map<String, LocationInfo> locationIds) {
 		// FIXME need to be sure this is all the IDs
 		String sparql = getProcessedEnvDataCountSparql(environmentalVariableNames, locationIds);
 		logger.debug("Environment data count SPARQL: " + sparql);
