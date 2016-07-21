@@ -33,6 +33,7 @@ import au.org.aekos.service.auth.AekosUserDetailsService;
 import au.org.aekos.service.auth.AuthStorageService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import springfox.documentation.annotations.ApiIgnore;
 
 
 @Api(value = "AekosV1", produces=MediaType.APPLICATION_JSON_VALUE)
