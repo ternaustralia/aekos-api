@@ -1,6 +1,6 @@
 <!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-spring4-4.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:th="http://www.thymeleaf.org">
+	xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
 	<title>Get Access - &AElig;KOS API</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -35,12 +35,27 @@
     		display: block;
 		}
 		
-		.vertical-align {
-			/* thanks http://stackoverflow.com/a/22196760/1410035 */
-			min-height: 100%;  /* Fallback for browsers do NOT support vh unit */
-			min-height: 100vh; /* These two lines are counted as one :-)       */
-			display: flex;
-			align-items: center;
+		@media (min-width: 768px) {
+			.vertical-align {
+			    position: absolute;
+			    top: 50%;
+			    left: 50%;
+			    transform: translate(-50%, -50%);
+			}
+		}
+		
+		@media (max-width: 992px) {
+			body {
+				font-size: 26px;
+			}
+		}
+		
+		@media (max-width: @screen-xs) {
+		    body{font-size: 10px;}
+		}
+		
+		@media (max-width: @screen-sm) {
+		    body{font-size: 14px;}
 		}
 	</style>
 	<!-- Custom Fonts -->
@@ -48,11 +63,11 @@
 	<link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css"/>
 </head>
 
-<body class="header vertical-align">
-	<div class="container">
+<body class="header">
+	<div class="container vertical-align">
 	    <div class="row">
-	        <div class="col-md-2"></div>
-	        <div class="col-md-8 panel">
+	        <div class="col-sm-2"></div>
+	        <div class="col-sm-8 panel">
 				<h1 class="text-center">Gain access to the API</h1>
 				<p>The AEKOS API is free to access but you require a personal
 					API key before you can make requests. Requesting an API key is also
@@ -65,7 +80,7 @@
 				</ol>
 				<div class="row">
 	        		<div class="col-md-3"></div>
-	        		<div class="col-md-6">
+	        		<div class="col-sm-12 col-md-6">
 						<form action="/v1/signup" method="post">
 							<div class="form-group">
 								<label for="email">Email:</label>
@@ -79,10 +94,8 @@
 							<input id="theSubmit" type="submit" value="Request an API Key" class="btn btn-primary btn-lg btn-block" />
 						</form>
 					</div>
-					<div class="col-md-3"></div>
 				</div>
 			</div>
-			<div class="col-md-2"></div>
 		</div>
 	</div>
 </body>
