@@ -11,9 +11,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration;
 import org.springframework.http.MediaType;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,15 +29,18 @@ import com.github.mkopylec.recaptcha.validation.ValidationResult;
 
 import au.org.aekos.service.auth.AekosApiAuthKey;
 import au.org.aekos.service.auth.AekosApiAuthKey.InvalidKeyException;
+import au.org.aekos.service.auth.AekosUserDetailsService;
 import au.org.aekos.service.auth.AuthStorageService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import springfox.documentation.annotations.ApiIgnore;
+
 
 @Api(value = "AekosV1", produces=MediaType.APPLICATION_JSON_VALUE)
 @RestController
 @RequestMapping("/v1")
 public class SignupController {
+
+	private static final Logger logger = LoggerFactory.getLogger(SignupController.class);
 
 	@Autowired
 	private AuthStorageService authStorageService;
@@ -45,6 +51,9 @@ public class SignupController {
     @Autowired
     private SpringTemplateEngine templateEngine;
 	
+    @Autowired
+    private RecaptchaValidator recaptchaValidator;
+
     /* Params to use in the templated email */
 	@Value("${aekos-api.spring.mail.from}")
 	private String from;
@@ -61,11 +70,13 @@ public class SignupController {
 	@Value("${aekos-api.spring.mail.logo}")
 	private String logo;
 
-	private static final Logger logger = LoggerFactory.getLogger(SignupController.class);
+    private final AekosUserDetailsService aekosUserDetailsService;
 
     @Autowired
-    private RecaptchaValidator recaptchaValidator;
-
+    public SignupController(AekosUserDetailsService aekosUserDetailsService) {
+       this.aekosUserDetailsService = aekosUserDetailsService;
+    }
+    
     @RequestMapping(path = "/signup", method = RequestMethod.POST)
     //@ApiIgnore
     @ApiOperation(value = "", notes = "This method is called to validate the captchya on signup.", tags="Signup")
@@ -117,4 +128,16 @@ public class SignupController {
         	return new ModelAndView("redirect:/signedup.html?status=captchafailure");
         }
     }
+    
+
+    //
+    // Test service - potentially dump this.
+    //
+    
+    //@ApiIgnore
+    @RequestMapping(path = "/exists/{username}", method = RequestMethod.GET)
+    public boolean userExists(@PathVariable("username") String username ) {
+        return aekosUserDetailsService.userExists(username);
+    }
+    
 }

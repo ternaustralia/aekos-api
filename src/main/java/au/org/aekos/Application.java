@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerFactory;
 import org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainerFactory;
@@ -34,7 +35,8 @@ import au.org.aekos.util.AuthAekosJenaModelFactory;
 import au.org.aekos.util.CoreDataAekosJenaModelFactory;
 import au.org.aekos.util.MetricsAekosJenaModelFactory;
 
-@SpringBootApplication
+// Exclude SecurityAutoConfiguration so we can insert our custom Auth filter
+@SpringBootApplication(exclude = {SecurityAutoConfiguration.class })
 @PropertySource("classpath:/au/org/aekos/aekos-api.properties")
 @PropertySource(value="file://${user.home}/aekos-api.properties", ignoreResourceNotFound=true)
 public class Application extends SpringBootServletInitializer {
