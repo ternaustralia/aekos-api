@@ -34,5 +34,13 @@ public class SpeciesLookupIndexServiceTest {
 		assertThat(result.size(), is(4));
 		List<String> names = result.stream().map(s -> s.getName()).collect(Collectors.toList());
 		assertThat(names, hasItems("Abacopteris aspera", "Abacopteris presliana", "Abacopteris sp.", "Abacopteris triphylla"));
+	    
+		result = objectUnderTest.performSearch("m", 100, false);
+		Assert.assertTrue(result.size() > 0);
+		SpeciesName species = result.get(0);
+		Assert.assertEquals("m", species.getName().substring(0,1).toLowerCase() );
+		
+	
+	
 	}
 }

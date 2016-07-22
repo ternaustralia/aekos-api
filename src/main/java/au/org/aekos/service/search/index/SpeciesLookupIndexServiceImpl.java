@@ -67,7 +67,7 @@ public class SpeciesLookupIndexServiceImpl implements InitializingBean, SpeciesL
 		if(td.totalHits == 0 && td2.totalHits == 0 ){
 			resultList = doWildcardQuery(searchTerm, numResults, searcher );
 		}else{
-		    resultList = mergePrimaryAndSecondaryResults(SpeciesNameList1, SpeciesNameList2, numResults, 15, 20);
+		    resultList = mergePrimaryAndSecondaryResults(SpeciesNameList1, SpeciesNameList2, numResults, 30, 20);
 		}
 		if(termHighlight){
 			//applyHighlightToResults(term, resultList);
