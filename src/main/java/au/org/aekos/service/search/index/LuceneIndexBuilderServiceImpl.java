@@ -86,9 +86,9 @@ public class LuceneIndexBuilderServiceImpl implements LuceneIndexBuilderService 
 	
 	static private void manualLowercaseTokeniseAndAddBoost(String traitDisplayValue, Document doc){
 		String lowercase = traitDisplayValue.toLowerCase().replace(" ", "").replace(".", "");
-		Field textField = new TextField(IndexConstants.FLD_SEARCH, lowercase, Field.Store.NO );
+		Field textField = new StringField(IndexConstants.FLD_SEARCH, lowercase, Field.Store.NO );
 		
-		textField.setBoost(10.0f);
+		//textField.setBoost(10.0f);
 		doc.add(textField);
 		doc.add(new SortedDocValuesField(IndexConstants.FLD_SEARCH, new BytesRef(lowercase)));
         
