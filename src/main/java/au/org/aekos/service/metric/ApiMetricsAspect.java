@@ -7,6 +7,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
@@ -16,8 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.metrics.CounterService;
 import org.springframework.stereotype.Component;
 
-import au.org.aekos.model.AbstractParams;
-import au.org.aekos.model.TraitDataParams;
 import au.org.aekos.service.auth.AekosApiAuthKey;
 import au.org.aekos.service.auth.AekosApiAuthKey.InvalidKeyException;
 import au.org.aekos.service.auth.AuthStorageService;
@@ -45,8 +44,8 @@ public class ApiMetricsAspect {
     @Autowired
     private JenaMetricsStorageService metricStore;
 
-    @Autowired
-    private AuthStorageService authStore;
+    //@Autowired
+    //private AuthStorageService authStore;
 
     /*
      * Metrics on Search Services
@@ -64,12 +63,17 @@ public class ApiMetricsAspect {
 	
     // GetEnvironmentBySpecies
     @AfterReturning(pointcut = "execution(* au.org.aekos.controller.ApiV1SearchController.getEnvironmentBySpecies(..))")
-    public void afterCallingGetEnvironmentBySpecies() {
+    public void afterCallingGetEnvironmentBySpecies(JoinPoint joinPoint) {
         counterService.increment("services.api.ApiV1SearchController.getEnvironmentBySpecies.invoked");
         
-		//AbstractParams params = new TraitDataParams(0, 20, Arrays.asList("atriplex vesicaria"), Arrays.asList("Height"));
-		//AekosApiAuthKey authKey = new AekosApiAuthKey("CAFEBABE1234");
-        //writeMetricToStore(new AekosApiAuthKey("ddd"), RequestType.ENVIRONMENT_BY_SPECIES, );
+        try {
+        	String[] speciesNames = (String[]) joinPoint.getArgs()[0]; 
+			logger.info(" *** GetEnvironmentBySpecies called.. " + Arrays.toString(speciesNames));
+			
+        	metricStore.recordRequest(new AekosApiAuthKey("ddd"), RequestType.V1_SPECIES_AUTOCOMPLETE, speciesNames);
+		} catch (InvalidKeyException e) {
+			logger.error("GetEnvironmentBySpecies bad apiKey exception");
+		}        
     }
 
     @AfterThrowing(pointcut = "execution(* au.org.aekos.controller.ApiV1SearchController.getEnvironmentBySpecies(..))", throwing = "e")
@@ -80,8 +84,17 @@ public class ApiMetricsAspect {
 
     // GetSpeciesByTrait
     @AfterReturning(pointcut = "execution(* au.org.aekos.controller.ApiV1SearchController.getSpeciesByTrait(..))")
-    public void afterCallingGetSpeciesByTrait() {
+    public void afterCallingGetSpeciesByTrait(JoinPoint joinPoint) {
         counterService.increment("services.api.ApiV1SearchController.getSpeciesByTrait.invoked");
+        
+        try {
+        	String[] traitNames = (String[]) joinPoint.getArgs()[0]; 
+			logger.info(" *** GetSpeciesByTrait called.. " + Arrays.toString(traitNames));
+			
+        	metricStore.recordRequest(new AekosApiAuthKey("ddd"), RequestType.V1_SPECIES_AUTOCOMPLETE, traitNames);
+		} catch (InvalidKeyException e) {
+			logger.error("GetSpeciesByTrait bad apiKey exception");
+		}            
     }
 
     @AfterThrowing(pointcut = "execution(* au.org.aekos.controller.ApiV1SearchController.getSpeciesByTrait(..))", throwing = "e")
@@ -92,8 +105,17 @@ public class ApiMetricsAspect {
     
     // GetSpeciesSummary
     @AfterReturning(pointcut = "execution(* au.org.aekos.controller.ApiV1SearchController.getSpeciesSummary(..))")
-    public void afterCallingGetSpeciesSummary() {
+    public void afterCallingGetSpeciesSummary(JoinPoint joinPoint) {
         counterService.increment("services.api.ApiV1SearchController.getSpeciesSummary.invoked");
+        
+        try {
+        	String[] speciesNames = (String[]) joinPoint.getArgs()[0]; 
+			logger.info(" *** GetSpeciesSummary called.. " + Arrays.toString(speciesNames));
+			
+        	metricStore.recordRequest(new AekosApiAuthKey("ddd"), RequestType.V1_SPECIES_AUTOCOMPLETE, speciesNames );
+		} catch (InvalidKeyException e) {
+			logger.error("GetSpeciesSummary bad apiKey exception");
+		}           
     }
 
     @AfterThrowing(pointcut = "execution(* au.org.aekos.controller.ApiV1SearchController.getSpeciesSummary(..))", throwing = "e")
@@ -104,8 +126,16 @@ public class ApiMetricsAspect {
     
     // GetTraitsBySpecies
     @AfterReturning(pointcut = "execution(* au.org.aekos.controller.ApiV1SearchController.getTraitsBySpecies(..))")
-    public void afterCallingGetTraitsBySpecies() {
+    public void afterCallingGetTraitsBySpecies(JoinPoint joinPoint) {
         counterService.increment("services.api.ApiV1SearchController.getTraitsBySpecies.invoked");
+        try {
+        	String[] speciesNames = (String[]) joinPoint.getArgs()[0]; 
+			logger.info(" *** GetTraitsBySpecies called.. " + Arrays.toString(speciesNames));
+			
+        	metricStore.recordRequest(new AekosApiAuthKey("ddd"), RequestType.V1_SPECIES_AUTOCOMPLETE, speciesNames );
+		} catch (InvalidKeyException e) {
+			logger.error("GetTraitsBySpecies bad apiKey exception");
+		}  
     }
 
     @AfterThrowing(pointcut = "execution(* au.org.aekos.controller.ApiV1SearchController.getTraitsBySpecies(..))", throwing = "e")
@@ -152,15 +182,15 @@ public class ApiMetricsAspect {
     }    
 
     
-    
     // SpeciesAutocomplete
     @AfterReturning(pointcut = "execution(* au.org.aekos.controller.ApiV1SearchController.speciesAutocomplete(..))")
-    public void afterCallingSpeciesAutocomplete() {
-		logger.info("afterCallingSpeciesAutocomplete aspect has been pinged..");
+    public void afterCallingSpeciesAutocomplete(JoinPoint joinPoint) {
         counterService.increment("services.api.ApiV1SearchController.speciesAutocomplete.invoked");
         try {
-			logger.info(" *** SpeciesAutocomplete called..");
-        	metricStore.recordRequest(new AekosApiAuthKey("ddd"), RequestType.V1_SPECIES_AUTOCOMPLETE);
+        	String speciesStub = (String) joinPoint.getArgs()[0]; 
+			logger.info(" *** SpeciesAutocomplete called.. " + speciesStub);
+			
+        	metricStore.recordRequest(new AekosApiAuthKey("ddd"), RequestType.V1_SPECIES_AUTOCOMPLETE, new String[] { speciesStub });
 		} catch (InvalidKeyException e) {
 			logger.error("SpeciesAutocomplete bad apiKey exception");
 		}
@@ -179,19 +209,41 @@ public class ApiMetricsAspect {
 
     // environmentDataDotCsv
     @AfterReturning(pointcut = "execution(* au.org.aekos.controller.ApiV1RetrievalController.environmentDataDotCsv(..))")
-    public void afterCallingenvironmentDataDotCsv() {
+    public void afterCallingEnvironmentDataDotCsv(JoinPoint joinPoint) {
         counterService.increment("services.api.ApiV1RetrievalController.environmentDataDotCsv.invoked");
+
+        try {
+        	String[] speciesNames = (String[]) joinPoint.getArgs()[0]; 
+        	String[] envNames = (String[]) joinPoint.getArgs()[1]; 
+			logger.info(" *** environmentDataDotCsv called.. " + Arrays.toString(speciesNames) + "," + Arrays.toString(envNames));
+			
+        	metricStore.recordRequest(new AekosApiAuthKey("ddd"), RequestType.V1_ENVIRONMENT_DATA_CSV, speciesNames );
+		} catch (InvalidKeyException e) {
+			logger.error("environmentDataDotCsv bad apiKey exception");
+		} 
+    
     }
 
     @AfterThrowing(pointcut = "execution(* au.org.aekos.controller.ApiV1RetrievalController.environmentDataDotCsv(..))", throwing = "e")
-    public void afterenvironmentDataDotCsvThrowsException(Exception e) {
+    public void afterEnvironmentDataDotCsvThrowsException(Exception e) {
         counterService.increment("counter.errors.ApiV1RetrievalController.environmentDataDotCsv");
     }
     
     // environmentDataDotJson
     @AfterReturning(pointcut = "execution(* au.org.aekos.controller.ApiV1RetrievalController.environmentDataDotJson(..))")
-    public void afterCallingenvironmentDataDotJson() {
+    public void afterCallingenvironmentDataDotJson(JoinPoint joinPoint) {
         counterService.increment("services.api.ApiV1RetrievalController.environmentDataDotJson.invoked");
+        
+        try {
+        	String[] speciesNames = (String[]) joinPoint.getArgs()[0]; 
+        	String[] envNames = (String[]) joinPoint.getArgs()[1]; 
+			logger.info(" *** environmentDataDotJson called.. " + Arrays.toString(speciesNames) + "," + Arrays.toString(envNames));
+			
+        	metricStore.recordRequest(new AekosApiAuthKey("ddd"), RequestType.V1_ENVIRONMENT_DATA_JSON, speciesNames );
+		} catch (InvalidKeyException e) {
+			logger.error("environmentDataDotJson bad apiKey exception");
+		} 
+    
     }
 
     @AfterThrowing(pointcut = "execution(* au.org.aekos.controller.ApiV1RetrievalController.environmentDataDotJson(..))", throwing = "e")
@@ -203,8 +255,18 @@ public class ApiMetricsAspect {
     
     // speciesDataDotCsv
     @AfterReturning(pointcut = "execution(* au.org.aekos.controller.ApiV1RetrievalController.speciesDataDotCsv(..))")
-    public void afterCallingspeciesDataDotCsv() {
+    public void afterCallingSpeciesDataDotCsv(JoinPoint joinPoint) {
         counterService.increment("services.api.ApiV1RetrievalController.speciesDataDotCsv.invoked");
+
+        try {
+        	String[] speciesNames = (String[]) joinPoint.getArgs()[0]; 
+			logger.info(" *** speciesDataDotCsv called.. " + Arrays.toString(speciesNames));
+			
+        	metricStore.recordRequest(new AekosApiAuthKey("ddd"), RequestType.V1_SPECIES_DATA_CSV, speciesNames );
+		} catch (InvalidKeyException e) {
+			logger.error("speciesDataDotCsv bad apiKey exception");
+		} 
+    
     }
 
     @AfterThrowing(pointcut = "execution(* au.org.aekos.controller.ApiV1RetrievalController.speciesDataDotCsv(..))", throwing = "e")
@@ -214,10 +276,12 @@ public class ApiMetricsAspect {
     
     // speciesDataDotJson
     @AfterReturning(pointcut = "execution(* au.org.aekos.controller.ApiV1RetrievalController.speciesDataDotJson(..))")
-    public void afterCallingSpeciesDataDotJson() {
+    public void afterCallingSpeciesDataDotJson(JoinPoint joinPoint) {
         counterService.increment("services.api.ApiV1RetrievalController.speciesDataDotJson.invoked");
 		try {
-			logger.info(" *** speciesDataDotJson called..");			
+        	String[] speciesNames = (String[]) joinPoint.getArgs()[0]; 
+			logger.info(" *** speciesDataDotCsv called.. " + Arrays.toString(speciesNames));
+
 			metricStore.recordRequest(new AekosApiAuthKey("ddd"), RequestType.V1_SPECIES_DATA_JSON);
 		} catch (InvalidKeyException e) {
 			logger.error("afterCallingspeciesDataDotJson bad apiKey exception");
@@ -234,8 +298,19 @@ public class ApiMetricsAspect {
     
     // traitDataDotCsv
     @AfterReturning(pointcut = "execution(* au.org.aekos.controller.ApiV1RetrievalController.traitDataDotCsv(..))")
-    public void afterCallingtraitDataDotCsv() {
+    public void afterCallingtraitDataDotCsv(JoinPoint joinPoint) {
         counterService.increment("services.api.ApiV1RetrievalController.traitDataDotCsv.invoked");
+
+        try {
+        	String[] speciesNames = (String[]) joinPoint.getArgs()[0]; 
+        	String[] envNames = (String[]) joinPoint.getArgs()[1]; 
+			logger.info(" *** traitDataDotCsv called.. " + Arrays.toString(speciesNames) + "," + Arrays.toString(envNames));
+			
+        	metricStore.recordRequest(new AekosApiAuthKey("ddd"), RequestType.V1_TRAIT_DATA_CSV, speciesNames );
+		} catch (InvalidKeyException e) {
+			logger.error("traitDataDotCsv bad apiKey exception");
+		}     
+    
     }
 
     @AfterThrowing(pointcut = "execution(* au.org.aekos.controller.ApiV1RetrievalController.traitDataDotCsv(..))", throwing = "e")
@@ -245,8 +320,19 @@ public class ApiMetricsAspect {
     
     // traitDataDotJson
     @AfterReturning(pointcut = "execution(* au.org.aekos.controller.ApiV1RetrievalController.traitDataDotJson(..))")
-    public void afterCallingTraitDataDotJson() {
+    public void afterCallingTraitDataDotJson(JoinPoint joinPoint) {
         counterService.increment("services.api.ApiV1RetrievalController.traitDataDotJson.invoked");
+
+        try {
+        	String[] speciesNames = (String[]) joinPoint.getArgs()[0]; 
+        	String[] envNames = (String[]) joinPoint.getArgs()[1]; 
+			logger.info(" *** traitDataDotJson called.. " + Arrays.toString(speciesNames) + "," + Arrays.toString(envNames));
+			
+        	metricStore.recordRequest(new AekosApiAuthKey("ddd"), RequestType.V1_TRAIT_DATA_JSON, speciesNames );
+		} catch (InvalidKeyException e) {
+			logger.error("traitDataDotJson bad apiKey exception");
+		}     
+    
     }
 
     @AfterThrowing(pointcut = "execution(* au.org.aekos.controller.ApiV1RetrievalController.traitDataDotJson(..))", throwing = "e")
