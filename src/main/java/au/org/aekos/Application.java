@@ -34,7 +34,6 @@ import au.org.aekos.util.AuthAekosJenaModelFactory;
 import au.org.aekos.util.CoreDataAekosJenaModelFactory;
 import au.org.aekos.util.MetricsAekosJenaModelFactory;
 
-// Exclude SecurityAutoConfiguration so we can insert our custom Auth filter
 @SpringBootApplication
 @PropertySource("classpath:/au/org/aekos/aekos-api.properties")
 @PropertySource(value="file://${user.home}/aekos-api.properties", ignoreResourceNotFound=true)

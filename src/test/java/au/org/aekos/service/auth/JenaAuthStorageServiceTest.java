@@ -12,6 +12,7 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.junit.Test;
 
 import au.org.aekos.service.auth.AekosApiAuthKey.InvalidKeyException;
+import au.org.aekos.service.auth.AuthStorageService.KeySummary;
 import au.org.aekos.service.auth.AuthStorageService.SignupMethod;
 
 public class JenaAuthStorageServiceTest {
@@ -160,5 +161,24 @@ public class JenaAuthStorageServiceTest {
 		assertTrue(authModel.isEmpty());
 		boolean result = objectUnderTest.exists(key);
 		assertFalse("Should NOT exist because we never stored it", result);
+	}
+	
+	/**
+	 * Can we get a key summary when there is data?
+	 */
+	@Test
+	public void testSummary01() throws InvalidKeyException {
+		JenaAuthStorageService objectUnderTest = new JenaAuthStorageService();
+		Model authModel = ModelFactory.createDefaultModel();
+		objectUnderTest.setAuthModel(authModel);
+		objectUnderTest.storeNewKey("test@example.com", new AekosApiAuthKey("AAABBB123"), SignupMethod.EMAIL);
+		objectUnderTest.storeNewKey("test2@example.com", new AekosApiAuthKey("CCCDDD456"), SignupMethod.EMAIL);
+		AekosApiAuthKey key3 = new AekosApiAuthKey("EEEFFF789");
+		objectUnderTest.storeNewKey("test3@example.com", key3, SignupMethod.EMAIL);
+		objectUnderTest.disableKey(key3);
+		KeySummary result = objectUnderTest.getSummary();
+		assertThat(result.getTotalCount(), is(3));
+		assertThat(result.getEnabledCount(), is(2));
+		assertThat(result.getDisabledCount(), is(1));
 	}
 }

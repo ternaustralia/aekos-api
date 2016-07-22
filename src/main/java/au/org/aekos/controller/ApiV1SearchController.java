@@ -1,11 +1,9 @@
 package au.org.aekos.controller;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -19,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import au.org.aekos.model.SpeciesName;
 import au.org.aekos.model.SpeciesSummary;
 import au.org.aekos.model.TraitOrEnvironmentalVariableVocabEntry;
-import au.org.aekos.service.metric.MetricsStorageService;
 import au.org.aekos.service.retrieval.RetrievalService;
 import au.org.aekos.service.search.PageRequest;
 import au.org.aekos.service.search.SearchService;
@@ -46,9 +43,6 @@ public class ApiV1SearchController {
 	@Autowired
 	private RetrievalService retrievalService;
 	
- 	@Autowired
-	private MetricsStorageService metricsService;
- 	
 	@RequestMapping(path="/getTraitVocab.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ApiOperation(value = "Get trait vocabulary",
 		notes = "Gets a distinct list of all the traits that appear in the system. The code and label are "
@@ -133,16 +127,4 @@ public class ApiV1SearchController {
 		}
 		return result;
 	}
-	
-	//
-	// TODO - RIP this later..
-	//
-	@RequestMapping(path="/getMet", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-    public void getMet(Writer w) throws IOException {
-		for (Entry<MetricsStorageService.RequestType, Integer> curr : metricsService.getRequestSummary().entrySet()) {
-			w.write(curr.getKey()  + " called " + curr.getValue() + '\n');
-		}
-	}
-		
-	
 }

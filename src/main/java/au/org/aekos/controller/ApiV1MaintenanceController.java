@@ -5,6 +5,8 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -21,6 +23,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import au.org.aekos.model.TraitOrEnvironmentalVariableVocabEntry;
+import au.org.aekos.service.auth.AuthStorageService;
+import au.org.aekos.service.auth.AuthStorageService.KeySummary;
+import au.org.aekos.service.metric.MetricsStorageService;
+import au.org.aekos.service.metric.MetricsStorageService.RequestType;
 import au.org.aekos.service.retrieval.IndexLoaderCallback;
 import au.org.aekos.service.retrieval.IndexLoaderRecord;
 import au.org.aekos.service.retrieval.RetrievalService;
@@ -43,6 +49,12 @@ public class ApiV1MaintenanceController {
 	
 	@Autowired
 	private LoaderClient loader;
+	
+	@Autowired
+	private MetricsStorageService metricsService;
+	
+	@Autowired
+	private AuthStorageService authService;
 	
 	@Value("${aekos-api.index-load-trigger-password}")
 	private String indexLoadPassword;
@@ -101,6 +113,36 @@ public class ApiV1MaintenanceController {
     	checkEnvironmentalVariableVocabMapping(responseWriter);
     }
 
+	@RequestMapping(path="/getMetricsSummary", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+	@ApiIgnore
+    public void getMetricsSummary(@RequestParam String password,
+    		HttpServletResponse resp, Writer responseWriter) throws IOException {
+		if (isProdOrPasswordInvalid(password, responseWriter, resp)) {
+    		return;
+    	}
+		Set<Entry<RequestType, Integer>> reqSummaryEntrySet = metricsService.getRequestSummary().entrySet();
+		if (reqSummaryEntrySet.isEmpty()) {
+			responseWriter.write("No metrics are recorded.");
+			return;
+		}
+		for (Entry<MetricsStorageService.RequestType, Integer> curr : reqSummaryEntrySet) {
+			responseWriter.write(curr.getKey()  + " called " + curr.getValue() + "\n");
+		}
+	}
+	
+	@RequestMapping(path="/getAuthSummary", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+	@ApiIgnore
+    public void getAuthSummary(@RequestParam String password,
+    		HttpServletResponse resp, Writer responseWriter) throws IOException {
+		if (isProdOrPasswordInvalid(password, responseWriter, resp)) {
+    		return;
+    	}
+		KeySummary summary = authService.getSummary();
+		responseWriter.write(summary.getDisabledCount()  + " keys are disabled.\n");
+		responseWriter.write(summary.getEnabledCount()  + " keys are enabled.\n");
+		responseWriter.write(summary.getTotalCount()  + " total keys.\n");
+	}
+    
 	private void checkTraitVocabMapping(Writer responseWriter) {
 		write(responseWriter, "== Checking that all trait vocabs have a label ==");
 		int traitsChecked = 0;

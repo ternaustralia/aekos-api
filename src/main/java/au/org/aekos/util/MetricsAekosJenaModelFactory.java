@@ -17,6 +17,9 @@ public class MetricsAekosJenaModelFactory extends AbstractAekosJenaModelFactory 
 	@Value("${aekos-api.metrics-tdb-dir}")
 	private String modelPath;
 	
+	@Value("${aekos-api.is-production}")
+	private boolean isProd;
+	
 	@Override
 	String getModelName() {
 		return modelName;
@@ -24,7 +27,9 @@ public class MetricsAekosJenaModelFactory extends AbstractAekosJenaModelFactory 
 	
 	@Override
 	void doPostConstructStats(Model newInstance) {
-		countExistingMetrics(newInstance);
+		if (!isProd) {
+			countExistingMetrics(newInstance);
+		}
 	}
 
 	@Override

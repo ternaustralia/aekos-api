@@ -4,5 +4,4 @@
     <logger name="au.org.aekos." level="WARN" />
     <logger name="au.org.aekos.service.retrieval.JenaRetrievalService" level="DEBUG" />
     <logger name="au.org.aekos.controller.SignupController" level="TRACE" />
-    <logger name="au.org.aekos.controller.RootController" level="DEBUG" />
 </configuration>

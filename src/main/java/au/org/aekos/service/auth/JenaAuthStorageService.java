@@ -2,6 +2,7 @@ package au.org.aekos.service.auth;
 
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.ResIterator;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +14,7 @@ import au.org.aekos.Application;
 /**
  * Implementation that uses Apache Jena as the storage mechanism.
  * Depending on which model is wired in, this could be an in-memory model or a
- * TDB backed one. 
+ * TDB backed one.
  */
 @Service
 public class JenaAuthStorageService implements AuthStorageService {
@@ -44,13 +45,17 @@ public class JenaAuthStorageService implements AuthStorageService {
 		if (resourceDoesNotExist) {
 			return false;
 		}
+		return !isKeyDisabled(subject);
+	}
+
+	private boolean isKeyDisabled(Resource subject) {
 		Property disabledProp = authModel.createProperty(DISABLED_PROP);
 		Statement keyDisabledStatement = subject.getProperty(disabledProp);
 		boolean keyIsMarkedAsDisabled = keyDisabledStatement != null && keyDisabledStatement.getBoolean() == true;
 		if (keyIsMarkedAsDisabled) {
-			return false;
+			return true;
 		}
-		return true;
+		return false;
 	}
 	
 	@Override
@@ -81,6 +86,21 @@ public class JenaAuthStorageService implements AuthStorageService {
 	@Override
 	public boolean exists(AekosApiAuthKey key) {
 		return existsPrivate(key);
+	}
+	
+	@Override
+	public KeySummary getSummary() {
+		int enabledCount = 0;
+		int disabledCount = 0;
+		for (ResIterator it = authModel.listSubjects(); it.hasNext();) {
+			Resource currKey = it.next();
+			if (isKeyDisabled(currKey)) {
+				disabledCount++;
+				continue;
+			}
+			enabledCount++;
+		}
+		return new KeySummary(enabledCount, disabledCount);
 	}
 
 	private boolean existsPrivate(AekosApiAuthKey key) {

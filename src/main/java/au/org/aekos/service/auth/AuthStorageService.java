@@ -53,4 +53,30 @@ public interface AuthStorageService {
 	 * @return		<code>true</code> if the supplied key exists, <code>false</code> otherwise
 	 */
 	boolean exists(AekosApiAuthKey key);
+	
+	/**
+	 * Gets a summary of keys
+	 * 
+	 * @return key summary
+	 */
+	KeySummary getSummary();
+	
+	class KeySummary {
+		private final int enabledCount;
+		private final int disabledCount;
+		
+		public KeySummary(int enabledCount, int disabledCount) {
+			this.enabledCount = enabledCount;
+			this.disabledCount = disabledCount;
+		}
+		public int getEnabledCount() {
+			return enabledCount;
+		}
+		public int getDisabledCount() {
+			return disabledCount;
+		}
+		public int getTotalCount() {
+			return disabledCount + enabledCount;
+		}
+	}
 }

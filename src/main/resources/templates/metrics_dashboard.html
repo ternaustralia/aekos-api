@@ -23,13 +23,21 @@ $.get("/v1/metric-graph-data",function(mydata) {
  
 }
 </script>
+<style type="text/css">
+	#chart_div {
+		width: 900px;
+		height: 500px;
+		border: 1px solid black;
+	}
+</style>
 </head>
 <body onload="drawChart()">
-    <div id="chart_div" style="width: 900px; height: 500px;"></div>
+	<h1>Metrics Dashboard</h1>
+    <div id="chart_div"></div>
     <p th:if="${not requestSummary.empty}">
     	<h3>Request summary:</h3>
-	    <span th:each="curr : ${requestSummary}"
-	       th:text="${curr.key}">as<br /></span>
+	    <span th:each="curr : ${requestSummary}">
+	       <span th:text="${curr.key}"></span> has been called <span th:text="${curr.value}"></span> times.<br /></span>
     </p>
 </body>
 </html>
