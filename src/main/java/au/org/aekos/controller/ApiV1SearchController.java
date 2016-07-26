@@ -78,10 +78,10 @@ public class ApiV1SearchController {
 					+ "values, you need to use the Data Retrieval services.")
     public List<TraitOrEnvironmentalVariableVocabEntry> getTraitsBySpecies(
     		@RequestParam(name="speciesName", required=true) String[] speciesNames,
-    		@RequestParam(name="page", required = false, defaultValue="0") int page,
-    		@RequestParam(name="numResults", required=false, defaultValue="20") int numResults,
+    		@RequestParam(required = false, defaultValue="0") int start,
+    		@RequestParam(required=false, defaultValue="20") int rows,
     		HttpServletResponse resp) {
-		PageRequest pagination = new PageRequest(page, numResults);
+		PageRequest pagination = new PageRequest(start, rows);
 		
 		return searchService.getTraitBySpecies(Arrays.asList(speciesNames), pagination);
 	}
@@ -93,10 +93,10 @@ public class ApiV1SearchController {
 					+ "to use the Data Retrieval services.")
     public List<SpeciesName> getSpeciesByTrait(
     		@RequestParam(name="traitName") String[] traitNames,
-    		@RequestParam(name="page", required = false, defaultValue="0") int page,
-    		@RequestParam(name="numResults", required=false, defaultValue="20") int numResults,
+    		@RequestParam(required = false, defaultValue="0") int start,
+    		@RequestParam(required=false, defaultValue="20") int rows,
 			HttpServletResponse resp) {
-		PageRequest pagination = new PageRequest(page, numResults);
+		PageRequest pagination = new PageRequest(start, rows);
 		return searchService.getSpeciesByTrait(Arrays.asList(traitNames), pagination);
 	}
 	
@@ -107,10 +107,10 @@ public class ApiV1SearchController {
 					+ "values, you need to use the Data Retrieval services.")
     public List<TraitOrEnvironmentalVariableVocabEntry> getEnvironmentBySpecies(
     		@RequestParam(name="speciesName") String[] speciesNames,
-    		@RequestParam(name="page", required = false, defaultValue="0") int page,
-    		@RequestParam(name="numResults", required=false, defaultValue="20") int numResults,
+    		@RequestParam(required = false, defaultValue="0") int start,
+    		@RequestParam(required=false, defaultValue="20") int rows,
     		HttpServletResponse resp) {
-		PageRequest pagination = new PageRequest(page, numResults);
+		PageRequest pagination = new PageRequest(start, rows);
 		return searchService.getEnvironmentBySpecies(Arrays.asList(speciesNames), pagination);
 	}
 	
