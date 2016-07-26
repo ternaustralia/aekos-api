@@ -188,7 +188,8 @@ public class JenaRetrievalService implements RetrievalService {
 		try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
 			ResultSet results = qexec.execSelect();
 			if (!results.hasNext()) {
-				throw new IllegalStateException("Data problem: no results were found.");
+				throw new IllegalStateException("Data problem: no results were found. "
+						+ "Do you have Darwin Core and environmental variable records loaded?");
 			}
 			for (; results.hasNext();) {
 				QuerySolution s = results.next();

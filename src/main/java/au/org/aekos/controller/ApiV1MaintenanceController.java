@@ -76,32 +76,35 @@ public class ApiV1MaintenanceController {
     	if (isProdOrPasswordInvalid(password, responseWriter, resp)) {
     		return;
     	}
-    	ProgressTracker tracker = new ProgressTracker();
-    	loader.beginLoad();
-    	retrievalService.getIndexStream(new IndexLoaderCallback() {
-			@Override
-			public void accept(IndexLoaderRecord record) {
-				try {
-					loader.addSpeciesTraitTermsToIndex(record.getScientificName(), new LinkedList<>(record.getTraitNames()));
-					loader.addSpeciesEnvironmentTermsToIndex(record.getScientificName(), new LinkedList<>(record.getEnvironmentalVariableNames()));
-				} catch (IOException e) {
-					logger.error("Failed to do index load", e);
-					e.printStackTrace(new PrintWriter(responseWriter));
-					return;
+    	try {
+			ProgressTracker tracker = new ProgressTracker();
+			loader.beginLoad();
+			retrievalService.getIndexStream(new IndexLoaderCallback() {
+				@Override
+				public void accept(IndexLoaderRecord record) {
+					try {
+						loader.addSpeciesTraitTermsToIndex(record.getScientificName(), new LinkedList<>(record.getTraitNames()));
+						loader.addSpeciesEnvironmentTermsToIndex(record.getScientificName(), new LinkedList<>(record.getEnvironmentalVariableNames()));
+					} catch (IOException e) {
+						reportIndexLoadFailure(resp, responseWriter, e);
+						return;
+					}
+					tracker.addRecord();
 				}
-				tracker.addRecord();
+			});
+			loader.endLoad();
+			write(responseWriter, tracker.getFinishedMessage());
+			String path = indexPath;
+			if (SystemUtils.IS_OS_WINDOWS) {
+				path = windowsIndexPath;
 			}
-		});
-    	loader.endLoad();
-		write(responseWriter, tracker.getFinishedMessage());
-		String path = indexPath;
-		if (SystemUtils.IS_OS_WINDOWS) {
-			path = windowsIndexPath;
+			write(responseWriter, "Wrote index to " + path);
+			write(responseWriter, "You need to restart the app so it can read the new index");
+		} catch (Throwable e) {
+			reportIndexLoadFailure(resp, responseWriter, e);
 		}
-		write(responseWriter, "Wrote index to " + path);
-		write(responseWriter, "You need to restart the app so it can read the new index");
     }
-    
+
     @RequestMapping(path="/doHealthCheck", method=RequestMethod.GET, produces=MediaType.TEXT_PLAIN_VALUE)
     @ApiIgnore
     public void doHealthCheck(@RequestParam String password,
@@ -196,6 +199,13 @@ public class ApiV1MaintenanceController {
     	return false;
     }
     
+	private void reportIndexLoadFailure(HttpServletResponse resp, Writer responseWriter, Throwable e) {
+		resp.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+		logger.error("Failed to doIndexLoad", e);
+		write(responseWriter, "Failed to do the index load.");
+		e.printStackTrace(new PrintWriter(responseWriter));
+	}
+	
     private class ProgressTracker {
     	private final Date start = new Date();
     	private int processedRecords = 0;
