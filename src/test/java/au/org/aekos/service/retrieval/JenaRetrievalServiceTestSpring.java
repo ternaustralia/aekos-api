@@ -55,6 +55,10 @@ public class JenaRetrievalServiceTestSpring {
 	@Autowired
 	@Qualifier("testGetTraitDataCsv01_expected")
 	private String testGetTraitDataCsv01_expected;
+
+	@Autowired
+	@Qualifier("testGetAllSpeciesDataCsv01_expected")
+	private String testGetAllSpeciesDataCsv01_expected;
 	
 	/**
 	 * Can we get all the records that are available for the specified species?
@@ -85,6 +89,15 @@ public class JenaRetrievalServiceTestSpring {
 		assertThat(result.getResponseHeader().getNumFound(), is(2));
 	}
 
+	/**
+	 * Can we get all the species records as JSON?
+	 */
+	@Test
+	public void testGetAllSpeciesDataJson01() throws Throwable {
+		SpeciesDataResponse result = objectUnderTest.getAllSpeciesDataJson(0, 10);
+		assertThat(result.getResponse().size(), is(4));
+	}
+	
 	/**
 	 * Can we get all the records that are available for the specified species?
 	 */
@@ -125,6 +138,21 @@ public class JenaRetrievalServiceTestSpring {
 		if(SystemUtils.IS_OS_WINDOWS){
 			compareStr = testGetSpeciesDataCsv03_expected.replaceAll("\r", "");
 		}
+		assertThat(writer.toString(), is(compareStr));
+	}
+	
+	/**
+	 * Can we get all the species records as CSV?
+	 */
+	@Test
+	public void testGetAllSpeciesDataCsv01() throws Throwable {
+		Writer writer = new StringWriter();
+		objectUnderTest.getAllSpeciesDataCsv(0, 20, writer);
+		String compareStr = testGetAllSpeciesDataCsv01_expected;
+		if(SystemUtils.IS_OS_WINDOWS){
+			compareStr = testGetAllSpeciesDataCsv01_expected.replaceAll("\r", "");
+		}
+		assertEquals(writer.toString(), compareStr);
 		assertThat(writer.toString(), is(compareStr));
 	}
 	

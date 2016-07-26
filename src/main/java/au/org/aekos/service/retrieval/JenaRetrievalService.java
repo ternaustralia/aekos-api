@@ -30,7 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import au.org.aekos.controller.ApiV1RetrievalController.RetrievalResponseHeader;
+import au.org.aekos.controller.RetrievalResponseHeader;
 import au.org.aekos.model.AbstractParams;
 import au.org.aekos.model.EnvironmentDataParams;
 import au.org.aekos.model.EnvironmentDataRecord;
@@ -54,7 +54,8 @@ public class JenaRetrievalService implements RetrievalService {
 	private static final String LOCATION_ID_PLACEHOLDER = "%LOCATION_ID_PLACEHOLDER%";
 	private static final String TRAIT_NAME_PLACEHOLDER = "%TRAIT_NAME_PLACEHOLDER%";
 	private static final String ENV_VAR_PLACEHOLDER = "%ENV_VAR_PLACEHOLDER%";
-	private static final String ENV_VAR_SWITCH_PLACEHOLDER = "#OFF";
+	private static final String SWITCH_PLACEHOLDER = "#OFF";
+	private static final List<String> ALL_SPECIES = Collections.emptyList();
 	
 	@Autowired
 	@Qualifier("dataModel")
@@ -90,23 +91,22 @@ public class JenaRetrievalService implements RetrievalService {
 	}
 
 	@Override
+	public SpeciesDataResponse getAllSpeciesDataJson(int start, int rows) {
+		return getSpeciesDataJsonPrivate(ALL_SPECIES, start, rows);
+	}
+	
+	@Override
 	public RetrievalResponseHeader getSpeciesDataCsv(List<String> speciesNames, int start, int rows, Writer responseWriter) throws AekosApiRetrievalException {
 		SpeciesDataResponse jsonResponse = getSpeciesDataJsonPrivate(speciesNames, start, rows);
-		try {
-			responseWriter.write(SpeciesOccurrenceRecord.getCsvHeader() + "\n");
-			for (Iterator<SpeciesOccurrenceRecord> it = jsonResponse.getResponse().iterator();it.hasNext();) {
-				SpeciesOccurrenceRecord curr = it.next();
-				responseWriter.write(curr.toCsv());
-				if (it.hasNext()) {
-					responseWriter.write("\n");
-				}
-			}
-		} catch (IOException e) {
-			throw new AekosApiRetrievalException("Failed to write to the supplied writer: " + responseWriter.getClass(), e);
-		}
-		return RetrievalResponseHeader.newInstance(jsonResponse);
+		return transformToCsv(responseWriter, jsonResponse);
 	}
 
+	@Override
+	public RetrievalResponseHeader getAllSpeciesDataCsv(int start, int rows, Writer responseWriter) throws AekosApiRetrievalException {
+		SpeciesDataResponse jsonResponse = getSpeciesDataJsonPrivate(ALL_SPECIES, start, rows);
+		return transformToCsv(responseWriter, jsonResponse);
+	}
+	
 	@Override
 	public EnvironmentDataResponse getEnvironmentalDataJson(List<String> speciesNames, List<String> environmentalVariableNames,
 			int start, int rows) throws AekosApiRetrievalException {
@@ -239,6 +239,23 @@ public class JenaRetrievalService implements RetrievalService {
 		AbstractParams params = new SpeciesDataParams(start, rows, speciesNames);
 		ResponseHeader responseHeader = ResponseHeader.newInstance(start, rows, numFound, startTime, params);
 		return new SpeciesDataResponse(responseHeader, records);
+	}
+	
+	private RetrievalResponseHeader transformToCsv(Writer responseWriter, SpeciesDataResponse jsonResponse)
+			throws AekosApiRetrievalException {
+		try {
+			responseWriter.write(SpeciesOccurrenceRecord.getCsvHeader() + "\n");
+			for (Iterator<SpeciesOccurrenceRecord> it = jsonResponse.getResponse().iterator();it.hasNext();) {
+				SpeciesOccurrenceRecord curr = it.next();
+				responseWriter.write(curr.toCsv());
+				if (it.hasNext()) {
+					responseWriter.write("\n");
+				}
+			}
+		} catch (IOException e) {
+			throw new AekosApiRetrievalException("Failed to write to the supplied writer: " + responseWriter.getClass(), e);
+		}
+		return RetrievalResponseHeader.newInstance(jsonResponse);
 	}
 
 	private SpeciesOccurrenceRecord processSpeciesDataSolution(QuerySolution s) {
@@ -436,26 +453,34 @@ public class JenaRetrievalService implements RetrievalService {
 	private String getProcessedTraitDataCountSparql(List<String> speciesNames, List<String> traitNames) {
 		String scientificNameValueList = speciesNames.stream().collect(Collectors.joining("\" \"", "\"", "\""));
 		String traitNameValueList = traitNames.stream().collect(Collectors.joining("\" \"", "\"", "\""));;
-		String processedSparql = traitDataCountQueryTemplate
+		String result = traitDataCountQueryTemplate
 				.replace(SCIENTIFIC_NAME_PLACEHOLDER, scientificNameValueList)
 				.replace(TRAIT_NAME_PLACEHOLDER, traitNameValueList);
-		return processedSparql;
+		return result;
 	}
 	
 	String getProcessedDarwinCoreSparql(List<String> speciesNames, int offset, int limit) {
-		String scientificNameValueList = speciesNames.stream().collect(Collectors.joining("\" \"", "\"", "\""));
-		String processedSparql = darwinCoreQueryTemplate
-				.replace(SCIENTIFIC_NAME_PLACEHOLDER, scientificNameValueList)
+		String result = darwinCoreQueryTemplate
 				.replace(OFFSET_PLACEHOLDER, String.valueOf(offset))
 				.replace(LIMIT_PLACEHOLDER, String.valueOf(limit == 0 ? Integer.MAX_VALUE : limit));
-		return processedSparql;
+		return handleSpeciesAndSwitchPlaceholders(speciesNames, result);
 	}
 	
 	private String getProcessedDarwinCoreCountSparql(List<String> speciesNames) {
+		String result = darwinCoreCountQueryTemplate;
+		return handleSpeciesAndSwitchPlaceholders(speciesNames, result);
+	}
+	
+	private String handleSpeciesAndSwitchPlaceholders(List<String> speciesNames, String result) {
+		boolean isRetrievingAll = speciesNames.isEmpty();
+		if (isRetrievingAll) {
+			return result;
+		}
 		String scientificNameValueList = speciesNames.stream().collect(Collectors.joining("\" \"", "\"", "\""));
-		String processedSparql = darwinCoreCountQueryTemplate
-				.replace(SCIENTIFIC_NAME_PLACEHOLDER, scientificNameValueList);
-		return processedSparql;
+		result = result
+				.replace(SCIENTIFIC_NAME_PLACEHOLDER, scientificNameValueList)
+				.replace(SWITCH_PLACEHOLDER, "    ");
+		return result;
 	}
 	
 	private String getProcessedEnvDataSparql(Map<String, LocationInfo> locationIds, int offset, int limit) {
@@ -478,7 +503,7 @@ public class JenaRetrievalService implements RetrievalService {
 		String envVarValueList = environmentalVariableNames.stream().collect(Collectors.joining("\" \"", "\"", "\""));;
 		processedSparql = processedSparql
 				.replace(ENV_VAR_PLACEHOLDER, envVarValueList)
-				.replace(ENV_VAR_SWITCH_PLACEHOLDER, "    ");
+				.replace(SWITCH_PLACEHOLDER, "    ");
 		return processedSparql;
 	}
 

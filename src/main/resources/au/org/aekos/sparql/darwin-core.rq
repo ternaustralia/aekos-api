@@ -2,19 +2,19 @@ PREFIX api: <http://www.aekos.org.au/api/1.0#>
 
 SELECT *
 WHERE {
-  ?s api:decimalLatitude ?decimalLatitude .
-  ?s api:decimalLongitude ?decimalLongitude .
-  ?s api:eventDate ?eventDate .
-  ?s api:geodeticDatum ?geodeticDatum .
-  ?s api:individualCount ?individualCount .
-  ?s api:locationID ?locationID .
-  ?s api:year ?year .
-  ?s api:month ?month .
-  ?s api:samplingProtocol ?samplingProtocol .
-  ?s api:scientificName ?scientificName .
-  ?s api:samplingProtocolEntity ?datasetDesc .
-  VALUES ?scientificName { %SCIENTIFIC_NAME_PLACEHOLDER% } .
-  ?datasetDesc api:bibliographicCitation ?bibliographicCitation .
+	  ?s api:decimalLatitude ?decimalLatitude .
+	  ?s api:decimalLongitude ?decimalLongitude .
+	  ?s api:eventDate ?eventDate .
+	  ?s api:geodeticDatum ?geodeticDatum .
+	  ?s api:individualCount ?individualCount .
+	  ?s api:locationID ?locationID .
+	  ?s api:year ?year .
+	  ?s api:month ?month .
+	  ?s api:samplingProtocol ?samplingProtocol .
+	  ?s api:scientificName ?scientificName .
+	  ?s api:samplingProtocolEntity ?datasetDesc .
+#OFF  VALUES ?scientificName { %SCIENTIFIC_NAME_PLACEHOLDER% } .
+      ?datasetDesc api:bibliographicCitation ?bibliographicCitation .
 }
 ORDER BY ?s
 OFFSET %OFFSET_PLACEHOLDER%

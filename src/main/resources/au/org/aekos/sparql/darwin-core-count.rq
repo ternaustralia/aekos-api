@@ -2,7 +2,7 @@ PREFIX api: <http://www.aekos.org.au/api/1.0#>
 
 SELECT (count(?s) as ?count)
 WHERE {
-  ?s a api:DarwinCoreRecord .
-  ?s api:scientificName ?scientificName .
-  VALUES ?scientificName { %SCIENTIFIC_NAME_PLACEHOLDER% } .
+      ?s a api:DarwinCoreRecord .
+      ?s api:scientificName ?scientificName .
+#OFF  VALUES ?scientificName { %SCIENTIFIC_NAME_PLACEHOLDER% } .
 }
