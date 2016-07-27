@@ -30,12 +30,14 @@ public class JenaAuthStorageService implements AuthStorageService {
 	
 	@Override
 	public void storeNewKey(String emailAddress, AekosApiAuthKey key, SignupMethod signupMethod) {
+		startTransaction();
 		Property ownedByProp = authModel.createProperty(OWNED_BY_PROP);
 		Property signupMethodProp = authModel.createProperty(SIGNUP_METHOD_PROP);
 		Resource keyEntityType = authModel.createResource(AUTH_NAMESPACE_V1_0 + key.getClass().getSimpleName());
 		Resource subject = authModel.createResource(AUTH_NAMESPACE_V1_0 + key.getKeyStringValue(), keyEntityType);
 		subject.addLiteral(ownedByProp, emailAddress);
 		subject.addLiteral(signupMethodProp, signupMethod.toString());
+		endTransaction();
 	}
 
 	@Override
@@ -63,6 +65,7 @@ public class JenaAuthStorageService implements AuthStorageService {
 		if (!existsPrivate(key)) {
 			return;
 		}
+		startTransaction();
 		Resource subject = authModel.createResource(AUTH_NAMESPACE_V1_0 + key.getKeyStringValue());
 		Property disabledProp = authModel.createProperty(DISABLED_PROP);
 		Statement keyDisabledStatement = subject.getProperty(disabledProp);
@@ -70,10 +73,12 @@ public class JenaAuthStorageService implements AuthStorageService {
 			keyDisabledStatement.remove();
 		}
 		subject.addLiteral(disabledProp, true);
+		endTransaction();
 	}
 
 	@Override
 	public void enableKey(AekosApiAuthKey key) {
+		startTransaction();
 		Resource subject = authModel.createResource(AUTH_NAMESPACE_V1_0 + key.getKeyStringValue());
 		Property disabledProp = authModel.createProperty(DISABLED_PROP);
 		Statement keyDisabledStatement = subject.getProperty(disabledProp);
@@ -81,6 +86,7 @@ public class JenaAuthStorageService implements AuthStorageService {
 			return;
 		}
 		keyDisabledStatement.remove();
+		endTransaction();
 	}
 	
 	@Override
@@ -109,6 +115,20 @@ public class JenaAuthStorageService implements AuthStorageService {
 			return true;
 		}
 		return false;
+	}
+	
+	private void startTransaction() {
+		if (!authModel.supportsTransactions()) {
+			return;
+		}
+		authModel.begin();
+	}
+	
+	private void endTransaction() {
+		if (!authModel.supportsTransactions()) {
+			return;
+		}
+		authModel.commit();
 	}
 
 	public void setAuthModel(Model authModel) {

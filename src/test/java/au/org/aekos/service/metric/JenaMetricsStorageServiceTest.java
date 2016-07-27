@@ -7,12 +7,15 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.StringWriter;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.tdb.TDBFactory;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -79,6 +82,22 @@ public class JenaMetricsStorageServiceTest {
 		Writer out = new StringWriter();
 		metricsModel.write(out, "TURTLE");
 		assertEquals(loadMetric("testRecordResponse04_expected.ttl"), out.toString());
+	}
+	
+	/**
+	 * Can we record in a TDB instance using transactions?
+	 */
+	@Test
+	public void testRecordRequest05() throws Throwable {
+		Path tempDir = Files.createTempDirectory("testRecordRequest05");
+		tempDir.toFile().deleteOnExit();
+		Model metricsModel = TDBFactory.createDataset(tempDir.toString()).getDefaultModel();
+		JenaMetricsStorageService objectUnderTest = jmss(1468917533333l, metricsModel, "urn:cbfbaccb-43c6-47a9-bddf-93a4c0077963");
+		AekosApiAuthKey authKey = new AekosApiAuthKey("CAFEBABE1234");
+		objectUnderTest.recordRequest(authKey, RequestType.V1_TRAIT_VOCAB);
+		Map<RequestType, Integer> result = objectUnderTest.getRequestSummary();
+		assertThat(result.size(), is(1));
+		assertThat(result.get(RequestType.V1_TRAIT_VOCAB), is(1));
 	}
 	
 	/**

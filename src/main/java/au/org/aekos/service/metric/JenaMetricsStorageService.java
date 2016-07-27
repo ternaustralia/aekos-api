@@ -49,27 +49,34 @@ public class JenaMetricsStorageService implements MetricsStorageService {
 	
 	@Override
 	public void recordRequest(AekosApiAuthKey authKey, RequestType reqType) {
+		startTransaction();
 		recordRequestHelper(authKey, reqType);
+		endTransaction();
 	}
 
 	@Override
 	public void recordRequest(AekosApiAuthKey authKey, RequestType reqType, AbstractParams params) {
+		startTransaction();
 		Resource subject = recordRequestHelper(authKey, reqType);
 		params.appendTo(subject, metricsModel);
+		endTransaction();
 	}
 	
 	@Override
 	public void recordRequest(AekosApiAuthKey authKey, RequestType reqType, String[] speciesNames) {
+		startTransaction();
 		Resource subject = recordRequestHelper(authKey, reqType);
 		Property speciesNamesProp = metricsModel.createProperty(SpeciesDataParams.SPECIES_NAMES_PROP);
 		for (String curr : speciesNames) {
 			metricsModel.add(subject, speciesNamesProp, curr);
 		}
+		endTransaction();
 	}
 	
 	@Override
 	public void recordRequest(AekosApiAuthKey authKey, RequestType reqType, String[] speciesOrTraitOrEnvVarNames,
 			int start, int rows) {
+		startTransaction();
 		Resource subject = recordRequestHelper(authKey, reqType);
 		Property namesProp = metricsModel.createProperty(SPECIES_OR_TRAIT_OR_ENVVAR_NAMES_PROP);
 		for (String curr : speciesOrTraitOrEnvVarNames) {
@@ -79,6 +86,7 @@ public class JenaMetricsStorageService implements MetricsStorageService {
 		metricsModel.addLiteral(subject, startProp, start);
 		Property rowsProp = metricsModel.createProperty(AbstractParams.ROWS_PROP);
 		metricsModel.addLiteral(subject, rowsProp, rows);
+		endTransaction();
 	}
 
 	@Override
@@ -116,6 +124,20 @@ public class JenaMetricsStorageService implements MetricsStorageService {
 	
 	public interface EventDateProvider {
 		long getEventDate();
+	}
+	
+	private void startTransaction() {
+		if (!metricsModel.supportsTransactions()) {
+			return;
+		}
+		metricsModel.begin();
+	}
+	
+	private void endTransaction() {
+		if (!metricsModel.supportsTransactions()) {
+			return;
+		}
+		metricsModel.commit();
 	}
 	
 	class GregorianCalendarEventDateProvider implements EventDateProvider {

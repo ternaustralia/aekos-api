@@ -6,9 +6,12 @@ import static org.junit.Assert.*;
 
 import java.io.StringWriter;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.tdb.TDBFactory;
 import org.junit.Test;
 
 import au.org.aekos.service.auth.AekosApiAuthKey.InvalidKeyException;
@@ -29,6 +32,20 @@ public class JenaAuthStorageServiceTest {
 		Writer out = new StringWriter();
 		authModel.write(out, "TURTLE");
 		assertThat(out.toString(), is(loadAuth("testStoreNewKey01_expected.ttl")));
+	}
+	
+	/**
+	 * Can we store a key using a TDB instance and transactions?
+	 */
+	@Test
+	public void testStoreNewKey02() throws Throwable {
+		Path tempDir = Files.createTempDirectory("testStoreNewKey02");
+		tempDir.toFile().deleteOnExit();
+		Model authModel = TDBFactory.createDataset(tempDir.toString()).getDefaultModel();
+		JenaAuthStorageService objectUnderTest = new JenaAuthStorageService();
+		objectUnderTest.setAuthModel(authModel);
+		objectUnderTest.storeNewKey("test@example.com", new AekosApiAuthKey("AAABBB123"), SignupMethod.EMAIL);
+		assertThat(objectUnderTest.getSummary().getTotalCount(), is(1));
 	}
 	
 	/**
