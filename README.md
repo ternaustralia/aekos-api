@@ -29,4 +29,12 @@ You can build a docker container that's configured to run this webapp with:
     # instructions on how to use it will be printed to the console
 
 ## Interacting with the endpoint
-Documentation is automatically generated using Swagger. You will be redirected to the documentation when you do a GET on the root of the webapp. You can also look at the production documentation at https://api.aekos.org.au/
+Documentation is automatically generated using Swagger. You will see a link to the documentation when you do a GET on the root of the webapp or you can go straight to https://api.aekos.org.au/swagger-ui.html.
+
+## Building a production instance
+Note: We're using https://letsencrypt.org/ to generate SSL certificates.
+ 1. generate SSL certificates (if you haven't already or they've expired) #TODO add more detail
+ 1. build a JKS keystore from the certificates with `generate-keystore-from-cert.sh`
+ 1. build a Docker container using `build-docker-image.sh` (Maven will include the keystore and password)
+ 1. if you didn't do this on the prod machine, then push the image to the remote machine
+ 1. (re)start the Docker instance
