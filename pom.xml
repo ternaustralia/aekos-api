@@ -177,7 +177,7 @@
 						<executions>
 							<execution>
 								<id>keystore-copy</id>
-								<phase>package</phase>
+								<phase>prepare-package</phase>
 								<configuration>
 									<target>
 							    		<taskdef resource="net/sf/antcontrib/antlib.xml" classpathref="maven.dependency.classpath" />
