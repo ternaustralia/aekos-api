@@ -1,7 +1,7 @@
 package au.org.aekos.model;
 
 import static au.org.aekos.TestUtils.loadMetric;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.StringWriter;
 import java.io.Writer;
@@ -12,8 +12,6 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.junit.Test;
 
-import au.org.aekos.util.WinCRUtil;
-
 public class TraitDataParamsTest {
 
 	/**
@@ -21,7 +19,7 @@ public class TraitDataParamsTest {
 	 */
 	@Test
 	public void testAppendTo01() {
-		TraitDataParams objectUnderTest = new TraitDataParams(0, 20, Arrays.asList("Species One", "Species Two"), 
+		TraitDataParams objectUnderTest = new TraitDataParams(0, 20, Arrays.asList("Species One", "Species Two"),
 				Arrays.asList("Trait One", "Trait Two"));
 		Model metricsModel = ModelFactory.createDefaultModel();
 		Resource subject = metricsModel.createResource();

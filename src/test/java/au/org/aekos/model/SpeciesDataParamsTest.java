@@ -1,7 +1,7 @@
 package au.org.aekos.model;
 
-import static org.junit.Assert.*;
 import static au.org.aekos.TestUtils.loadMetric;
+import static org.junit.Assert.assertEquals;
 
 import java.io.StringWriter;
 import java.io.Writer;
@@ -11,8 +11,6 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.junit.Test;
-
-import au.org.aekos.util.WinCRUtil;
 
 public class SpeciesDataParamsTest {
 
@@ -27,7 +25,6 @@ public class SpeciesDataParamsTest {
 		objectUnderTest.appendTo(subject, metricsModel);
 		Writer out = new StringWriter();
 		metricsModel.write(out, "TURTLE");
-		
 		assertEquals(loadMetric("SpeciesDataParamsTest_testAppendTo01_expected.ttl"), out.toString());
 	}
 }
