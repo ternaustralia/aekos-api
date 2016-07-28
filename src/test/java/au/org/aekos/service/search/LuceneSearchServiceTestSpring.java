@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,8 +22,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import au.org.aekos.model.SpeciesName;
+import au.org.aekos.model.SpeciesSummary;
 import au.org.aekos.model.TraitOrEnvironmentalVariableVocabEntry;
-import au.org.aekos.service.retrieval.IndexLoaderRecord;
 import au.org.aekos.service.search.index.TermIndexManager;
 import au.org.aekos.service.search.load.LoaderClient;
 
@@ -155,10 +154,10 @@ public class LuceneSearchServiceTestSpring {
 	@Test
 	public void testPerformSearch01() throws IOException{
 		loadTaxaNamesCsv();
-		List<SpeciesName> result = objectUnderTest.speciesAutocomplete("abac", 100);
+		List<SpeciesSummary> result = objectUnderTest.speciesAutocomplete("abac", 100);
 		assertNotNull(result);
 		assertThat(result.size(), is(4));
-		List<String> names = result.stream().map(s -> s.getName()).collect(Collectors.toList());
+		List<String> names = result.stream().map(s -> s.getScientificName()).collect(Collectors.toList());
 		assertThat(names, hasItems("Abacopteris aspera", "Abacopteris presliana", "Abacopteris sp.", "Abacopteris triphylla"));
 	}
 
@@ -168,10 +167,10 @@ public class LuceneSearchServiceTestSpring {
 	@Test
 	public void testPerformSearch02() throws IOException{
 		loadTaxaNamesCsv();
-		List<SpeciesName> result = objectUnderTest.speciesAutocomplete("m", 100);
+		List<SpeciesSummary> result = objectUnderTest.speciesAutocomplete("m", 100);
 		assertEquals(100, result.size());
-		SpeciesName species = result.get(0);
-		assertEquals("Mariosousa millefolia", species.getName());
+		SpeciesSummary species = result.get(0);
+		assertEquals("Mariosousa millefolia", species.getScientificName());
 	}
 	
 	private void loadTaxaNamesCsv() throws IOException {
@@ -181,7 +180,7 @@ public class LuceneSearchServiceTestSpring {
 			String line = null;
 			loader.beginLoad();
 			while ((line = reader.readLine()) != null) {
-				loader.addSpecies(new IndexLoaderRecord(line, Collections.emptySet(), Collections.emptySet()));
+				loader.addSpecies(line, 123);
 			}
 			loader.endLoad();
 		}

@@ -4,15 +4,15 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-public class SpeciesNameTest {
+public class SpeciesSummaryTest {
 
 	/**
 	 * Are two species with the same name but different count still equal?
 	 */
 	@Test
 	public void testEquals01() {
-		SpeciesName one = new SpeciesName("Leersia hexandra");
-		SpeciesName two = new SpeciesName("Leersia hexandra");
+		SpeciesSummary one = new SpeciesSummary("Leersia hexandra", 1);
+		SpeciesSummary two = new SpeciesSummary("Leersia hexandra", 2);
 		assertEquals(one, two);
 	}
 }

@@ -3,8 +3,6 @@ package au.org.aekos.service.search.load;
 import java.io.IOException;
 import java.util.List;
 
-import au.org.aekos.service.retrieval.IndexLoaderRecord;
-
 /**
  * Loads records into the index to be used for searching.
  */
@@ -33,7 +31,8 @@ public interface LoaderClient {
 	/**
 	 * Adds an occurrence of a species name to be used in the speciesAutocomplete.
 	 * 
-	 * @param record	record to extract species name from
+	 * @param speciesName	record to extract species name from
+	 * @param speciesCount 	number of records that the system holds for this species
 	 */
-	public void addSpecies(IndexLoaderRecord record) throws IOException;
+	public void addSpecies(String speciesName, int speciesCount) throws IOException;
 }

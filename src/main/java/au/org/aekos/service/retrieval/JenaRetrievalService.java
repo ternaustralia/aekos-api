@@ -216,7 +216,13 @@ public class JenaRetrievalService implements RetrievalService {
 	
 	@Override
 	public int getTotalRecordsHeldForSpeciesName(String speciesName) {
+		// TODO could use Lucene for this but might get a bit hard to test/maintain
 		return getTotalNumFoundForSpeciesData(Arrays.asList(speciesName));
+	}
+	
+	@Override
+	public int getTotalSpeciesRecordsHeld() {
+		return getTotalNumFoundForSpeciesData(ALL_SPECIES);
 	}
 	
 	private SpeciesDataResponse getSpeciesDataJsonPrivate(List<String> speciesNames, int start, int rows) {

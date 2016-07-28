@@ -6,7 +6,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.util.Collections;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.IndexWriter;
@@ -14,7 +13,6 @@ import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.RAMDirectory;
 import org.junit.Test;
 
-import au.org.aekos.service.retrieval.IndexLoaderRecord;
 import au.org.aekos.service.search.index.TermIndexManager;
 
 public class LuceneLoaderClientTest {
@@ -30,9 +28,9 @@ public class LuceneLoaderClientTest {
 		when(indexManager.getIndexWriter()).thenReturn(writer);
 		objectUnderTest.setIndexManager(indexManager);
 		objectUnderTest.beginLoad();
-		objectUnderTest.addSpecies(new IndexLoaderRecord("Acacia abbatiana", Collections.emptySet(), Collections.emptySet()));
-		objectUnderTest.addSpecies(new IndexLoaderRecord("Acacia abietina", Collections.emptySet(), Collections.emptySet()));
-		objectUnderTest.addSpecies(new IndexLoaderRecord("Acacia abrupta", Collections.emptySet(), Collections.emptySet()));
+		objectUnderTest.addSpecies("Acacia abbatiana", 11);
+		objectUnderTest.addSpecies("Acacia abietina", 22);
+		objectUnderTest.addSpecies("Acacia abrupta", 33);
 		assertThat(writer.numDocs(), is(3));
 		objectUnderTest.endLoad();
 	}

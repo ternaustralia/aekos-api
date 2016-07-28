@@ -7,7 +7,10 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -17,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 import au.org.aekos.model.SpeciesName;
 import au.org.aekos.model.SpeciesSummary;
 import au.org.aekos.model.TraitOrEnvironmentalVariableVocabEntry;
-import au.org.aekos.service.retrieval.RetrievalService;
 import au.org.aekos.service.search.PageRequest;
 import au.org.aekos.service.search.SearchService;
 import io.swagger.annotations.Api;
@@ -30,15 +32,13 @@ import io.swagger.annotations.ApiParam;
 public class ApiV1SearchController {
 
 	// TODO do we accept LSID/species ID and/or a species name for the species related services?
-	
+
+	private static final Logger logger = LoggerFactory.getLogger(ApiV1SearchController.class);
 	private static final String DEFAULT_PAGE_NUM = "1";
 	private static final String DEFAULT_PAGE_SIZE = "20";
 
 	@Autowired
 	private SearchService searchService;
-	
-	@Autowired
-	private RetrievalService retrievalService;
 	
 	@RequestMapping(path="/getTraitVocab.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ApiOperation(value = "Get trait vocabulary",
@@ -62,7 +62,7 @@ public class ApiV1SearchController {
 	@ApiOperation(value = "Autocomplete partial species names",
 			notes = "Performs an autocomplete on the partial species name supplied. Results starting with the supplied fragment"
 					+ "will be returned ordered by most relevant.")
-    public List<SpeciesName> speciesAutocomplete(
+    public List<SpeciesSummary> speciesAutocomplete(
     		@RequestParam(name="q") @ApiParam("partial species name") String partialSpeciesName,
     		HttpServletResponse resp) throws IOException {
 		// TODO do we need propagating headers to enable browser side caching
@@ -116,14 +116,32 @@ public class ApiV1SearchController {
 	@RequestMapping(path="/speciesSummary.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ApiOperation(value = "Get a summary of the specified species",
 			notes = "A summary of the information that the system holds on the supplied species name(s) "
-					+ "including a count of records.")
-    public List<SpeciesSummary> getSpeciesSummary(@RequestParam(name="speciesName") String[] speciesNames, HttpServletResponse resp) {
-		// TODO support searching/substring as the param, same as ALA
-		List<SpeciesSummary> result = new LinkedList<>();
-		for (String curr : speciesNames) {
-			int recordsHeld = retrievalService.getTotalRecordsHeldForSpeciesName(curr);
-			result.add(new SpeciesSummary(String.valueOf(curr.hashCode()), curr, recordsHeld));
-		}
-		return result;
+					+ "including a count of records. If the system doesn't have any data on a species name, "
+					+ "it will return a record with id=0 and recordsHeld=0.")
+    public List<SpeciesSummary> getSpeciesSummary(
+    		@RequestParam(name="speciesName") @ApiParam("list of species names") String[] speciesNames,
+    		HttpServletResponse resp) {
+			List<SpeciesSummary> result = new LinkedList<>();
+			for (String curr : speciesNames) {
+				try {
+					List<SpeciesSummary> records = searchService.speciesAutocomplete(curr, 1);
+					if (records.size() == 0) {
+						result.add(0, new SpeciesSummary(curr, 0));
+						continue;
+					}
+					SpeciesSummary match = records.get(0);
+					boolean searchReturnedSomethingButItsNotWhatWeAskedFor = !match.getScientificName().equalsIgnoreCase(curr);
+					if (searchReturnedSomethingButItsNotWhatWeAskedFor) {
+						result.add(0, new SpeciesSummary(curr, 0));
+						continue;
+					}
+					result.add(match);
+				} catch (IOException e) {
+					logger.error("Failed when retrieving species summaries, died on: " + curr, e);
+					resp.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+					return null;
+				}
+			}
+			return result;
 	}
 }

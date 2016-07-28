@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -77,7 +79,10 @@ public class ApiV1MaintenanceController {
     		return;
     	}
     	try {
-			ProgressTracker tracker = new ProgressTracker();
+    		int totalRecordCount = retrievalService.getTotalSpeciesRecordsHeld();
+			ProgressTracker tracker = new ProgressTracker(10000, totalRecordCount);
+			Map<String, Integer> speciesCounts = new HashMap<>();
+			// FIXME clear index before starting
 			loader.beginLoad();
 			retrievalService.getIndexStream(new IndexLoaderCallback() {
 				@Override
@@ -85,7 +90,11 @@ public class ApiV1MaintenanceController {
 					try {
 						loader.addSpeciesTraitTermsToIndex(record.getScientificName(), new LinkedList<>(record.getTraitNames()));
 						loader.addSpeciesEnvironmentTermsToIndex(record.getScientificName(), new LinkedList<>(record.getEnvironmentalVariableNames()));
-						loader.addSpecies(record);
+						Integer speciesCount = speciesCounts.get(record.getScientificName());
+						if (speciesCount == null) {
+							speciesCount = 0;
+						}
+						speciesCounts.put(record.getScientificName(), ++speciesCount);
 					} catch (IOException e) {
 						reportIndexLoadFailure(resp, responseWriter, e);
 						return;
@@ -93,6 +102,7 @@ public class ApiV1MaintenanceController {
 					tracker.addRecord();
 				}
 			});
+			processSpeciesCounts(speciesCounts);
 			loader.endLoad();
 			write(responseWriter, tracker.getFinishedMessage());
 			String path = indexPath;
@@ -106,7 +116,7 @@ public class ApiV1MaintenanceController {
 		}
     }
 
-    @RequestMapping(path="/doHealthCheck", method=RequestMethod.GET, produces=MediaType.TEXT_PLAIN_VALUE)
+	@RequestMapping(path="/doHealthCheck", method=RequestMethod.GET, produces=MediaType.TEXT_PLAIN_VALUE)
     @ApiIgnore
     public void doHealthCheck(@RequestParam String password,
     		HttpServletResponse resp, Writer responseWriter) {
@@ -207,17 +217,43 @@ public class ApiV1MaintenanceController {
 		e.printStackTrace(new PrintWriter(responseWriter));
 	}
 	
-    private class ProgressTracker {
+	private void processSpeciesCounts(Map<String, Integer> speciesCounts) throws IOException {
+		for (Entry<String, Integer> curr : speciesCounts.entrySet()) {
+			loader.addSpecies(curr.getKey(), curr.getValue());
+		}
+	}
+	
+    static class ProgressTracker {
     	private final Date start = new Date();
+    	private final int logCheckpoint;
+    	private final int totalRecordCount;
     	private int processedRecords = 0;
     	
-    	public void addRecord() {
+    	public ProgressTracker(int logCheckpoint, int totalRecordCount) {
+			this.logCheckpoint = logCheckpoint;
+			this.totalRecordCount = totalRecordCount;
+		}
+
+		public void addRecord() {
     		processedRecords++;
+    		if (processedRecords % logCheckpoint != 0) {
+    			return;
+    		}
+    		long elapsedSeconds = getElapsedSeconds();
+    		double processedPercentage = 100.0 * processedRecords / totalRecordCount;
+    		double timeLeft = (100 - processedPercentage) * (elapsedSeconds / processedPercentage);
+    		String msg = String.format("Processed %d/%d records (%3.1f%%) in %ds with estimated %5.0fs left",
+    				processedRecords, totalRecordCount, processedPercentage, elapsedSeconds, timeLeft);
+			logger.info(msg);
     	}
     	
     	public String getFinishedMessage() {
-    		long elapsedSeconds = (new Date().getTime() - start.getTime()) / 1000;
+    		long elapsedSeconds = getElapsedSeconds();
     		return "Processed " + processedRecords + " records in " + elapsedSeconds + " seconds.";
     	}
+
+		private long getElapsedSeconds() {
+			return (new Date().getTime() - start.getTime()) / 1000;
+		}
     }
 }

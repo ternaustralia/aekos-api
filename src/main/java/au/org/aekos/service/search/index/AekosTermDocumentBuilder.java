@@ -46,13 +46,14 @@ public class AekosTermDocumentBuilder {
 	 * Builds a document for a single species
 	 * 
 	 * @param speciesName	name of species
+	 * @param speciesCount	number of records we have for speciesName
 	 * @return				populated document
 	 */
-	public static Document buildSpeciesTermDocument(String speciesName){
+	public static Document buildSpeciesTermDocument(String speciesName, int speciesCount) {
 		speciesName = speciesName.trim();
 		Document doc = new Document();
-		doc.add(new StringField(IndexConstants.FLD_TRAIT_VALUE /*FIXME should we be using 'trait' here? */, speciesName, Field.Store.YES));
 		doc.add(new StringField(IndexConstants.FLD_DISPLAY_VALUE, speciesName, Field.Store.YES));
+		doc.add(new StringField(IndexConstants.FLD_INSTANCE_COUNT, String.valueOf(speciesCount), Field.Store.YES));
 		caseInsensitiveTokeniseAndBoost(speciesName, doc);
 		return doc;
 	}
@@ -68,6 +69,7 @@ public class AekosTermDocumentBuilder {
 	}
 
 	private static void addLevenshteinDistanceField(Document doc, String cleanedLcSpeciesName) {
+		// FIXME we don't currently use Levenshtein Distance, should we?
 		String cleanedLcSpeciesNameNoPunctuation = cleanedLcSpeciesName.replaceAll(",", "").replaceAll("'", "").replaceAll("-","");
 	    Field textFieldLevenshtein = new TextField(IndexConstants.FLD_SEARCH_LEV, cleanedLcSpeciesNameNoPunctuation, Field.Store.NO );
 		doc.add(textFieldLevenshtein);
@@ -105,7 +107,6 @@ public class AekosTermDocumentBuilder {
 		doc.add(new StringField(IndexConstants.FLD_DOC_INDEX_TYPE , docType.name(), Field.Store.NO));
 	}
 	
-	//Was going to just use hashcode but no guarantee of uniqueness
 	private static String getUidField(String term1, String term2, String docType) {
 		return term1 + "-" + term2 + "-" + docType;
 	}

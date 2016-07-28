@@ -123,4 +123,11 @@ public interface RetrievalService {
 	 * @return				count of the records in the system for the supplied species name
 	 */
 	int getTotalRecordsHeldForSpeciesName(String speciesName);
+
+	/**
+	 * Gets the total number of species records we hold.
+	 * 
+	 * @return	count of the species records in the system
+	 */
+	int getTotalSpeciesRecordsHeld();
 }

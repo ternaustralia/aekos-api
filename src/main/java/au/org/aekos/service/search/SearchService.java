@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import au.org.aekos.model.SpeciesName;
+import au.org.aekos.model.SpeciesSummary;
 import au.org.aekos.model.TraitOrEnvironmentalVariableVocabEntry;
 
 public interface SearchService {
@@ -70,5 +71,5 @@ public interface SearchService {
 	 * @param numResults	limits the number of results
 	 * @return				list of possible matches ordered with the most likely match first
 	 */
-	List<SpeciesName> speciesAutocomplete(String term, int numResults) throws IOException;
+	List<SpeciesSummary> speciesAutocomplete(String term, int numResults) throws IOException;
 }

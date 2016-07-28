@@ -367,4 +367,13 @@ public class JenaRetrievalServiceTestSpring {
 		int result = objectUnderTest.getTotalRecordsHeldForSpeciesName("blah blah");
 		assertThat(result, is(0));
 	}
+	
+	/**
+	 * Can we count all the species records?
+	 */
+	@Test
+	public void testGetTotalSpeciesRecordsHeld01() throws Throwable {
+		int result = objectUnderTest.getTotalSpeciesRecordsHeld();
+		assertThat(result, is(4));
+	}
 }

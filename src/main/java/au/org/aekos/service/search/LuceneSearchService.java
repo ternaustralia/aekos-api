@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import au.org.aekos.model.SpeciesName;
+import au.org.aekos.model.SpeciesSummary;
 import au.org.aekos.model.TraitOrEnvironmentalVariableVocabEntry;
 import au.org.aekos.service.search.index.DocumentType;
 import au.org.aekos.service.search.index.IndexConstants;
@@ -53,8 +54,8 @@ public class LuceneSearchService implements SearchService {
 	private VocabService vocabService;
 	
 	@Override //TODO throw a nice exception to perhaps return a tidy error in the json response?
-	public List<TraitOrEnvironmentalVariableVocabEntry> getTraitBySpecies(List<String> speciesNames, PageRequest pagination) {
-		Query query = buildFieldOrQuery(speciesNames, IndexConstants.FLD_SPECIES, DocumentType.TRAIT_SPECIES);
+	public List<TraitOrEnvironmentalVariableVocabEntry> getTraitBySpecies(List<String> SpeciesSummarys, PageRequest pagination) {
+		Query query = buildFieldOrQuery(SpeciesSummarys, IndexConstants.FLD_SPECIES, DocumentType.TRAIT_SPECIES);
 		return performSpeciesTraitSearch(query, pagination);
 	}
 	
@@ -65,15 +66,15 @@ public class LuceneSearchService implements SearchService {
 	}
 	
 	@Override
-	public List<TraitOrEnvironmentalVariableVocabEntry> getEnvironmentBySpecies(List<String> speciesNames,PageRequest pagination) {
-		Query query = buildFieldOrQuery(speciesNames, IndexConstants.FLD_SPECIES, DocumentType.SPECIES_ENV);
+	public List<TraitOrEnvironmentalVariableVocabEntry> getEnvironmentBySpecies(List<String> SpeciesSummarys,PageRequest pagination) {
+		Query query = buildFieldOrQuery(SpeciesSummarys, IndexConstants.FLD_SPECIES, DocumentType.SPECIES_ENV);
 		return performSpeciesEnvironmentSearch(query, pagination);
 	}
 
 	@Override
-	public List<SpeciesName> speciesAutocomplete(String term, int numResults) throws IOException{
-		List<SpeciesName> primaryResults = new ArrayList<SpeciesName>();
-		List<SpeciesName> secondaryResults = new ArrayList<SpeciesName>();
+	public List<SpeciesSummary> speciesAutocomplete(String term, int numResults) throws IOException{
+		List<SpeciesSummary> primaryResults = new ArrayList<SpeciesSummary>();
+		List<SpeciesSummary> secondaryResults = new ArrayList<SpeciesSummary>();
 		IndexSearcher searcher = null;
 		try {
 			searcher = termIndexManager.getIndexSearcher();
@@ -89,7 +90,9 @@ public class LuceneSearchService implements SearchService {
 			for(ScoreDoc sd :td.scoreDocs ){
 				Document d = searcher.doc(sd.doc);
 				if(d != null){
-					primaryResults.add(new SpeciesName(  d.getField(IndexConstants.FLD_DISPLAY_VALUE).stringValue()));
+					String speciesName = d.getField(IndexConstants.FLD_DISPLAY_VALUE).stringValue();
+					int count = Integer.parseInt(d.get(IndexConstants.FLD_INSTANCE_COUNT));
+					primaryResults.add(new SpeciesSummary(speciesName, count));
 				}
 			}
 		}
@@ -98,11 +101,13 @@ public class LuceneSearchService implements SearchService {
 			for(ScoreDoc sd :td2.scoreDocs ){
 				Document d = searcher.doc(sd.doc);
 				if(d != null){
-					secondaryResults.add(new SpeciesName( d.getField(IndexConstants.FLD_DISPLAY_VALUE).stringValue()));
+					String speciesName = d.getField(IndexConstants.FLD_DISPLAY_VALUE).stringValue();
+					int count = Integer.parseInt(d.get(IndexConstants.FLD_INSTANCE_COUNT));
+					secondaryResults.add(new SpeciesSummary(speciesName, count));
 				}
 			}
 		}
-		List<SpeciesName> resultList ;
+		List<SpeciesSummary> resultList ;
 		if(td.totalHits == 0 && td2.totalHits == 0 ){
 			resultList = doWildcardQuery(searchTerm, numResults, searcher );
 		}else{
@@ -111,22 +116,24 @@ public class LuceneSearchService implements SearchService {
 		return Collections.unmodifiableList(resultList);
 	}
 	
-	private List<SpeciesName> doWildcardQuery(String searchTerm, int numResults, IndexSearcher searcher) throws IOException{
-		List<SpeciesName> SpeciesNameList = new ArrayList<SpeciesName>();
+	private List<SpeciesSummary> doWildcardQuery(String searchTerm, int numResults, IndexSearcher searcher) throws IOException{
+		List<SpeciesSummary> result = new ArrayList<SpeciesSummary>();
 		Query q = new WildcardQuery(new Term("search", "*" + searchTerm + "*" ));
 		TopDocs td = searcher.search(q, numResults, new Sort(new SortField("search", SortField.Type.STRING)));
 		if( td.totalHits > 0 ){
 			for(ScoreDoc sd :td.scoreDocs ){
 				Document d = searcher.doc(sd.doc);
 				if(d != null){
-					SpeciesNameList.add(new SpeciesName(d.getField(IndexConstants.FLD_DISPLAY_VALUE).stringValue()));
+					String speciesName = d.getField(IndexConstants.FLD_DISPLAY_VALUE).stringValue();
+					int count = Integer.parseInt(d.get(IndexConstants.FLD_INSTANCE_COUNT));
+					result.add(new SpeciesSummary(speciesName, count));
 				}
 			}
 		}
-		return SpeciesNameList;
+		return result;
 	}
 	
-	private List<SpeciesName> mergePrimaryAndSecondaryResults(List<SpeciesName> tvListPrimary, List<SpeciesName> tvListSecondary, int numResults, int numPrimaryFirst, int numSecondary){
+	private List<SpeciesSummary> mergePrimaryAndSecondaryResults(List<SpeciesSummary> tvListPrimary, List<SpeciesSummary> tvListSecondary, int numResults, int numPrimaryFirst, int numSecondary){
 		if(tvListSecondary.size() == 0){
 			return tvListPrimary;
 		}
@@ -134,7 +141,7 @@ public class LuceneSearchService implements SearchService {
 			return tvListSecondary;
 		}
 		
-		Set<SpeciesName> tvSet = new LinkedHashSet<SpeciesName>();
+		Set<SpeciesSummary> tvSet = new LinkedHashSet<SpeciesSummary>();
 		
 		int primSz = tvListPrimary.size();
 		int secSz = tvListSecondary.size();
@@ -172,7 +179,7 @@ public class LuceneSearchService implements SearchService {
 				}
 			}
 		}
-		List<SpeciesName> result = new ArrayList<SpeciesName>();
+		List<SpeciesSummary> result = new ArrayList<SpeciesSummary>();
 		result.addAll(tvSet);
 		return result;
 	}
@@ -227,8 +234,8 @@ public class LuceneSearchService implements SearchService {
 		return responseList;
 	}
 	
-	private List<SpeciesName> performTraitSpeciesSearch(Query query, PageRequest pagination ){
-		List<SpeciesName> responseList = new ArrayList<SpeciesName>();
+	private List<SpeciesName> performTraitSpeciesSearch(Query query, PageRequest pagination){
+		List<SpeciesName> responseList = new ArrayList<>();
 		IndexSearcher searcher = null;
 		try {
 			searcher = termIndexManager.getIndexSearcher();
@@ -240,7 +247,7 @@ public class LuceneSearchService implements SearchService {
 			TopDocs td = searcher.search(query, Integer.MAX_VALUE, new Sort(new SortField(IndexConstants.FLD_SPECIES, SortField.Type.STRING)));
 		    int totalSpecies = td.totalHits;
 		    if(totalSpecies > 0){
-		    	LinkedHashSet<SpeciesName> uniqueResults = new LinkedHashSet<>();
+		    	Set<SpeciesName> uniqueResults = new LinkedHashSet<>();
 		    	int startDocIndex = getTopDocStartIndex(pagination, td.totalHits);
 		    	if(startDocIndex > -1){
 		    		int endDocIndex = getTopDocEndIndex(pagination, td.totalHits);

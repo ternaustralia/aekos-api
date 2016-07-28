@@ -1,7 +1,10 @@
 package au.org.aekos.service.search.load;
 
-import java.io.IOException;
+import static au.org.aekos.service.search.index.AekosTermDocumentBuilder.buildSpeciesEnvironmentTermDocument;
+import static au.org.aekos.service.search.index.AekosTermDocumentBuilder.buildSpeciesTermDocument;
+import static au.org.aekos.service.search.index.AekosTermDocumentBuilder.buildTraitSpeciesTermDocument;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.apache.lucene.document.Document;
@@ -14,11 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import au.org.aekos.service.retrieval.IndexLoaderRecord;
 import au.org.aekos.service.search.index.IndexConstants;
 import au.org.aekos.service.search.index.TermIndexManager;
-
-import static au.org.aekos.service.search.index.AekosTermDocumentBuilder.*;
 
 
 /**
@@ -104,8 +104,8 @@ public class LuceneLoaderClient implements LoaderClient {
 	}
 	
 	@Override
-	public void addSpecies(IndexLoaderRecord record) throws IOException {
-		Document doc = buildSpeciesTermDocument(record.getScientificName());
+	public void addSpecies(String speciesName, int speciesCount) throws IOException {
+		Document doc = buildSpeciesTermDocument(speciesName, speciesCount);
 		writeDocument(doc, indexWriter);
 	}
 
