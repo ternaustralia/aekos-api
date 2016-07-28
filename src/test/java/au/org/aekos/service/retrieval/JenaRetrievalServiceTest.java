@@ -67,4 +67,24 @@ public class JenaRetrievalServiceTest {
 		String result = JenaRetrievalService.replaceSpaces(locationID);
 		assertThat(result, is("aekos.org.au/collection/sydney.edu.au/DERG/Cravens%20Peak"));
 	}
+	
+	/**
+	 * Can we sanitise a SPARQL param that contains a double quote (")?
+	 */
+	@Test
+	public void testSanitise01() {
+		String sparqlParam = "injection\" attack";
+		String result = JenaRetrievalService.sanitise(sparqlParam);
+		assertThat(result, is("injection\\\" attack"));
+	}
+	
+	/**
+	 * Can we sanitise a SPARQL param that contains a backslash (\)?
+	 */
+	@Test
+	public void testSanitise02() {
+		String sparqlParam = "injection\\attack";
+		String result = JenaRetrievalService.sanitise(sparqlParam);
+		assertThat(result, is("injection\\\\attack"));
+	}
 }

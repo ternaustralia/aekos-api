@@ -377,7 +377,7 @@ public class JenaRetrievalService implements RetrievalService {
 	
 	private Map<String, LocationInfo> getLocations(List<String> speciesNames) throws AekosApiRetrievalException {
 		Map<String, LocationInfo> result = new HashMap<>();
-		SpeciesDataResponse speciesRecords = getSpeciesDataJson(speciesNames, 0, Integer.MAX_VALUE); // FIXME should we page this?
+		SpeciesDataResponse speciesRecords = getSpeciesDataJsonPrivate(speciesNames, 0, Integer.MAX_VALUE); // FIXME should we page this?
 		for (SpeciesOccurrenceRecord currSpeciesRecord : speciesRecords.getResponse()) {
 			String locationID = currSpeciesRecord.getLocationID();
 			LocationInfo item = new LocationInfo(currSpeciesRecord.getSamplingProtocol(), currSpeciesRecord.getBibliographicCitation());
@@ -463,20 +463,22 @@ public class JenaRetrievalService implements RetrievalService {
 		String result = darwinCoreQueryTemplate
 				.replace(OFFSET_PLACEHOLDER, String.valueOf(offset))
 				.replace(LIMIT_PLACEHOLDER, String.valueOf(limit == 0 ? Integer.MAX_VALUE : limit));
-		return handleSpeciesAndSwitchPlaceholders(speciesNames, result);
+		return handleSpeciesAndOnOffSwitchPlaceholders(speciesNames, result);
 	}
 	
 	private String getProcessedDarwinCoreCountSparql(List<String> speciesNames) {
 		String result = darwinCoreCountQueryTemplate;
-		return handleSpeciesAndSwitchPlaceholders(speciesNames, result);
+		return handleSpeciesAndOnOffSwitchPlaceholders(speciesNames, result);
 	}
 	
-	private String handleSpeciesAndSwitchPlaceholders(List<String> speciesNames, String result) {
+	private String handleSpeciesAndOnOffSwitchPlaceholders(List<String> speciesNames, String result) {
 		boolean isRetrievingAll = speciesNames.isEmpty();
 		if (isRetrievingAll) {
 			return result;
 		}
-		String scientificNameValueList = speciesNames.stream().collect(Collectors.joining("\" \"", "\"", "\""));
+		String scientificNameValueList = speciesNames.stream()
+				.map(e -> sanitise(e))
+				.collect(Collectors.joining("\" \"", "\"", "\""));
 		result = result
 				.replace(SCIENTIFIC_NAME_PLACEHOLDER, scientificNameValueList)
 				.replace(SWITCH_PLACEHOLDER, "    ");
@@ -534,5 +536,11 @@ public class JenaRetrievalService implements RetrievalService {
 
 	static String replaceSpaces(String locationID) {
 		return locationID.replace(" ", "%20");
+	}
+
+	static String sanitise(String sparqlParam) {
+		return sparqlParam
+				.replace("\\", "\\\\")
+				.replace("\"", "\\\"");
 	}
 }

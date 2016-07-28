@@ -88,6 +88,16 @@ public class JenaRetrievalServiceTestSpring {
 		assertThat(result.getResponse().size(), is(1));
 		assertThat(result.getResponseHeader().getNumFound(), is(2));
 	}
+	
+	/**
+	 * Can we defend against a SPARQL injection attack?
+	 */
+	@Test
+	public void testGetSpeciesDataJson04() throws Throwable {
+		SpeciesDataResponse result = objectUnderTest.getSpeciesDataJson(Arrays.asList("\" UNDEF \""), 0, 1);
+		assertThat("should be nothing because no species match the escaped text", result.getResponse().size(), is(0));
+		assertThat(result.getResponseHeader().getNumFound(), is(0));
+	}
 
 	/**
 	 * Can we get all the species records as JSON?
@@ -271,6 +281,16 @@ public class JenaRetrievalServiceTestSpring {
 	}
 	
 	/**
+	 * Can we defend against a SPARQL injection attack on the species name?
+	 */
+	@Test
+	public void testGetEnvironmentalDataJson05() throws Throwable {
+		EnvironmentDataResponse result = objectUnderTest.getEnvironmentalDataJson(Arrays.asList("\" UNDEF \""), Collections.emptyList(), 0, 1);
+		assertThat("should be nothing because no species match the escaped text", result.getResponse().size(), is(0));
+		assertThat(result.getResponseHeader().getNumFound(), is(0));
+	}
+	
+	/**
 	 * Can we map all the variables for a trait data record?
 	 */
 	@Test
@@ -304,6 +324,16 @@ public class JenaRetrievalServiceTestSpring {
 		assertThat(response.size(), is(1));
 		TraitDataRecord record = response.get(0);
 		assertThat(record.getYear(), is(2013));
+	}
+	
+	/**
+	 * Can we defend against a SPARQL injection attack on the species name?
+	 */
+	@Test
+	public void testGetTraitDataJson03() throws Throwable {
+		TraitDataResponse result = objectUnderTest.getTraitDataJson(Arrays.asList("\" UNDEF \""), Collections.emptyList(), 0, 20);
+		assertThat("should be nothing because no species match the escaped text", result.getResponse().size(), is(0));
+		assertThat(result.getResponseHeader().getNumFound(), is(0));
 	}
 	
 	/**
