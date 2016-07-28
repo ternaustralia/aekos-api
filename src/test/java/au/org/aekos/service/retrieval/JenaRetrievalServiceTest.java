@@ -87,4 +87,14 @@ public class JenaRetrievalServiceTest {
 		String result = JenaRetrievalService.sanitise(sparqlParam);
 		assertThat(result, is("injection\\\\attack"));
 	}
+	
+	/**
+	 * Can we sanitise a SPARQL param that contains multiple illegal characters?
+	 */
+	@Test
+	public void testSanitise03() {
+		String sparqlParam = "\"injection\\att\\ack\"blah";
+		String result = JenaRetrievalService.sanitise(sparqlParam);
+		assertThat(result, is("\\\"injection\\\\att\\\\ack\\\"blah"));
+	}
 }
