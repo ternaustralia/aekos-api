@@ -23,17 +23,18 @@ import au.org.aekos.service.search.SearchService;
 import au.org.aekos.service.search.index.SpeciesLookupIndexService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 @Api(description="Find species, traits and environmental variables", produces=MediaType.APPLICATION_JSON_VALUE, tags="Search")
 @RestController
 @RequestMapping("/v1")
 public class ApiV1SearchController {
 
-	// TODO add lots more Swagger doco
-	// TODO figure out how to get Swagger to support content negotiation with overloaded methods
-	// TODO define coord ref system
 	// TODO do we accept LSID/species ID and/or a species name for the species related services?
 	
+	private static final String DEFAULT_PAGE_NUM = "1";
+	private static final String DEFAULT_PAGE_SIZE = "20";
+
 	@Autowired
 	private SearchService searchService;
 	
@@ -65,7 +66,9 @@ public class ApiV1SearchController {
 	@ApiOperation(value = "Autocomplete partial species names",
 			notes = "Performs an autocomplete on the partial species name supplied. Results starting with the supplied fragment"
 					+ "will be returned ordered by most relevant.")
-    public List<SpeciesName> speciesAutocomplete(@RequestParam(name="q") String partialSpeciesName, HttpServletResponse resp) throws IOException {
+    public List<SpeciesName> speciesAutocomplete(
+    		@RequestParam(name="q") @ApiParam("partial species name") String partialSpeciesName,
+    		HttpServletResponse resp) throws IOException {
 		// TODO do we need propagating headers to enable browser side caching
 		// TODO look at returning a complex object with meta information like total results, curr page, etc
 		return speciesSearchService.performSearch(partialSpeciesName, 50, false);
@@ -77,11 +80,11 @@ public class ApiV1SearchController {
 					+ "of the traits, it only shows that the supplied species have values for those traits. To get the"
 					+ "values, you need to use the Data Retrieval services.")
     public List<TraitOrEnvironmentalVariableVocabEntry> getTraitsBySpecies(
-    		@RequestParam(name="speciesName", required=true) String[] speciesNames,
-    		@RequestParam(required = false, defaultValue="0") int start,
-    		@RequestParam(required=false, defaultValue="20") int rows,
+    		@RequestParam(name="speciesName", required=true) @ApiParam("species name to search for") String[] speciesNames,
+    		@RequestParam(required = false, defaultValue=DEFAULT_PAGE_NUM) @ApiParam("1-indexed page number") int pageNum,
+    		@RequestParam(required=false, defaultValue=DEFAULT_PAGE_SIZE) @ApiParam("records per page") int pageSize,
     		HttpServletResponse resp) {
-		PageRequest pagination = new PageRequest(start, rows);
+		PageRequest pagination = new PageRequest(pageNum, pageSize);
 		
 		return searchService.getTraitBySpecies(Arrays.asList(speciesNames), pagination);
 	}
@@ -93,10 +96,10 @@ public class ApiV1SearchController {
 					+ "to use the Data Retrieval services.")
     public List<SpeciesName> getSpeciesByTrait(
     		@RequestParam(name="traitName") String[] traitNames,
-    		@RequestParam(required = false, defaultValue="0") int start,
-    		@RequestParam(required=false, defaultValue="20") int rows,
+    		@RequestParam(required = false, defaultValue=DEFAULT_PAGE_NUM) @ApiParam("1-indexed page number") int pageNum,
+    		@RequestParam(required=false, defaultValue=DEFAULT_PAGE_SIZE) @ApiParam("records per page") int pageSize,
 			HttpServletResponse resp) {
-		PageRequest pagination = new PageRequest(start, rows);
+		PageRequest pagination = new PageRequest(pageNum, pageSize);
 		return searchService.getSpeciesByTrait(Arrays.asList(traitNames), pagination);
 	}
 	
@@ -107,10 +110,10 @@ public class ApiV1SearchController {
 					+ "values, you need to use the Data Retrieval services.")
     public List<TraitOrEnvironmentalVariableVocabEntry> getEnvironmentBySpecies(
     		@RequestParam(name="speciesName") String[] speciesNames,
-    		@RequestParam(required = false, defaultValue="0") int start,
-    		@RequestParam(required=false, defaultValue="20") int rows,
+    		@RequestParam(required = false, defaultValue=DEFAULT_PAGE_NUM) @ApiParam("1-indexed page number") int pageNum,
+    		@RequestParam(required=false, defaultValue=DEFAULT_PAGE_SIZE) @ApiParam("records per page") int pageSize,
     		HttpServletResponse resp) {
-		PageRequest pagination = new PageRequest(start, rows);
+		PageRequest pagination = new PageRequest(pageNum, pageSize);
 		return searchService.getEnvironmentBySpecies(Arrays.asList(speciesNames), pagination);
 	}
 	

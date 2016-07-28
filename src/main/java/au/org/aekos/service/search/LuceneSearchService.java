@@ -36,7 +36,7 @@ import au.org.aekos.service.vocab.VocabService;
 public class LuceneSearchService implements SearchService {
 
 	//Can also pass in a null page request!!
-	public static final PageRequest EVERYTHING = new PageRequest(0, Integer.MAX_VALUE);
+	static final PageRequest EVERYTHING = new PageRequest(0, Integer.MAX_VALUE);
 
 	private static final Logger logger = LoggerFactory.getLogger(LuceneSearchService.class);
 	
@@ -121,9 +121,6 @@ public class LuceneSearchService implements SearchService {
 		return responseList;
 	}
 	
-	
-	
-	
 	private List<SpeciesName> performTraitSpeciesSearch(Query query, PageRequest pagination ){
 		List<SpeciesName> responseList = new ArrayList<SpeciesName>();
 		IndexSearcher searcher = null;
@@ -203,41 +200,39 @@ public class LuceneSearchService implements SearchService {
 	 * @param totalHits
 	 * @return startIndex or -1 to signify return nothing
 	 */
-	
-	public int getTopDocStartIndex(PageRequest pagination, int totalHits){
+	int getTopDocStartIndex(PageRequest pagination, int totalHits){
 		if(pagination == null){
 			return 0;
 		}
-		int pageNumber = pagination.pageNumber;
+		int pageNumber = pagination.getPageNumber();
 		if(pageNumber == -1 || pageNumber == 0 || pageNumber == 1){
 			return 0;
 		}
-		int resultsPerPage = pagination.resultsPerPage > 0 ?  pagination.resultsPerPage : defaultResultsPerPage;
+		int resultsPerPage = pagination.getResultsPerPage() > 0 ?  pagination.getResultsPerPage() : defaultResultsPerPage;
 		int startIndex = ( pageNumber - 1 ) * resultsPerPage;
 		if(startIndex >= totalHits){
-			return -1; //
+			return -1;
 		}
 	    return startIndex;
 	}
 	
-	public int getTopDocEndIndex(PageRequest pagination, int totalHits){
+	int getTopDocEndIndex(PageRequest pagination, int totalHits){
 		if(pagination == null ){ //Still might like to cap the everything query at a number of docs.
 			return totalHits - 1;
 		}
-		int pageNumber = pagination.pageNumber;
+		int pageNumber = pagination.getPageNumber();
 		if(pageNumber == -1 ){
 			return -1;
 		}
 	    if(pageNumber == 0){ //zero index just in case
 	        pageNumber = 1;
 	    }
-	    int resultsPerPage = pagination.resultsPerPage > 0 ?  pagination.resultsPerPage : defaultResultsPerPage;
+	    int resultsPerPage = pagination.getResultsPerPage() > 0 ?  pagination.getResultsPerPage() : defaultResultsPerPage;
 		int endIndex = (pageNumber * resultsPerPage) - 1;
 		if(endIndex > totalHits - 1){
 			endIndex = totalHits - 1; //If pagination too far startIndex should already be -1
 		}
 		return endIndex;
-		
 	}
 	
 	@Override
