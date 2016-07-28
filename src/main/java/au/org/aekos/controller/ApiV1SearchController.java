@@ -20,7 +20,6 @@ import au.org.aekos.model.TraitOrEnvironmentalVariableVocabEntry;
 import au.org.aekos.service.retrieval.RetrievalService;
 import au.org.aekos.service.search.PageRequest;
 import au.org.aekos.service.search.SearchService;
-import au.org.aekos.service.search.index.SpeciesLookupIndexService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -37,9 +36,6 @@ public class ApiV1SearchController {
 
 	@Autowired
 	private SearchService searchService;
-	
-	@Autowired
-	private SpeciesLookupIndexService speciesSearchService;
 	
 	@Autowired
 	private RetrievalService retrievalService;
@@ -71,7 +67,7 @@ public class ApiV1SearchController {
     		HttpServletResponse resp) throws IOException {
 		// TODO do we need propagating headers to enable browser side caching
 		// TODO look at returning a complex object with meta information like total results, curr page, etc
-		return speciesSearchService.performSearch(partialSpeciesName, 50, false);
+		return searchService.speciesAutocomplete(partialSpeciesName, 50);
 	}
 
 	@RequestMapping(path="/getTraitsBySpecies.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)

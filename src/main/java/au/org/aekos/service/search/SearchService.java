@@ -1,5 +1,6 @@
 package au.org.aekos.service.search;
 
+import java.io.IOException;
 import java.util.List;
 
 import au.org.aekos.model.SpeciesName;
@@ -65,8 +66,9 @@ public interface SearchService {
 	/**
 	 * Finds possible species name matches for the supplied partial name.
 	 * 
-	 * @param partialSpeciesName	partial string to match
-	 * @return						list of posssible matches ordered with the most likely match first
+	 * @param term			partial species name to do a starts with search
+	 * @param numResults	limits the number of results
+	 * @return				list of possible matches ordered with the most likely match first
 	 */
-	List<SpeciesName> autocompleteSpeciesName(String partialSpeciesName);
+	List<SpeciesName> speciesAutocomplete(String term, int numResults) throws IOException;
 }

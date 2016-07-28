@@ -1,6 +1,7 @@
 package au.org.aekos.service.search.load;
 
 import java.io.IOException;
+
 import java.util.List;
 
 import org.apache.lucene.document.Document;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import au.org.aekos.service.retrieval.IndexLoaderRecord;
 import au.org.aekos.service.search.index.IndexConstants;
 import au.org.aekos.service.search.index.TermIndexManager;
 
@@ -20,10 +22,12 @@ import static au.org.aekos.service.search.index.AekosTermDocumentBuilder.*;
 
 
 /**
- * to use,  first call the begin load method,
- * do your stuff,
- * then call the end load method at the end to tidy up 
- * and close the indexWriter.
+ * To use:
+ * <pre>
+ *   // client is a LuceneLoaderClient
+ *   client.beingLoad();
+ *   // do you stuff
+ *   cliet.endLoad();
  * 
  * @author Ben
  *
@@ -41,7 +45,7 @@ public class LuceneLoaderClient implements LoaderClient {
 	@Autowired
 	private TermIndexManager indexManager;
 	
-	//TODO not threadsafe for parallel load processes . . . 
+	//TODO not threadsafe for parallel load processes . . .
 	private IndexWriter indexWriter;
 	
 	@Override
@@ -61,7 +65,6 @@ public class LuceneLoaderClient implements LoaderClient {
 			indexWriter.flush();
 			indexWriter.close();
 			indexManager.flushDeletions();
-			//indexManager.getTermIndex().
 		} catch (IOException e) {
 			logger.error("Failed to end the load process", e);
 		}
@@ -83,10 +86,8 @@ public class LuceneLoaderClient implements LoaderClient {
 
 	@Override
 	public void addSpeciesTraitTermToIndex(String species, String trait) throws IOException {
-		Document doc = buildTraitSpeciesTermDocument(trait, species);
+		Document doc = buildTraitSpeciesTermDocument(species, trait);
 		writeDocument(doc, indexWriter);
-//		Document traitVocabDoc = buildTraitVocabTermDocument(trait);
-//		writeDocument(traitVocabDoc, indexWriter);
 	}
 
 	@Override
@@ -101,10 +102,20 @@ public class LuceneLoaderClient implements LoaderClient {
 		Document doc = buildSpeciesEnvironmentTermDocument(species, environmentTrait);
 		writeDocument(doc, indexWriter);
 	}
+	
+	@Override
+	public void addSpecies(IndexLoaderRecord record) throws IOException {
+		Document doc = buildSpeciesTermDocument(record.getScientificName());
+		writeDocument(doc, indexWriter);
+	}
 
-	public void writeDocument(Document doc, IndexWriter writer) throws IOException{
+	private void writeDocument(Document doc, IndexWriter writer) throws IOException{
+		if (writer == null) {
+			throw new NullPointerException("writer is null, have you called .beginLoad() yet?");
+		}
 		IndexableField uidField = doc.getField(IndexConstants.FLD_UNIQUE_ID);
-		if(uidField != null){
+		boolean hasDocumentAlreadyBeenWritten = uidField != null;
+		if(hasDocumentAlreadyBeenWritten){
 		    String uid = uidField.stringValue();
 		    writer.updateDocument(new Term(IndexConstants.FLD_UNIQUE_ID, uid), doc);
 		}else{
@@ -114,5 +125,9 @@ public class LuceneLoaderClient implements LoaderClient {
 			writer.commit();
 			commitCount = 0;
 		}
+	}
+
+	public void setIndexManager(TermIndexManager indexManager) {
+		this.indexManager = indexManager;
 	}
 }

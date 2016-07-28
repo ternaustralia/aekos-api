@@ -85,6 +85,7 @@ public class ApiV1MaintenanceController {
 					try {
 						loader.addSpeciesTraitTermsToIndex(record.getScientificName(), new LinkedList<>(record.getTraitNames()));
 						loader.addSpeciesEnvironmentTermsToIndex(record.getScientificName(), new LinkedList<>(record.getEnvironmentalVariableNames()));
+						loader.addSpecies(record);
 					} catch (IOException e) {
 						reportIndexLoadFailure(resp, responseWriter, e);
 						return;
