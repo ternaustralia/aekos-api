@@ -126,13 +126,13 @@ public class ApiV1SearchController {
 				try {
 					List<SpeciesSummary> records = searchService.speciesAutocomplete(curr, 1);
 					if (records.size() == 0) {
-						result.add(0, new SpeciesSummary(curr, 0));
+						result.add(new SpeciesSummary("0", curr, 0));
 						continue;
 					}
 					SpeciesSummary match = records.get(0);
 					boolean searchReturnedSomethingButItsNotWhatWeAskedFor = !match.getScientificName().equalsIgnoreCase(curr);
 					if (searchReturnedSomethingButItsNotWhatWeAskedFor) {
-						result.add(0, new SpeciesSummary(curr, 0));
+						result.add(new SpeciesSummary("0", curr, 0));
 						continue;
 					}
 					result.add(match);
