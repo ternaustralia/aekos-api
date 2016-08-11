@@ -12,8 +12,8 @@ echo "  docker load -i $TAR_NAME"
 echo "  docker run \\
     -p 443:443 \\
     -p 80:80 \\
-    -v /host/path/to/tdb:/data \\                   # change the left side path
-    -v /host/path/to/auth:/auth \\                  # change the left side path
-    -v /host/path/to/metrics:/metrics \\            # change the left side path
-    -v /home/path/to/lucene-index:/lucene-index \\  # change the left side path
+    -v /host/path/to/tdb:/data:ro \\                  # change the left side path
+    -v /host/path/to/auth:/auth \\                    # change the left side path
+    -v /host/path/to/metrics:/metrics \\              # change the left side path
+    -v /home/path/to/lucene-index:/lucene-index:ro \\ # change the left side path
     $IMAGE_NAME"
