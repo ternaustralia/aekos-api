@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import org.apache.catalina.Context;
 import org.apache.catalina.connector.Connector;
 import org.apache.jena.ontology.OntModel;
+import org.apache.jena.query.Dataset;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.tomcat.util.descriptor.web.SecurityCollection;
@@ -40,6 +41,7 @@ import au.org.aekos.util.MetricsAekosJenaModelFactory;
 public class Application extends SpringBootServletInitializer {
 
 	public static final String API_NAMESPACE_V1_0 = "urn:api.aekos.org.au/1.0/";
+	public static final String API_DATA_NAMESPACE = "http://www.aekos.org.au/api/1.0#";  // FIXME move to config FIXME could probably name this better
 	
 	@Autowired
 	private Environment environment;
@@ -53,6 +55,7 @@ public class Application extends SpringBootServletInitializer {
 	}
 
     public static void main(String[] args) {
+    	//org.apache.jena.tdb.TDB.getContext().set(org.apache.jena.query.ARQ.symLogExec,true); // Uncomment to enable TDB/ARQ debugging output
         SpringApplication.run(Application.class, args);
     }
     
@@ -75,8 +78,8 @@ public class Application extends SpringBootServletInitializer {
     }
     
     @Bean
-    public Model dataModel(CoreDataAekosJenaModelFactory loader) {
-    	return loader.getInstance();
+    public Dataset coreDS(CoreDataAekosJenaModelFactory loader) {
+    	return loader.getDatasetInstance();
     }
     
     @Bean
@@ -119,6 +122,11 @@ public class Application extends SpringBootServletInitializer {
     @Bean
     public Model metricsModel(MetricsAekosJenaModelFactory factory) {
     	return factory.getInstance();
+    }
+    
+    @Bean
+    public Dataset metricsDS(MetricsAekosJenaModelFactory factory) {
+    	return factory.getDatasetInstance();
     }
     
     @Bean

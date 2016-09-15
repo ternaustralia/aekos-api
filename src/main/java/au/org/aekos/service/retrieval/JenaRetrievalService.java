@@ -14,13 +14,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
-import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.StmtIterator;
@@ -30,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import au.org.aekos.Application;
 import au.org.aekos.controller.RetrievalResponseHeader;
 import au.org.aekos.model.AbstractParams;
 import au.org.aekos.model.EnvironmentDataParams;
@@ -47,6 +49,7 @@ import au.org.aekos.model.TraitOrEnvironmentalVariable;
 @Service
 public class JenaRetrievalService implements RetrievalService {
 
+	
 	private static final Logger logger = LoggerFactory.getLogger(JenaRetrievalService.class);
 	static final String SCIENTIFIC_NAME_PLACEHOLDER = "%SCIENTIFIC_NAME_PLACEHOLDER%";
 	private static final String OFFSET_PLACEHOLDER = "%OFFSET_PLACEHOLDER%";
@@ -56,10 +59,15 @@ public class JenaRetrievalService implements RetrievalService {
 	private static final String ENV_VAR_PLACEHOLDER = "%ENV_VAR_PLACEHOLDER%";
 	private static final String SWITCH_PLACEHOLDER = "#OFF";
 	private static final List<String> ALL_SPECIES = Collections.emptyList();
+	private static final Property NAME_PROP = prop2("name");
+	private static final Property UNITS_PROP = prop2("units");
+	private static final Property VALUE_PROP = prop2("value");
+	private static final Property TRAIT_PROP = prop2("trait");
+	private static final Property NO_UNITS_VARS_PROP = prop2("noUnitsVars");
 	
 	@Autowired
-	@Qualifier("dataModel")
-	private Model model;
+	@Qualifier("coreDS")
+	private Dataset ds;
 	
 	@Autowired
 	@Qualifier("darwinCoreQueryTemplate")
@@ -185,7 +193,7 @@ public class JenaRetrievalService implements RetrievalService {
 		String sparql = indexLoaderQuery;
 		logger.debug("Index loader SPARQL: " + sparql);
 		Query query = QueryFactory.create(sparql);
-		try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
+		try (QueryExecution qexec = QueryExecutionFactory.create(query, ds)) {
 			ResultSet results = qexec.execSelect();
 			if (!results.hasNext()) {
 				throw new IllegalStateException("Data problem: no results were found. "
@@ -196,10 +204,10 @@ public class JenaRetrievalService implements RetrievalService {
 				String scientificName = getString(s, "scientificName");
 				// env
 				EnvironmentDataRecord envRecord = new EnvironmentDataRecord(0, 0, "", "", "", 0, 0, "", "");
-				processEnvDataVars(Collections.emptyList(), s.get("loc").asResource(), envRecord, "noUnitsVars");
+				processEnvDataVars(Collections.emptyList(), s.get("loc").asResource(), envRecord, NO_UNITS_VARS_PROP);
 				// traits
 				TraitDataRecord traitRecord = new TraitDataRecord(0, 0, "", "", "", 0, "", 0, 0, "", "");
-				processTraitDataVars(s.get("dwr").asResource(), traitRecord, "trait", Collections.emptyList());
+				processTraitDataVars(s.get("dwr").asResource(), traitRecord, TRAIT_PROP, Collections.emptyList());
 				Set<String> traitNames = new HashSet<>();
 				for (TraitOrEnvironmentalVariable curr : traitRecord.getTraits()) {
 					traitNames.add(curr.getName());
@@ -232,7 +240,7 @@ public class JenaRetrievalService implements RetrievalService {
 		String sparql = getProcessedDarwinCoreSparql(speciesNames, start, rows);
 		logger.debug("Species data SPARQL: " + sparql);
 		Query query = QueryFactory.create(sparql);
-		try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
+		try (QueryExecution qexec = QueryExecutionFactory.create(query, ds)) {
 			ResultSet results = qexec.execSelect();
 			if (results.hasNext()) {
 				for (; results.hasNext();) {
@@ -288,7 +296,7 @@ public class JenaRetrievalService implements RetrievalService {
 		String sparql = getProcessedDarwinCoreCountSparql(speciesNames);
 		logger.debug("Species data count SPARQL: " + sparql);
 		Query query = QueryFactory.create(sparql);
-		try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
+		try (QueryExecution qexec = QueryExecutionFactory.create(query, ds)) {
 			ResultSet results = qexec.execSelect();
 			if (!results.hasNext()) {
 				throw new IllegalStateException("Programmer error: a count query should always return something");
@@ -308,7 +316,7 @@ public class JenaRetrievalService implements RetrievalService {
 		AbstractParams params = new EnvironmentDataParams(start, rows, speciesNames, environmentalVariableNames);
 		logger.debug("Environmental data SPARQL: " + sparql);
 		Query query = QueryFactory.create(sparql);
-		try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
+		try (QueryExecution qexec = QueryExecutionFactory.create(query, ds)) {
 			ResultSet results = qexec.execSelect();
 			if (!results.hasNext()) {
 				int foundNothing = 0;
@@ -332,8 +340,8 @@ public class JenaRetrievalService implements RetrievalService {
 			getString(s, "eventDate"), getInt(s, "year"), getInt(s, "month"),
 			locationIds.get(locationID).bibliographicCitation,
 			locationIds.get(locationID).samplingProtocol);
-		for (String currVarProp : Arrays.asList("disturbanceEvidenceVars", "landscapeVars", "noUnitVars",
-				"rainfallVars", "soilVars", "temperatureVars", "windVars")) {
+		for (Property currVarProp : Arrays.asList(prop2("disturbanceEvidenceVars"), prop2("landscapeVars"), prop2("noUnitVars"),
+				prop2("rainfallVars"), prop2("soilVars"), prop2("temperatureVars"), prop2("windVars"))) {
 			processEnvDataVars(varNames, s.get("s").asResource(), record, currVarProp);
 		}
 		boolean isEnvVarFilterEnabled = varNames.size() > 0;
@@ -343,17 +351,17 @@ public class JenaRetrievalService implements RetrievalService {
 		records.add(record);
 	}
 
-	private void processEnvDataVars(List<String> varNames, Resource locationSubject, EnvironmentDataRecord record, String propName) {
-		StmtIterator varsIterator = locationSubject.listProperties(prop(propName));
+	private void processEnvDataVars(List<String> varNames, Resource locationSubject, EnvironmentDataRecord record, Property prop) {
+		StmtIterator varsIterator = locationSubject.listProperties(prop);
 		boolean isEnvVarFilterEnabled = varNames.size() > 0;
 		while (varsIterator.hasNext()) {
 			Resource currVar = varsIterator.next().getResource();
-			String name = currVar.getProperty(prop("name")).getString();
+			String name = currVar.getProperty(NAME_PROP).getString();
 			if (isEnvVarFilterEnabled && !varNames.contains(name)) {
 				continue;
 			}
-			String value = currVar.getProperty(prop("value")).getString();
-			String units = currVar.getProperty(prop("units")).getString();
+			String value = currVar.getProperty(VALUE_PROP).getString();
+			String units = currVar.getProperty(UNITS_PROP).getString();
 			record.addVariable(new TraitOrEnvironmentalVariable(name, value, units));
 		}
 	}
@@ -363,7 +371,7 @@ public class JenaRetrievalService implements RetrievalService {
 		String sparql = getProcessedEnvDataCountSparql(environmentalVariableNames, locationIds);
 		logger.debug("Environment data count SPARQL: " + sparql);
 		Query query = QueryFactory.create(sparql);
-		try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
+		try (QueryExecution qexec = QueryExecutionFactory.create(query, ds)) {
 			ResultSet results = qexec.execSelect();
 			if (!results.hasNext()) {
 				throw new IllegalStateException("Programmer error: a count query should always return something");
@@ -400,7 +408,7 @@ public class JenaRetrievalService implements RetrievalService {
 		logger.debug("Trait data SPARQL: " + sparql);
 		AbstractParams params = new TraitDataParams(start, rows, speciesNames, traitNames);
 		Query query = QueryFactory.create(sparql);
-		try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
+		try (QueryExecution qexec = QueryExecutionFactory.create(query, ds)) {
 			ResultSet results = qexec.execSelect();
 			if (!results.hasNext()) {
 				int foundNothing = 0;
@@ -420,7 +428,7 @@ public class JenaRetrievalService implements RetrievalService {
 	
 	private void processTraitDataSolution(List<String> traitNames, List<TraitDataRecord> records, QuerySolution s) {
 		TraitDataRecord record = processTraitDataSolution(s);
-		processTraitDataVars(s.get("s").asResource(), record, "trait", traitNames);
+		processTraitDataVars(s.get("s").asResource(), record, TRAIT_PROP, traitNames);
 		boolean isTraitFilterEnabled = traitNames.size() > 0;
 		if (isTraitFilterEnabled && !record.matchesTraitFilter(traitNames)) {
 			return;
@@ -428,17 +436,17 @@ public class JenaRetrievalService implements RetrievalService {
 		records.add(record);
 	}
 
-	private void processTraitDataVars(Resource speciesEntity, TraitDataRecord record, String propName, List<String> traitNames) {
-		StmtIterator varsIterator = speciesEntity.listProperties(prop(propName));
+	private void processTraitDataVars(Resource speciesEntity, TraitDataRecord record, Property prop, List<String> traitNames) {
+		StmtIterator varsIterator = speciesEntity.listProperties(prop);
 		boolean isTraitFilterEnabled = traitNames.size() > 0;
 		while (varsIterator.hasNext()) {
 			Resource currVar = varsIterator.next().getResource();
-			String name = currVar.getProperty(prop("name")).getString();
+			String name = currVar.getProperty(NAME_PROP).getString();
 			if (isTraitFilterEnabled && !traitNames.contains(name)) {
 				continue;
 			}
-			String value = currVar.getProperty(prop("value")).getString();
-			String units = currVar.getProperty(prop("units")).getString();
+			String value = currVar.getProperty(VALUE_PROP).getString();
+			String units = currVar.getProperty(UNITS_PROP).getString();
 			record.addTraitValue(new TraitOrEnvironmentalVariable(name, value, units));
 		}
 	}
@@ -447,7 +455,7 @@ public class JenaRetrievalService implements RetrievalService {
 		String sparql = getProcessedTraitDataCountSparql(speciesNames, traitNames);
 		logger.debug("Trait data count SPARQL: " + sparql);
 		Query query = QueryFactory.create(sparql);
-		try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
+		try (QueryExecution qexec = QueryExecutionFactory.create(query, ds)) {
 			ResultSet results = qexec.execSelect();
 			if (!results.hasNext()) {
 				throw new IllegalStateException("Programmer error: a count query should always return something");
@@ -515,9 +523,9 @@ public class JenaRetrievalService implements RetrievalService {
 		return processedSparql;
 	}
 
-	private Property prop(String localPropName) {
-		String namespace = "http://www.aekos.org.au/api/1.0#"; // FIXME move to config
-		return model.createProperty(namespace + localPropName);
+	private static Property prop2(String localPropName) {
+		String namespace = Application.API_DATA_NAMESPACE;
+		return ModelFactory.createDefaultModel().createProperty(namespace + localPropName);
 	}
 	
 	private int getInt(QuerySolution soln, String variableName) {
@@ -530,10 +538,6 @@ public class JenaRetrievalService implements RetrievalService {
 
 	private double getDouble(QuerySolution soln, String variableName) {
 		return soln.get(variableName).asLiteral().getDouble();
-	}
-	
-	public void setModel(Model model) {
-		this.model = model;
 	}
 
 	public void setDarwinCoreQueryTemplate(String darwinCoreQueryTemplate) {

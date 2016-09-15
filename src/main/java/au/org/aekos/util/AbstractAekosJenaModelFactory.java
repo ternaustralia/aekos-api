@@ -3,8 +3,8 @@ package au.org.aekos.util;
 import javax.annotation.PreDestroy;
 
 import org.apache.jena.query.Dataset;
+import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.tdb.TDBFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +21,7 @@ public abstract class AbstractAekosJenaModelFactory implements AekosJenaModelFac
 	private boolean isProd;
 	
 	private Model instance;
-	private Dataset dataset;
+	protected Dataset dataset;
 	
 	@Override
 	public Model getInstance() {
@@ -34,7 +34,8 @@ public abstract class AbstractAekosJenaModelFactory implements AekosJenaModelFac
 						+ "Cannot continue without it. Either supply it or turn production mode off.");
 			}
 			logger.info("Using in-memory " + getModelName() + " model");
-			instance = ModelFactory.createDefaultModel();
+			dataset = DatasetFactory.create();
+			instance = dataset.getDefaultModel();
 			return instance;
 		}
 		logger.info("Using disk based " + getModelName() + " model at " + getModelPath());
@@ -42,6 +43,12 @@ public abstract class AbstractAekosJenaModelFactory implements AekosJenaModelFac
 		instance = dataset.getDefaultModel();
 		doPostConstructStats(instance);
 		return instance;
+	}
+	
+	@Override
+	public Dataset getDatasetInstance() {
+		getInstance();
+		return dataset;
 	}
 	
 	abstract String getModelPath();

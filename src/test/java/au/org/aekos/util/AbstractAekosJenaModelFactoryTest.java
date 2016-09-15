@@ -1,6 +1,7 @@
 package au.org.aekos.util;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
 import java.nio.file.Files;
@@ -45,6 +46,18 @@ public class AbstractAekosJenaModelFactoryTest {
 		ReflectionTestUtils.setField(objectUnderTest, "isProd", true);
 		// leave path as not defined
 		objectUnderTest.getInstance();
+	}
+	
+	/**
+	 * Can we create an in-memory dataset when no path is provided?
+	 */
+	@Test
+	public void testGetInstance03() throws Throwable {
+		ConcreteAekosJenaModelFactory objectUnderTest = new ConcreteAekosJenaModelFactory();
+		ReflectionTestUtils.setField(objectUnderTest, "notDefined", "NOT_DEFINED");
+		// leave path as not defined
+		Dataset result = objectUnderTest.getDatasetInstance();
+		assertNotNull("We should create an in-memory dataset when no path is provided", result);
 	}
 }
 

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
+import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
@@ -43,6 +44,10 @@ public class JenaMetricsStorageService implements MetricsStorageService {
 	@Autowired
 	@Qualifier("metricsModel")
 	private Model metricsModel;
+	
+	@Autowired
+	@Qualifier("metricsDS")
+	private Dataset metricsDataset;
 	
 	@Autowired
 	private IdProvider idProvider;
@@ -96,7 +101,7 @@ public class JenaMetricsStorageService implements MetricsStorageService {
 			return Collections.unmodifiableMap(result);
 		}
 		Query query = QueryFactory.create(REQ_SUMMARY_SPARQL);
-		try (QueryExecution qexec = QueryExecutionFactory.create(query, metricsModel)) {
+		try (QueryExecution qexec = QueryExecutionFactory.create(query, metricsDataset)) {
 			ResultSet results = qexec.execSelect();
 			if (!results.hasNext()) {
 				throw new RuntimeException("No results were returned in the solution for the query: " + REQ_SUMMARY_SPARQL);
@@ -151,6 +156,10 @@ public class JenaMetricsStorageService implements MetricsStorageService {
 
 	public void setMetricsModel(Model metricsModel) {
 		this.metricsModel = metricsModel;
+	}
+
+	public void setMetricsDataset(Dataset metricsDataset) {
+		this.metricsDataset = metricsDataset;
 	}
 
 	public void setIdProvider(IdProvider idProvider) {

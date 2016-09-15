@@ -109,11 +109,18 @@
 	        </bean>     
 	    </constructor-arg>
 	</bean>	
+	
 	<bean id="modelLoader" class="au.org.aekos.util.CoreDataAekosJenaModelFactory" />
 	
+	<!-- we need a reference to the model so we can load data to it, but we use the dataset in the actual class -->
 	<bean id="dataModel" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
 		<property name="targetObject" ref="modelLoader" />
 		<property name="targetMethod" value="getInstance" />
+	</bean>
+	
+	<bean id="coreDS" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+		<property name="targetObject" ref="modelLoader" />
+		<property name="targetMethod" value="getDatasetInstance" />
 	</bean>
 	
 	<!-- pre-populate the model with Darwin Core and trait data -->
