@@ -1,7 +1,5 @@
 package au.org.aekos.util;
 
-import javax.annotation.PreDestroy;
-
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.rdf.model.Model;
@@ -56,14 +54,4 @@ public abstract class AbstractAekosJenaModelFactory implements AekosJenaModelFac
 	abstract String getModelName();
 	
 	abstract void doPostConstructStats(Model newInstance);
-	
-	@PreDestroy
-	public void destroy() {
-		if (instance != null) {
-			instance.close();
-		}
-		if (dataset != null) {
-			dataset.close();
-		}
-	}
 }

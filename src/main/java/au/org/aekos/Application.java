@@ -40,6 +40,7 @@ import au.org.aekos.util.MetricsAekosJenaModelFactory;
 @PropertySource(value="file://${user.home}/aekos-api.properties", ignoreResourceNotFound=true)
 public class Application extends SpringBootServletInitializer {
 
+	private static final String DONT_CALL_BECUASE_DATASET_GETS_AUTOCLOSED = "";
 	public static final String API_NAMESPACE_V1_0 = "urn:api.aekos.org.au/1.0/";
 	public static final String API_DATA_NAMESPACE = "http://www.aekos.org.au/api/1.0#";  // FIXME move to config FIXME could probably name this better
 	
@@ -119,7 +120,7 @@ public class Application extends SpringBootServletInitializer {
 		return out.toString();
 	}
     
-    @Bean
+    @Bean(destroyMethod=DONT_CALL_BECUASE_DATASET_GETS_AUTOCLOSED)
     public Model metricsModel(MetricsAekosJenaModelFactory factory) {
     	return factory.getInstance();
     }
