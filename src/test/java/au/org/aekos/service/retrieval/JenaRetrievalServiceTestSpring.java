@@ -1,7 +1,9 @@
 package au.org.aekos.service.retrieval;
 
 import static au.org.aekos.TraitOrEnvVarMatcher.isTraitOrVar;
+import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 
@@ -12,6 +14,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.SystemUtils;
 import org.junit.Test;
@@ -23,6 +27,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import au.org.aekos.model.EnvironmentDataRecord;
 import au.org.aekos.model.EnvironmentDataResponse;
+import au.org.aekos.model.LocationInfo;
 import au.org.aekos.model.ResponseHeader;
 import au.org.aekos.model.SpeciesDataResponse;
 import au.org.aekos.model.TraitDataRecord;
@@ -98,6 +103,16 @@ public class JenaRetrievalServiceTestSpring {
 		assertThat("should be nothing because no species match the escaped text", result.getResponse().size(), is(0));
 		assertThat(result.getResponseHeader().getNumFound(), is(0));
 	}
+	
+	/**
+	 * Can we get a species record that uses taxonRemarks rather than scientificName?
+	 */
+	@Test
+	public void testGetSpeciesDataJson05() throws Throwable {
+		SpeciesDataResponse result = objectUnderTest.getSpeciesDataJson(Arrays.asList("Hakea obtusa"), 0, 1);
+		assertThat(result.getResponse().size(), is(1));
+		assertThat(result.getResponse().get(0).getTaxonRemarks(), is("Hakea obtusa"));
+	}
 
 	/**
 	 * Can we get all the species records as JSON?
@@ -105,7 +120,7 @@ public class JenaRetrievalServiceTestSpring {
 	@Test
 	public void testGetAllSpeciesDataJson01() throws Throwable {
 		SpeciesDataResponse result = objectUnderTest.getAllSpeciesDataJson(0, 10);
-		assertThat(result.getResponse().size(), is(4));
+		assertThat(result.getResponse().size(), is(7));
 	}
 	
 	/**
@@ -162,8 +177,7 @@ public class JenaRetrievalServiceTestSpring {
 		if(SystemUtils.IS_OS_WINDOWS){
 			compareStr = testGetAllSpeciesDataCsv01_expected.replaceAll("\r", "");
 		}
-		assertEquals(writer.toString(), compareStr);
-		assertThat(writer.toString(), is(compareStr));
+		assertEquals(compareStr, writer.toString());
 	}
 	
 	/**
@@ -172,7 +186,8 @@ public class JenaRetrievalServiceTestSpring {
 	@Test
 	public void testGetEnvironmentalDataCsv01() throws Throwable {
 		Writer writer = new StringWriter();
-		objectUnderTest.getEnvironmentalDataCsv(Arrays.asList("Calotis hispidula"), Collections.emptyList(), 0, 20, writer);
+		objectUnderTest.getEnvironmentalDataCsv(Arrays.asList("Calotis hispidula", "Hakea obtusa", "Lasiopetalum compactum", "Dodonaea concinna Benth."),
+				Collections.emptyList(), 0, 20, writer);
 		String compareStr = testGetEnvironmentalDataCsv01_expected;
 		if(SystemUtils.IS_OS_WINDOWS){
 			compareStr = testGetEnvironmentalDataCsv01_expected.replaceAll("\r", "");
@@ -291,6 +306,54 @@ public class JenaRetrievalServiceTestSpring {
 	}
 	
 	/**
+	 * Can we tell which species is associated with which environmental record in the result when we supply more than one species?
+	 */
+	@Test
+	public void testGetEnvironmentalDataJson06() throws Throwable {
+		EnvironmentDataResponse result = objectUnderTest.getEnvironmentalDataJson(Arrays.asList("Calotis hispidula", "Rosa canina"), Collections.emptyList(), 0, 10);
+		assertThat(result.getResponse().size(), is(2));
+		Set<String> scientificNamesForFirstRecord = result.getResponse().get(0).getScientificNames();
+		assertThat(scientificNamesForFirstRecord.size(), is(1));
+		assertThat(scientificNamesForFirstRecord, hasItems("Calotis hispidula"));
+		Set<String> scientificNamesForSecondRecord = result.getResponse().get(1).getScientificNames();
+		assertThat(scientificNamesForSecondRecord.size(), is(1));
+		assertThat(scientificNamesForSecondRecord, hasItems("Rosa canina"));
+	}
+	
+	/**
+	 * Can we get an environment record with multiple species that appear at the same site?
+	 */
+	@Test
+	public void testGetEnvironmentalDataJson07() throws Throwable {
+		EnvironmentDataResponse result = objectUnderTest.getEnvironmentalDataJson(Arrays.asList("Dodonaea concinna Benth.", "Hakea obtusa"), Collections.emptyList(), 0, 10);
+		assertThat(result.getResponse().size(), is(1));
+		Set<String> scientificNamesForFirstRecord = result.getResponse().get(0).getScientificNames();
+		assertThat(scientificNamesForFirstRecord.size(), is(1));
+		assertThat(scientificNamesForFirstRecord, hasItems("Dodonaea concinna Benth."));
+		Set<String> taxonRemarksForFirstRecord = result.getResponse().get(0).getTaxonRemarks();
+		assertThat(taxonRemarksForFirstRecord.size(), is(1));
+		assertThat(taxonRemarksForFirstRecord, hasItems("Hakea obtusa"));
+	}
+	
+	/**
+	 * Can we get the location mapping for two species at the same site?
+	 */
+	@Test
+	public void testGetLocations01() throws Throwable {
+		Map<String, LocationInfo> result = objectUnderTest.getLocations(Arrays.asList("Dodonaea concinna Benth.", "Hakea obtusa"));
+		assertThat(result.size(), is(1));
+		LocationInfo locInfo = result.get("aekos.org.au/collection/wa.gov.au/ravensthorpe/R002");
+		assertThat(locInfo.getBibliographicCitation(), startsWith("Department of Parks and Wildlife (Biogeography Program) (2012)."));
+		assertThat(locInfo.getSamplingProtocol(), is("aekos.org.au/collection/wa.gov.au/ravensthorpe"));
+		Set<String> scientificNames = locInfo.getScientificNames();
+		assertThat(scientificNames.size(), is(1));
+		assertThat(scientificNames, hasItems("Dodonaea concinna Benth."));
+		Set<String> taxonRemarks = locInfo.getTaxonRemarks();
+		assertThat(taxonRemarks.size(), is(1));
+		assertThat(taxonRemarks, hasItems("Hakea obtusa"));
+	}
+	
+	/**
 	 * Can we map all the variables for a trait data record?
 	 */
 	@Test
@@ -337,6 +400,26 @@ public class JenaRetrievalServiceTestSpring {
 	}
 	
 	/**
+	 * Can we get trait data for a record with a taxonRemarks field?
+	 */
+	@Test
+	public void testGetTraitDataJson04() throws Throwable {
+		TraitDataResponse result = objectUnderTest.getTraitDataJson(Arrays.asList("Hakea obtusa"), Collections.emptyList(), 0, 20);
+		ResponseHeader header = result.getResponseHeader();
+		assertThat(header.getPageNumber(), is(1));
+		assertThat(header.getTotalPages(), is(1));
+		assertThat(header.getNumFound(), is(1));
+		List<TraitDataRecord> response = result.getResponse();
+		assertThat(response.size(), is(1));
+		TraitDataRecord record = response.get(0);
+		Collection<TraitOrEnvironmentalVariable> traits = record.getTraits();
+		assertThat(traits.size(), is(2));
+		Iterator<TraitOrEnvironmentalVariable> traitsIterator = traits.iterator();
+		assertThat(traitsIterator.next(), isTraitOrVar("averageHeight", "2", "metres"));
+		assertThat(traitsIterator.next(), isTraitOrVar("cover", "<10% cover", ""));
+	}
+	
+	/**
 	 * Can we get the trait data CSV?
 	 */
 	@Test
@@ -374,6 +457,6 @@ public class JenaRetrievalServiceTestSpring {
 	@Test
 	public void testGetTotalSpeciesRecordsHeld01() throws Throwable {
 		int result = objectUnderTest.getTotalSpeciesRecordsHeld();
-		assertThat(result, is(4));
+		assertThat(result, is(7));
 	}
 }

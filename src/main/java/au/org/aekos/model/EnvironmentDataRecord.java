@@ -2,8 +2,11 @@ package au.org.aekos.model;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class EnvironmentDataRecord {
 
@@ -18,6 +21,8 @@ public class EnvironmentDataRecord {
     private final Collection<TraitOrEnvironmentalVariable> variables = new LinkedList<>();
     private final String bibliographicCitation;
     private final String samplingProtocol;
+    private final Set<String> scientificNames = new HashSet<>();
+	private final Set<String> taxonRemarks = new HashSet<>();
 
     public EnvironmentDataRecord(double decimalLatitude, double decimalLongitude, String geodeticDatum, String locationID,
 			String eventDate, int year, int month, String bibliographicCitation, String samplingProtocol) {
@@ -75,6 +80,22 @@ public class EnvironmentDataRecord {
 	public void addVariable(TraitOrEnvironmentalVariable entry) {
 		variables.add(entry);
 	}
+	
+	public void addScientificNames(Set<String> names) {
+		scientificNames.addAll(names);
+	}
+	
+	public void addTaxonRemarks(Set<String> remarks) {
+		taxonRemarks.addAll(remarks);
+	}
+	
+	public Set<String> getScientificNames() {
+		return Collections.unmodifiableSet(scientificNames);
+	}
+	
+	public Set<String> getTaxonRemarks() {
+		return Collections.unmodifiableSet(taxonRemarks);
+	}
 
 	public String toCsv() {
 		StringBuilder result = new StringBuilder();
@@ -85,6 +106,10 @@ public class EnvironmentDataRecord {
 		result.append(quote(geodeticDatum));
 		result.append(CSV_SEPARATOR);
 		result.append(quote(locationID));
+		result.append(CSV_SEPARATOR);
+		result.append(quote(scientificNames.stream().collect(Collectors.joining("|"))));
+		result.append(CSV_SEPARATOR);
+		result.append(quote(taxonRemarks.stream().collect(Collectors.joining("|"))));
 		result.append(CSV_SEPARATOR);
 		result.append(quote(eventDate));
 		result.append(CSV_SEPARATOR);
@@ -119,6 +144,10 @@ public class EnvironmentDataRecord {
 		result.append(quote("geodeticDatum"));
 		result.append(CSV_SEPARATOR);
 		result.append(quote("locationID"));
+		result.append(CSV_SEPARATOR);
+		result.append(quote("scientificNames"));
+		result.append(CSV_SEPARATOR);
+		result.append(quote("taxonRemarks"));
 		result.append(CSV_SEPARATOR);
 		result.append(quote("eventDate"));
 		result.append(CSV_SEPARATOR);

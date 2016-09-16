@@ -1,4 +1,5 @@
 @prefix api:   <http://www.aekos.org.au/api/1.0#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
 
 <urn:uuid:7e263a89-b013-4e24-ab16-bc9907bc1333>
         a                           api:DarwinCoreRecord ;
@@ -87,3 +88,60 @@ api:7048c362fa3f55171c8f9aa2edba6d43fde8ea30
         api:samplingProtocolEntity  api:7048c362fa3f55171c8f9aa2edba6d43fde8ea30 ;
         api:scientificName          "Rosa canina" ;
         api:year                    2014 .
+
+<urn:uuid:26e08eac-f33a-4598-9223-345a83e3f90b>
+        a                           api:DarwinCoreRecord ;
+        api:decimalLatitude         -33.671367991139874 ;
+        api:decimalLongitude        120.40881133568425 ;
+        api:eventDate               "2007-05-28" ;
+        api:geodeticDatum           "GDA94" ;
+        api:individualCount         1 ;
+        api:locationID              "aekos.org.au/collection/wa.gov.au/ravensthorpe/R002" ;
+        api:month                   05 ;
+        api:samplingProtocol        "aekos.org.au/collection/wa.gov.au/ravensthorpe" ;
+        api:samplingProtocolEntity  api:70f587d434d02e5d95e5c82c86577543ce6077f9 ;
+        api:scientificName          "Dodonaea concinna Benth." ;
+        api:year                    2007 .
+        
+<urn:uuid:26e08eac-f33a-4598-9223-345a3344f000>
+        a                           api:DarwinCoreRecord ;
+        api:decimalLatitude         -33.671367991139874 ;
+        api:decimalLongitude        120.40881133568425 ;
+        api:eventDate               "2007-05-28" ;
+        api:geodeticDatum           "GDA94" ;
+        api:individualCount         1 ;
+        api:locationID              "aekos.org.au/collection/wa.gov.au/ravensthorpe/R002" ;
+        api:month                   05 ;
+        api:samplingProtocol        "aekos.org.au/collection/wa.gov.au/ravensthorpe" ;
+        api:samplingProtocolEntity  api:70f587d434d02e5d95e5c82c86577543ce6077f9 ;
+        api:scientificName          "Lasiopetalum compactum" ;
+        api:year                    2007 .
+        
+<urn:uuid:e56bab82-162a-4b50-97f5-dc2d8a508daf>
+        a                           api:DarwinCoreRecord ;
+        api:decimalLatitude         -33.60974828576365 ;
+        api:decimalLongitude        120.15047758874314 ;
+        api:eventDate               "2007-02-14" ;
+        api:geodeticDatum           "GDA94" ;
+        api:individualCount         1 ;
+        api:locationID              "aekos.org.au/collection/wa.gov.au/ravensthorpe/R002" ;
+        api:month                   02 ;
+        api:samplingProtocol        "aekos.org.au/collection/wa.gov.au/ravensthorpe" ;
+        api:samplingProtocolEntity  api:70f587d434d02e5d95e5c82c86577543ce6077f9 ;
+        api:trait                   <urn:averageHeight:19650974-edd0-4b00-8b9d-9a41aaebee7e> , <urn:cover:42bc27ea-32a0-4ac7-9f8d-c2f0ac2277d5> ;
+        api:taxonRemarks            "Hakea obtusa" ;
+        api:year                    2007 .
+
+api:70f587d434d02e5d95e5c82c86577543ce6077f9
+        api:bibliographicCitation  "Department of Parks and Wildlife (Biogeography Program) (2012). Biological Survey of the Ravensthorpe Range (Phase 1), Version 1/2013. Persistent Hyperlink: http://www.aekos.org.au/collection/wa.gov.au/ravensthorpe. &#198;KOS Data Portal, rights owned by the State of Western Australia (Department of Parks and Wildlife). Accessed [dd mmm yyyy, e.g. 01 Jan 2016]." ;
+        api:samplingProtocol       "aekos.org.au/collection/wa.gov.au/ravensthorpe" .
+        
+<urn:averageHeight:19650974-edd0-4b00-8b9d-9a41aaebee7e>
+        api:name   "averageHeight" ;
+        api:units  "metres" ;
+        api:value  "2"^^xsd:decimal .
+        
+<urn:cover:42bc27ea-32a0-4ac7-9f8d-c2f0ac2277d5>
+        api:name   "cover" ;
+        api:units  "" ;
+        api:value  "<10% cover" .

@@ -19,7 +19,7 @@ public class JenaRetrievalServiceTest {
 		int start = 0;
 		int rows = 20;
 		JenaRetrievalService objectUnderTest = new JenaRetrievalService();
-		objectUnderTest.setDarwinCoreQueryTemplate("SELECT * WHERE {?s ?p ?o . VALUES ?s { " + JenaRetrievalService.SCIENTIFIC_NAME_PLACEHOLDER + " }"
+		objectUnderTest.setDarwinCoreQueryTemplate("SELECT * WHERE {?s ?p ?o . VALUES ?s { " + JenaRetrievalService.SPECIES_NAMES_PLACEHOLDER + " }"
 				+ " OFFSET %OFFSET_PLACEHOLDER% LIMIT %LIMIT_PLACEHOLDER% }");
 		String result = objectUnderTest.getProcessedDarwinCoreSparql(s, start, rows);
 		assertThat(result, is("SELECT * WHERE {?s ?p ?o . VALUES ?s { \"Goodenia havilandii\" }"
@@ -35,7 +35,7 @@ public class JenaRetrievalServiceTest {
 		int start = 5000;
 		int rows = 100;
 		JenaRetrievalService objectUnderTest = new JenaRetrievalService();
-		objectUnderTest.setDarwinCoreQueryTemplate("SELECT * WHERE {?s ?p ?o . VALUES ?s { " + JenaRetrievalService.SCIENTIFIC_NAME_PLACEHOLDER + " }"
+		objectUnderTest.setDarwinCoreQueryTemplate("SELECT * WHERE {?s ?p ?o . VALUES ?s { " + JenaRetrievalService.SPECIES_NAMES_PLACEHOLDER + " }"
 				+ " OFFSET %OFFSET_PLACEHOLDER% LIMIT %LIMIT_PLACEHOLDER% }");
 		String result = objectUnderTest.getProcessedDarwinCoreSparql(s, start, rows);
 		assertThat(result, is("SELECT * WHERE {?s ?p ?o . VALUES ?s { \"Goodenia havilandii\" \"Rosa canina\" }"
@@ -51,7 +51,7 @@ public class JenaRetrievalServiceTest {
 		int start = 0;
 		int rows = 0;
 		JenaRetrievalService objectUnderTest = new JenaRetrievalService();
-		objectUnderTest.setDarwinCoreQueryTemplate("SELECT * WHERE {?s ?p ?o . VALUES ?s { " + JenaRetrievalService.SCIENTIFIC_NAME_PLACEHOLDER + " }"
+		objectUnderTest.setDarwinCoreQueryTemplate("SELECT * WHERE {?s ?p ?o . VALUES ?s { " + JenaRetrievalService.SPECIES_NAMES_PLACEHOLDER + " }"
 				+ " OFFSET %OFFSET_PLACEHOLDER% LIMIT %LIMIT_PLACEHOLDER% }");
 		String result = objectUnderTest.getProcessedDarwinCoreSparql(s, start, rows);
 		assertThat(result, is("SELECT * WHERE {?s ?p ?o . VALUES ?s { \"Rosa canina\" }"

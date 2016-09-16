@@ -162,3 +162,13 @@ api:location-284ab54489db265d8c1ef33d6661b45f925c6d7e
         api:name         "rainfallTotal" ;
         api:units        "millilitres" ;
         api:value        49.8 .
+
+api:location-daea24a05e0aa8487ffd15eef0b2f61aeb5d883c
+        a                     api:location ;
+        api:decimalLatitude   -33.60974828576365 ;
+        api:decimalLongitude  120.15047758874314 ;
+        api:eventDate         "1990-03-30" ;
+        api:geodeticDatum     "GDA94" ;
+        api:locationID        "aekos.org.au/collection/wa.gov.au/ravensthorpe/R002" ;
+        api:month             03 ;
+        api:year              1990 .

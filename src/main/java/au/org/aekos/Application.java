@@ -94,6 +94,11 @@ public class Application extends SpringBootServletInitializer {
     }
     
     @Bean
+    public String darwinCoreCountAllQueryTemplate() throws IOException {
+		return getSparqlQuery("darwin-core-count-all.rq");
+    }
+    
+    @Bean
     public String environmentDataQueryTemplate() throws IOException {
     	return getSparqlQuery("environment-data.rq");
     }

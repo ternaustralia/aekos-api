@@ -37,6 +37,7 @@ import au.org.aekos.model.AbstractParams;
 import au.org.aekos.model.EnvironmentDataParams;
 import au.org.aekos.model.EnvironmentDataRecord;
 import au.org.aekos.model.EnvironmentDataResponse;
+import au.org.aekos.model.LocationInfo;
 import au.org.aekos.model.ResponseHeader;
 import au.org.aekos.model.SpeciesDataParams;
 import au.org.aekos.model.SpeciesDataResponse;
@@ -50,8 +51,9 @@ import au.org.aekos.model.TraitOrEnvironmentalVariable;
 public class JenaRetrievalService implements RetrievalService {
 
 	
+	private static final String SCIENTIFIC_NAME_VAR_NAME = "scientificName";
 	private static final Logger logger = LoggerFactory.getLogger(JenaRetrievalService.class);
-	static final String SCIENTIFIC_NAME_PLACEHOLDER = "%SCIENTIFIC_NAME_PLACEHOLDER%";
+	static final String SPECIES_NAMES_PLACEHOLDER = "%SPECIES_NAMES_PLACEHOLDER%";
 	private static final String OFFSET_PLACEHOLDER = "%OFFSET_PLACEHOLDER%";
 	private static final String LIMIT_PLACEHOLDER = "%LIMIT_PLACEHOLDER%";
 	private static final String LOCATION_ID_PLACEHOLDER = "%LOCATION_ID_PLACEHOLDER%";
@@ -76,6 +78,10 @@ public class JenaRetrievalService implements RetrievalService {
 	@Autowired
 	@Qualifier("darwinCoreCountQueryTemplate")
 	private String darwinCoreCountQueryTemplate;
+	
+	@Autowired
+	@Qualifier("darwinCoreCountAllQueryTemplate")
+	private String darwinCoreCountAllQueryTemplate;
 	
 	@Autowired
 	@Qualifier("environmentDataQueryTemplate")
@@ -201,7 +207,7 @@ public class JenaRetrievalService implements RetrievalService {
 			}
 			for (; results.hasNext();) {
 				QuerySolution s = results.next();
-				String scientificName = getString(s, "scientificName");
+				String scientificName = getString(s, SCIENTIFIC_NAME_VAR_NAME);
 				// env
 				EnvironmentDataRecord envRecord = new EnvironmentDataRecord(0, 0, "", "", "", 0, 0, "", "");
 				processEnvDataVars(Collections.emptyList(), s.get("loc").asResource(), envRecord, NO_UNITS_VARS_PROP);
@@ -273,23 +279,41 @@ public class JenaRetrievalService implements RetrievalService {
 	}
 
 	private SpeciesOccurrenceRecord processSpeciesDataSolution(QuerySolution s) {
+		if (hasScientificName(s)) {
+			return new SpeciesOccurrenceRecord(getDouble(s, "decimalLatitude"),
+				getDouble(s, "decimalLongitude"), getString(s, "geodeticDatum"), replaceSpaces(getString(s, "locationID")),
+				getString(s, SCIENTIFIC_NAME_VAR_NAME), getInt(s, "individualCount"), getString(s, "eventDate"),
+				getInt(s, "year"), getInt(s, "month"), getString(s, "bibliographicCitation"),
+				getString(s, "samplingProtocol"));
+		}
 		return new SpeciesOccurrenceRecord(getDouble(s, "decimalLatitude"),
 			getDouble(s, "decimalLongitude"), getString(s, "geodeticDatum"), replaceSpaces(getString(s, "locationID")),
-			getString(s, "scientificName"), getInt(s, "individualCount"), getString(s, "eventDate"),
+			getInt(s, "individualCount"), getString(s, "eventDate"),
 			getInt(s, "year"), getInt(s, "month"), getString(s, "bibliographicCitation"),
-			getString(s, "samplingProtocol"));
+			getString(s, "samplingProtocol"), getString(s, "taxonRemarks"));
 	}
 	
+	private boolean hasScientificName(QuerySolution s) {
+		return s.contains(SCIENTIFIC_NAME_VAR_NAME);
+	}
+
 	/*
 	 * We can't merge with #processSpeciesDataSolution() because then the JSON response has
 	 * an empty 'traits: []' field.
 	 */
 	private TraitDataRecord processTraitDataSolution(QuerySolution s) {
+		if (hasScientificName(s)) {
+			return new TraitDataRecord(getDouble(s, "decimalLatitude"), getDouble(s, "decimalLongitude"),
+				getString(s, "geodeticDatum"), replaceSpaces(getString(s, "locationID")),
+				getString(s, SCIENTIFIC_NAME_VAR_NAME), getInt(s, "individualCount"), getString(s, "eventDate"),
+				getInt(s, "year"), getInt(s, "month"), getString(s, "bibliographicCitation"),
+				getString(s, "samplingProtocol"));
+		}
 		return new TraitDataRecord(getDouble(s, "decimalLatitude"),
-			getDouble(s, "decimalLongitude"), getString(s, "geodeticDatum"), replaceSpaces(getString(s, "locationID")),
-			getString(s, "scientificName"), getInt(s, "individualCount"), getString(s, "eventDate"),
-			getInt(s, "year"), getInt(s, "month"), getString(s, "bibliographicCitation"),
-			getString(s, "samplingProtocol"));
+				getDouble(s, "decimalLongitude"), getString(s, "geodeticDatum"), replaceSpaces(getString(s, "locationID")),
+				getInt(s, "individualCount"), getString(s, "eventDate"),
+				getInt(s, "year"), getInt(s, "month"), getString(s, "bibliographicCitation"),
+				getString(s, "samplingProtocol"), getString(s, "taxonRemarks"));
 	}
 	
 	private int getTotalNumFoundForSpeciesData(List<String> speciesNames) {
@@ -335,11 +359,14 @@ public class JenaRetrievalService implements RetrievalService {
 
 	private void processEnvDataSolution(List<String> varNames, List<EnvironmentDataRecord> records, Map<String, LocationInfo> locationIds, QuerySolution s) {
 		String locationID = getString(s, "locationID");
+		LocationInfo locationInfo = locationIds.get(locationID);
 		EnvironmentDataRecord record = new EnvironmentDataRecord(getDouble(s, "decimalLatitude"),
 			getDouble(s, "decimalLongitude"), getString(s, "geodeticDatum"), replaceSpaces(locationID),
 			getString(s, "eventDate"), getInt(s, "year"), getInt(s, "month"),
-			locationIds.get(locationID).bibliographicCitation,
-			locationIds.get(locationID).samplingProtocol);
+			locationInfo.getBibliographicCitation(),
+			locationInfo.getSamplingProtocol());
+		record.addScientificNames(locationInfo.getScientificNames());
+		record.addTaxonRemarks(locationInfo.getTaxonRemarks());
 		for (Property currVarProp : Arrays.asList(prop2("disturbanceEvidenceVars"), prop2("landscapeVars"), prop2("noUnitVars"),
 				prop2("rainfallVars"), prop2("soilVars"), prop2("temperatureVars"), prop2("windVars"))) {
 			processEnvDataVars(varNames, s.get("s").asResource(), record, currVarProp);
@@ -380,21 +407,16 @@ public class JenaRetrievalService implements RetrievalService {
 		}
 	}
 
-	private class LocationInfo {
-		private final String samplingProtocol;
-		private final String bibliographicCitation;
-		public LocationInfo(String samplingProtocol, String bibliographicCitation) {
-			this.samplingProtocol = samplingProtocol;
-			this.bibliographicCitation = bibliographicCitation;
-		}
-	}
-	
-	private Map<String, LocationInfo> getLocations(List<String> speciesNames) throws AekosApiRetrievalException {
+	Map<String, LocationInfo> getLocations(List<String> speciesNames) throws AekosApiRetrievalException {
 		Map<String, LocationInfo> result = new HashMap<>();
 		SpeciesDataResponse speciesRecords = getSpeciesDataJsonPrivate(speciesNames, 0, Integer.MAX_VALUE); // FIXME should we page this?
 		for (SpeciesOccurrenceRecord currSpeciesRecord : speciesRecords.getResponse()) {
 			String locationID = currSpeciesRecord.getLocationID();
-			LocationInfo item = new LocationInfo(currSpeciesRecord.getSamplingProtocol(), currSpeciesRecord.getBibliographicCitation());
+			LocationInfo item = result.get(locationID);
+			if (item == null) {
+				item = new LocationInfo(currSpeciesRecord.getSamplingProtocol(), currSpeciesRecord.getBibliographicCitation());
+			}
+			currSpeciesRecord.appendSpeciesNameTo(item);
 			result.put(locationID, item);
 		}
 		return result;
@@ -465,38 +487,42 @@ public class JenaRetrievalService implements RetrievalService {
 	}
 	
 	private String getProcessedTraitDataCountSparql(List<String> speciesNames, List<String> traitNames) {
-		String scientificNameValueList = speciesNames.stream().collect(Collectors.joining("\" \"", "\"", "\""));
+		String speciesNamesValueList = speciesNames.stream().collect(Collectors.joining("\" \"", "\"", "\""));
 		String traitNameValueList = traitNames.stream().collect(Collectors.joining("\" \"", "\"", "\""));;
 		String result = traitDataCountQueryTemplate
-				.replace(SCIENTIFIC_NAME_PLACEHOLDER, scientificNameValueList)
+				.replace(SPECIES_NAMES_PLACEHOLDER, speciesNamesValueList)
 				.replace(TRAIT_NAME_PLACEHOLDER, traitNameValueList);
 		return result;
 	}
 	
 	String getProcessedDarwinCoreSparql(List<String> speciesNames, int offset, int limit) {
-		String result = darwinCoreQueryTemplate
+		String partialResult = darwinCoreQueryTemplate
 				.replace(OFFSET_PLACEHOLDER, String.valueOf(offset))
 				.replace(LIMIT_PLACEHOLDER, String.valueOf(limit == 0 ? Integer.MAX_VALUE : limit));
-		return handleSpeciesAndOnOffSwitchPlaceholders(speciesNames, result);
+		String partialResult2 = handleSpeciesAndOnOffSwitchPlaceholders(speciesNames, partialResult);
+		boolean isRetrievingAll = speciesNames.isEmpty();
+		if (isRetrievingAll) {
+			return partialResult2;
+		}
+		return partialResult2
+			.replace(SWITCH_PLACEHOLDER, "    ");
 	}
 	
 	private String getProcessedDarwinCoreCountSparql(List<String> speciesNames) {
-		String result = darwinCoreCountQueryTemplate;
-		return handleSpeciesAndOnOffSwitchPlaceholders(speciesNames, result);
+		boolean isRetrievingAll = speciesNames.isEmpty();
+		if (isRetrievingAll) {
+			return darwinCoreCountAllQueryTemplate;
+		}
+		return handleSpeciesAndOnOffSwitchPlaceholders(speciesNames, darwinCoreCountQueryTemplate);
 	}
 	
 	private String handleSpeciesAndOnOffSwitchPlaceholders(List<String> speciesNames, String result) {
-		boolean isRetrievingAll = speciesNames.isEmpty();
-		if (isRetrievingAll) {
-			return result;
-		}
-		String scientificNameValueList = speciesNames.stream()
+		String speciesNameValueList = speciesNames.stream()
 				.map(e -> sanitise(e))
 				.collect(Collectors.joining("\" \"", "\"", "\""));
-		result = result
-				.replace(SCIENTIFIC_NAME_PLACEHOLDER, scientificNameValueList)
-				.replace(SWITCH_PLACEHOLDER, "    ");
-		return result;
+		String cleanedResult = result
+				.replace(SPECIES_NAMES_PLACEHOLDER, speciesNameValueList);
+		return cleanedResult;
 	}
 	
 	private String getProcessedEnvDataSparql(Map<String, LocationInfo> locationIds, int offset, int limit) {

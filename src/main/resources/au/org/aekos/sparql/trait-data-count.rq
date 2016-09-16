@@ -4,7 +4,7 @@ SELECT (count(DISTINCT ?s) as ?count)
 WHERE {
   ?s a api:DarwinCoreRecord .
   ?s api:scientificName ?scientificName .
-  VALUES ?scientificName { %SCIENTIFIC_NAME_PLACEHOLDER% } .
+  VALUES ?scientificName { %SPECIES_NAMES_PLACEHOLDER% } .
   ?s api:trait/api:name ?traitName .
   VALUES ?traitName { %TRAIT_NAME_PLACEHOLDER% } .
 }

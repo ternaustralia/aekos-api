@@ -16,7 +16,7 @@ public class TraitDataRecordTest {
 				"Atriplex stipitata", 1, "2012-11-23", 2012, 11, "some citation stuff", "http://aekos.org.au/collection/adelaide.edu.au/Koonamore/Photopoints/pp28A");
 		objectUnderTest.addTraitValue(new TraitOrEnvironmentalVariable("growthForm", "Tree", ""));
 		String result = objectUnderTest.toCsv();
-		assertThat(result, is("-32.1094,139.3506,\"GDA94\",\"aekos.org.au/collection/adelaide.edu.au/Koonamore/Photopoints/pp28A\",\"Atriplex stipitata\",1"
+		assertThat(result, is("-32.1094,139.3506,\"GDA94\",\"aekos.org.au/collection/adelaide.edu.au/Koonamore/Photopoints/pp28A\",\"Atriplex stipitata\",\"\",1"
 				+ ",\"2012-11-23\",2012,11,\"some citation stuff\",\"http://aekos.org.au/collection/adelaide.edu.au/Koonamore/Photopoints/pp28A\""
 				+ ",\"growthForm\",\"Tree\",\"\""));
 	}
@@ -31,7 +31,7 @@ public class TraitDataRecordTest {
 		objectUnderTest.addTraitValue(new TraitOrEnvironmentalVariable("growthForm", "Tree", ""));
 		objectUnderTest.addTraitValue(new TraitOrEnvironmentalVariable("growthForm", "Shrub", ""));
 		String result = objectUnderTest.toCsv();
-		assertThat(result, is("-32.1094,139.3506,\"GDA94\",\"aekos.org.au/collection/adelaide.edu.au/Koonamore/Photopoints/pp28A\",\"Atriplex stipitata\",1"
+		assertThat(result, is("-32.1094,139.3506,\"GDA94\",\"aekos.org.au/collection/adelaide.edu.au/Koonamore/Photopoints/pp28A\",\"Atriplex stipitata\",\"\",1"
 				+ ",\"2012-11-23\",2012,11,\"some citation stuff\",\"http://aekos.org.au/collection/adelaide.edu.au/Koonamore/Photopoints/pp28A\""
 				+ ",\"growthForm\",\"Tree\",\"\",\"growthForm\",\"Shrub\",\"\""));
 	}

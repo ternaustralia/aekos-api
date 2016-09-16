@@ -15,6 +15,13 @@ public class TraitDataRecord extends SpeciesOccurrenceRecord {
 		super(decimalLatitude, decimalLongitude, geodeticDatum, locationID, scientificName, individualCount, eventDate,
 				year, month, bibliographicCitation, samplingProtocol);
 	}
+	
+	public TraitDataRecord(double decimalLatitude, double decimalLongitude, String geodeticDatum, String locationID,
+			int individualCount, String eventDate, int year, int month,
+			String bibliographicCitation, String samplingProtocol, String taxonRemarks) {
+		super(decimalLatitude, decimalLongitude, geodeticDatum, locationID, individualCount, eventDate,
+				year, month, bibliographicCitation, samplingProtocol, taxonRemarks);
+	}
 
 	public Collection<TraitOrEnvironmentalVariable> getTraits() {
 		return Collections.unmodifiableCollection(traits);
