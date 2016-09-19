@@ -13,3 +13,9 @@ or find a trait with <code>getTraitVocab</code>. Then, for traits, find the spec
 <p>Now you can retrieve the data. You can get Darwin Core species records (using species names), Darwin Core + traits
 (using species names and optionally filtering by trait names) or environmental variable records (using species names and
 optionally filtering by environmental variable names).</p>
+<h3>A note about species names</h3>
+<p>We have used Darwin Core terms (version 2015-06-02) as field names for the result of the data retrieval resources. There are two fields
+that are relevant to species names: <code>scientificName</code> and <code>taxonRemarks</code>. The former is, as the name
+suggests, for scientific species names and the latter is for records that have a common species name or a commentary
+about the organism e.g.: "Grass", "Absent" or "Clover". See <a href="http://rs.tdwg.org/dwc/terms/index.htm#scientificName">http://rs.tdwg.org/dwc/terms/index.htm#scientificName</a>
+and <a href="http://rs.tdwg.org/dwc/terms/index.htm#taxonRemarks">http://rs.tdwg.org/dwc/terms/index.htm#taxonRemarks</a> for more information.</p>

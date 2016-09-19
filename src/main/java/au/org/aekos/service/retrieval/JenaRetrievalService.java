@@ -1,5 +1,6 @@
 package au.org.aekos.service.retrieval;
 
+import static au.org.aekos.util.FieldNames.*;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Arrays;
@@ -50,8 +51,6 @@ import au.org.aekos.model.TraitOrEnvironmentalVariable;
 @Service
 public class JenaRetrievalService implements RetrievalService {
 
-	
-	private static final String SCIENTIFIC_NAME_VAR_NAME = "scientificName";
 	private static final Logger logger = LoggerFactory.getLogger(JenaRetrievalService.class);
 	static final String SPECIES_NAMES_PLACEHOLDER = "%SPECIES_NAMES_PLACEHOLDER%";
 	private static final String OFFSET_PLACEHOLDER = "%OFFSET_PLACEHOLDER%";
@@ -61,11 +60,11 @@ public class JenaRetrievalService implements RetrievalService {
 	private static final String ENV_VAR_PLACEHOLDER = "%ENV_VAR_PLACEHOLDER%";
 	private static final String SWITCH_PLACEHOLDER = "#OFF";
 	private static final List<String> ALL_SPECIES = Collections.emptyList();
-	private static final Property NAME_PROP = prop2("name");
-	private static final Property UNITS_PROP = prop2("units");
-	private static final Property VALUE_PROP = prop2("value");
-	private static final Property TRAIT_PROP = prop2("trait");
-	private static final Property NO_UNITS_VARS_PROP = prop2("noUnitsVars");
+	private static final Property NAME_PROP = prop("name");
+	private static final Property UNITS_PROP = prop("units");
+	private static final Property VALUE_PROP = prop("value");
+	private static final Property TRAIT_PROP = prop("trait");
+	private static final Property NO_UNITS_VARS_PROP = prop("noUnitsVars");
 	
 	@Autowired
 	@Qualifier("coreDS")
@@ -207,7 +206,7 @@ public class JenaRetrievalService implements RetrievalService {
 			}
 			for (; results.hasNext();) {
 				QuerySolution s = results.next();
-				String scientificName = getString(s, SCIENTIFIC_NAME_VAR_NAME);
+				String scientificName = getString(s, SCIENTIFIC_NAME);
 				// env
 				EnvironmentDataRecord envRecord = new EnvironmentDataRecord(0, 0, "", "", "", 0, 0, "", "");
 				processEnvDataVars(Collections.emptyList(), s.get("loc").asResource(), envRecord, NO_UNITS_VARS_PROP);
@@ -280,21 +279,21 @@ public class JenaRetrievalService implements RetrievalService {
 
 	private SpeciesOccurrenceRecord processSpeciesDataSolution(QuerySolution s) {
 		if (hasScientificName(s)) {
-			return new SpeciesOccurrenceRecord(getDouble(s, "decimalLatitude"),
-				getDouble(s, "decimalLongitude"), getString(s, "geodeticDatum"), replaceSpaces(getString(s, "locationID")),
-				getString(s, SCIENTIFIC_NAME_VAR_NAME), getInt(s, "individualCount"), getString(s, "eventDate"),
-				getInt(s, "year"), getInt(s, "month"), getString(s, "bibliographicCitation"),
-				getString(s, "samplingProtocol"));
+			return new SpeciesOccurrenceRecord(getDouble(s, DECIMAL_LATITUDE),
+				getDouble(s, DECIMAL_LONGITUDE), getString(s, GEODETIC_DATUM), replaceSpaces(getString(s, LOCATION_ID)),
+				getString(s, SCIENTIFIC_NAME), getInt(s, INDIVIDUAL_COUNT), getString(s, EVENT_DATE),
+				getInt(s, YEAR), getInt(s, MONTH), getString(s, BIBLIOGRAPHIC_CITATION),
+				getString(s, SAMPLING_PROTOCOL));
 		}
-		return new SpeciesOccurrenceRecord(getDouble(s, "decimalLatitude"),
-			getDouble(s, "decimalLongitude"), getString(s, "geodeticDatum"), replaceSpaces(getString(s, "locationID")),
-			getInt(s, "individualCount"), getString(s, "eventDate"),
-			getInt(s, "year"), getInt(s, "month"), getString(s, "bibliographicCitation"),
-			getString(s, "samplingProtocol"), getString(s, "taxonRemarks"));
+		return new SpeciesOccurrenceRecord(getDouble(s, DECIMAL_LATITUDE),
+			getDouble(s, DECIMAL_LONGITUDE), getString(s, GEODETIC_DATUM), replaceSpaces(getString(s, LOCATION_ID)),
+			getInt(s, INDIVIDUAL_COUNT), getString(s, EVENT_DATE),
+			getInt(s, YEAR), getInt(s, MONTH), getString(s, BIBLIOGRAPHIC_CITATION),
+			getString(s, SAMPLING_PROTOCOL), getString(s, TAXON_REMARKS));
 	}
 	
 	private boolean hasScientificName(QuerySolution s) {
-		return s.contains(SCIENTIFIC_NAME_VAR_NAME);
+		return s.contains(SCIENTIFIC_NAME);
 	}
 
 	/*
@@ -303,17 +302,17 @@ public class JenaRetrievalService implements RetrievalService {
 	 */
 	private TraitDataRecord processTraitDataSolution(QuerySolution s) {
 		if (hasScientificName(s)) {
-			return new TraitDataRecord(getDouble(s, "decimalLatitude"), getDouble(s, "decimalLongitude"),
-				getString(s, "geodeticDatum"), replaceSpaces(getString(s, "locationID")),
-				getString(s, SCIENTIFIC_NAME_VAR_NAME), getInt(s, "individualCount"), getString(s, "eventDate"),
-				getInt(s, "year"), getInt(s, "month"), getString(s, "bibliographicCitation"),
-				getString(s, "samplingProtocol"));
+			return new TraitDataRecord(getDouble(s, DECIMAL_LATITUDE), getDouble(s, DECIMAL_LONGITUDE),
+				getString(s, GEODETIC_DATUM), replaceSpaces(getString(s, LOCATION_ID)),
+				getString(s, SCIENTIFIC_NAME), getInt(s, INDIVIDUAL_COUNT), getString(s, EVENT_DATE),
+				getInt(s, YEAR), getInt(s, MONTH), getString(s, BIBLIOGRAPHIC_CITATION),
+				getString(s, SAMPLING_PROTOCOL));
 		}
-		return new TraitDataRecord(getDouble(s, "decimalLatitude"),
-				getDouble(s, "decimalLongitude"), getString(s, "geodeticDatum"), replaceSpaces(getString(s, "locationID")),
-				getInt(s, "individualCount"), getString(s, "eventDate"),
-				getInt(s, "year"), getInt(s, "month"), getString(s, "bibliographicCitation"),
-				getString(s, "samplingProtocol"), getString(s, "taxonRemarks"));
+		return new TraitDataRecord(getDouble(s, DECIMAL_LATITUDE),
+				getDouble(s, DECIMAL_LONGITUDE), getString(s, GEODETIC_DATUM), replaceSpaces(getString(s, LOCATION_ID)),
+				getInt(s, INDIVIDUAL_COUNT), getString(s, EVENT_DATE),
+				getInt(s, YEAR), getInt(s, MONTH), getString(s, BIBLIOGRAPHIC_CITATION),
+				getString(s, SAMPLING_PROTOCOL), getString(s, TAXON_REMARKS));
 	}
 	
 	private int getTotalNumFoundForSpeciesData(List<String> speciesNames) {
@@ -358,17 +357,17 @@ public class JenaRetrievalService implements RetrievalService {
 	}
 
 	private void processEnvDataSolution(List<String> varNames, List<EnvironmentDataRecord> records, Map<String, LocationInfo> locationIds, QuerySolution s) {
-		String locationID = getString(s, "locationID");
+		String locationID = getString(s, LOCATION_ID);
 		LocationInfo locationInfo = locationIds.get(locationID);
-		EnvironmentDataRecord record = new EnvironmentDataRecord(getDouble(s, "decimalLatitude"),
-			getDouble(s, "decimalLongitude"), getString(s, "geodeticDatum"), replaceSpaces(locationID),
-			getString(s, "eventDate"), getInt(s, "year"), getInt(s, "month"),
+		EnvironmentDataRecord record = new EnvironmentDataRecord(getDouble(s, DECIMAL_LATITUDE),
+			getDouble(s, DECIMAL_LONGITUDE), getString(s, GEODETIC_DATUM), replaceSpaces(locationID),
+			getString(s, EVENT_DATE), getInt(s, YEAR), getInt(s, MONTH),
 			locationInfo.getBibliographicCitation(),
 			locationInfo.getSamplingProtocol());
 		record.addScientificNames(locationInfo.getScientificNames());
 		record.addTaxonRemarks(locationInfo.getTaxonRemarks());
-		for (Property currVarProp : Arrays.asList(prop2("disturbanceEvidenceVars"), prop2("landscapeVars"), prop2("noUnitVars"),
-				prop2("rainfallVars"), prop2("soilVars"), prop2("temperatureVars"), prop2("windVars"))) {
+		for (Property currVarProp : Arrays.asList(prop(DISTURBANCE_EVIDENCE_VARS), prop(LANDSCAPE_VARS), prop(NO_UNIT_VARS),
+				prop(RAINFALL_VARS), prop(SOIL_VARS), prop(TEMPERATURE_VARS), prop(WIND_VARS))) {
 			processEnvDataVars(varNames, s.get("s").asResource(), record, currVarProp);
 		}
 		boolean isEnvVarFilterEnabled = varNames.size() > 0;
@@ -549,7 +548,7 @@ public class JenaRetrievalService implements RetrievalService {
 		return processedSparql;
 	}
 
-	private static Property prop2(String localPropName) {
+	private static Property prop(String localPropName) {
 		String namespace = Application.API_DATA_NAMESPACE;
 		return ModelFactory.createDefaultModel().createProperty(namespace + localPropName);
 	}
@@ -571,12 +570,15 @@ public class JenaRetrievalService implements RetrievalService {
 	}
 
 	static String replaceSpaces(String locationID) {
-		return locationID.replace(" ", "%20");
+		String urlEscapedSpaceCharacter = "%20";
+		return locationID.replace(" ", urlEscapedSpaceCharacter);
 	}
 
 	static String sanitise(String sparqlParam) {
+		String sparqlEscapedBackslash = "\\\\";
+		String sparqlEscapedDoubleQuote = "\\\"";
 		return sparqlParam
-				.replace("\\", "\\\\")
-				.replace("\"", "\\\"");
+				.replace("\\", sparqlEscapedBackslash)
+				.replace("\"", sparqlEscapedDoubleQuote);
 	}
 }
