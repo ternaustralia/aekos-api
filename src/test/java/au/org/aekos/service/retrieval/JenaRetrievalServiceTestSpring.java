@@ -134,7 +134,7 @@ public class JenaRetrievalServiceTestSpring {
 		if(SystemUtils.IS_OS_WINDOWS){
 			compareStr = testGetSpeciesDataCsv01_expected.replaceAll("\r", "");
 		}
-		assertThat(writer.toString(), is(compareStr));
+		assertEquals(compareStr, writer.toString());
 	}
 
 	/**
@@ -148,7 +148,7 @@ public class JenaRetrievalServiceTestSpring {
 		if(SystemUtils.IS_OS_WINDOWS){
 			compareStr = testGetSpeciesDataCsv02_expected.replaceAll("\r", "");
 		}
-		assertThat(writer.toString(), is(compareStr));
+		assertEquals(compareStr, writer.toString());
 	}
 
 	/**
@@ -163,7 +163,7 @@ public class JenaRetrievalServiceTestSpring {
 		if(SystemUtils.IS_OS_WINDOWS){
 			compareStr = testGetSpeciesDataCsv03_expected.replaceAll("\r", "");
 		}
-		assertThat(writer.toString(), is(compareStr));
+		assertEquals(compareStr, writer.toString());
 	}
 	
 	/**

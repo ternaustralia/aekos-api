@@ -3,11 +3,11 @@
 
 api:location-db06dcd590c3097320c84ab7b16fa9feb95a80d0
         a       <http://www.aekos.org.au/api/1.0#location> ;
-        api:decimalLatitude         "6289421"^^xsd:decimal ;
-        api:decimalLongitude        "225657"^^xsd:decimal ;
+        api:decimalLatitude         120.2940736736989 ;
+        api:decimalLongitude        -33.68953500855846 ;
         api:disturbanceEvidenceVars <urn:disturbanceEvidenceCover:8239e171-b1f4-4d13-ac46-617119d43aaa> ;
         api:eventDate               "2016-01-12" ;
-        api:geodeticDatum           "Universal Transverse Mercator GDA94" ;
+        api:geodeticDatum           "GDA94" ;
         api:landscapeVars           <urn:aspect:162903b9-f113-4264-b379-88bd2cfc8551> , <urn:slope:1ba9eea4-668c-443d-a450-3602073875d6> ;
         api:locationID              "aekos.org.au/collection/adelaide.edu.au/trend/SATFLB0026" ;
         api:month                   01 ;
