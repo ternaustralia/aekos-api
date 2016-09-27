@@ -2,7 +2,7 @@
 @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
 
 api:location-db06dcd590c3097320c84ab7b16fa9feb95a80d0
-        a       <http://www.aekos.org.au/api/1.0#location> ;
+        a                           api:LocationVisit ;
         api:decimalLatitude         120.2940736736989 ;
         api:decimalLongitude        -33.68953500855846 ;
         api:disturbanceEvidenceVars <urn:disturbanceEvidenceCover:8239e171-b1f4-4d13-ac46-617119d43aaa> ;
@@ -117,7 +117,7 @@ api:location-db06dcd590c3097320c84ab7b16fa9feb95a80d0
         api:value        50 .
         
 api:location-284ab54489db265d8c1ef33d6661b45f925c6d7e
-        a       <http://www.aekos.org.au/api/1.0#location> ;
+        a                     api:LocationVisit ;
         api:decimalLatitude   -23.5318398476576 ;
         api:decimalLongitude  138.321378247854 ;
         api:eventDate         "1990-03-30" ;
@@ -164,7 +164,7 @@ api:location-284ab54489db265d8c1ef33d6661b45f925c6d7e
         api:value        49.8 .
 
 api:location-daea24a05e0aa8487ffd15eef0b2f61aeb5d883c
-        a                     api:location ;
+        a                     api:LocationVisit ;
         api:decimalLatitude   -33.60974828576365 ;
         api:decimalLongitude  120.15047758874314 ;
         api:eventDate         "1990-03-30" ;

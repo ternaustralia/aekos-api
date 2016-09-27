@@ -5,6 +5,6 @@ WHERE {
   ?dwr a api:DarwinCoreRecord .
   ?dwr api:scientificName ?scientificName .
   ?dwr api:locationID ?locationID .
-  ?loc a api:location .
+  ?loc a api:LocationVisit .
   ?loc api:locationID ?locationID .
 }

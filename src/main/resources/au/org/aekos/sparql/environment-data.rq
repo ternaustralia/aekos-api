@@ -2,7 +2,7 @@ PREFIX api: <http://www.aekos.org.au/api/1.0#>
 
 SELECT *
 WHERE {
-  ?s a api:location .
+  ?s a api:LocationVisit .
   ?s api:decimalLatitude ?decimalLatitude .
   ?s api:decimalLongitude ?decimalLongitude .
   ?s api:geodeticDatum ?geodeticDatum .
