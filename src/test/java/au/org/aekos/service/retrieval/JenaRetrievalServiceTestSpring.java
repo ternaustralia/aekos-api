@@ -219,15 +219,7 @@ public class JenaRetrievalServiceTestSpring {
 				+ "Accessed [dd mmm yyyy, e.g. 01 Jan 2016]."));
 		assertThat(record.getSamplingProtocol(), is("aekos.org.au/collection/adelaide.edu.au/trend"));
 		Collection<TraitOrEnvironmentalVariable> vars = record.getVariables();
-		assertThat(vars.size(), is(7));
-		Iterator<TraitOrEnvironmentalVariable> varsIterator = vars.iterator();
-		assertThat(varsIterator.next(), isTraitOrVar("rainfallTotal", "0.4", "millilitres"));
-		assertThat(varsIterator.next(), isTraitOrVar("rainfallTotal", "49.8", "millilitres"));
-		assertThat(varsIterator.next(), isTraitOrVar("rainfallMean", "0.013333333", "millilitres"));
-		assertThat(varsIterator.next(), isTraitOrVar("rainfallMean", "1.606451613", "millilitres"));
-		assertThat(varsIterator.next(), isTraitOrVar("temperatureMean", "28.12631579", "degrees Celcius"));
-		assertThat(varsIterator.next(), isTraitOrVar("temperatureMaximum", "38.03157895", "degrees Celcius"));
-		assertThat(varsIterator.next(), isTraitOrVar("temperatureMinimum", "16.86315789", "degrees Celcius"));
+		assertThat(vars.size(), is(0));
 	}
 	
 	/**
@@ -243,6 +235,7 @@ public class JenaRetrievalServiceTestSpring {
 	/**
 	 * Can we get all the environmental data variables that aren't already tested?
 	 */
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testGetEnvironmentalDataJson03() throws Throwable {
 		EnvironmentDataResponse result = objectUnderTest.getEnvironmentalDataJson(Arrays.asList("Rosa canina"), Collections.emptyList(), 0, 20);
@@ -251,28 +244,26 @@ public class JenaRetrievalServiceTestSpring {
 		EnvironmentDataRecord record = response.get(0);
 		assertThat(record.getLocationID(), is("aekos.org.au/collection/adelaide.edu.au/trend/SATFLB0026"));
 		Collection<TraitOrEnvironmentalVariable> vars = record.getVariables();
-		assertThat(vars.size(), is(20));
-		Iterator<TraitOrEnvironmentalVariable> varsIterator = vars.iterator();
-		assertThat(varsIterator.next(), isTraitOrVar("disturbanceEvidenceCover", "50", "percent"));
-		assertThat(varsIterator.next(), isTraitOrVar("slope", "10", "degrees"));
-		assertThat(varsIterator.next(), isTraitOrVar("aspect", "230", "degrees"));
-		assertThat(varsIterator.next(), isTraitOrVar("erosionEvidenceType", "No evidence", ""));
-		assertThat(varsIterator.next(), isTraitOrVar("surfaceType", "Flat", ""));
-		assertThat(varsIterator.next(), isTraitOrVar("erosionEvidenceState", "Good", ""));
-		assertThat(varsIterator.next(), isTraitOrVar("visibleFireEvidence", "No evidence", ""));
-		assertThat(varsIterator.next(), isTraitOrVar("soilTexture", "Coarse", ""));
-		assertThat(varsIterator.next(), isTraitOrVar("soilType", "Clay", ""));
-		assertThat(varsIterator.next(), isTraitOrVar("disturbanceEvidenceType", "No effective disturbance", ""));
-		assertThat(varsIterator.next(), isTraitOrVar("latestLandUse", "Farming", ""));
-		assertThat(varsIterator.next(), isTraitOrVar("ph", "5.4", "pH"));
-		assertThat(varsIterator.next(), isTraitOrVar("silt", "A lot", "siltiness"));
-		assertThat(varsIterator.next(), isTraitOrVar("clay", "Very", "dunno"));
-		assertThat(varsIterator.next(), isTraitOrVar("sand", "it's everywhere", "sandiness"));
-		assertThat(varsIterator.next(), isTraitOrVar("totalOrganicCarbon", "1.34", "percent"));
-		assertThat(varsIterator.next(), isTraitOrVar("electricalConductivity", "4", "millisiemens per metre"));
-		assertThat(varsIterator.next(), isTraitOrVar("windMeanAverageDirection", "270", "degrees"));
-		assertThat(varsIterator.next(), isTraitOrVar("windMeanAverage", "13", "km/h"));
-		assertThat(varsIterator.next(), isTraitOrVar("windMaximumMean", "30", "km/h"));
+		assertThat(vars.size(), is(17));
+		assertThat(vars, hasItems(
+			isTraitOrVar("disturbanceEvidenceCover", "50", "percent"),
+			isTraitOrVar("slope", "10", "degrees"),
+			isTraitOrVar("aspect", "230", "degrees"),
+			isTraitOrVar("erosionEvidenceType", "No evidence", ""),
+			isTraitOrVar("surfaceType", "Flat", ""),
+			isTraitOrVar("erosionEvidenceState", "Good", ""),
+			isTraitOrVar("visibleFireEvidence", "No evidence", ""),
+			isTraitOrVar("soilTexture", "Coarse", ""),
+			isTraitOrVar("soilType", "Clay", ""),
+			isTraitOrVar("disturbanceEvidenceType", "No effective disturbance", ""),
+			isTraitOrVar("latestLandUse", "Farming", ""),
+			isTraitOrVar("ph", "5.4", "pH"),
+			isTraitOrVar("silt", "A lot", "siltiness"),
+			isTraitOrVar("clay", "Very", "dunno"),
+			isTraitOrVar("sand", "it's everywhere", "sandiness"),
+			isTraitOrVar("totalOrganicCarbon", "1.34", "percent"),
+			isTraitOrVar("electricalConductivity", "4", "millisiemens per metre")
+		));
 	}
 	
 	/**

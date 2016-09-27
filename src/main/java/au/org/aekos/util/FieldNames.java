@@ -17,11 +17,8 @@ public class FieldNames {
 	
 	public static final String DISTURBANCE_EVIDENCE_VARS = "disturbanceEvidenceVars";
 	public static final String LANDSCAPE_VARS = "landscapeVars";
-	public static final String NO_UNIT_VARS = "noUnitVars";
-	public static final String RAINFALL_VARS = "rainfallVars";
+	public static final String NO_UNITS_VARS = "noUnitsVars";
 	public static final String SOIL_VARS = "soilVars";
-	public static final String TEMPERATURE_VARS = "temperatureVars";
-	public static final String WIND_VARS = "windVars";
 	
 	private FieldNames() {}
 }

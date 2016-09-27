@@ -11,9 +11,8 @@ api:location-db06dcd590c3097320c84ab7b16fa9feb95a80d0
         api:landscapeVars           <urn:aspect:162903b9-f113-4264-b379-88bd2cfc8551> , <urn:slope:1ba9eea4-668c-443d-a450-3602073875d6> ;
         api:locationID              "aekos.org.au/collection/adelaide.edu.au/trend/SATFLB0026" ;
         api:month                   01 ;
-        api:noUnitVars              <urn:latestLandUse:8239e171-b1f4-4d13-ac46-617119d43aaa>, <urn:visibleFireEvidence:8239e171-b1f4-4d13-ac46-617119d43bbb>, <urn:soilType:8239e171-b1f4-4d13-ac46-617119d43ccc>, <urn:soilTexture:8239e171-b1f4-4d13-ac46-617119d43ddd>, <urn:surfaceType:8239e171-b1f4-4d13-ac46-617119d43eee>, <urn:disturbanceEvidenceType:8239e171-b1f4-4d13-ac46-617119d43fff>, <urn:erosionEvidenceType:8239e171-b1f4-4d13-ac46-617119d43ggg>, <urn:erosionEvidenceState:8239e171-b1f4-4d13-ac46-617119d43hhh> ;
+        api:noUnitsVars              <urn:latestLandUse:8239e171-b1f4-4d13-ac46-617119d43aaa>, <urn:visibleFireEvidence:8239e171-b1f4-4d13-ac46-617119d43bbb>, <urn:soilType:8239e171-b1f4-4d13-ac46-617119d43ccc>, <urn:soilTexture:8239e171-b1f4-4d13-ac46-617119d43ddd>, <urn:surfaceType:8239e171-b1f4-4d13-ac46-617119d43eee>, <urn:disturbanceEvidenceType:8239e171-b1f4-4d13-ac46-617119d43fff>, <urn:erosionEvidenceType:8239e171-b1f4-4d13-ac46-617119d43ggg>, <urn:erosionEvidenceState:8239e171-b1f4-4d13-ac46-617119d43hhh> ;
         api:soilVars                <urn:electricalConductivity:8239e171-b1f4-4d13-ac46-617119d43aaa>, <urn:totalOrganicCarbon:8239e171-b1f4-4d13-ac46-617119d43bbb>, <urn:clay:8239e171-b1f4-4d13-ac46-617119d43ccc>, <urn:ph:8239e171-b1f4-4d13-ac46-617119d43ddd>, <urn:silt:8239e171-b1f4-4d13-ac46-617119d43eee>, <urn:sand:8239e171-b1f4-4d13-ac46-617119d43fff> ;
-        api:windVars                <urn:windMaximumMean:1ba9eea4-668c-443d-a450-360207387aaa>, <urn:windMeanAverage:1ba9eea4-668c-443d-a450-360207387aab>, <urn:windMeanAverageDirection:1ba9eea4-668c-443d-a450-360207387aac> ;
         api:year                    2016 .
 
 <urn:aspect:162903b9-f113-4264-b379-88bd2cfc8551>
@@ -26,21 +25,6 @@ api:location-db06dcd590c3097320c84ab7b16fa9feb95a80d0
         api:units        "degrees" ;
         api:value        "10"^^xsd:decimal .
         
-<urn:windMaximumMean:1ba9eea4-668c-443d-a450-360207387aaa>
-        api:name         "windMaximumMean" ;
-        api:units        "km/h" ;
-        api:value        "30"^^xsd:decimal .
-        
-<urn:windMeanAverage:1ba9eea4-668c-443d-a450-360207387aab>
-        api:name         "windMeanAverage" ;
-        api:units        "km/h" ;
-        api:value        "13"^^xsd:decimal .
-        
-<urn:windMeanAverageDirection:1ba9eea4-668c-443d-a450-360207387aac>
-        api:name         "windMeanAverageDirection" ;
-        api:units        "degrees" ;
-        api:value        "270"^^xsd:decimal .
-
 <urn:latestLandUse:8239e171-b1f4-4d13-ac46-617119d43aaa>
         api:name         "latestLandUse" ;
         api:units        "" ;
@@ -124,51 +108,42 @@ api:location-284ab54489db265d8c1ef33d6661b45f925c6d7e
         api:geodeticDatum     "GDA94" ;
         api:locationID        "aekos.org.au/collection/adelaide.edu.au/trend/SATFLB0025" ;
         api:month             03 ;
-        api:rainfallVars      <urn:rainfallMean:162cae90-6f8b-4e47-869d-44019ae2c1be>, <urn:rainfallTotal:162cae90-6f8b-4e47-869d-44019ae2cddd>, <urn:rainfallMean:162cae90-6f8b-4e47-869d-44019ae2cccc>, <urn:rainfallTotal:162cae90-6f8b-4e47-869d-44019ae2ccee> ;
-        api:temperatureVars   <urn:temperatureMaximum:c1fac121-e206-467c-afe2-4f4310102ce4>, <urn:temperatureMean:c1fac121-e206-467c-afe2-4f4310102cff>, <urn:temperatureMinimum:c1fac121-e206-467c-afe2-4f4310102c33> ;
         api:year              1990 .
         
-<urn:temperatureMaximum:c1fac121-e206-467c-afe2-4f4310102ce4>
-		api:name         "temperatureMaximum" ;
-        api:units        "degrees Celcius" ;
-        api:value        38.03157895 .
-        
-<urn:temperatureMean:c1fac121-e206-467c-afe2-4f4310102cff>
-		api:name         "temperatureMean" ;
-        api:units        "degrees Celcius" ;
-        api:value        28.12631579 .
-        
-<urn:temperatureMinimum:c1fac121-e206-467c-afe2-4f4310102c33>
-		api:name         "temperatureMinimum" ;
-        api:units        "degrees Celcius" ;
-        api:value        16.86315789 .
-
-<urn:rainfallMean:162cae90-6f8b-4e47-869d-44019ae2cccc>
-        api:name         "rainfallMean" ;
-        api:units        "millilitres" ;
-        api:value        0.013333333 .
-        
-<urn:rainfallTotal:162cae90-6f8b-4e47-869d-44019ae2ccee>
-        api:name         "rainfallTotal" ;
-        api:units        "millilitres" ;
-        api:value        0.4 .
-        
-<urn:rainfallMean:162cae90-6f8b-4e47-869d-44019ae2c1be>
-        api:name         "rainfallMean" ;
-        api:units        "millilitres" ;
-        api:value        1.606451613 .
-
-<urn:rainfallTotal:162cae90-6f8b-4e47-869d-44019ae2cddd>
-        api:name         "rainfallTotal" ;
-        api:units        "millilitres" ;
-        api:value        49.8 .
-
 api:location-daea24a05e0aa8487ffd15eef0b2f61aeb5d883c
         a                     api:LocationVisit ;
         api:decimalLatitude   -33.60974828576365 ;
         api:decimalLongitude  120.15047758874314 ;
         api:eventDate         "1990-03-30" ;
         api:geodeticDatum     "GDA94" ;
+        api:landscapeVars     <urn:aspect:73b72f96-df34-4a23-a74a-bd2edbac9ca7> , <urn:slope:02399d04-9739-4a38-b5b0-b5d791b87f03> ;
         api:locationID        "aekos.org.au/collection/wa.gov.au/ravensthorpe/R002" ;
         api:month             03 ;
+        api:noUnitsVars       <urn:surfaceType:fb3f04d4-4785-4ed3-9605-1860ceba8a04> , <urn:disturbanceType:9b38a6a6-5fa4-417a-be2e-fb1575cdc521> ;
+        api:soilVars          <urn:electricalConductivity:078640eb-48b8-483f-8d3c-654357a8a36c> ;
         api:year              1990 .
+
+<urn:electricalConductivity:078640eb-48b8-483f-8d3c-654357a8a36c>
+        api:name   "electricalConductivity" ;
+        api:units  "millisiemens per metre" ;
+        api:value  "40"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+<urn:aspect:73b72f96-df34-4a23-a74a-bd2edbac9ca7>
+        api:name   "aspect" ;
+        api:units  "degrees" ;
+        api:value  "215"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+<urn:surfaceType:fb3f04d4-4785-4ed3-9605-1860ceba8a04>
+        api:name   "surfaceType" ;
+        api:units  "" ;
+        api:value  "Soft" .
+
+<urn:slope:02399d04-9739-4a38-b5b0-b5d791b87f03>
+        api:name   "slope" ;
+        api:units  "degrees" ;
+        api:value  "4"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+<urn:disturbanceType:9b38a6a6-5fa4-417a-be2e-fb1575cdc521>
+        api:name   "disturbanceType" ;
+        api:units  "" ;
+        api:value  "No effective disturbance" .

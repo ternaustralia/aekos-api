@@ -366,8 +366,7 @@ public class JenaRetrievalService implements RetrievalService {
 			locationInfo.getSamplingProtocol());
 		record.addScientificNames(locationInfo.getScientificNames());
 		record.addTaxonRemarks(locationInfo.getTaxonRemarks());
-		for (Property currVarProp : Arrays.asList(prop(DISTURBANCE_EVIDENCE_VARS), prop(LANDSCAPE_VARS), prop(NO_UNIT_VARS),
-				prop(RAINFALL_VARS), prop(SOIL_VARS), prop(TEMPERATURE_VARS), prop(WIND_VARS))) {
+		for (Property currVarProp : Arrays.asList(prop(DISTURBANCE_EVIDENCE_VARS), prop(LANDSCAPE_VARS), prop(NO_UNITS_VARS), prop(SOIL_VARS))) {
 			processEnvDataVars(varNames, s.get("s").asResource(), record, currVarProp);
 		}
 		boolean isEnvVarFilterEnabled = varNames.size() > 0;
