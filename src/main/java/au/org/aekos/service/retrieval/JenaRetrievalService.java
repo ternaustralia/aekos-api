@@ -270,9 +270,26 @@ public class JenaRetrievalService implements RetrievalService {
 	}
 	
 	private SpeciesDataResponse getSpeciesDataJsonPrivate(List<String> speciesNames, int start, int rows) {
-		// FIXME make species names case insensitive (try binding an LCASE(?scientificName) and using that
 		long startTime = new Date().getTime();
 		List<SpeciesOccurrenceRecord> records = new LinkedList<>();
+		doDarwinCoreResultStream(speciesNames, start, rows, new DarwinCoreResultStreamCallback() {
+			@Override
+			public void handleRecord(SpeciesOccurrenceRecord record) {
+				records.add(record);
+			}
+		});
+		int numFound = getTotalNumFoundForSpeciesData(speciesNames);
+		AbstractParams params = new SpeciesDataParams(start, rows, speciesNames);
+		ResponseHeader responseHeader = ResponseHeader.newInstance(start, rows, numFound, startTime, params);
+		return new SpeciesDataResponse(responseHeader, records);
+	}
+
+	private interface DarwinCoreResultStreamCallback {
+		void handleRecord(SpeciesOccurrenceRecord record);
+	}
+	
+	private void doDarwinCoreResultStream(List<String> speciesNames, int start, int rows, DarwinCoreResultStreamCallback callback) {
+		// FIXME make species names case insensitive (try binding an LCASE(?scientificName) and using that
 		String sparql = getProcessedDarwinCoreSparql(speciesNames, start, rows);
 		logger.debug("Species data SPARQL: " + sparql);
 		Query query = QueryFactory.create(sparql);
@@ -281,14 +298,11 @@ public class JenaRetrievalService implements RetrievalService {
 			if (results.hasNext()) {
 				for (; results.hasNext();) {
 					QuerySolution s = results.next();
-					records.add(processSpeciesDataSolution(s));
+					SpeciesOccurrenceRecord record = processSpeciesDataSolution(s);
+					callback.handleRecord(record);
 				}
 			}
 		}
-		int numFound = getTotalNumFoundForSpeciesData(speciesNames);
-		AbstractParams params = new SpeciesDataParams(start, rows, speciesNames);
-		ResponseHeader responseHeader = ResponseHeader.newInstance(start, rows, numFound, startTime, params);
-		return new SpeciesDataResponse(responseHeader, records);
 	}
 	
 	private RetrievalResponseHeader transformToCsv(Writer responseWriter, SpeciesDataResponse jsonResponse)
@@ -437,17 +451,19 @@ public class JenaRetrievalService implements RetrievalService {
 
 	VisitTracker getVisitInfoFor(List<String> speciesNames) throws AekosApiRetrievalException {
 		VisitTracker result = new VisitTracker();
-		SpeciesDataResponse speciesRecords = getSpeciesDataJsonPrivate(speciesNames, 0, Integer.MAX_VALUE); // FIXME should we page this?
-		for (SpeciesOccurrenceRecord currSpeciesRecord : speciesRecords.getResponse()) {
-			String locationID = currSpeciesRecord.getLocationID();
-			String eventDate = currSpeciesRecord.getEventDate();
-			VisitInfo item = result.getVisitInfoFor(locationID, eventDate);
-			if (item == null) {
-				item = new VisitInfo(currSpeciesRecord.getSamplingProtocol(), currSpeciesRecord.getBibliographicCitation());
+		doDarwinCoreResultStream(speciesNames, 0, Integer.MAX_VALUE, new DarwinCoreResultStreamCallback() {
+			@Override
+			public void handleRecord(SpeciesOccurrenceRecord currSpeciesRecord) {
+				String locationID = currSpeciesRecord.getLocationID();
+				String eventDate = currSpeciesRecord.getEventDate();
+				VisitInfo item = result.getVisitInfoFor(locationID, eventDate);
+				if (item == null) {
+					item = new VisitInfo(currSpeciesRecord.getSamplingProtocol(), currSpeciesRecord.getBibliographicCitation());
+				}
+				currSpeciesRecord.appendSpeciesNameTo(item);
+				result.addVisitInfo(locationID, eventDate, item);
 			}
-			currSpeciesRecord.appendSpeciesNameTo(item);
-			result.addVisitInfo(locationID, eventDate, item);
-		}
+		});
 		return result;
 	}
 
