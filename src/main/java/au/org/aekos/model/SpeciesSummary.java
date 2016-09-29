@@ -3,27 +3,23 @@ package au.org.aekos.model;
 public class SpeciesSummary {
 
 	private final String id;
-	private String scientificName;
+	private final String speciesName;
 	private final int recordsHeld;
 
-	public SpeciesSummary(String id, String scientificName, int recordsHeld) {
+	public SpeciesSummary(String id, String speciesName, int recordsHeld) {
 		this.id = id;
-		this.scientificName = scientificName;
+		this.speciesName = speciesName;
 		this.recordsHeld = recordsHeld;
 	}
 	
-	public SpeciesSummary(String scientificName, int recordsHeld) {
-		this.id = String.valueOf(scientificName.hashCode());
-		this.scientificName = scientificName;
+	public SpeciesSummary(String speciesName, int recordsHeld) {
+		this.id = String.valueOf(speciesName.hashCode());
+		this.speciesName = speciesName;
 		this.recordsHeld = recordsHeld;
 	}
 
-	public String getScientificName() {
-		return scientificName;
-	}
-
-	public void setScientificName(String scientificName) {
-		this.scientificName = scientificName;
+	public String getSpeciesName() {
+		return speciesName;
 	}
 
 	public String getId() {
@@ -39,7 +35,7 @@ public class SpeciesSummary {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		result = prime * result + ((scientificName == null) ? 0 : scientificName.hashCode());
+		result = prime * result + ((speciesName == null) ? 0 : speciesName.hashCode());
 		return result;
 	}
 
@@ -57,16 +53,16 @@ public class SpeciesSummary {
 				return false;
 		} else if (!id.equals(other.id))
 			return false;
-		if (scientificName == null) {
-			if (other.scientificName != null)
+		if (speciesName == null) {
+			if (other.speciesName != null)
 				return false;
-		} else if (!scientificName.equals(other.scientificName))
+		} else if (!speciesName.equals(other.speciesName))
 			return false;
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return "SpeciesSummary [" + scientificName + ", " + recordsHeld + "]";
+		return "SpeciesSummary [" + speciesName + ", " + recordsHeld + " records]";
 	}
 }

@@ -11,6 +11,7 @@ WHERE {
   ?s api:year ?year .
   ?s api:month ?month .
   VALUES ?locationID { %LOCATION_ID_PLACEHOLDER% } .
+  VALUES ?eventDate { %EVENT_DATE_PLACEHOLDER% } .
 }
 ORDER BY ?s
 OFFSET %OFFSET_PLACEHOLDER%

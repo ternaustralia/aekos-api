@@ -157,7 +157,7 @@ public class LuceneSearchServiceTestSpring {
 		List<SpeciesSummary> result = objectUnderTest.speciesAutocomplete("abac", 100);
 		assertNotNull(result);
 		assertThat(result.size(), is(4));
-		List<String> names = result.stream().map(s -> s.getScientificName()).collect(Collectors.toList());
+		List<String> names = result.stream().map(s -> s.getSpeciesName()).collect(Collectors.toList());
 		assertThat(names, hasItems("Abacopteris aspera", "Abacopteris presliana", "Abacopteris sp.", "Abacopteris triphylla"));
 	}
 
@@ -170,7 +170,7 @@ public class LuceneSearchServiceTestSpring {
 		List<SpeciesSummary> result = objectUnderTest.speciesAutocomplete("m", 100);
 		assertEquals(100, result.size());
 		SpeciesSummary species = result.get(0);
-		assertEquals("Mariosousa millefolia", species.getScientificName());
+		assertEquals("Mariosousa millefolia", species.getSpeciesName());
 	}
 	
 	private void loadTaxaNamesCsv() throws IOException {

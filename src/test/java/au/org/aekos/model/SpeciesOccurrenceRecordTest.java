@@ -41,7 +41,7 @@ public class SpeciesOccurrenceRecordTest {
 	public void testHasSpeciesName01() {
 		SpeciesOccurrenceRecord objectUnderTest = new SpeciesOccurrenceRecord(-32.1094d, 139.3506d, "GDA94", "aekos.org.au/collection/adelaide.edu.au/Koonamore/Photopoints/pp28A",
 				"Atriplex stipitata", 1, "2012-11-23", 2012, 11, "some citation stuff", "http://aekos.org.au/collection/adelaide.edu.au/Koonamore/Photopoints/pp28A");
-		LocationInfo item = new LocationInfo("not important", "not important");
+		VisitInfo item = new VisitInfo("not important", "not important");
 		objectUnderTest.appendSpeciesNameTo(item);
 		Set<String> result = item.getScientificNames();
 		assertThat(result, hasItems("Atriplex stipitata"));
@@ -55,7 +55,7 @@ public class SpeciesOccurrenceRecordTest {
 	public void testHasSpeciesName02() {
 		SpeciesOccurrenceRecord objectUnderTest = new SpeciesOccurrenceRecord(-32.1094d, 139.3506d, "GDA94", "aekos.org.au/collection/adelaide.edu.au/Koonamore/Photopoints/pp28A",
 				1, "2012-11-23", 2012, 11, "some citation stuff", "http://aekos.org.au/collection/adelaide.edu.au/Koonamore/Photopoints/pp28A", "Hakea obtusa");
-		LocationInfo item = new LocationInfo("not important", "not important");
+		VisitInfo item = new VisitInfo("not important", "not important");
 		objectUnderTest.appendSpeciesNameTo(item);
 		Set<String> result = item.getTaxonRemarks();
 		assertThat(result, hasItems("Hakea obtusa"));

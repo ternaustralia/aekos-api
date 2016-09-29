@@ -14,7 +14,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.SystemUtils;
@@ -27,12 +26,12 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import au.org.aekos.model.EnvironmentDataRecord;
 import au.org.aekos.model.EnvironmentDataResponse;
-import au.org.aekos.model.LocationInfo;
 import au.org.aekos.model.ResponseHeader;
 import au.org.aekos.model.SpeciesDataResponse;
 import au.org.aekos.model.TraitDataRecord;
 import au.org.aekos.model.TraitDataResponse;
 import au.org.aekos.model.TraitOrEnvironmentalVariable;
+import au.org.aekos.model.VisitInfo;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("classpath:/au/org/aekos/retrievalContext-test.xml")
@@ -120,7 +119,7 @@ public class JenaRetrievalServiceTestSpring {
 	@Test
 	public void testGetAllSpeciesDataJson01() throws Throwable {
 		SpeciesDataResponse result = objectUnderTest.getAllSpeciesDataJson(0, 10);
-		assertThat(result.getResponse().size(), is(7));
+		assertThat(result.getResponse().size(), is(8));
 	}
 	
 	/**
@@ -305,10 +304,10 @@ public class JenaRetrievalServiceTestSpring {
 		assertThat(result.getResponse().size(), is(2));
 		Set<String> scientificNamesForFirstRecord = result.getResponse().get(0).getScientificNames();
 		assertThat(scientificNamesForFirstRecord.size(), is(1));
-		assertThat(scientificNamesForFirstRecord, hasItems("Calotis hispidula"));
+		assertThat(scientificNamesForFirstRecord, hasItems("Rosa canina"));
 		Set<String> scientificNamesForSecondRecord = result.getResponse().get(1).getScientificNames();
 		assertThat(scientificNamesForSecondRecord.size(), is(1));
-		assertThat(scientificNamesForSecondRecord, hasItems("Rosa canina"));
+		assertThat(scientificNamesForSecondRecord, hasItems("Calotis hispidula"));
 	}
 	
 	/**
@@ -327,13 +326,49 @@ public class JenaRetrievalServiceTestSpring {
 	}
 	
 	/**
-	 * Can we get the location mapping for two species at the same site?
+	 * Do we only get the visit with the same date as the species record (and not other visits to the same location)?
+	 */
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testGetEnvironmentalDataJson08() throws Throwable {
+		EnvironmentDataResponse result = objectUnderTest.getEnvironmentalDataJson(Arrays.asList("Acacia binata Maslin"), Collections.emptyList(), 0, 10);
+		assertThat(result.getResponse().size(), is(1));
+		Set<String> scientificNamesForFirstRecord = result.getResponse().get(0).getScientificNames();
+		assertThat(scientificNamesForFirstRecord.size(), is(1));
+		assertThat(scientificNamesForFirstRecord, hasItems("Acacia binata Maslin"));
+		Collection<TraitOrEnvironmentalVariable> vars = result.getResponse().get(0).getVariables();
+		assertThat(vars.size(), is(2));
+		assertThat(vars, hasItems(
+			isTraitOrVar("slope", "5", "degrees"),
+			isTraitOrVar("aspect", "216", "degrees")
+		));
+	}
+	
+	/**
+	 * Can we request two species at the same location but different visits and have the records correctly
+	 * record which species appeared in which visit?
 	 */
 	@Test
-	public void testGetLocations01() throws Throwable {
-		Map<String, LocationInfo> result = objectUnderTest.getLocations(Arrays.asList("Dodonaea concinna Benth.", "Hakea obtusa"));
-		assertThat(result.size(), is(1));
-		LocationInfo locInfo = result.get("aekos.org.au/collection/wa.gov.au/ravensthorpe/R002");
+	public void testGetEnvironmentalDataJson09() throws Throwable {
+		EnvironmentDataResponse result = objectUnderTest.getEnvironmentalDataJson(Arrays.asList("Acacia binata Maslin", "Lasiopetalum compactum"), Collections.emptyList(), 0, 10);
+		assertThat(result.getResponse().size(), is(2));
+		EnvironmentDataRecord firstRecord = result.getResponse().get(0);
+		assertThat(firstRecord.getScientificNames(), hasItems("Acacia binata Maslin"));
+		assertThat(firstRecord.getScientificNames().size(), is(1));
+		EnvironmentDataRecord secondRecord = result.getResponse().get(1);
+		assertThat(secondRecord.getScientificNames(), hasItems("Lasiopetalum compactum"));
+		assertThat(secondRecord.getScientificNames().size(), is(1));
+		assertThat(firstRecord.getLocationID(), is(secondRecord.getLocationID()));
+	}
+	
+	/**
+	 * Can we get the visit info for two species at the same site?
+	 */
+	@Test
+	public void testGetVisitInfoFor01() throws Throwable {
+		VisitTracker result = objectUnderTest.getVisitInfoFor(Arrays.asList("Dodonaea concinna Benth.", "Hakea obtusa"));
+		assertThat(result.visitSize(), is(1));
+		VisitInfo locInfo = result.getVisitInfoFor("aekos.org.au/collection/wa.gov.au/ravensthorpe/R002", "1990-03-30");
 		assertThat(locInfo.getBibliographicCitation(), startsWith("Department of Parks and Wildlife (Biogeography Program) (2012)."));
 		assertThat(locInfo.getSamplingProtocol(), is("aekos.org.au/collection/wa.gov.au/ravensthorpe"));
 		Set<String> scientificNames = locInfo.getScientificNames();
@@ -377,7 +412,7 @@ public class JenaRetrievalServiceTestSpring {
 		List<TraitDataRecord> response = result2.getResponse();
 		assertThat(response.size(), is(1));
 		TraitDataRecord record = response.get(0);
-		assertThat(record.getYear(), is(2013));
+		assertThat(record.getYear(), is(1990));
 	}
 	
 	/**
@@ -448,6 +483,6 @@ public class JenaRetrievalServiceTestSpring {
 	@Test
 	public void testGetTotalSpeciesRecordsHeld01() throws Throwable {
 		int result = objectUnderTest.getTotalSpeciesRecordsHeld();
-		assertThat(result, is(7));
+		assertThat(result, is(8));
 	}
 }

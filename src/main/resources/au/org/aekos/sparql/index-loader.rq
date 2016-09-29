@@ -1,10 +1,14 @@
 PREFIX api: <http://www.aekos.org.au/api/1.0#>
 
-SELECT ?scientificName ?dwr ?loc
+SELECT ?speciesName ?dwr ?loc
 WHERE {
   ?dwr a api:DarwinCoreRecord .
-  ?dwr api:scientificName ?scientificName .
+  {?dwr api:scientificName ?speciesName .}
+  UNION
+  {?dwr api:taxonRemarks ?speciesName .}
+  ?dwr api:eventDate ?eventDate .
   ?dwr api:locationID ?locationID .
   ?loc a api:LocationVisit .
   ?loc api:locationID ?locationID .
+  ?loc api:eventDate ?eventDate .
 }

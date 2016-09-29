@@ -1,7 +1,17 @@
 @prefix api:   <http://www.aekos.org.au/api/1.0#> .
 @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
 
-api:location-db06dcd590c3097320c84ab7b16fa9feb95a80d0
+<urn:uuid:0db19bb0-5bf6-4cfd-83d1-3713f2baaaaa>
+        a                           api:LocationVisit ;
+        api:decimalLatitude         -24.5318398476576 ;
+        api:decimalLongitude        137.321378247222 ;
+        api:eventDate               "2013-12-31" ;
+        api:geodeticDatum           "GDA94" ;
+        api:locationID              "aekos.org.au/collection/adelaide.edu.au/trend/SATFLB0022" ;
+        api:month                   12 ;
+        api:year                    2013 .
+
+<urn:uuid:0db19bb0-5bf6-4cfd-83d1-3713f2bbbbbb>
         a                           api:LocationVisit ;
         api:decimalLatitude         120.2940736736989 ;
         api:decimalLongitude        -33.68953500855846 ;
@@ -100,7 +110,7 @@ api:location-db06dcd590c3097320c84ab7b16fa9feb95a80d0
         api:units        "percent" ;
         api:value        50 .
         
-api:location-284ab54489db265d8c1ef33d6661b45f925c6d7e
+<urn:uuid:0db19bb0-5bf6-4cfd-83d1-3713f2bccccc>
         a                     api:LocationVisit ;
         api:decimalLatitude   -23.5318398476576 ;
         api:decimalLongitude  138.321378247854 ;
@@ -110,7 +120,7 @@ api:location-284ab54489db265d8c1ef33d6661b45f925c6d7e
         api:month             03 ;
         api:year              1990 .
         
-api:location-daea24a05e0aa8487ffd15eef0b2f61aeb5d883c
+<urn:uuid:0db19bb0-5bf6-4cfd-83d1-3713f2dddddd>
         a                     api:LocationVisit ;
         api:decimalLatitude   -33.60974828576365 ;
         api:decimalLongitude  120.15047758874314 ;
@@ -147,3 +157,24 @@ api:location-daea24a05e0aa8487ffd15eef0b2f61aeb5d883c
         api:name   "disturbanceType" ;
         api:units  "" ;
         api:value  "No effective disturbance" .
+        
+<urn:uuid:0db19bb0-5bf6-4cfd-83d1-3713f2beeeee>
+        a                     api:LocationVisit ;
+        api:decimalLatitude   -33.60974828576365 ;
+        api:decimalLongitude  120.15047758874314 ;
+        api:eventDate         "1991-04-29" ;
+        api:geodeticDatum     "GDA94" ;
+        api:landscapeVars     <urn:aspect:73b72f96-df34-4a23-a74a-bd2edbacaaaa> , <urn:slope:02399d04-9739-4a38-b5b0-b5d791b8aaaa> ;
+        api:locationID        "aekos.org.au/collection/wa.gov.au/ravensthorpe/R002" ;
+        api:month             04 ;
+        api:year              1991 .
+        
+<urn:aspect:73b72f96-df34-4a23-a74a-bd2edbacaaaa>
+        api:name   "aspect" ;
+        api:units  "degrees" ;
+        api:value  "216"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+<urn:slope:02399d04-9739-4a38-b5b0-b5d791b8aaaa>
+        api:name   "slope" ;
+        api:units  "degrees" ;
+        api:value  "5"^^<http://www.w3.org/2001/XMLSchema#decimal> .

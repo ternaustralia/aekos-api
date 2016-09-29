@@ -70,7 +70,7 @@ public class TermIndexManagerImpl implements TermIndexManager, DisposableBean {
 		return indexPath;
 	}
 	
-	//Ensure index path exists, if not attempt to create it. 
+	//Ensure index path exists, if not attempt to create it.
 	public boolean ensureIndexPathExists(){
 		if(Files.isDirectory(Paths.get(getIndexPath()))){
 			return true;

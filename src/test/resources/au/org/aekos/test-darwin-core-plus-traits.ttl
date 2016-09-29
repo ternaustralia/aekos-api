@@ -5,16 +5,16 @@
         a                           api:DarwinCoreRecord ;
         api:decimalLatitude         -23.5318398476576 ;
         api:decimalLongitude        138.321378247854 ;
-        api:eventDate               "2001-01-15" ;
+        api:eventDate               "1990-03-30" ;
         api:geodeticDatum           "GDA94" ;
         api:individualCount         1 ;
         api:locationID              "aekos.org.au/collection/adelaide.edu.au/trend/SATFLB0025" ;
-        api:month                   01 ;
+        api:month                   03 ;
         api:samplingProtocol        "aekos.org.au/collection/adelaide.edu.au/trend" ;
         api:samplingProtocolEntity  api:7048c362fa3f55171c8f9aa2edba6d43fde8ea30 ;
         api:scientificName          "Calotis hispidula" ;
         api:trait                   <urn:totalLength:8239e171-b1f4-4d13-ac46-617119d43eee> ;
-        api:year                    2001 .
+        api:year                    1990 .
 
 <urn:totalLength:8239e171-b1f4-4d13-ac46-617119d43eee>
         api:name   "totalLength" ;
@@ -29,16 +29,16 @@ api:7048c362fa3f55171c8f9aa2edba6d43fde8ea30
         a                           api:DarwinCoreRecord ;
         api:decimalLatitude         -23.5318398476576 ;
         api:decimalLongitude        138.321378247854 ;
-        api:eventDate               "2013-12-31" ;
+        api:eventDate               "1990-03-30" ;
         api:geodeticDatum           "GDA94" ;
         api:individualCount         1 ;
         api:locationID              "aekos.org.au/collection/adelaide.edu.au/trend/SATFLB0025" ;
-        api:month                   12 ;
+        api:month                   03 ;
         api:samplingProtocol        "aekos.org.au/collection/adelaide.edu.au/trend" ;
         api:samplingProtocolEntity  api:7048c362fa3f55171c8f9aa2edba6d43fde8ea30 ;
         api:scientificName          "Calotis hispidula" ;
         api:trait                   <urn:lifeStage:8239e171-b1f4-4d13-ac46-617119d43hhh> ;
-        api:year                    2013 .
+        api:year                    1990 .
         
 <urn:lifeStage:8239e171-b1f4-4d13-ac46-617119d43hhh>
         api:name   "lifeStage" ;
@@ -79,58 +79,58 @@ api:7048c362fa3f55171c8f9aa2edba6d43fde8ea30
         a                           api:DarwinCoreRecord ;
         api:decimalLatitude         120.2940736736989 ;
         api:decimalLongitude        -33.68953500855846 ;
-        api:eventDate               "2014-11-01" ;
+        api:eventDate               "2016-01-12" ;
         api:geodeticDatum           "GDA94" ;
         api:individualCount         1 ;
         api:locationID              "aekos.org.au/collection/adelaide.edu.au/trend/SATFLB0026" ;
-        api:month                   11 ;
+        api:month                   01 ;
         api:samplingProtocol        "aekos.org.au/collection/adelaide.edu.au/trend" ;
         api:samplingProtocolEntity  api:7048c362fa3f55171c8f9aa2edba6d43fde8ea30 ;
         api:scientificName          "Rosa canina" ;
-        api:year                    2014 .
+        api:year                    2016 .
 
 <urn:uuid:26e08eac-f33a-4598-9223-345a83e3f90b>
         a                           api:DarwinCoreRecord ;
         api:decimalLatitude         -33.671367991139874 ;
         api:decimalLongitude        120.40881133568425 ;
-        api:eventDate               "2007-05-28" ;
+        api:eventDate               "1990-03-30" ;
         api:geodeticDatum           "GDA94" ;
         api:individualCount         1 ;
         api:locationID              "aekos.org.au/collection/wa.gov.au/ravensthorpe/R002" ;
-        api:month                   05 ;
+        api:month                   03 ;
         api:samplingProtocol        "aekos.org.au/collection/wa.gov.au/ravensthorpe" ;
         api:samplingProtocolEntity  api:70f587d434d02e5d95e5c82c86577543ce6077f9 ;
         api:scientificName          "Dodonaea concinna Benth." ;
-        api:year                    2007 .
+        api:year                    1990 .
         
 <urn:uuid:26e08eac-f33a-4598-9223-345a3344f000>
         a                           api:DarwinCoreRecord ;
         api:decimalLatitude         -33.671367991139874 ;
         api:decimalLongitude        120.40881133568425 ;
-        api:eventDate               "2007-05-28" ;
+        api:eventDate               "1990-03-30" ;
         api:geodeticDatum           "GDA94" ;
         api:individualCount         1 ;
         api:locationID              "aekos.org.au/collection/wa.gov.au/ravensthorpe/R002" ;
-        api:month                   05 ;
+        api:month                   03 ;
         api:samplingProtocol        "aekos.org.au/collection/wa.gov.au/ravensthorpe" ;
         api:samplingProtocolEntity  api:70f587d434d02e5d95e5c82c86577543ce6077f9 ;
         api:scientificName          "Lasiopetalum compactum" ;
-        api:year                    2007 .
+        api:year                    1990 .
         
 <urn:uuid:e56bab82-162a-4b50-97f5-dc2d8a508daf>
         a                           api:DarwinCoreRecord ;
         api:decimalLatitude         -33.60974828576365 ;
         api:decimalLongitude        120.15047758874314 ;
-        api:eventDate               "2007-02-14" ;
+        api:eventDate               "1990-03-30" ;
         api:geodeticDatum           "GDA94" ;
         api:individualCount         1 ;
         api:locationID              "aekos.org.au/collection/wa.gov.au/ravensthorpe/R002" ;
-        api:month                   02 ;
+        api:month                   03 ;
         api:samplingProtocol        "aekos.org.au/collection/wa.gov.au/ravensthorpe" ;
         api:samplingProtocolEntity  api:70f587d434d02e5d95e5c82c86577543ce6077f9 ;
         api:trait                   <urn:averageHeight:19650974-edd0-4b00-8b9d-9a41aaebee7e> , <urn:cover:42bc27ea-32a0-4ac7-9f8d-c2f0ac2277d5> ;
         api:taxonRemarks            "Hakea obtusa" ;
-        api:year                    2007 .
+        api:year                    1990 .
 
 api:70f587d434d02e5d95e5c82c86577543ce6077f9
         api:bibliographicCitation  "Department of Parks and Wildlife (Biogeography Program) (2012). Biological Survey of the Ravensthorpe Range (Phase 1), Version 1/2013. Persistent Hyperlink: http://www.aekos.org.au/collection/wa.gov.au/ravensthorpe. &#198;KOS Data Portal, rights owned by the State of Western Australia (Department of Parks and Wildlife). Accessed [dd mmm yyyy, e.g. 01 Jan 2016]." ;
@@ -145,3 +145,17 @@ api:70f587d434d02e5d95e5c82c86577543ce6077f9
         api:name   "cover" ;
         api:units  "" ;
         api:value  "<10% cover" .
+
+<urn:uuid:e56bab82-162a-4b50-97f5-dc2d8a50dddd>
+        a                           api:DarwinCoreRecord ;
+        api:decimalLatitude         -33.60974828576365 ;
+        api:decimalLongitude        120.15047758874314 ;
+        api:eventDate               "1991-04-29" ;
+        api:geodeticDatum           "GDA94" ;
+        api:individualCount         1 ;
+        api:locationID              "aekos.org.au/collection/wa.gov.au/ravensthorpe/R002" ;
+        api:month                   04 ;
+        api:samplingProtocol        "aekos.org.au/collection/wa.gov.au/ravensthorpe" ;
+        api:samplingProtocolEntity  api:70f587d434d02e5d95e5c82c86577543ce6077f9 ;
+        api:scientificName         "Acacia binata Maslin" ;
+        api:year                    1991 .

@@ -130,7 +130,7 @@ public class ApiV1SearchController {
 						continue;
 					}
 					SpeciesSummary match = records.get(0);
-					boolean searchReturnedSomethingButItsNotWhatWeAskedFor = !match.getScientificName().equalsIgnoreCase(curr);
+					boolean searchReturnedSomethingButItsNotWhatWeAskedFor = !match.getSpeciesName().equalsIgnoreCase(curr);
 					if (searchReturnedSomethingButItsNotWhatWeAskedFor) {
 						result.add(new SpeciesSummary("0", curr, 0));
 						continue;

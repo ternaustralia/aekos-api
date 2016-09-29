@@ -164,4 +164,9 @@ public class EnvironmentDataRecord {
 	public boolean matchesTraitFilter(List<String> varNames) {
 		return Helper.matchesFilter(varNames, variables);
 	}
+
+	@Override
+	public String toString() {
+		return locationID + "@" + eventDate + " " + variables.size() + " vars, " + scientificNames.size() + " scientificNames, " + taxonRemarks.size() + " taxonRemarks";
+	}
 }

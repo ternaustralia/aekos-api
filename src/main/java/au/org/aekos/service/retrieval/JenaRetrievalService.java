@@ -1,17 +1,30 @@
 package au.org.aekos.service.retrieval;
 
-import static au.org.aekos.util.FieldNames.*;
+import static au.org.aekos.util.FieldNames.BIBLIOGRAPHIC_CITATION;
+import static au.org.aekos.util.FieldNames.DECIMAL_LATITUDE;
+import static au.org.aekos.util.FieldNames.DECIMAL_LONGITUDE;
+import static au.org.aekos.util.FieldNames.DISTURBANCE_EVIDENCE_VARS;
+import static au.org.aekos.util.FieldNames.EVENT_DATE;
+import static au.org.aekos.util.FieldNames.GEODETIC_DATUM;
+import static au.org.aekos.util.FieldNames.INDIVIDUAL_COUNT;
+import static au.org.aekos.util.FieldNames.LANDSCAPE_VARS;
+import static au.org.aekos.util.FieldNames.LOCATION_ID;
+import static au.org.aekos.util.FieldNames.MONTH;
+import static au.org.aekos.util.FieldNames.NO_UNITS_VARS;
+import static au.org.aekos.util.FieldNames.SAMPLING_PROTOCOL;
+import static au.org.aekos.util.FieldNames.SCIENTIFIC_NAME;
+import static au.org.aekos.util.FieldNames.SOIL_VARS;
+import static au.org.aekos.util.FieldNames.TAXON_REMARKS;
+import static au.org.aekos.util.FieldNames.YEAR;
+
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -38,7 +51,6 @@ import au.org.aekos.model.AbstractParams;
 import au.org.aekos.model.EnvironmentDataParams;
 import au.org.aekos.model.EnvironmentDataRecord;
 import au.org.aekos.model.EnvironmentDataResponse;
-import au.org.aekos.model.LocationInfo;
 import au.org.aekos.model.ResponseHeader;
 import au.org.aekos.model.SpeciesDataParams;
 import au.org.aekos.model.SpeciesDataResponse;
@@ -47,6 +59,7 @@ import au.org.aekos.model.TraitDataParams;
 import au.org.aekos.model.TraitDataRecord;
 import au.org.aekos.model.TraitDataResponse;
 import au.org.aekos.model.TraitOrEnvironmentalVariable;
+import au.org.aekos.model.VisitInfo;
 
 @Service
 public class JenaRetrievalService implements RetrievalService {
@@ -58,13 +71,13 @@ public class JenaRetrievalService implements RetrievalService {
 	private static final String LOCATION_ID_PLACEHOLDER = "%LOCATION_ID_PLACEHOLDER%";
 	private static final String TRAIT_NAME_PLACEHOLDER = "%TRAIT_NAME_PLACEHOLDER%";
 	private static final String ENV_VAR_PLACEHOLDER = "%ENV_VAR_PLACEHOLDER%";
+	private static final String EVENT_DATE_PLACEHOLDER = "%EVENT_DATE_PLACEHOLDER%";
 	private static final String SWITCH_PLACEHOLDER = "#OFF";
 	private static final List<String> ALL_SPECIES = Collections.emptyList();
 	private static final Property NAME_PROP = prop("name");
 	private static final Property UNITS_PROP = prop("units");
 	private static final Property VALUE_PROP = prop("value");
 	private static final Property TRAIT_PROP = prop("trait");
-	private static final Property NO_UNITS_VARS_PROP = prop("noUnitsVars");
 	
 	@Autowired
 	@Qualifier("coreDS")
@@ -206,24 +219,42 @@ public class JenaRetrievalService implements RetrievalService {
 			}
 			for (; results.hasNext();) {
 				QuerySolution s = results.next();
-				String scientificName = getString(s, SCIENTIFIC_NAME);
+				String speciesName = getString(s, "speciesName");
 				// env
-				EnvironmentDataRecord envRecord = new EnvironmentDataRecord(0, 0, "", "", "", 0, 0, "", "");
-				processEnvDataVars(Collections.emptyList(), s.get("loc").asResource(), envRecord, NO_UNITS_VARS_PROP);
+				DummyEnvironmentDataRecord envRecord = new DummyEnvironmentDataRecord();
+				for (Property currVarProp : Arrays.asList(prop(DISTURBANCE_EVIDENCE_VARS), prop(LANDSCAPE_VARS), prop(NO_UNITS_VARS), prop(SOIL_VARS))) {
+					processEnvDataVars(Collections.emptyList(), s.get("loc").asResource(), envRecord, currVarProp);
+				}
 				// traits
-				TraitDataRecord traitRecord = new TraitDataRecord(0, 0, "", "", "", 0, "", 0, 0, "", "");
+				DummyTraitDataRecord traitRecord = new DummyTraitDataRecord();
 				processTraitDataVars(s.get("dwr").asResource(), traitRecord, TRAIT_PROP, Collections.emptyList());
-				Set<String> traitNames = new HashSet<>();
-				for (TraitOrEnvironmentalVariable curr : traitRecord.getTraits()) {
-					traitNames.add(curr.getName());
-				}
-				Set<String> envVarNames = new HashSet<>();
-				for (TraitOrEnvironmentalVariable curr : envRecord.getVariables()) {
-					envVarNames.add(curr.getName());
-				}
+				Set<String> traitNames = traitRecord.getTraits().stream()
+						.map(e -> e.getName())
+						.collect(Collectors.toSet());
+				Set<String> envVarNames = envRecord.getVariables().stream()
+						.map(e -> e.getName())
+						.collect(Collectors.toSet());
 				// result
-				callback.accept(new IndexLoaderRecord(scientificName, traitNames, envVarNames));
+				callback.accept(new IndexLoaderRecord(speciesName, traitNames, envVarNames));
 			}
+		}
+	}
+	
+	/**
+	 * Acts as a dumb container to hold environmental variables so we can index them
+	 */
+	private class DummyEnvironmentDataRecord extends EnvironmentDataRecord {
+		public DummyEnvironmentDataRecord() {
+			super(0, 0, "", "", "", 0, 0, "", "");
+		}
+	}
+	
+	/**
+	 * Acts as a dumb container to hold traits so we can index them
+	 */
+	private class DummyTraitDataRecord extends TraitDataRecord {
+		public DummyTraitDataRecord() {
+			super(0, 0, "", "", "", 0, "", 0, 0, "", "");
 		}
 	}
 	
@@ -332,10 +363,9 @@ public class JenaRetrievalService implements RetrievalService {
 			int rows) throws AekosApiRetrievalException {
 		long startTime = new Date().getTime();
 		List<EnvironmentDataRecord> records = new LinkedList<>();
-		Map<String, LocationInfo> locationIds = getLocations(speciesNames);
-		logger.debug(String.format("Found %d locations", locationIds.size()));
-		// TODO query using all required keys (location, time ?)
-		String sparql = getProcessedEnvDataSparql(locationIds, start, rows);
+		VisitTracker visitTracker = getVisitInfoFor(speciesNames);
+		logger.debug(String.format("Found %d visits", visitTracker.visitSize())); // FIXME is it actually visits yet or still locations?
+		String sparql = getProcessedEnvDataSparql(visitTracker, start, rows);
 		AbstractParams params = new EnvironmentDataParams(start, rows, speciesNames, environmentalVariableNames);
 		logger.debug("Environmental data SPARQL: " + sparql);
 		Query query = QueryFactory.create(sparql);
@@ -348,24 +378,25 @@ public class JenaRetrievalService implements RetrievalService {
 			}
 			for (; results.hasNext();) {
 				QuerySolution s = results.next();
-				processEnvDataSolution(environmentalVariableNames, records, locationIds, s);
+				processEnvDataSolution(environmentalVariableNames, records, visitTracker, s);
 			}
 		}
-		int numFound = getTotalNumFoundForEnvironmentData(environmentalVariableNames, locationIds);
+		int numFound = getTotalNumFoundForEnvironmentData(environmentalVariableNames, visitTracker);
 		ResponseHeader responseHeader = ResponseHeader.newInstance(start, rows, numFound, startTime, params);
 		return new EnvironmentDataResponse(responseHeader, records);
 	}
 
-	private void processEnvDataSolution(List<String> varNames, List<EnvironmentDataRecord> records, Map<String, LocationInfo> locationIds, QuerySolution s) {
+	private void processEnvDataSolution(List<String> varNames, List<EnvironmentDataRecord> records, VisitTracker visitTracker, QuerySolution s) {
 		String locationID = getString(s, LOCATION_ID);
-		LocationInfo locationInfo = locationIds.get(locationID);
+		String eventDate = getString(s, EVENT_DATE);
+		VisitInfo visitInfo = visitTracker.getVisitInfoFor(locationID, eventDate);
 		EnvironmentDataRecord record = new EnvironmentDataRecord(getDouble(s, DECIMAL_LATITUDE),
 			getDouble(s, DECIMAL_LONGITUDE), getString(s, GEODETIC_DATUM), replaceSpaces(locationID),
 			getString(s, EVENT_DATE), getInt(s, YEAR), getInt(s, MONTH),
-			locationInfo.getBibliographicCitation(),
-			locationInfo.getSamplingProtocol());
-		record.addScientificNames(locationInfo.getScientificNames());
-		record.addTaxonRemarks(locationInfo.getTaxonRemarks());
+			visitInfo.getBibliographicCitation(),
+			visitInfo.getSamplingProtocol());
+		record.addScientificNames(visitInfo.getScientificNames());
+		record.addTaxonRemarks(visitInfo.getTaxonRemarks());
 		for (Property currVarProp : Arrays.asList(prop(DISTURBANCE_EVIDENCE_VARS), prop(LANDSCAPE_VARS), prop(NO_UNITS_VARS), prop(SOIL_VARS))) {
 			processEnvDataVars(varNames, s.get("s").asResource(), record, currVarProp);
 		}
@@ -391,9 +422,8 @@ public class JenaRetrievalService implements RetrievalService {
 		}
 	}
 
-	private int getTotalNumFoundForEnvironmentData(List<String> environmentalVariableNames, Map<String, LocationInfo> locationIds) {
-		// FIXME need to be sure this is all the IDs
-		String sparql = getProcessedEnvDataCountSparql(environmentalVariableNames, locationIds);
+	private int getTotalNumFoundForEnvironmentData(List<String> environmentalVariableNames, VisitTracker visitTracker) {
+		String sparql = getProcessedEnvDataCountSparql(environmentalVariableNames, visitTracker);
 		logger.debug("Environment data count SPARQL: " + sparql);
 		Query query = QueryFactory.create(sparql);
 		try (QueryExecution qexec = QueryExecutionFactory.create(query, ds)) {
@@ -405,17 +435,18 @@ public class JenaRetrievalService implements RetrievalService {
 		}
 	}
 
-	Map<String, LocationInfo> getLocations(List<String> speciesNames) throws AekosApiRetrievalException {
-		Map<String, LocationInfo> result = new HashMap<>();
+	VisitTracker getVisitInfoFor(List<String> speciesNames) throws AekosApiRetrievalException {
+		VisitTracker result = new VisitTracker();
 		SpeciesDataResponse speciesRecords = getSpeciesDataJsonPrivate(speciesNames, 0, Integer.MAX_VALUE); // FIXME should we page this?
 		for (SpeciesOccurrenceRecord currSpeciesRecord : speciesRecords.getResponse()) {
 			String locationID = currSpeciesRecord.getLocationID();
-			LocationInfo item = result.get(locationID);
+			String eventDate = currSpeciesRecord.getEventDate();
+			VisitInfo item = result.getVisitInfoFor(locationID, eventDate);
 			if (item == null) {
-				item = new LocationInfo(currSpeciesRecord.getSamplingProtocol(), currSpeciesRecord.getBibliographicCitation());
+				item = new VisitInfo(currSpeciesRecord.getSamplingProtocol(), currSpeciesRecord.getBibliographicCitation());
 			}
 			currSpeciesRecord.appendSpeciesNameTo(item);
-			result.put(locationID, item);
+			result.addVisitInfo(locationID, eventDate, item);
 		}
 		return result;
 	}
@@ -523,19 +554,23 @@ public class JenaRetrievalService implements RetrievalService {
 		return cleanedResult;
 	}
 	
-	private String getProcessedEnvDataSparql(Map<String, LocationInfo> locationIds, int offset, int limit) {
-		String locationIDValueList = locationIds.keySet().stream().collect(Collectors.joining("\" \"", "\"", "\""));
+	private String getProcessedEnvDataSparql(VisitTracker visitTracker, int offset, int limit) {
+		String locationIDValueList = visitTracker.getLocationIDSparqlParamList();
+		String eventDateValueList = visitTracker.getEventDateSparqlParamList();
 		String processedSparql = environmentDataQueryTemplate
 				.replace(LOCATION_ID_PLACEHOLDER, locationIDValueList)
+				.replace(EVENT_DATE_PLACEHOLDER, eventDateValueList)
 				.replace(OFFSET_PLACEHOLDER, String.valueOf(offset))
 				.replace(LIMIT_PLACEHOLDER, String.valueOf(limit == 0 ? Integer.MAX_VALUE : limit));
 		return processedSparql;
 	}
 	
-	private String getProcessedEnvDataCountSparql(List<String> environmentalVariableNames, Map<String, LocationInfo> locationIds) {
-		String locationIDValueList = locationIds.keySet().stream().collect(Collectors.joining("\" \"", "\"", "\""));
+	private String getProcessedEnvDataCountSparql(List<String> environmentalVariableNames, VisitTracker visitTracker) {
+		String locationIDValueList = visitTracker.getLocationIDSparqlParamList();
+		String eventDateValueList = visitTracker.getEventDateSparqlParamList();
 		String processedSparql = environmentDataCountQueryTemplate
-				.replace(LOCATION_ID_PLACEHOLDER, locationIDValueList);
+				.replace(LOCATION_ID_PLACEHOLDER, locationIDValueList)
+				.replace(EVENT_DATE_PLACEHOLDER, eventDateValueList);
 		boolean isEnvVarFilterNotEnabled = environmentalVariableNames.size() == 0;
 		if (isEnvVarFilterNotEnabled) {
 			return processedSparql;

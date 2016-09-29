@@ -4,13 +4,13 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-public class LocationInfo {
+public class VisitInfo {
 	private final String samplingProtocol;
 	private final String bibliographicCitation;
 	private final Set<String> scientificNames = new HashSet<>();
 	private final Set<String> taxonRemarks = new HashSet<>();
 	
-	public LocationInfo(String samplingProtocol, String bibliographicCitation) {
+	public VisitInfo(String samplingProtocol, String bibliographicCitation) {
 		this.samplingProtocol = samplingProtocol;
 		this.bibliographicCitation = bibliographicCitation;
 	}

@@ -4,7 +4,9 @@ SELECT (COUNT(DISTINCT ?s) as ?count)
 WHERE {
      ?s a api:LocationVisit .
      ?s api:locationID ?locationID .
+     ?s api:eventDate ?eventDate .
      VALUES ?locationID { %LOCATION_ID_PLACEHOLDER% } .
+     VALUES ?eventDate { %EVENT_DATE_PLACEHOLDER% } .
 #OFF ?s api:disturbanceEvidenceVars | api:landscapeVars | api:noUnitVars | api:soilVars ?envVar .
 #OFF ?envVar api:name ?varName .
 #OFF VALUES ?varName { %ENV_VAR_PLACEHOLDER% } .

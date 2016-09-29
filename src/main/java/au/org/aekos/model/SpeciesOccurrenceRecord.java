@@ -107,7 +107,7 @@ public class SpeciesOccurrenceRecord {
 	/**
 	 * Appends the scientificName or taxonRemarks as appropriate to the supplied item.
 	 */
-	public void appendSpeciesNameTo(LocationInfo item) {
+	public void appendSpeciesNameTo(VisitInfo item) {
 		if (isScientificNameSupplied()) {
 			item.addScientificName(scientificName);
 			return;

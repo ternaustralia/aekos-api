@@ -39,7 +39,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/v1")
 public class ApiV1EnvVarRetrievalController {
 
-	private static final String SITE_FRAGMENT = "site/study location/plots";
+	private static final String SITE_FRAGMENT = "site/study location/plot visits";
 	private static final String ENVVAR_FILTERING_FRAGMENT = " If you supply "
 			+ "environmental variable names then the result will have the environmental variables filtered down to only the environmental variables "
 			+ "you've asked for, otherwise all environmental variables are returned.";
