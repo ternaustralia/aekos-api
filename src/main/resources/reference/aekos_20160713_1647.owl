@@ -17135,3 +17135,10 @@
                 "SamplingUnitCoordinates" ;
         <http://www.w3.org/2004/02/skos/core#prefLabel>
                 "Sampling Unit Coordinates" .
+
+<http://www.aekos.org.au/ontology/1.0.0#weatherComment>
+        a            owl:DatatypeProperty ;
+        <http://www.aekos.org.au/ontology/1.0.0#code>
+                "weatherComment" ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "Weather Comment" .
