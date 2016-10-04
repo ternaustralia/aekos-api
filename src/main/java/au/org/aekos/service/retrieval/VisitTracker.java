@@ -22,18 +22,15 @@ class VisitTracker {
 		return visitInfos.size();
 	}
 
-	public String getLocationIDSparqlParamList() {
+	public String getLocationIDAndEventDateSparqlParamList() {
 		return visitInfos.keySet().stream()
-				.map(e -> e.getLocationId())
+				.map(e -> String.format("%s\" \"%s", e.getLocationId(), e.getEventDate()))
 				.distinct()
-				.collect(Collectors.joining("\" \"", "\"", "\""));
+				.collect(Collectors.joining("\") (\"", "(\"", "\")"));
 	}
 
-	public String getEventDateSparqlParamList() {
-		return visitInfos.keySet().stream()
-				.map(e -> e.getEventDate())
-				.distinct()
-				.collect(Collectors.joining("\" \"", "\"", "\""));
+	public boolean isEmpty() {
+		return visitInfos.isEmpty();
 	}
 }
 

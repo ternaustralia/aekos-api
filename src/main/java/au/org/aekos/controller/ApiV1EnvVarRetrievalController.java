@@ -43,6 +43,7 @@ public class ApiV1EnvVarRetrievalController {
 	private static final String ENVVAR_FILTERING_FRAGMENT = " If you supply "
 			+ "environmental variable names then the result will have the environmental variables filtered down to only the environmental variables "
 			+ "you've asked for, otherwise all environmental variables are returned.";
+	private static final String NO_VARS_NOTE_FRAGMENT = " Note: not all sites have environmental variables available. ";
 
 	@Autowired
 	private RetrievalService retrievalService;
@@ -50,7 +51,7 @@ public class ApiV1EnvVarRetrievalController {
     @RequestMapping(path="/environmentData.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get environmental variable data in JSON format",
     		notes = "Gets environmental variable data records for the " + SITE_FRAGMENT + " that the supplied species "
-    				+ "name(s) appear at in JSON format.")
+    				+ "name(s) appear at in JSON format." + ENVVAR_FILTERING_FRAGMENT + NO_VARS_NOTE_FRAGMENT)
     public EnvironmentDataResponse environmentDataDotJson(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(name="envVarName", required=false) String[] envVarNames,
@@ -66,7 +67,7 @@ public class ApiV1EnvVarRetrievalController {
     @RequestMapping(path="/environmentData", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get environmental variable data",
 			notes = "Gets environmental variable data records for the " + SITE_FRAGMENT + " that the supplied species "
-					+ "name(s) appear at " + CONTENT_NEGOTIATION_FRAGMENT + ENVVAR_FILTERING_FRAGMENT
+					+ "name(s) appear at " + CONTENT_NEGOTIATION_FRAGMENT + ENVVAR_FILTERING_FRAGMENT + NO_VARS_NOTE_FRAGMENT
 					+ " This resource honours <code>Accept</code> headers represented by any of the <code>/environmentData.*</code> resources.",
 			produces=MediaType.APPLICATION_JSON_VALUE + ", " + TEXT_CSV_MIME) // Forcing Swagger content negotiation until support for two methods is in)
     public EnvironmentDataResponse environmentDataJson(
@@ -81,7 +82,7 @@ public class ApiV1EnvVarRetrievalController {
     @RequestMapping(path="/environmentData.csv", method=RequestMethod.GET, produces=TEXT_CSV_MIME)
     @ApiOperation(value = "Get environmental variable data in CSV format",
     		notes = "Gets environmental variable data records for the " + SITE_FRAGMENT + " that the supplied species "
-    				+ "name(s) appear at in CSV format.")
+    				+ "name(s) appear at in CSV format." + ENVVAR_FILTERING_FRAGMENT + NO_VARS_NOTE_FRAGMENT)
     public void environmentDataDotCsv(
     		@RequestParam(name="speciesName") String[] speciesNames,
     		@RequestParam(name="envVarName", required=false) String[] envVarNames,

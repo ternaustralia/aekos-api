@@ -2,8 +2,10 @@ package au.org.aekos.service.retrieval;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
@@ -56,6 +58,125 @@ public class JenaRetrievalServiceTest {
 		String result = objectUnderTest.getProcessedDarwinCoreSparql(s, start, rows);
 		assertThat(result, is("SELECT * WHERE {?s ?p ?o . VALUES ?s { \"Rosa canina\" }"
 				+ " OFFSET 0 LIMIT " + Integer.MAX_VALUE + " }"));
+	}
+	
+	/**
+	 * Can we generate the env data query?
+	 */
+	@Test
+	public void testGetProcessedEnvDataSparql01() {
+		JenaRetrievalService objectUnderTest = new JenaRetrievalService();
+		objectUnderTest.setEnvironmentDataQueryTemplate(
+			"SELECT *" +
+			"WHERE {" +
+			"  ?s a api:LocationVisit ." +
+			"  ?s api:decimalLatitude ?decimalLatitude ." +
+			"  ?s api:decimalLongitude ?decimalLongitude ." +
+			"  ?s api:geodeticDatum ?geodeticDatum ." +
+			"  ?s api:locationID ?locationID ." +
+			"  ?s api:eventDate ?eventDate ." +
+			"  ?s api:year ?year ." +
+			"  ?s api:month ?month ." +
+			"  VALUES (?locationID ?eventDate) { " + JenaRetrievalService.LOCATION_ID_AND_EVENT_DATE_PLACEHOLDER + " } ." +
+			"}" +
+			"ORDER BY ?s" +
+			"OFFSET %OFFSET_PLACEHOLDER%" +
+			"LIMIT %LIMIT_PLACEHOLDER%");
+		VisitTracker visitTracker = new VisitTracker();
+		visitTracker.addVisitInfo("loc1", "date1", null);
+		visitTracker.addVisitInfo("loc1", "date2", null);
+		visitTracker.addVisitInfo("loc2", "date1", null);
+		visitTracker.addVisitInfo("loc3", "date1", null);
+		String result = objectUnderTest.getProcessedEnvDataSparql(visitTracker, 0, 20);
+		assertEquals(
+			"SELECT *" +
+			"WHERE {" +
+			"  ?s a api:LocationVisit ." +
+			"  ?s api:decimalLatitude ?decimalLatitude ." +
+			"  ?s api:decimalLongitude ?decimalLongitude ." +
+			"  ?s api:geodeticDatum ?geodeticDatum ." +
+			"  ?s api:locationID ?locationID ." +
+			"  ?s api:eventDate ?eventDate ." +
+			"  ?s api:year ?year ." +
+			"  ?s api:month ?month ." +
+			"  VALUES (?locationID ?eventDate) { (\"loc2\" \"date1\") (\"loc3\" \"date1\") (\"loc1\" \"date2\") (\"loc1\" \"date1\") } ." +
+			"}" +
+			"ORDER BY ?s" +
+			"OFFSET 0" +
+			"LIMIT 20", result);
+	}
+	
+	/**
+	 * Can we generate the env data count query WITH a variable name filter?
+	 */
+	@Test
+	public void testGetProcessedEnvDataCountSparql01() {
+		List<String> varsFilter = Arrays.asList("var1", "var2");
+		JenaRetrievalService objectUnderTest = new JenaRetrievalService();
+		objectUnderTest.setEnvironmentDataCountQueryTemplate(
+			"SELECT (COUNT(DISTINCT ?s) as ?count)" +
+			"WHERE {" +
+			"     ?s a api:LocationVisit ." +
+			"     ?s api:locationID ?locationID ." +
+			"     ?s api:eventDate ?eventDate ." +
+			"     VALUES (?locationID ?eventDate) { " + JenaRetrievalService.LOCATION_ID_AND_EVENT_DATE_PLACEHOLDER + " } ." +
+			"#OFF ?s api:disturbanceEvidenceVars | api:landscapeVars | api:noUnitVars | api:soilVars ?envVar ." +
+			"#OFF ?envVar api:name ?varName ." +
+			"#OFF VALUES ?varName { %ENV_VAR_PLACEHOLDER% } ." +
+			"}");
+		VisitTracker visitTracker = new VisitTracker();
+		visitTracker.addVisitInfo("loc1", "date1", null);
+		visitTracker.addVisitInfo("loc1", "date2", null);
+		visitTracker.addVisitInfo("loc2", "date1", null);
+		visitTracker.addVisitInfo("loc3", "date1", null);
+		String result = objectUnderTest.getProcessedEnvDataCountSparql(varsFilter, visitTracker);
+		assertEquals(
+			"SELECT (COUNT(DISTINCT ?s) as ?count)" +
+			"WHERE {" +
+			"     ?s a api:LocationVisit ." +
+			"     ?s api:locationID ?locationID ." +
+			"     ?s api:eventDate ?eventDate ." +
+			"     VALUES (?locationID ?eventDate) { (\"loc2\" \"date1\") (\"loc3\" \"date1\") (\"loc1\" \"date2\") (\"loc1\" \"date1\") } ." +
+			"     ?s api:disturbanceEvidenceVars | api:landscapeVars | api:noUnitVars | api:soilVars ?envVar ." +
+			"     ?envVar api:name ?varName ." +
+			"     VALUES ?varName { \"var1\" \"var2\" } ." +
+			"}", result);
+	}
+	
+	/**
+	 * Can we generate the env data count query WITHOUT a variable name filter?
+	 */
+	@Test
+	public void testGetProcessedEnvDataCountSparql02() {
+		JenaRetrievalService objectUnderTest = new JenaRetrievalService();
+		objectUnderTest.setEnvironmentDataCountQueryTemplate(
+			"SELECT (COUNT(DISTINCT ?s) as ?count)" +
+			"WHERE {" +
+			"     ?s a api:LocationVisit ." +
+			"     ?s api:locationID ?locationID ." +
+			"     ?s api:eventDate ?eventDate ." +
+			"     VALUES (?locationID ?eventDate) { " + JenaRetrievalService.LOCATION_ID_AND_EVENT_DATE_PLACEHOLDER + " } ." +
+			"#OFF ?s api:disturbanceEvidenceVars | api:landscapeVars | api:noUnitVars | api:soilVars ?envVar ." +
+			"#OFF ?envVar api:name ?varName ." +
+			"#OFF VALUES ?varName { %ENV_VAR_PLACEHOLDER% } ." +
+			"}");
+		VisitTracker visitTracker = new VisitTracker();
+		visitTracker.addVisitInfo("loc1", "date1", null);
+		visitTracker.addVisitInfo("loc1", "date2", null);
+		visitTracker.addVisitInfo("loc2", "date1", null);
+		visitTracker.addVisitInfo("loc3", "date1", null);
+		String result = objectUnderTest.getProcessedEnvDataCountSparql(Collections.emptyList(), visitTracker);
+		assertEquals(
+			"SELECT (COUNT(DISTINCT ?s) as ?count)" +
+			"WHERE {" +
+			"     ?s a api:LocationVisit ." +
+			"     ?s api:locationID ?locationID ." +
+			"     ?s api:eventDate ?eventDate ." +
+			"     VALUES (?locationID ?eventDate) { (\"loc2\" \"date1\") (\"loc3\" \"date1\") (\"loc1\" \"date2\") (\"loc1\" \"date1\") } ." +
+			"#OFF ?s api:disturbanceEvidenceVars | api:landscapeVars | api:noUnitVars | api:soilVars ?envVar ." +
+			"#OFF ?envVar api:name ?varName ." +
+			"#OFF VALUES ?varName { %ENV_VAR_PLACEHOLDER% } ." +
+			"}", result);
 	}
 	
 	/**

@@ -116,7 +116,7 @@
         api:decimalLongitude  138.321378247854 ;
         api:eventDate         "1990-03-30" ;
         api:geodeticDatum     "GDA94" ;
-        api:locationID        "aekos.org.au/collection/adelaide.edu.au/trend/SATFLB0025" ;
+        api:locationID        "aekos.org.au/collection/sydney.edu.au/DERG/Plum Pudding" ;
         api:month             03 ;
         api:year              1990 .
         

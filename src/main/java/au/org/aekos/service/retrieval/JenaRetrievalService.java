@@ -68,10 +68,9 @@ public class JenaRetrievalService implements RetrievalService {
 	static final String SPECIES_NAMES_PLACEHOLDER = "%SPECIES_NAMES_PLACEHOLDER%";
 	private static final String OFFSET_PLACEHOLDER = "%OFFSET_PLACEHOLDER%";
 	private static final String LIMIT_PLACEHOLDER = "%LIMIT_PLACEHOLDER%";
-	private static final String LOCATION_ID_PLACEHOLDER = "%LOCATION_ID_PLACEHOLDER%";
+	static final String LOCATION_ID_AND_EVENT_DATE_PLACEHOLDER = "%LOCATION_ID_AND_EVENT_DATE_PLACEHOLDER%";
 	private static final String TRAIT_NAME_PLACEHOLDER = "%TRAIT_NAME_PLACEHOLDER%";
 	private static final String ENV_VAR_PLACEHOLDER = "%ENV_VAR_PLACEHOLDER%";
-	private static final String EVENT_DATE_PLACEHOLDER = "%EVENT_DATE_PLACEHOLDER%";
 	private static final String SWITCH_PLACEHOLDER = "#OFF";
 	private static final List<String> ALL_SPECIES = Collections.emptyList();
 	private static final Property NAME_PROP = prop("name");
@@ -272,7 +271,7 @@ public class JenaRetrievalService implements RetrievalService {
 	private SpeciesDataResponse getSpeciesDataJsonPrivate(List<String> speciesNames, int start, int rows) {
 		long startTime = new Date().getTime();
 		List<SpeciesOccurrenceRecord> records = new LinkedList<>();
-		doDarwinCoreResultStream(speciesNames, start, rows, new DarwinCoreResultStreamCallback() {
+		doDarwinCoreResultStream(speciesNames, start, rows, UrlEncodeSpaces.YES, new DarwinCoreResultStreamCallback() {
 			@Override
 			public void handleRecord(SpeciesOccurrenceRecord record) {
 				records.add(record);
@@ -288,7 +287,7 @@ public class JenaRetrievalService implements RetrievalService {
 		void handleRecord(SpeciesOccurrenceRecord record);
 	}
 	
-	private void doDarwinCoreResultStream(List<String> speciesNames, int start, int rows, DarwinCoreResultStreamCallback callback) {
+	private void doDarwinCoreResultStream(List<String> speciesNames, int start, int rows, UrlEncodeSpaces encodeSpaces, DarwinCoreResultStreamCallback callback) {
 		// FIXME make species names case insensitive (try binding an LCASE(?scientificName) and using that
 		String sparql = getProcessedDarwinCoreSparql(speciesNames, start, rows);
 		logger.debug("Species data SPARQL: " + sparql);
@@ -298,7 +297,7 @@ public class JenaRetrievalService implements RetrievalService {
 			if (results.hasNext()) {
 				for (; results.hasNext();) {
 					QuerySolution s = results.next();
-					SpeciesOccurrenceRecord record = processSpeciesDataSolution(s);
+					SpeciesOccurrenceRecord record = processSpeciesDataSolution(s, encodeSpaces);
 					callback.handleRecord(record);
 				}
 			}
@@ -322,16 +321,26 @@ public class JenaRetrievalService implements RetrievalService {
 		return RetrievalResponseHeader.newInstance(jsonResponse);
 	}
 
-	private SpeciesOccurrenceRecord processSpeciesDataSolution(QuerySolution s) {
+	private enum UrlEncodeSpaces {
+		YES,
+		NO;
+		
+		public boolean areSpacesEncoded() {
+			return YES == this;
+		}
+	}
+	
+	private SpeciesOccurrenceRecord processSpeciesDataSolution(QuerySolution s, UrlEncodeSpaces encodeSpaces) {
+		String locationID = encodeSpaces.areSpacesEncoded() ? replaceSpaces(getString(s, LOCATION_ID)) : getString(s, LOCATION_ID);
 		if (hasScientificName(s)) {
 			return new SpeciesOccurrenceRecord(getDouble(s, DECIMAL_LATITUDE),
-				getDouble(s, DECIMAL_LONGITUDE), getString(s, GEODETIC_DATUM), replaceSpaces(getString(s, LOCATION_ID)),
+				getDouble(s, DECIMAL_LONGITUDE), getString(s, GEODETIC_DATUM), locationID,
 				getString(s, SCIENTIFIC_NAME), getInt(s, INDIVIDUAL_COUNT), getString(s, EVENT_DATE),
 				getInt(s, YEAR), getInt(s, MONTH), getString(s, BIBLIOGRAPHIC_CITATION),
 				getString(s, SAMPLING_PROTOCOL));
 		}
 		return new SpeciesOccurrenceRecord(getDouble(s, DECIMAL_LATITUDE),
-			getDouble(s, DECIMAL_LONGITUDE), getString(s, GEODETIC_DATUM), replaceSpaces(getString(s, LOCATION_ID)),
+			getDouble(s, DECIMAL_LONGITUDE), getString(s, GEODETIC_DATUM), locationID,
 			getInt(s, INDIVIDUAL_COUNT), getString(s, EVENT_DATE),
 			getInt(s, YEAR), getInt(s, MONTH), getString(s, BIBLIOGRAPHIC_CITATION),
 			getString(s, SAMPLING_PROTOCOL), getString(s, TAXON_REMARKS));
@@ -378,17 +387,18 @@ public class JenaRetrievalService implements RetrievalService {
 		long startTime = new Date().getTime();
 		List<EnvironmentDataRecord> records = new LinkedList<>();
 		VisitTracker visitTracker = getVisitInfoFor(speciesNames);
-		logger.debug(String.format("Found %d visits", visitTracker.visitSize())); // FIXME is it actually visits yet or still locations?
-		String sparql = getProcessedEnvDataSparql(visitTracker, start, rows);
+		logger.debug(String.format("Found %d visits", visitTracker.visitSize()));
 		AbstractParams params = new EnvironmentDataParams(start, rows, speciesNames, environmentalVariableNames);
+		if (visitTracker.isEmpty()) {
+			return emptyEnvDataResponse(start, rows, startTime, records, params);
+		}
+		String sparql = getProcessedEnvDataSparql(visitTracker, start, rows);
 		logger.debug("Environmental data SPARQL: " + sparql);
 		Query query = QueryFactory.create(sparql);
 		try (QueryExecution qexec = QueryExecutionFactory.create(query, ds)) {
 			ResultSet results = qexec.execSelect();
 			if (!results.hasNext()) {
-				int foundNothing = 0;
-				ResponseHeader responseHeader = ResponseHeader.newInstance(start, rows, foundNothing, startTime, params);
-				return new EnvironmentDataResponse(responseHeader, records);
+				return emptyEnvDataResponse(start, rows, startTime, records, params);
 			}
 			for (; results.hasNext();) {
 				QuerySolution s = results.next();
@@ -400,10 +410,21 @@ public class JenaRetrievalService implements RetrievalService {
 		return new EnvironmentDataResponse(responseHeader, records);
 	}
 
+	private EnvironmentDataResponse emptyEnvDataResponse(int start, int rows, long startTime,
+			List<EnvironmentDataRecord> records, AbstractParams params) {
+		int foundNothing = 0;
+		ResponseHeader responseHeader = ResponseHeader.newInstance(start, rows, foundNothing, startTime, params);
+		return new EnvironmentDataResponse(responseHeader, records);
+	}
+
 	private void processEnvDataSolution(List<String> varNames, List<EnvironmentDataRecord> records, VisitTracker visitTracker, QuerySolution s) {
 		String locationID = getString(s, LOCATION_ID);
 		String eventDate = getString(s, EVENT_DATE);
 		VisitInfo visitInfo = visitTracker.getVisitInfoFor(locationID, eventDate);
+		if (visitInfo == null) {
+			String msg = String.format("Couldn't find visit info for '%s'@'%s'", locationID, eventDate);
+			throw new RuntimeException(msg);
+		}
 		EnvironmentDataRecord record = new EnvironmentDataRecord(getDouble(s, DECIMAL_LATITUDE),
 			getDouble(s, DECIMAL_LONGITUDE), getString(s, GEODETIC_DATUM), replaceSpaces(locationID),
 			getString(s, EVENT_DATE), getInt(s, YEAR), getInt(s, MONTH),
@@ -451,7 +472,7 @@ public class JenaRetrievalService implements RetrievalService {
 
 	VisitTracker getVisitInfoFor(List<String> speciesNames) throws AekosApiRetrievalException {
 		VisitTracker result = new VisitTracker();
-		doDarwinCoreResultStream(speciesNames, 0, Integer.MAX_VALUE, new DarwinCoreResultStreamCallback() {
+		doDarwinCoreResultStream(speciesNames, 0, Integer.MAX_VALUE, UrlEncodeSpaces.NO, new DarwinCoreResultStreamCallback() {
 			@Override
 			public void handleRecord(SpeciesOccurrenceRecord currSpeciesRecord) {
 				String locationID = currSpeciesRecord.getLocationID();
@@ -570,23 +591,19 @@ public class JenaRetrievalService implements RetrievalService {
 		return cleanedResult;
 	}
 	
-	private String getProcessedEnvDataSparql(VisitTracker visitTracker, int offset, int limit) {
-		String locationIDValueList = visitTracker.getLocationIDSparqlParamList();
-		String eventDateValueList = visitTracker.getEventDateSparqlParamList();
-		String processedSparql = environmentDataQueryTemplate
-				.replace(LOCATION_ID_PLACEHOLDER, locationIDValueList)
-				.replace(EVENT_DATE_PLACEHOLDER, eventDateValueList)
+	String getProcessedEnvDataSparql(VisitTracker visitTracker, int offset, int limit) {
+		String locationIDAndEventDateValueList = visitTracker.getLocationIDAndEventDateSparqlParamList();
+		String result = environmentDataQueryTemplate
+				.replace(LOCATION_ID_AND_EVENT_DATE_PLACEHOLDER, locationIDAndEventDateValueList)
 				.replace(OFFSET_PLACEHOLDER, String.valueOf(offset))
 				.replace(LIMIT_PLACEHOLDER, String.valueOf(limit == 0 ? Integer.MAX_VALUE : limit));
-		return processedSparql;
+		return result;
 	}
 	
-	private String getProcessedEnvDataCountSparql(List<String> environmentalVariableNames, VisitTracker visitTracker) {
-		String locationIDValueList = visitTracker.getLocationIDSparqlParamList();
-		String eventDateValueList = visitTracker.getEventDateSparqlParamList();
+	String getProcessedEnvDataCountSparql(List<String> environmentalVariableNames, VisitTracker visitTracker) {
+		String locationIDAndEventDateValueList = visitTracker.getLocationIDAndEventDateSparqlParamList();
 		String processedSparql = environmentDataCountQueryTemplate
-				.replace(LOCATION_ID_PLACEHOLDER, locationIDValueList)
-				.replace(EVENT_DATE_PLACEHOLDER, eventDateValueList);
+				.replace(LOCATION_ID_AND_EVENT_DATE_PLACEHOLDER, locationIDAndEventDateValueList);
 		boolean isEnvVarFilterNotEnabled = environmentalVariableNames.size() == 0;
 		if (isEnvVarFilterNotEnabled) {
 			return processedSparql;
@@ -615,8 +632,16 @@ public class JenaRetrievalService implements RetrievalService {
 		return soln.get(variableName).asLiteral().getDouble();
 	}
 
-	public void setDarwinCoreQueryTemplate(String darwinCoreQueryTemplate) {
+	void setDarwinCoreQueryTemplate(String darwinCoreQueryTemplate) {
 		this.darwinCoreQueryTemplate = darwinCoreQueryTemplate;
+	}
+
+	void setEnvironmentDataQueryTemplate(String environmentDataQueryTemplate) {
+		this.environmentDataQueryTemplate = environmentDataQueryTemplate;
+	}
+
+	void setEnvironmentDataCountQueryTemplate(String environmentDataCountQueryTemplate) {
+		this.environmentDataCountQueryTemplate = environmentDataCountQueryTemplate;
 	}
 
 	static String replaceSpaces(String locationID) {

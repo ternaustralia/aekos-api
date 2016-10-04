@@ -11,8 +11,7 @@ import au.org.aekos.model.VisitInfo;
 public class VisitTrackerTest {
 
 	/**
-	 * Can we get the event date param list when there are multiple event dates per visit
-	 * and duplicates should be removed?
+	 * Can we get the location ID and event date param list?
 	 */
 	@Test
 	public void testGetEventDateSparqlParamList01() {
@@ -21,11 +20,13 @@ public class VisitTrackerTest {
 		objectUnderTest.addVisitInfo("loc1", "2012-02-02", new VisitInfo("not important", "not important"));
 		objectUnderTest.addVisitInfo("loc2", "2012-02-02", new VisitInfo("not important", "not important"));
 		objectUnderTest.addVisitInfo("loc2", "2013-03-03", new VisitInfo("not important", "not important"));
-		String result = objectUnderTest.getEventDateSparqlParamList();
-		assertThat(result, containsString("\"2013-03-03\""));
-		assertThat(result, containsString("\"2012-02-02\""));
-		assertThat(result, containsString("\"2011-01-01\""));
-		assertThat(result.length(), is(38));
+		String result = objectUnderTest.getLocationIDAndEventDateSparqlParamList();
+		System.out.println(result);
+		assertThat(result, containsString("(\"loc1\" \"2011-01-01\")"));
+		assertThat(result, containsString("(\"loc1\" \"2012-02-02\")"));
+		assertThat(result, containsString("(\"loc2\" \"2012-02-02\")"));
+		assertThat(result, containsString("(\"loc2\" \"2013-03-03\")"));
+		assertThat(result.length(), is(87));
 	}
 	
 	/**

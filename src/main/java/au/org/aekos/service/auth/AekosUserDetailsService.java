@@ -6,13 +6,13 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
 
-@Configuration
+@Service
 public class AekosUserDetailsService {
 
     private static final Logger logger = LoggerFactory.getLogger(AekosUserDetailsService.class);
@@ -74,7 +74,7 @@ public class AekosUserDetailsService {
 	}
 	
     private Set<GrantedAuthority> getAuthorities(String user) {
-        Set<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
+        Set<GrantedAuthority> authorities = new HashSet<>();
         
         // Default to a normal USER
         // TODO - add admin user role
