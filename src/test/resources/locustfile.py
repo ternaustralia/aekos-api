@@ -1,6 +1,7 @@
 #
 # Simple load tester for hitting the services and determining performance under load.
 # uses locust.io
+# run with: locust --host=http://api.aekos.org.au
 #
 from locust import HttpLocust, TaskSet, task
 
