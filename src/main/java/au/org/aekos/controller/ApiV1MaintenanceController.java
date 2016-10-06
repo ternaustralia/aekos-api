@@ -35,6 +35,7 @@ import springfox.documentation.annotations.ApiIgnore;
 public class ApiV1MaintenanceController {
 
 	private static final Logger logger = LoggerFactory.getLogger(ApiV1MaintenanceController.class);
+	private static final String TURTLE_MEDIA_TYPE = "text/turtle";
 	
 	@Autowired
 	private IndexingService indexingService;
@@ -48,8 +49,8 @@ public class ApiV1MaintenanceController {
 	@Autowired
 	private AuthStorageService authService;
 	
-	@Value("${aekos-api.index-load-trigger-password}")
-	private String indexLoadPassword;
+	@Value("${aekos-api.maintenance-password}")
+	private String maintenancePassword;
 	
 	@Value("${aekos-api.is-production}")
 	private boolean isProd;
@@ -108,6 +109,17 @@ public class ApiV1MaintenanceController {
 		for (Entry<MetricsStorageService.RequestType, Integer> curr : reqSummaryEntrySet) {
 			responseWriter.write(curr.getKey()  + " called " + curr.getValue() + "\n");
 		}
+	}
+	
+	@RequestMapping(path="/getMetricsDump", method=RequestMethod.GET, produces=TURTLE_MEDIA_TYPE)
+	@ApiIgnore
+    public void getMetricsDump(@RequestParam String password,
+    		HttpServletResponse resp, Writer responseWriter) throws IOException {
+		if (!maintenancePassword.equals(password)) {
+    		write(responseWriter, "These are not the droids you're looking for");
+    		resp.setStatus(HttpStatus.FORBIDDEN.value());
+		}
+		metricsService.writeRdfDump(responseWriter);
 	}
 	
 	@RequestMapping(path="/getAuthSummary", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
@@ -173,7 +185,7 @@ public class ApiV1MaintenanceController {
 	}
     
 	private boolean isProdOrPasswordInvalid(String password, Writer responseWriter, HttpServletResponse resp) {
-    	if (isProd || !indexLoadPassword.equals(password)) {
+    	if (isProd || !maintenancePassword.equals(password)) {
     		write(responseWriter, "These are not the droids you're looking for");
     		resp.setStatus(HttpStatus.FORBIDDEN.value());
     		return true;

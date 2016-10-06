@@ -1,5 +1,6 @@
 package au.org.aekos.service.metric;
 
+import java.io.Writer;
 import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -114,6 +115,11 @@ public class JenaMetricsStorageService implements MetricsStorageService {
 			}
 		}
 		return Collections.unmodifiableMap(result);
+	}
+	
+	@Override
+	public void writeRdfDump(Writer writer) {
+		metricsModel.write(writer, "TURTLE");
 	}
 	
 	private Resource recordRequestHelper(AekosApiAuthKey authKey, RequestType reqType) {

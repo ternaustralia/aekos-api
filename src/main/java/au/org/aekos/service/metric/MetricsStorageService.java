@@ -1,5 +1,6 @@
 package au.org.aekos.service.metric;
 
+import java.io.Writer;
 import java.util.Map;
 
 import au.org.aekos.controller.ApiV1SearchController;
@@ -78,4 +79,11 @@ public interface MetricsStorageService {
 	 * @return	mapping of request type to call count
 	 */
 	Map<RequestType, Integer> getRequestSummary();
+
+	/**
+	 * Writes the whole model as TURTLE RDF to the supplied writer
+	 * 
+	 * @param responseWriter	writer to write to
+	 */
+	void writeRdfDump(Writer writer);
 }

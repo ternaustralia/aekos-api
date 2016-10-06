@@ -1,0 +1,41 @@
+<urn:ccc>  a    <urn:api.aekos.org.au/1.0/metrics#V1_SPECIES_BY_TRAIT> ;
+        <paramSpeciesOrTraitOrEnvVarNames>
+                "lifeForm" , "averageHeight" ;
+        <urn:api.aekos.org.au/1.0/metrics#authKey>
+                "CAFEBABE1234" ;
+        <urn:api.aekos.org.au/1.0/metrics#eventDate>
+                "333"^^<http://www.w3.org/2001/XMLSchema#long> ;
+        <urn:api.aekos.org.au/1.0/metrics#paramRows>
+                "20"^^<http://www.w3.org/2001/XMLSchema#int> ;
+        <urn:api.aekos.org.au/1.0/metrics#paramStart>
+                "20"^^<http://www.w3.org/2001/XMLSchema#int> .
+
+<urn:ddd>  a    <urn:api.aekos.org.au/1.0/metrics#V1_TRAIT_DATA_JSON> ;
+        <urn:api.aekos.org.au/1.0/metrics#authKey>
+                "CAFEBABE1234" ;
+        <urn:api.aekos.org.au/1.0/metrics#eventDate>
+                "444"^^<http://www.w3.org/2001/XMLSchema#long> ;
+        <urn:api.aekos.org.au/1.0/metrics#paramRows>
+                "20"^^<http://www.w3.org/2001/XMLSchema#int> ;
+        <urn:api.aekos.org.au/1.0/metrics#paramSpeciesNames>
+                "Acacia chrysocephala" ;
+        <urn:api.aekos.org.au/1.0/metrics#paramStart>
+                "0"^^<http://www.w3.org/2001/XMLSchema#int> .
+
+<urn:aaa>  a    <urn:api.aekos.org.au/1.0/metrics#V1_TRAIT_VOCAB> ;
+        <urn:api.aekos.org.au/1.0/metrics#authKey>
+                "CAFEBABE1234" ;
+        <urn:api.aekos.org.au/1.0/metrics#eventDate>
+                "111"^^<http://www.w3.org/2001/XMLSchema#long> .
+
+<urn:bbb>  a    <urn:api.aekos.org.au/1.0/metrics#V1_SPECIES_BY_TRAIT> ;
+        <paramSpeciesOrTraitOrEnvVarNames>
+                "lifeForm" , "averageHeight" ;
+        <urn:api.aekos.org.au/1.0/metrics#authKey>
+                "CAFEBABE1234" ;
+        <urn:api.aekos.org.au/1.0/metrics#eventDate>
+                "222"^^<http://www.w3.org/2001/XMLSchema#long> ;
+        <urn:api.aekos.org.au/1.0/metrics#paramRows>
+                "20"^^<http://www.w3.org/2001/XMLSchema#int> ;
+        <urn:api.aekos.org.au/1.0/metrics#paramStart>
+                "0"^^<http://www.w3.org/2001/XMLSchema#int> .

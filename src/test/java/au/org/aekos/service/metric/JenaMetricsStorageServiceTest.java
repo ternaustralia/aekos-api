@@ -129,6 +129,26 @@ public class JenaMetricsStorageServiceTest {
 		assertThat(result.size(), is(0));
 	}
 
+	/**
+	 * Can we write an RDF dump when there are records to dump?
+	 */
+	@Test
+	public void testWriteRdfDump01() throws InvalidKeyException {
+		Dataset metricsDataset = DatasetFactory.create();
+		JenaMetricsStorageService objectUnderTest = jmss(
+				new long[] {111l, 222l, 333l, 444l},
+				metricsDataset,
+				new String[] {"urn:aaa", "urn:bbb", "urn:ccc", "urn:ddd"});
+		AekosApiAuthKey authKey = new AekosApiAuthKey("CAFEBABE1234");
+		objectUnderTest.recordRequest(authKey, RequestType.V1_TRAIT_VOCAB);
+		objectUnderTest.recordRequest(authKey, RequestType.V1_SPECIES_BY_TRAIT, new String[] {"averageHeight", "lifeForm"}, 0, 20);
+		objectUnderTest.recordRequest(authKey, RequestType.V1_SPECIES_BY_TRAIT, new String[] {"averageHeight", "lifeForm"}, 20, 20);
+		objectUnderTest.recordRequest(authKey, RequestType.V1_TRAIT_DATA_JSON, new TraitDataParams(0, 20, Arrays.asList("Acacia chrysocephala"), Collections.emptyList()));
+		StringWriter writer = new StringWriter();
+		objectUnderTest.writeRdfDump(writer);
+		assertEquals(loadMetric("testWriteRdfDump01_expected.ttl"), writer.toString());
+	}
+	
 	private JenaMetricsStorageService jmss(long eventDate, Dataset metricsDataset, String idProviderNextValue) {
 		return jmss(new long[] {eventDate}, metricsDataset, new String[] {idProviderNextValue});
 	}
