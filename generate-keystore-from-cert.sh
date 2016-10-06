@@ -3,6 +3,7 @@ cd `dirname $0`
 trap "echo Exited!; exit;" SIGINT SIGTERM
 USAGE="This script creates a JKS keystore from the Let'sEncrypt certificate and key.
 The password parameter is the password that will be set on the keystore so you can make it up.
+The password is written to a file and automatically read in by the next step so you don't have to remember it.
 usage: $0 <fullchain> <privkey> <keystore password>
    eg: $0 ./fullchain.pem ./privkey.pem roflc0pt3r\n"
 FULLCHAIN=$1
@@ -44,5 +45,5 @@ keytool \
  -alias $CERT_NAME
 rm $PKCS_OUT
 echo "keystore-password=$KS_PW" > $PW_OUT
-echo "Done, wrote keystore to $JKS_OUT. Keystore password is '$KS_PW'."
-echo "Now run the $(tput setaf 2)build-docker-image.sh$(tput sgr0) script to build a container with the keystore in it (maven does the hard work)."
+echo "Done, wrote keystore to $JKS_OUT. Wrote keystore password '$KS_PW' to $PW_OUT."
+echo "Now run the $(tput setaf 2)build-docker-image.sh$(tput sgr0) script to build a container with the keystore in it (maven reads the password and does the hard work)."
