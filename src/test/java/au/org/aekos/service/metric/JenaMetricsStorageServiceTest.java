@@ -9,8 +9,6 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Map;
 
 import org.apache.jena.query.Dataset;
@@ -19,26 +17,52 @@ import org.apache.jena.tdb.TDBFactory;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import au.org.aekos.model.AbstractParams;
-import au.org.aekos.model.TraitDataParams;
 import au.org.aekos.service.auth.AekosApiAuthKey;
 import au.org.aekos.service.auth.AekosApiAuthKey.InvalidKeyException;
-import au.org.aekos.service.metric.MetricsStorageService.RequestType;
+import au.org.aekos.service.metric.RequestRecorder.RequestType;
 
 public class JenaMetricsStorageServiceTest {
 
 	/**
-	 * Can we record a request with retrieval parameters?
+	 * Can we record a request with species?
 	 */
 	@Test
-	public void testRecordRequest01() throws InvalidKeyException {
+	public void testRecordRequestWithSpecies01() throws InvalidKeyException {
 		Dataset metricsDataset = DatasetFactory.create();
 		JenaMetricsStorageService objectUnderTest = jmss(1468917533333l, metricsDataset, "urn:cbfbaccb-43c6-47a9-bddf-93a4c0077963");
-		AbstractParams params = new TraitDataParams(0, 20, Arrays.asList("atriplex vesicaria"), Arrays.asList("Height"));
 		AekosApiAuthKey authKey = new AekosApiAuthKey("CAFEBABE1234");
-		objectUnderTest.recordRequest(authKey, RequestType.V1_TRAIT_DATA_CSV, params);
+		objectUnderTest.recordRequestWithSpecies(authKey, RequestType.V1_TRAIT_BY_SPECIES, new String[] {"atriplex vesicaria"}, 1, 30);
 		String modelTTL = getModelTurtleString(metricsDataset);
-		assertEquals(loadMetric("testRecordResponse01_expected.ttl"), modelTTL);
+		assertEquals(loadMetric("testRecordRequestWithSpecies01_expected.ttl"), modelTTL);
+	}
+	
+	/**
+	 * Can we record a request with traits/env vars?
+	 */
+	@Test
+	public void testRecordRequestWithTraitsOrEnvVars01() throws InvalidKeyException {
+		Dataset metricsDataset = DatasetFactory.create();
+		JenaMetricsStorageService objectUnderTest = jmss(1468917533333l, metricsDataset, "urn:cbfbaccb-43c6-47a9-bddf-93a4c0077963");
+		AekosApiAuthKey authKey = new AekosApiAuthKey("CAFEBABE1234");
+		objectUnderTest.recordRequestWithTraitsOrEnvVars(authKey, RequestType.V1_SPECIES_BY_TRAIT, new String[] {"trait1", "trait2"}, 1, 30);
+		String modelTTL = getModelTurtleString(metricsDataset);
+		assertEquals(loadMetric("testRecordRequestWithTraitsOrEnvVars01_expected.ttl"), modelTTL);
+	}
+	
+	/**
+	 * Can we record in a TDB instance using transactions?
+	 */
+	@Test
+	public void testRecordRequest01() throws Throwable {
+		Path tempDir = Files.createTempDirectory("testRecordRequest05");
+		tempDir.toFile().deleteOnExit();
+		Dataset metricsDataset = TDBFactory.createDataset(tempDir.toString());
+		JenaMetricsStorageService objectUnderTest = jmss(1468917533333l, metricsDataset, "urn:cbfbaccb-43c6-47a9-bddf-93a4c0077963");
+		AekosApiAuthKey authKey = new AekosApiAuthKey("CAFEBABE1234");
+		objectUnderTest.recordRequest(authKey, RequestType.V1_TRAIT_VOCAB);
+		Map<RequestType, Integer> result = objectUnderTest.getRequestSummary();
+		assertThat(result.size(), is(1));
+		assertThat(result.get(RequestType.V1_TRAIT_VOCAB), is(1));
 	}
 
 	/**
@@ -75,25 +99,10 @@ public class JenaMetricsStorageServiceTest {
 		Dataset metricsDataset = DatasetFactory.create();
 		JenaMetricsStorageService objectUnderTest = jmss(1468955533888l, metricsDataset, "urn:cbfbaccb-43c6-47a9-bddf-93a4c0077aaa");
 		AekosApiAuthKey authKey = new AekosApiAuthKey("CAFEBABE1234");
-		objectUnderTest.recordRequest(authKey, RequestType.V1_SPECIES_BY_TRAIT, new String[] {"averageHeight", "lifeForm"}, 100, 20);
+		objectUnderTest.recordRequest(authKey, RequestType.V1_SPECIES_BY_TRAIT, new String[] {"Acacia chrysella", "Acacia chrysocephala"},
+				new String[] {"averageHeight", "lifeForm"}, 100, 20);
 		String modelTTL = getModelTurtleString(metricsDataset);
 		assertEquals(loadMetric("testRecordResponse04_expected.ttl"), modelTTL);
-	}
-	
-	/**
-	 * Can we record in a TDB instance using transactions?
-	 */
-	@Test
-	public void testRecordRequest05() throws Throwable {
-		Path tempDir = Files.createTempDirectory("testRecordRequest05");
-		tempDir.toFile().deleteOnExit();
-		Dataset metricsDataset = TDBFactory.createDataset(tempDir.toString());
-		JenaMetricsStorageService objectUnderTest = jmss(1468917533333l, metricsDataset, "urn:cbfbaccb-43c6-47a9-bddf-93a4c0077963");
-		AekosApiAuthKey authKey = new AekosApiAuthKey("CAFEBABE1234");
-		objectUnderTest.recordRequest(authKey, RequestType.V1_TRAIT_VOCAB);
-		Map<RequestType, Integer> result = objectUnderTest.getRequestSummary();
-		assertThat(result.size(), is(1));
-		assertThat(result.get(RequestType.V1_TRAIT_VOCAB), is(1));
 	}
 	
 	/**
@@ -108,9 +117,9 @@ public class JenaMetricsStorageServiceTest {
 				new String[] {"urn:aaa", "urn:bbb", "urn:ccc", "urn:ddd"});
 		AekosApiAuthKey authKey = new AekosApiAuthKey("CAFEBABE1234");
 		objectUnderTest.recordRequest(authKey, RequestType.V1_TRAIT_VOCAB);
-		objectUnderTest.recordRequest(authKey, RequestType.V1_SPECIES_BY_TRAIT, new String[] {"averageHeight", "lifeForm"}, 0, 20);
-		objectUnderTest.recordRequest(authKey, RequestType.V1_SPECIES_BY_TRAIT, new String[] {"averageHeight", "lifeForm"}, 20, 20);
-		objectUnderTest.recordRequest(authKey, RequestType.V1_TRAIT_DATA_JSON, new TraitDataParams(0, 20, Arrays.asList("Acacia chrysocephala"), Collections.emptyList()));
+		objectUnderTest.recordRequestWithTraitsOrEnvVars(authKey, RequestType.V1_SPECIES_BY_TRAIT, new String[] {"averageHeight", "lifeForm"}, 1, 20);
+		objectUnderTest.recordRequestWithTraitsOrEnvVars(authKey, RequestType.V1_SPECIES_BY_TRAIT, new String[] {"averageHeight", "lifeForm"}, 2, 20);
+		objectUnderTest.recordRequest(authKey, RequestType.V1_TRAIT_DATA_JSON, new String[] {"Acacia chrysocephala"}, new String[] {"trait1"}, 0, 20);
 		Map<RequestType, Integer> result = objectUnderTest.getRequestSummary();
 		assertThat(result.size(), is(3));
 		assertThat(result.get(RequestType.V1_TRAIT_VOCAB), is(1));
@@ -141,9 +150,9 @@ public class JenaMetricsStorageServiceTest {
 				new String[] {"urn:aaa", "urn:bbb", "urn:ccc", "urn:ddd"});
 		AekosApiAuthKey authKey = new AekosApiAuthKey("CAFEBABE1234");
 		objectUnderTest.recordRequest(authKey, RequestType.V1_TRAIT_VOCAB);
-		objectUnderTest.recordRequest(authKey, RequestType.V1_SPECIES_BY_TRAIT, new String[] {"averageHeight", "lifeForm"}, 0, 20);
-		objectUnderTest.recordRequest(authKey, RequestType.V1_SPECIES_BY_TRAIT, new String[] {"averageHeight", "lifeForm"}, 20, 20);
-		objectUnderTest.recordRequest(authKey, RequestType.V1_TRAIT_DATA_JSON, new TraitDataParams(0, 20, Arrays.asList("Acacia chrysocephala"), Collections.emptyList()));
+		objectUnderTest.recordRequestWithTraitsOrEnvVars(authKey, RequestType.V1_SPECIES_BY_TRAIT, new String[] {"averageHeight", "lifeForm"}, 1, 20);
+		objectUnderTest.recordRequestWithTraitsOrEnvVars(authKey, RequestType.V1_SPECIES_BY_TRAIT, new String[] {"averageHeight", "lifeForm"}, 2, 20);
+		objectUnderTest.recordRequest(authKey, RequestType.V1_TRAIT_DATA_JSON, new String[] {"Acacia chrysocephala"}, new String[] {"trait1"}, 0, 20);
 		StringWriter writer = new StringWriter();
 		objectUnderTest.writeRdfDump(writer);
 		assertEquals(loadMetric("testWriteRdfDump01_expected.ttl"), writer.toString());

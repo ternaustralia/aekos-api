@@ -22,8 +22,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import au.org.aekos.Application;
-import au.org.aekos.model.AbstractParams;
-import au.org.aekos.model.SpeciesDataParams;
 import au.org.aekos.service.auth.AekosApiAuthKey;
 
 @Service
@@ -32,7 +30,13 @@ public class JenaMetricsStorageService implements MetricsStorageService {
 	public static final String METRICS_NAMESPACE_V1_0 = Application.API_NAMESPACE_V1_0 + "metrics#";
 	private static final String AUTH_KEY_PROP = METRICS_NAMESPACE_V1_0 + "authKey";
 	private static final String EVENT_DATE_PROP = METRICS_NAMESPACE_V1_0 + "eventDate";
-	private static final String SPECIES_OR_TRAIT_OR_ENVVAR_NAMES_PROP = "paramSpeciesOrTraitOrEnvVarNames";
+	private static final String TRAIT_OR_ENVVAR_NAMES_PROP = METRICS_NAMESPACE_V1_0 + "paramTraitOrEnvVarNames";
+	private static final String PAGE_NUM = METRICS_NAMESPACE_V1_0 + "paramPageNum";
+	private static final String PAGE_SIZE = METRICS_NAMESPACE_V1_0 + "paramPageSize";
+	private static final String SPECIES_NAMES_PROP = METRICS_NAMESPACE_V1_0 + "paramSpeciesNames";
+	private static final String START_PROP = JenaMetricsStorageService.METRICS_NAMESPACE_V1_0 + "paramStart";
+	private static final String ROWS_PROP = JenaMetricsStorageService.METRICS_NAMESPACE_V1_0 + "paramRows";
+	private static final String SPECIES_AUTOCOMPLETE_FRAGMENT = METRICS_NAMESPACE_V1_0 + "fragment";
 	private static final String COUNT = "count";
 	private static final String REQ_TYPE = "reqType";
 	private static final String REQ_SUMMARY_SPARQL =
@@ -61,10 +65,34 @@ public class JenaMetricsStorageService implements MetricsStorageService {
 	}
 
 	@Override
-	public void recordRequest(AekosApiAuthKey authKey, RequestType reqType, AbstractParams params) {
+	public void recordRequestWithSpecies(AekosApiAuthKey authKey, RequestType reqType, String[] speciesNames,
+			int pageNum, int pageSize) {
 		startTransaction();
 		Resource subject = recordRequestHelper(authKey, reqType);
-		params.appendTo(subject, metricsModel);
+		Property speciesNamesProp = metricsModel.createProperty(SPECIES_NAMES_PROP);
+		for (String curr : speciesNames) {
+			metricsModel.add(subject, speciesNamesProp, curr);
+		}
+		Property pageNumProp = metricsModel.createProperty(PAGE_NUM);
+		metricsModel.addLiteral(subject, pageNumProp, pageNum);
+		Property pageSizeProp = metricsModel.createProperty(PAGE_SIZE);
+		metricsModel.addLiteral(subject, pageSizeProp, pageSize);
+		endTransaction();
+	}
+
+	@Override
+	public void recordRequestWithTraitsOrEnvVars(AekosApiAuthKey authKey, RequestType reqType,
+			String[] traitOrEnvVarNames, int pageNum, int pageSize) {
+		startTransaction();
+		Resource subject = recordRequestHelper(authKey, reqType);
+		Property traitsOrEnvVarsProp = metricsModel.createProperty(TRAIT_OR_ENVVAR_NAMES_PROP);
+		for (String curr : traitOrEnvVarNames) {
+			metricsModel.add(subject, traitsOrEnvVarsProp, curr);
+		}
+		Property pageNumProp = metricsModel.createProperty(PAGE_NUM);
+		metricsModel.addLiteral(subject, pageNumProp, pageNum);
+		Property pageSizeProp = metricsModel.createProperty(PAGE_SIZE);
+		metricsModel.addLiteral(subject, pageSizeProp, pageSize);
 		endTransaction();
 	}
 	
@@ -72,7 +100,7 @@ public class JenaMetricsStorageService implements MetricsStorageService {
 	public void recordRequest(AekosApiAuthKey authKey, RequestType reqType, String[] speciesNames) {
 		startTransaction();
 		Resource subject = recordRequestHelper(authKey, reqType);
-		Property speciesNamesProp = metricsModel.createProperty(SpeciesDataParams.SPECIES_NAMES_PROP);
+		Property speciesNamesProp = metricsModel.createProperty(SPECIES_NAMES_PROP);
 		for (String curr : speciesNames) {
 			metricsModel.add(subject, speciesNamesProp, curr);
 		}
@@ -80,18 +108,31 @@ public class JenaMetricsStorageService implements MetricsStorageService {
 	}
 	
 	@Override
-	public void recordRequest(AekosApiAuthKey authKey, RequestType reqType, String[] speciesOrTraitOrEnvVarNames,
-			int start, int rows) {
+	public void recordRequest(AekosApiAuthKey authKey, RequestType reqType, String[] speciesNames,
+			String[] traitOrEnvVarNames, int start, int rows) {
 		startTransaction();
 		Resource subject = recordRequestHelper(authKey, reqType);
-		Property namesProp = metricsModel.createProperty(SPECIES_OR_TRAIT_OR_ENVVAR_NAMES_PROP);
-		for (String curr : speciesOrTraitOrEnvVarNames) {
-			metricsModel.add(subject, namesProp, curr);
+		Property speciesNamesProp = metricsModel.createProperty(SPECIES_NAMES_PROP);
+		for (String curr : speciesNames) {
+			metricsModel.add(subject, speciesNamesProp, curr);
 		}
-		Property startProp = metricsModel.createProperty(AbstractParams.START_PROP);
+		Property traitOrEnvVarsProp = metricsModel.createProperty(TRAIT_OR_ENVVAR_NAMES_PROP);
+		for (String curr : traitOrEnvVarNames) {
+			metricsModel.add(subject, traitOrEnvVarsProp, curr);
+		}
+		Property startProp = metricsModel.createProperty(START_PROP);
 		metricsModel.addLiteral(subject, startProp, start);
-		Property rowsProp = metricsModel.createProperty(AbstractParams.ROWS_PROP);
+		Property rowsProp = metricsModel.createProperty(ROWS_PROP);
 		metricsModel.addLiteral(subject, rowsProp, rows);
+		endTransaction();
+	}
+	
+	@Override
+	public void recordRequestAutocomplete(AekosApiAuthKey authKey, RequestType reqType, String speciesFragment) {
+		startTransaction();
+		Resource subject = recordRequestHelper(authKey, reqType);
+		Property autocompleteFragmentProp = metricsModel.createProperty(SPECIES_AUTOCOMPLETE_FRAGMENT);
+		metricsModel.add(subject, autocompleteFragmentProp, speciesFragment);
 		endTransaction();
 	}
 

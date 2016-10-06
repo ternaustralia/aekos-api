@@ -1,0 +1,12 @@
+<urn:cbfbaccb-43c6-47a9-bddf-93a4c0077963>
+        a       <urn:api.aekos.org.au/1.0/metrics#V1_TRAIT_BY_SPECIES> ;
+        <urn:api.aekos.org.au/1.0/metrics#authKey>
+                "CAFEBABE1234" ;
+        <urn:api.aekos.org.au/1.0/metrics#eventDate>
+                "1468917533333"^^<http://www.w3.org/2001/XMLSchema#long> ;
+        <urn:api.aekos.org.au/1.0/metrics#paramPageNum>
+                "1"^^<http://www.w3.org/2001/XMLSchema#int> ;
+        <urn:api.aekos.org.au/1.0/metrics#paramPageSize>
+                "30"^^<http://www.w3.org/2001/XMLSchema#int> ;
+        <urn:api.aekos.org.au/1.0/metrics#paramSpeciesNames>
+                "atriplex vesicaria" .

@@ -1,31 +1,38 @@
 package au.org.aekos.service.metric;
 
-import java.io.Writer;
-import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
 import javax.annotation.Resource;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import au.org.aekos.model.AbstractParams;
 import au.org.aekos.service.auth.AekosApiAuthKey;
 
 @Component
-public class MetricsQueue implements MetricsStorageService {
+public class MetricsQueue implements RequestRecorder {
 
 	private static final Logger logger = LoggerFactory.getLogger(MetricsQueue.class);
 	
 	@Resource(name="metricsInnerQueue")
 	private BlockingQueue<MetricsQueueItem> queue;
-	
+
 	@Override
-	public void recordRequest(AekosApiAuthKey authKey, RequestType reqType, AbstractParams params) {
+	public void recordRequestWithSpecies(AekosApiAuthKey authKey, RequestType reqType, String[] speciesNames,
+			int pageNum, int pageSize) {
 		try {
-			queue.put(new MetricsQueueItem(authKey, reqType, params));
+			queue.put(new MetricsQueueItem(authKey, reqType, speciesNames, pageNum, pageSize));
+		} catch (InterruptedException e) {
+			handleInterruption(e);
+		}
+	}
+
+	@Override
+	public void recordRequestWithTraitsOrEnvVars(AekosApiAuthKey authKey, RequestType reqType,
+			String[] traitOrEnvVarNames, int pageNum, int pageSize) {
+		try {
+			queue.put(new MetricsQueueItem(authKey, reqType, pageNum, pageSize, traitOrEnvVarNames));
 		} catch (InterruptedException e) {
 			handleInterruption(e);
 		}
@@ -50,10 +57,18 @@ public class MetricsQueue implements MetricsStorageService {
 	}
 
 	@Override
-	public void recordRequest(AekosApiAuthKey authKey, RequestType reqType, String[] speciesOrTraitOrEnvVarNames,
-			int start, int rows) {
+	public void recordRequest(AekosApiAuthKey authKey, RequestType reqType, String[] speciesNames, String[] traitOrEnvVarNames, int start, int rows) {
 		try {
-			queue.put(new MetricsQueueItem(authKey, reqType, speciesOrTraitOrEnvVarNames, start, rows));
+			queue.put(new MetricsQueueItem(authKey, reqType, speciesNames, traitOrEnvVarNames, start, rows));
+		} catch (InterruptedException e) {
+			handleInterruption(e);
+		}
+	}
+	
+	@Override
+	public void recordRequestAutocomplete(AekosApiAuthKey authKey, RequestType reqType, String speciesFragment) {
+		try {
+			queue.put(new MetricsQueueItem(authKey, reqType, speciesFragment));
 		} catch (InterruptedException e) {
 			handleInterruption(e);
 		}
@@ -61,15 +76,5 @@ public class MetricsQueue implements MetricsStorageService {
 	
 	private void handleInterruption(InterruptedException e) {
 		logger.warn("Interrupted while trying to record metrics", e);
-	}
-
-	@Override
-	public Map<RequestType, Integer> getRequestSummary() {
-		throw new NotImplementedException("This implementation is only intended to support recording requests");
-	}
-
-	@Override
-	public void writeRdfDump(Writer writer) {
-		throw new NotImplementedException("This implementation is only intended to support recording requests");
 	}
 }

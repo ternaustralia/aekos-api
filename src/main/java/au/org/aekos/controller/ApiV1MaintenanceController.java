@@ -26,7 +26,7 @@ import au.org.aekos.service.auth.AuthStorageService;
 import au.org.aekos.service.auth.AuthStorageService.KeySummary;
 import au.org.aekos.service.index.IndexingService;
 import au.org.aekos.service.metric.MetricsStorageService;
-import au.org.aekos.service.metric.MetricsStorageService.RequestType;
+import au.org.aekos.service.metric.RequestRecorder.RequestType;
 import au.org.aekos.service.search.SearchService;
 import springfox.documentation.annotations.ApiIgnore;
 
