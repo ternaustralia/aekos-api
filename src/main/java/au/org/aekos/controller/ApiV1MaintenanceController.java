@@ -70,13 +70,13 @@ public class ApiV1MaintenanceController {
     	}
     	try {
     		String finishedMessage = indexingService.doIndexing();
-			write(responseWriter, finishedMessage);
+    		logAndWriteToResponse(responseWriter, finishedMessage);
 			String path = indexPath;
 			if (SystemUtils.IS_OS_WINDOWS) {
 				path = windowsIndexPath;
 			}
-			write(responseWriter, "Wrote index to " + path);
-			write(responseWriter, "You need to restart the app so it can read the new index");
+			logAndWriteToResponse(responseWriter, "Wrote index to " + path);
+			logAndWriteToResponse(responseWriter, "You need to restart the app so it can read the new index"); // FIXME make it so you don't have to restart
 		} catch (Throwable e) {
 			reportIndexLoadFailure(resp, responseWriter, e);
 		}
@@ -165,6 +165,11 @@ public class ApiV1MaintenanceController {
 
     private void writeBlankLine(Writer responseWriter) {
 		write(responseWriter, "");
+	}
+    
+    private void logAndWriteToResponse(Writer responseWriter, String msg) {
+		write(responseWriter, msg);
+		logger.info(msg);
 	}
     
 	private boolean isProdOrPasswordInvalid(String password, Writer responseWriter, HttpServletResponse resp) {

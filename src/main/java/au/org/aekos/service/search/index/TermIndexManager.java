@@ -19,5 +19,6 @@ public interface TermIndexManager {
 	void releaseIndexSearcher(IndexSearcher searcher) throws IOException;
 	
 	public void closeTermIndex() throws IOException;
-	
+
+	void resetSearcher() throws IOException;
 }

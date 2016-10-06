@@ -35,4 +35,6 @@ public interface LoaderClient {
 	 * @param speciesCount 	number of records that the system holds for this species
 	 */
 	public void addSpecies(String speciesName, int speciesCount) throws IOException;
+
+	void deleteAll() throws IOException;
 }

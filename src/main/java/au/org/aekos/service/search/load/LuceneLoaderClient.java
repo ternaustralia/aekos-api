@@ -65,8 +65,18 @@ public class LuceneLoaderClient implements LoaderClient {
 			indexWriter.flush();
 			indexWriter.close();
 			indexManager.flushDeletions();
+//			indexManager.resetSearcher(); // FIXME check if this works, should mean we don't have to restart the app
 		} catch (IOException e) {
 			logger.error("Failed to end the load process", e);
+		}
+	}
+	
+	@Override
+	public void deleteAll() throws IOException {
+		try {
+			indexWriter.deleteAll();
+		} catch (NullPointerException e) {
+			throw new RuntimeException("Have you called beginLoad() yet?", e);
 		}
 	}
 	

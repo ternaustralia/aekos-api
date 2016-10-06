@@ -27,10 +27,10 @@ public class LuceneIndexingService implements IndexingService {
 	@Override
 	public String doIndexing() throws IOException {
 		int totalRecordCount = retrievalService.getTotalSpeciesRecordsHeld();
-		ProgressTracker tracker = new ProgressTracker(10000, totalRecordCount);
 		Map<String, Integer> speciesCounts = new HashMap<>();
-		// FIXME clear index before starting
 		loader.beginLoad();
+		loader.deleteAll();
+		ProgressTracker tracker = new ProgressTracker(totalRecordCount);
 		retrievalService.getIndexStream(new IndexLoaderCallback() {
 			@Override
 			public void accept(IndexLoaderRecord record) {

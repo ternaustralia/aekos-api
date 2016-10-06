@@ -86,10 +86,10 @@ public class SwaggerConfig {
 				"ÆKOS REST API",
 				getDescription(),
 				apiVersion,
-				"TODO - ÆKOS API TOS",
-				new Contact("TERN Ecoinformatics", "http://www.aekos.org.au", "api@aekos.org.au"),
-				"TODO - License of API",
-				"https://api.aekos.org.au");
+				"http://www.ecoinformatics.org.au/licensing_and_attributions",
+				new Contact("TERN Ecoinformatics", "http://www.ecoinformatics.org.au", "api@aekos.org.au"),
+				"Licensing and attributions",
+				"http://www.ecoinformatics.org.au/licensing_and_attributions");
 		return apiInfo;
 	}
 

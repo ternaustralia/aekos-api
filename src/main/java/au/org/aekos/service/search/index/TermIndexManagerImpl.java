@@ -6,11 +6,8 @@ import java.nio.file.Paths;
 
 import org.apache.commons.lang.SystemUtils;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.index.IndexableField;
-import org.apache.lucene.index.Term;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.SearcherFactory;
 import org.apache.lucene.search.SearcherManager;
@@ -43,11 +40,18 @@ public class TermIndexManagerImpl implements TermIndexManager, DisposableBean {
 	@Value("${lucene.index.writer.commitLimit}")
 	private int commitLimit = 1000;
 
+	@Override
 	public Directory getTermIndex() throws IOException {
 		if(termIndex == null){
 			initialiseIndexDirectory();
 		}
 		return termIndex;
+	}
+	
+	@Override
+	public void resetSearcher() throws IOException {
+		searcherManager.close();
+		searcherManager = null;
 	}
 	
 	private void initialiseIndexDirectory() throws IOException{
@@ -63,7 +67,7 @@ public class TermIndexManagerImpl implements TermIndexManager, DisposableBean {
 		}
 	}
 
-	public String getIndexPath(){
+	private String getIndexPath(){
 		if(SystemUtils.IS_OS_WINDOWS){
 			return windowsIndexPath;
 		}
@@ -71,7 +75,7 @@ public class TermIndexManagerImpl implements TermIndexManager, DisposableBean {
 	}
 	
 	//Ensure index path exists, if not attempt to create it.
-	public boolean ensureIndexPathExists(){
+	private boolean ensureIndexPathExists(){
 		if(Files.isDirectory(Paths.get(getIndexPath()))){
 			return true;
 		}
@@ -102,20 +106,12 @@ public class TermIndexManagerImpl implements TermIndexManager, DisposableBean {
 		return searcherManager.acquire();
 	}
 	
+	@Override
 	public void releaseIndexSearcher(IndexSearcher searcher) throws IOException{
 		searcherManager.release(searcher);
 	}
-	
-	public void writeDocument(Document doc, IndexWriter writer) throws IOException{
-		IndexableField uidField = doc.getField(IndexConstants.FLD_UNIQUE_ID);
-		if(uidField != null){
-		    String uid = uidField.stringValue();
-		    writer.updateDocument(new Term("id", uid), doc);
-		}else{
-			writer.addDocument(doc);
-		}
-	}
 
+	@Override
 	public void closeTermIndex() throws IOException{
 		if(termIndex != null){
 			try {

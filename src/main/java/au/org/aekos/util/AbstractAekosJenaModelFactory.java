@@ -34,15 +34,22 @@ public abstract class AbstractAekosJenaModelFactory implements AekosJenaModelFac
 			logger.info("Using in-memory " + getModelName() + " model");
 			dataset = DatasetFactory.create();
 			instance = dataset.getDefaultModel();
+			logTransactionSupport();
 			return instance;
 		}
 		logger.info("Using disk based " + getModelName() + " model at " + getModelPath());
 		dataset = TDBFactory.createDataset(getModelPath());
 		instance = dataset.getDefaultModel();
+		logTransactionSupport();
 		doPostConstructStats(instance);
 		return instance;
 	}
 	
+	private void logTransactionSupport() {
+		String transactionSupportFragment = dataset.supportsTransactions() ? "DOES" : "DOES NOT";
+		logger.warn(String.format("The %s model %s support transactions.", getModelName(), transactionSupportFragment));
+	}
+
 	@Override
 	public Dataset getDatasetInstance() {
 		getInstance();

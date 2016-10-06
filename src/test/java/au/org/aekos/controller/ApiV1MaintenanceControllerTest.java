@@ -10,7 +10,7 @@ public class ApiV1MaintenanceControllerTest {
 	@Test
 	public void testAddRecord01() {
 		int total = 10;
-		ProgressTracker objectUnderTest = new ProgressTracker(1, total);
+		ProgressTracker objectUnderTest = new ProgressTracker(total);
 		for (int i = 0; i < total; i++) {
 			objectUnderTest.addRecord();
 		}
