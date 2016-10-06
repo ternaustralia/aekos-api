@@ -1,16 +1,22 @@
 #
 # Simple load tester for hitting the services and determining performance under load.
 # uses locust.io
-# run with: locust --host=http://api.aekos.org.au
+# run with something like one of:
+#    locust --host=https://api.aekos.org.au
+#    locust --host=https://localhost:8443
 #
 from locust import HttpLocust, TaskSet, task
 
 class MyTaskSet(TaskSet):
-    @task
-    def my_task(self):
-        print "executing my_task"
-	#self.client.get("https://api.aekos.org.au/v1/speciesAutocomplete.json?q=acacia")
-	self.client.get("https://api.aekos.org.au/v1/speciesData.json?speciesName=Acacia%20aneura%20var.%20intermedia&rows=20")
+
+  def on_start(self):
+    self.client.verify = False
+
+  @task
+  def my_task(self):
+    print "executing my_task"
+    #self.client.get("/v1/speciesAutocomplete.json?q=acacia")
+    self.client.get("/v1/speciesData.json?speciesName=Acacia%20aneura%20var.%20intermedia&rows=20")
 
 
 class MyLocust(HttpLocust):

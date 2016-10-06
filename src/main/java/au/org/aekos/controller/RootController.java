@@ -1,6 +1,7 @@
 package au.org.aekos.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.web.ErrorController;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,6 +13,7 @@ import au.org.aekos.service.metric.MetricsStorageService;
 public class RootController implements ErrorController {
 	
 	@Autowired
+	@Qualifier("jenaMetricsStorageService")
 	private MetricsStorageService metricsService;
 	
 	@RequestMapping(path="/doco")

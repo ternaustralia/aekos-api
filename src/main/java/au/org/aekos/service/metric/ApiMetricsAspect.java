@@ -10,6 +10,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.actuate.metrics.CounterService;
 import org.springframework.stereotype.Component;
 
@@ -46,7 +47,8 @@ public class ApiMetricsAspect {
     }
     
 	@Autowired
-    private MetricsStorageService metricStore;
+	@Qualifier("metricsQueue")
+	private MetricsStorageService metricsQueue;
 
     // GetEnvironmentBySpecies
     @AfterReturning(pointcut = "execution(* au.org.aekos.controller.ApiV1SearchController.getEnvironmentBySpecies(..))")
@@ -57,7 +59,7 @@ public class ApiMetricsAspect {
         	String[] speciesNames = (String[]) joinPoint.getArgs()[0];
 			logMethodCall(" *** GetEnvironmentBySpecies called.. " + Arrays.toString(speciesNames));
 			
-        	metricStore.recordRequest(new AekosApiAuthKey("ddd"), RequestType.V1_SPECIES_AUTOCOMPLETE, speciesNames);
+        	metricsQueue.recordRequest(new AekosApiAuthKey("TODO"), RequestType.V1_SPECIES_AUTOCOMPLETE, speciesNames);
 		} catch (InvalidKeyException e) {
 			logger.error("GetEnvironmentBySpecies bad apiKey exception");
 		}
@@ -77,7 +79,7 @@ public class ApiMetricsAspect {
         	String[] traitNames = (String[]) joinPoint.getArgs()[0];
 			logMethodCall(" *** GetSpeciesByTrait called.. " + Arrays.toString(traitNames));
 			
-        	metricStore.recordRequest(new AekosApiAuthKey("ddd"), RequestType.V1_SPECIES_AUTOCOMPLETE, traitNames);
+        	metricsQueue.recordRequest(new AekosApiAuthKey("TODO"), RequestType.V1_SPECIES_AUTOCOMPLETE, traitNames);
 		} catch (InvalidKeyException e) {
 			logger.error("GetSpeciesByTrait bad apiKey exception");
 		}
@@ -97,7 +99,7 @@ public class ApiMetricsAspect {
         	String[] speciesNames = (String[]) joinPoint.getArgs()[0];
 			logMethodCall(" *** GetSpeciesSummary called.. " + Arrays.toString(speciesNames));
 			
-        	metricStore.recordRequest(new AekosApiAuthKey("ddd"), RequestType.V1_SPECIES_AUTOCOMPLETE, speciesNames );
+        	metricsQueue.recordRequest(new AekosApiAuthKey("TODO"), RequestType.V1_SPECIES_AUTOCOMPLETE, speciesNames );
 		} catch (InvalidKeyException e) {
 			logger.error("GetSpeciesSummary bad apiKey exception");
 		}
@@ -117,7 +119,7 @@ public class ApiMetricsAspect {
         	String[] speciesNames = (String[]) joinPoint.getArgs()[0];
 			logMethodCall(" *** GetTraitsBySpecies called.. " + Arrays.toString(speciesNames));
 			
-        	metricStore.recordRequest(new AekosApiAuthKey("ddd"), RequestType.V1_SPECIES_AUTOCOMPLETE, speciesNames );
+        	metricsQueue.recordRequest(new AekosApiAuthKey("TODO"), RequestType.V1_SPECIES_AUTOCOMPLETE, speciesNames );
 		} catch (InvalidKeyException e) {
 			logger.error("GetTraitsBySpecies bad apiKey exception");
 		}
@@ -136,7 +138,7 @@ public class ApiMetricsAspect {
         counterService.increment("services.api.ApiV1SearchController.getTraitVocab.invoked");
         try {
 			logMethodCall(" *** GetTraitVocab called..");
-        	metricStore.recordRequest(new AekosApiAuthKey("ddd"), RequestType.V1_TRAIT_VOCAB);
+        	metricsQueue.recordRequest(new AekosApiAuthKey("TODO"), RequestType.V1_TRAIT_VOCAB);
 		} catch (InvalidKeyException e) {
 			logger.error("GetTraitVocab bad apiKey exception");
 		}
@@ -155,7 +157,7 @@ public class ApiMetricsAspect {
         counterService.increment("services.api.ApiV1SearchController.getEnvironmentalVariableVocab.invoked");
 		try {
 			logMethodCall(" *** GetEnvironmentalVariableVocab called..");
-			metricStore.recordRequest(new AekosApiAuthKey("ddd"), RequestType.V1_ENVVAR_VOCAB);
+			metricsQueue.recordRequest(new AekosApiAuthKey("TODO"), RequestType.V1_ENVVAR_VOCAB);
 		} catch (InvalidKeyException e) {
 			logger.error("GetEnvironmentalVariableVocab bad apiKey exception");
 		}
@@ -175,7 +177,7 @@ public class ApiMetricsAspect {
         	String speciesStub = (String) joinPoint.getArgs()[0];
 			logMethodCall(" *** SpeciesAutocomplete called.. " + speciesStub);
 			
-        	metricStore.recordRequest(new AekosApiAuthKey("ddd"), RequestType.V1_SPECIES_AUTOCOMPLETE, new String[] { speciesStub });
+        	metricsQueue.recordRequest(new AekosApiAuthKey("TODO"), RequestType.V1_SPECIES_AUTOCOMPLETE, new String[] { speciesStub });
 		} catch (InvalidKeyException e) {
 			logger.error("SpeciesAutocomplete bad apiKey exception");
 		}
@@ -198,7 +200,7 @@ public class ApiMetricsAspect {
         	String[] speciesNames = (String[]) joinPoint.getArgs()[0];
         	String[] envNames = (String[]) joinPoint.getArgs()[1];
 			logMethodCall(" *** environmentDataDotCsv called.. " + Arrays.toString(speciesNames) + "," + Arrays.toString(envNames));
-        	metricStore.recordRequest(new AekosApiAuthKey("ddd"), RequestType.V1_ENVIRONMENT_DATA_CSV, speciesNames );
+        	metricsQueue.recordRequest(new AekosApiAuthKey("TODO"), RequestType.V1_ENVIRONMENT_DATA_CSV, speciesNames );
 		} catch (InvalidKeyException e) {
 			logger.error("environmentDataDotCsv bad apiKey exception");
 		}
@@ -217,7 +219,7 @@ public class ApiMetricsAspect {
         	String[] speciesNames = (String[]) joinPoint.getArgs()[0];
         	String[] envNames = (String[]) joinPoint.getArgs()[1];
 			logMethodCall(" *** environmentDataDotJson called.. " + Arrays.toString(speciesNames) + "," + Arrays.toString(envNames));
-        	metricStore.recordRequest(new AekosApiAuthKey("ddd"), RequestType.V1_ENVIRONMENT_DATA_JSON, speciesNames );
+        	metricsQueue.recordRequest(new AekosApiAuthKey("TODO"), RequestType.V1_ENVIRONMENT_DATA_JSON, speciesNames );
 		} catch (InvalidKeyException e) {
 			logger.error("environmentDataDotJson bad apiKey exception");
 		}
@@ -239,7 +241,7 @@ public class ApiMetricsAspect {
         try {
         	String[] speciesNames = (String[]) joinPoint.getArgs()[0];
 			logMethodCall(" *** speciesDataDotCsv called.. " + Arrays.toString(speciesNames));
-        	metricStore.recordRequest(new AekosApiAuthKey("ddd"), RequestType.V1_SPECIES_DATA_CSV, speciesNames );
+        	metricsQueue.recordRequest(new AekosApiAuthKey("TODO"), RequestType.V1_SPECIES_DATA_CSV, speciesNames );
 		} catch (InvalidKeyException e) {
 			logger.error("speciesDataDotCsv bad apiKey exception");
 		}
@@ -257,7 +259,7 @@ public class ApiMetricsAspect {
 		try {
         	String[] speciesNames = (String[]) joinPoint.getArgs()[0];
 			logMethodCall(" *** speciesDataDotCsv called.. " + Arrays.toString(speciesNames));
-			metricStore.recordRequest(new AekosApiAuthKey("ddd"), RequestType.V1_SPECIES_DATA_JSON);
+			metricsQueue.recordRequest(new AekosApiAuthKey("TODO"), RequestType.V1_SPECIES_DATA_JSON);
 		} catch (InvalidKeyException e) {
 			logger.error("afterCallingspeciesDataDotJson bad apiKey exception");
 		}
@@ -275,7 +277,7 @@ public class ApiMetricsAspect {
         try {
         	String[] speciesNames = (String[]) joinPoint.getArgs()[0];
 			logMethodCall(" *** allSpeciesDataDotCsv called.. " + Arrays.toString(speciesNames));
-        	metricStore.recordRequest(new AekosApiAuthKey("ddd"), RequestType.V1_ALL_SPECIES_DATA_CSV, speciesNames );
+        	metricsQueue.recordRequest(new AekosApiAuthKey("TODO"), RequestType.V1_ALL_SPECIES_DATA_CSV, speciesNames );
 		} catch (InvalidKeyException e) {
 			logger.error("speciesDataDotCsv bad apiKey exception");
 		}
@@ -293,7 +295,7 @@ public class ApiMetricsAspect {
 		try {
         	String[] speciesNames = (String[]) joinPoint.getArgs()[0];
 			logMethodCall(" *** allSpeciesDataDotJson called.. " + Arrays.toString(speciesNames));
-			metricStore.recordRequest(new AekosApiAuthKey("ddd"), RequestType.V1_ALL_SPECIES_DATA_JSON);
+			metricsQueue.recordRequest(new AekosApiAuthKey("TODO"), RequestType.V1_ALL_SPECIES_DATA_JSON);
 		} catch (InvalidKeyException e) {
 			logger.error("afterCallingspeciesDataDotJson bad apiKey exception");
 		}
@@ -316,7 +318,7 @@ public class ApiMetricsAspect {
         	String[] speciesNames = (String[]) joinPoint.getArgs()[0];
         	String[] envNames = (String[]) joinPoint.getArgs()[1];
 			logMethodCall(" *** traitDataDotCsv called.. " + Arrays.toString(speciesNames) + "," + Arrays.toString(envNames));
-        	metricStore.recordRequest(new AekosApiAuthKey("ddd"), RequestType.V1_TRAIT_DATA_CSV, speciesNames );
+        	metricsQueue.recordRequest(new AekosApiAuthKey("TODO"), RequestType.V1_TRAIT_DATA_CSV, speciesNames );
 		} catch (InvalidKeyException e) {
 			logger.error("traitDataDotCsv bad apiKey exception");
 		}
@@ -335,7 +337,7 @@ public class ApiMetricsAspect {
         	String[] speciesNames = (String[]) joinPoint.getArgs()[0];
         	String[] envNames = (String[]) joinPoint.getArgs()[1];
 			logMethodCall(" *** traitDataDotJson called.. " + Arrays.toString(speciesNames) + "," + Arrays.toString(envNames));
-        	metricStore.recordRequest(new AekosApiAuthKey("ddd"), RequestType.V1_TRAIT_DATA_JSON, speciesNames );
+        	metricsQueue.recordRequest(new AekosApiAuthKey("TODO"), RequestType.V1_TRAIT_DATA_JSON, speciesNames );
 		} catch (InvalidKeyException e) {
 			logger.error("traitDataDotJson bad apiKey exception");
 		}

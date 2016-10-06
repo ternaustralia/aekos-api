@@ -4,6 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.connector.Connector;
@@ -31,6 +33,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.AbstractJsonpResponseBodyAdvice;
 
+import au.org.aekos.service.metric.MetricsQueueItem;
 import au.org.aekos.util.AuthAekosJenaModelFactory;
 import au.org.aekos.util.CoreDataAekosJenaModelFactory;
 import au.org.aekos.util.MetricsAekosJenaModelFactory;
@@ -49,6 +52,9 @@ public class Application extends SpringBootServletInitializer {
 	
 	@Value("${aekos-api.owl-file.location}")
 	private String owlFileLocation;
+	
+	@Value("${aekos-api.metrics-queue-capacity}")
+	private int metricsQueueCapacity;
 	
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
@@ -145,6 +151,11 @@ public class Application extends SpringBootServletInitializer {
     	OntModel result = ModelFactory.createOntologyModel();
     	result.read(getClass().getResourceAsStream(owlFileLocation), null, "TURTLE");
     	return result;
+    }
+    
+    @Bean
+    public BlockingQueue<MetricsQueueItem> metricsInnerQueue() {
+    	return new LinkedBlockingDeque<>(metricsQueueCapacity);
     }
     
 	@Bean
