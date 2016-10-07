@@ -118,7 +118,7 @@ public class ApiV1SearchController {
 			notes = "A summary of the information that the system holds on the supplied species name(s) "
 					+ "including a count of records. If the system doesn't have any data on a species name, "
 					+ "it will return a record with id=0 and recordsHeld=0.")
-    public List<SpeciesSummary> getSpeciesSummary(
+    public List<SpeciesSummary> speciesSummary(
     		@RequestParam(name="speciesName") @ApiParam("list of species names") String[] speciesNames,
     		HttpServletResponse resp) {
 			List<SpeciesSummary> result = new LinkedList<>();
