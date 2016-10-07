@@ -95,7 +95,7 @@ public class SwaggerConfig {
 
 	private String getDescription() {
 		try {
-			InputStream sparqlIS = Thread.currentThread().getContextClassLoader().getResourceAsStream("reference/api-description.html");
+			InputStream sparqlIS = Thread.currentThread().getContextClassLoader().getResourceAsStream("reference/api-description.md");
 			OutputStream out = new ByteArrayOutputStream();
 			StreamUtils.copy(sparqlIS, out);
 			return out.toString();
