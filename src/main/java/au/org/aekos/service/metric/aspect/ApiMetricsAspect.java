@@ -145,52 +145,67 @@ public class ApiMetricsAspect {
     
     
     private static final String ENVIRONMENT_DATA_DOT_CSV = "environmentDataDotCsv";
+	private static final String ENVIRONMENT_DATA_CSV = "environmentDataCsv";
+	static final ErrorCounterName V1_ENVIRONMENT_DATA_DOT_CSV_ERRORS_COUNTER = v1EnvVarRetrievalControllerErrors(ENVIRONMENT_DATA_DOT_CSV);
     
-    @AfterReturning(pointcut = "execution(* " + V1_ENV_VAR_RETRIEVAL_CONTROLLER + "." + ENVIRONMENT_DATA_DOT_CSV + "(..))")
+    @AfterReturning(pointcut = "execution(* " + V1_ENV_VAR_RETRIEVAL_CONTROLLER + "." + ENVIRONMENT_DATA_DOT_CSV + "(..))"
+    		+ " || execution(* " + V1_ENV_VAR_RETRIEVAL_CONTROLLER + "." + ENVIRONMENT_DATA_CSV + "(..))")
     public void afterCallingEnvironmentDataDotCsv(JoinPoint joinPoint) {
     	recordCallWithSpeciesNamesAndTraitsOrEnvVarsAndPaging(v1EnvVarRetrievalControllerServices(ENVIRONMENT_DATA_DOT_CSV), RequestType.V1_ENVIRONMENT_DATA_CSV, joinPoint);
     }
 
-	@AfterThrowing(pointcut = "execution(* " + V1_ENV_VAR_RETRIEVAL_CONTROLLER + "." + ENVIRONMENT_DATA_DOT_CSV + "(..))", throwing = "e")
+	@AfterThrowing(pointcut = "execution(* " + V1_ENV_VAR_RETRIEVAL_CONTROLLER + "." + ENVIRONMENT_DATA_DOT_CSV + "(..))"
+			+ " || execution(* " + V1_ENV_VAR_RETRIEVAL_CONTROLLER + "." + ENVIRONMENT_DATA_CSV + "(..))", throwing = "e")
     public void afterEnvironmentDataDotCsvThrowsException(Exception e) {
-        counterService.increment(v1EnvVarRetrievalControllerErrors(ENVIRONMENT_DATA_DOT_CSV).getFullName());
+        counterService.increment(V1_ENVIRONMENT_DATA_DOT_CSV_ERRORS_COUNTER.getFullName());
     }
 
 	private static final String ENVIRONMENT_DATA_DOT_JSON = "environmentDataDotJson";
+	private static final String ENVIRONMENT_DATA_JSON = "environmentDataJson";
+	static final ErrorCounterName V1_ENVIRONMENT_DATA_DOT_JSON_ERRORS_COUNTER = v1EnvVarRetrievalControllerErrors(ENVIRONMENT_DATA_DOT_JSON);
 	
-    @AfterReturning(pointcut = "execution(* " + V1_ENV_VAR_RETRIEVAL_CONTROLLER + "." + ENVIRONMENT_DATA_DOT_JSON + "(..))")
+    @AfterReturning(pointcut = "execution(* " + V1_ENV_VAR_RETRIEVAL_CONTROLLER + "." + ENVIRONMENT_DATA_DOT_JSON + "(..))"
+    		+ " || execution(* " + V1_ENV_VAR_RETRIEVAL_CONTROLLER + "." + ENVIRONMENT_DATA_JSON + "(..))")
     public void afterCallingenvironmentDataDotJson(JoinPoint joinPoint) {
     	recordCallWithSpeciesNamesAndTraitsOrEnvVarsAndPaging(v1EnvVarRetrievalControllerServices(ENVIRONMENT_DATA_DOT_JSON), RequestType.V1_ENVIRONMENT_DATA_JSON, joinPoint);
     }
 
-    @AfterThrowing(pointcut = "execution(* " + V1_ENV_VAR_RETRIEVAL_CONTROLLER + ".environmentDataDotJson(..))", throwing = "e")
+    @AfterThrowing(pointcut = "execution(* " + V1_ENV_VAR_RETRIEVAL_CONTROLLER + ".environmentDataDotJson(..))"
+    		+ " || execution(* " + V1_ENV_VAR_RETRIEVAL_CONTROLLER + "." + ENVIRONMENT_DATA_JSON + "(..))", throwing = "e")
     public void afterenvironmentDataDotJsonThrowsException(Exception e) {
-        counterService.increment(v1EnvVarRetrievalControllerErrors(ENVIRONMENT_DATA_DOT_JSON).getFullName());
+        counterService.increment(V1_ENVIRONMENT_DATA_DOT_JSON_ERRORS_COUNTER.getFullName());
     }
     
     private static final String SPECIES_DATA_DOT_CSV = "speciesDataDotCsv";
+	private static final String SPECIES_DATA_CSV = "speciesDataCsv";
+	static final ErrorCounterName V1_SPECIES_DATA_DOT_CSV_ERRORS_COUNTER = v1SpeciesRetrievalControllerErrors(SPECIES_DATA_DOT_CSV);
     
-    @AfterReturning(pointcut = "execution(* " + V1_SPECIES_RETRIEVAL_CONTROLLER + "." + SPECIES_DATA_DOT_CSV + "(..))")
+    @AfterReturning(pointcut = "execution(* " + V1_SPECIES_RETRIEVAL_CONTROLLER + "." + SPECIES_DATA_DOT_CSV + "(..))"
+    		+ " || execution(* " + V1_SPECIES_RETRIEVAL_CONTROLLER + "." + SPECIES_DATA_CSV + "(..))")
     public void afterCallingSpeciesDataDotCsv(JoinPoint joinPoint) {
     	recordCallWithSpeciesNamesAndRetrievalPaging(v1SpeciesRetrievalControllerServices(SPECIES_DATA_DOT_CSV), RequestType.V1_SPECIES_DATA_CSV, joinPoint);
     }
 
-    @AfterThrowing(pointcut = "execution(* " + V1_SPECIES_RETRIEVAL_CONTROLLER + "." + SPECIES_DATA_DOT_CSV + "(..))", throwing = "e")
+    @AfterThrowing(pointcut = "execution(* " + V1_SPECIES_RETRIEVAL_CONTROLLER + "." + SPECIES_DATA_DOT_CSV + "(..))"
+    		+ " || execution(* " + V1_SPECIES_RETRIEVAL_CONTROLLER + "." + SPECIES_DATA_CSV + "(..))", throwing = "e")
     public void afterSpeciesDataDotCsvThrowsException(Exception e) {
-        counterService.increment(v1SpeciesRetrievalControllerErrors(SPECIES_DATA_DOT_CSV).getFullName());
+        counterService.increment(V1_SPECIES_DATA_DOT_CSV_ERRORS_COUNTER.getFullName());
     }
     
     private static final String SPECIES_DATA_DOT_JSON = "speciesDataDotJson";
+	private static final String SPECIES_DATA_JSON = "speciesDataJson";
+	static final ErrorCounterName V1_SPECIES_DATA_DOT_JSON_ERRORS_COUNTER = v1SpeciesRetrievalControllerErrors(SPECIES_DATA_DOT_JSON);
     
-    @AfterReturning(pointcut = "execution(* " + V1_SPECIES_RETRIEVAL_CONTROLLER + "." + SPECIES_DATA_DOT_JSON + "(..))")
- // FIXME add pointcut for content neg method (for all)
+    @AfterReturning(pointcut = "execution(* " + V1_SPECIES_RETRIEVAL_CONTROLLER + "." + SPECIES_DATA_DOT_JSON + "(..))"
+    		+ " || execution(* " + V1_SPECIES_RETRIEVAL_CONTROLLER + "." + SPECIES_DATA_JSON + "(..))")
     public void afterCallingSpeciesDataDotJson(JoinPoint joinPoint) {
     	recordCallWithSpeciesNamesAndRetrievalPaging(v1SpeciesRetrievalControllerServices(SPECIES_DATA_DOT_JSON), RequestType.V1_SPECIES_DATA_JSON, joinPoint);
     }
 
-	@AfterThrowing(pointcut = "execution(* " + V1_SPECIES_RETRIEVAL_CONTROLLER + "." + SPECIES_DATA_DOT_JSON + "(..))", throwing = "e")
+	@AfterThrowing(pointcut = "execution(* " + V1_SPECIES_RETRIEVAL_CONTROLLER + "." + SPECIES_DATA_DOT_JSON + "(..))"
+			+ " || execution(* " + V1_SPECIES_RETRIEVAL_CONTROLLER + "." + SPECIES_DATA_JSON + "(..))", throwing = "e")
     public void afterSpeciesDataDotJsonThrowsException(Exception e) {
-        counterService.increment(v1SpeciesRetrievalControllerErrors(SPECIES_DATA_DOT_JSON).getFullName());
+        counterService.increment(V1_SPECIES_DATA_DOT_JSON_ERRORS_COUNTER.getFullName());
     }
     
 	private static final String ALL_SPECIES_DATA_DOT_CSV = "allSpeciesDataDotCsv";
@@ -226,27 +241,35 @@ public class ApiMetricsAspect {
     }
     
 	private static final String TRAIT_DATA_DOT_CSV = "traitDataDotCsv";
+	private static final String TRAIT_DATA_CSV = "traitDataCsv";
+	static final ErrorCounterName V1_TRAIT_DATA_DOT_CSV_ERRORS_COUNTER = v1TraitRetrievalControllerErrors(TRAIT_DATA_DOT_CSV);
     
-    @AfterReturning(pointcut = "execution(* " + V1_TRAIT_RETRIEVAL_CONTROLLER + "." + TRAIT_DATA_DOT_CSV + "(..))")
+    @AfterReturning(pointcut = "execution(* " + V1_TRAIT_RETRIEVAL_CONTROLLER + "." + TRAIT_DATA_DOT_CSV + "(..))"
+    		+ " || execution(* " + V1_TRAIT_RETRIEVAL_CONTROLLER + "." + TRAIT_DATA_CSV + "(..))")
     public void afterCallingtraitDataDotCsv(JoinPoint joinPoint) {
     	recordCallWithSpeciesNamesAndTraitsOrEnvVarsAndPaging(v1TraitRetrievalControllerServices(TRAIT_DATA_DOT_CSV), RequestType.V1_TRAIT_DATA_CSV, joinPoint);
     }
 
-    @AfterThrowing(pointcut = "execution(* " + V1_TRAIT_RETRIEVAL_CONTROLLER + "." + TRAIT_DATA_DOT_CSV + "(..))", throwing = "e")
+    @AfterThrowing(pointcut = "execution(* " + V1_TRAIT_RETRIEVAL_CONTROLLER + "." + TRAIT_DATA_DOT_CSV + "(..))"
+    		+ " || execution(* " + V1_TRAIT_RETRIEVAL_CONTROLLER + "." + TRAIT_DATA_CSV + "(..))", throwing = "e")
     public void afterTraitDataDotCsvThrowsException(Exception e) {
-        counterService.increment(v1TraitRetrievalControllerErrors(TRAIT_DATA_DOT_CSV).getFullName());
+        counterService.increment(V1_TRAIT_DATA_DOT_CSV_ERRORS_COUNTER.getFullName());
     }
     
     private static final String TRAIT_DATA_DOT_JSON = "traitDataDotJson";
+	private static final String TRAIT_DATA_JSON = "traitDataJson";
+	static final ErrorCounterName V1_TRAIT_DATA_DOT_JSON_ERRORS_COUNTER = v1TraitRetrievalControllerErrors(TRAIT_DATA_DOT_JSON);
     
-    @AfterReturning(pointcut = "execution(* " + V1_TRAIT_RETRIEVAL_CONTROLLER + "." + TRAIT_DATA_DOT_JSON + "(..))")
+    @AfterReturning(pointcut = "execution(* " + V1_TRAIT_RETRIEVAL_CONTROLLER + "." + TRAIT_DATA_DOT_JSON + "(..))"
+    		+ " || execution(* " + V1_TRAIT_RETRIEVAL_CONTROLLER + "." + TRAIT_DATA_JSON + "(..))")
     public void afterCallingTraitDataDotJson(JoinPoint joinPoint) {
     	recordCallWithSpeciesNamesAndTraitsOrEnvVarsAndPaging(v1TraitRetrievalControllerServices(TRAIT_DATA_DOT_JSON), RequestType.V1_TRAIT_DATA_JSON, joinPoint);
     }
 
-	@AfterThrowing(pointcut = "execution(* " + V1_TRAIT_RETRIEVAL_CONTROLLER + "." + TRAIT_DATA_DOT_JSON + "(..))", throwing = "e")
+	@AfterThrowing(pointcut = "execution(* " + V1_TRAIT_RETRIEVAL_CONTROLLER + "." + TRAIT_DATA_DOT_JSON + "(..))"
+			+ " || execution(* " + V1_TRAIT_RETRIEVAL_CONTROLLER + "." + TRAIT_DATA_JSON + "(..))", throwing = "e")
     public void afterTraitDataDotJsonThrowsException(Exception e) {
-        counterService.increment(v1TraitRetrievalControllerErrors(TRAIT_DATA_DOT_JSON).getFullName());
+        counterService.increment(V1_TRAIT_DATA_DOT_JSON_ERRORS_COUNTER.getFullName());
     }
     
 	private void recordCallWithoutParams(ServicesCounterName counterName, RequestType reqType) {

@@ -4,5 +4,6 @@
     <logger name="au.org.aekos.service.retrieval.JenaRetrievalService" level="DEBUG" />
     <logger name="au.org.aekos.util" level="DEBUG" />
     <logger name="au.org.aekos" level="INFO" />
+<!--     <logger name="org.springframework.test" level="DEBUG" /> -->
     <root level="WARN" />
 </configuration>

@@ -32,7 +32,9 @@ import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -40,14 +42,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.util.NestedServletException;
 
-import au.org.aekos.controller.ApiV1EnvVarRetrievalController;
 import au.org.aekos.controller.ApiV1MaintenanceController;
-import au.org.aekos.controller.ApiV1SpeciesRetrievalController;
-import au.org.aekos.controller.ApiV1TraitRetrievalController;
 import au.org.aekos.controller.RootController;
 import au.org.aekos.controller.SignupController;
 import au.org.aekos.service.metric.MetricsQueueItem;
 import au.org.aekos.service.metric.MetricsQueueWorker;
+import au.org.aekos.service.metric.aspect.ApiMetricsAspectTest2.ApiMetricsAspectTest2Context;
 import au.org.aekos.service.retrieval.AekosApiRetrievalException;
 import au.org.aekos.service.retrieval.RetrievalService;
 import au.org.aekos.service.search.SearchService;
@@ -56,8 +56,9 @@ import au.org.aekos.service.search.SearchService;
  * Testing the pointcuts and that the correct stats are recorded for thrown exceptions.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration
+@ContextConfiguration(classes=ApiMetricsAspectTest2Context.class)
 @WebAppConfiguration
+@ActiveProfiles({"test", "force-only-ApiMetricsAspectTest2"})
 public class ApiMetricsAspectTest2 {
 
 	private static final String TEXT_CSV_MIME = "text/csv";
@@ -242,20 +243,224 @@ public class ApiMetricsAspectTest2 {
 		assertThat(counterService.counts.get(ApiMetricsAspect.V1_ALL_SPECIES_DATA_DOT_CSV_ERRORS_COUNTER.getFullName()), is(1));
 	}
 	
+	/**
+	 * Does the @AfterThrowing for the speciesData.json call work?
+	 */
+	@Test
+	public void testSpeciesDataJson01() throws Exception {
+		URIBuilder uriBuilder = new URIBuilder("/v1/speciesData.json");
+		uriBuilder.addParameter("speciesName", "species1");
+		uriBuilder.addParameter("start", "0");
+		uriBuilder.addParameter("rows", "42");
+		try {
+			mockMvc.perform(get(uriBuilder.build()))
+			    .andExpect(status().isOk());
+		} catch (NestedServletException e) { /* swallow so we can check the pointcut worked */ }
+		assertThat(counterService.counts.get(ApiMetricsAspect.V1_SPECIES_DATA_DOT_JSON_ERRORS_COUNTER.getFullName()), is(1));
+	}
+	
+	/**
+	 * Does the @AfterThrowing for the speciesData.csv call work?
+	 */
+	@Test
+	public void testSpeciesDataCsv01() throws Exception {
+		URIBuilder uriBuilder = new URIBuilder("/v1/speciesData.csv");
+		uriBuilder.addParameter("speciesName", "species1");
+		uriBuilder.addParameter("start", "0");
+		uriBuilder.addParameter("rows", "42");
+		try {
+			mockMvc.perform(get(uriBuilder.build()))
+			    .andExpect(status().isOk());
+		} catch (NestedServletException e) { /* swallow so we can check the pointcut worked */ }
+		assertThat(counterService.counts.get(ApiMetricsAspect.V1_SPECIES_DATA_DOT_CSV_ERRORS_COUNTER.getFullName()), is(1));
+	}
+
+	/**
+	 * Does the @AfterThrowing for the speciesData with Accept=json call work?
+	 */
+	@Test
+	public void testSpeciesData01() throws Exception {
+		URIBuilder uriBuilder = new URIBuilder("/v1/speciesData");
+		uriBuilder.addParameter("speciesName", "species1");
+		uriBuilder.addParameter("start", "0");
+		uriBuilder.addParameter("rows", "42");
+		try {
+			mockMvc.perform(get(uriBuilder.build())
+					.header("Accept", MediaType.APPLICATION_JSON_VALUE))
+			    .andExpect(status().isOk());
+		} catch (NestedServletException e) { /* swallow so we can check the pointcut worked */ }
+		assertThat(counterService.counts.get(ApiMetricsAspect.V1_SPECIES_DATA_DOT_JSON_ERRORS_COUNTER.getFullName()), is(1));
+	}
+
+	/**
+	 * Does the @AfterThrowing for the speciesData with Accept=csv call work?
+	 */
+	@Test
+	public void testSpeciesData02() throws Exception {
+		URIBuilder uriBuilder = new URIBuilder("/v1/speciesData");
+		uriBuilder.addParameter("speciesName", "species1");
+		uriBuilder.addParameter("start", "0");
+		uriBuilder.addParameter("rows", "42");
+		try {
+			mockMvc.perform(get(uriBuilder.build())
+					.header("Accept", TEXT_CSV_MIME))
+			    .andExpect(status().isOk());
+		} catch (NestedServletException e) { /* swallow so we can check the pointcut worked */ }
+		assertThat(counterService.counts.get(ApiMetricsAspect.V1_SPECIES_DATA_DOT_CSV_ERRORS_COUNTER.getFullName()), is(1));
+	}
+	
+	/**
+	 * Does the @AfterThrowing for the environmentData.json call work?
+	 */
+	@Test
+	public void testEnvironmentDataJson01() throws Exception {
+		URIBuilder uriBuilder = new URIBuilder("/v1/environmentData.json");
+		uriBuilder.addParameter("speciesName", "species1");
+		uriBuilder.addParameter("envVarName", "var1");
+		uriBuilder.addParameter("start", "0");
+		uriBuilder.addParameter("rows", "42");
+		try {
+			mockMvc.perform(get(uriBuilder.build()))
+			    .andExpect(status().isOk());
+		} catch (NestedServletException e) { /* swallow so we can check the pointcut worked */ }
+		assertThat(counterService.counts.get(ApiMetricsAspect.V1_ENVIRONMENT_DATA_DOT_JSON_ERRORS_COUNTER.getFullName()), is(1));
+	}
+	
+	/**
+	 * Does the @AfterThrowing for the environmentData.csv call work?
+	 */
+	@Test
+	public void testEnvironmentDataCsv01() throws Exception {
+		URIBuilder uriBuilder = new URIBuilder("/v1/environmentData.csv");
+		uriBuilder.addParameter("speciesName", "species1");
+		uriBuilder.addParameter("envVarName", "var1");
+		uriBuilder.addParameter("start", "0");
+		uriBuilder.addParameter("rows", "42");
+		try {
+			mockMvc.perform(get(uriBuilder.build()))
+			    .andExpect(status().isOk());
+		} catch (NestedServletException e) { /* swallow so we can check the pointcut worked */ }
+		assertThat(counterService.counts.get(ApiMetricsAspect.V1_ENVIRONMENT_DATA_DOT_CSV_ERRORS_COUNTER.getFullName()), is(1));
+	}
+
+	/**
+	 * Does the @AfterThrowing for the environmentData with Accept=json call work?
+	 */
+	@Test
+	public void testEnvironmentData01() throws Exception {
+		URIBuilder uriBuilder = new URIBuilder("/v1/environmentData");
+		uriBuilder.addParameter("speciesName", "species1");
+		uriBuilder.addParameter("envVarName", "var1");
+		uriBuilder.addParameter("start", "0");
+		uriBuilder.addParameter("rows", "42");
+		try {
+			mockMvc.perform(get(uriBuilder.build())
+					.header("Accept", MediaType.APPLICATION_JSON_VALUE))
+			    .andExpect(status().isOk());
+		} catch (NestedServletException e) { /* swallow so we can check the pointcut worked */ }
+		assertThat(counterService.counts.get(ApiMetricsAspect.V1_ENVIRONMENT_DATA_DOT_JSON_ERRORS_COUNTER.getFullName()), is(1));
+	}
+
+	/**
+	 * Does the @AfterThrowing for the environmentData with Accept=csv call work?
+	 */
+	@Test
+	public void testEnvironmentData02() throws Exception {
+		URIBuilder uriBuilder = new URIBuilder("/v1/environmentData");
+		uriBuilder.addParameter("speciesName", "species1");
+		uriBuilder.addParameter("envVarName", "var1");
+		uriBuilder.addParameter("start", "0");
+		uriBuilder.addParameter("rows", "42");
+		try {
+			mockMvc.perform(get(uriBuilder.build())
+					.header("Accept", TEXT_CSV_MIME))
+			    .andExpect(status().isOk());
+		} catch (NestedServletException e) { /* swallow so we can check the pointcut worked */ }
+		assertThat(counterService.counts.get(ApiMetricsAspect.V1_ENVIRONMENT_DATA_DOT_CSV_ERRORS_COUNTER.getFullName()), is(1));
+	}
+	
+	/**
+	 * Does the @AfterThrowing for the traitData.json call work?
+	 */
+	@Test
+	public void testTraitDataJson01() throws Exception {
+		URIBuilder uriBuilder = new URIBuilder("/v1/traitData.json");
+		uriBuilder.addParameter("speciesName", "species1");
+		uriBuilder.addParameter("traitName", "trait1");
+		uriBuilder.addParameter("start", "0");
+		uriBuilder.addParameter("rows", "42");
+		try {
+			mockMvc.perform(get(uriBuilder.build()))
+			    .andExpect(status().isOk());
+		} catch (NestedServletException e) { /* swallow so we can check the pointcut worked */ }
+		assertThat(counterService.counts.get(ApiMetricsAspect.V1_TRAIT_DATA_DOT_JSON_ERRORS_COUNTER.getFullName()), is(1));
+	}
+	
+	/**
+	 * Does the @AfterThrowing for the traitData.csv call work?
+	 */
+	@Test
+	public void testTraitDataCsv01() throws Exception {
+		URIBuilder uriBuilder = new URIBuilder("/v1/traitData.csv");
+		uriBuilder.addParameter("speciesName", "species1");
+		uriBuilder.addParameter("traitName", "trait1");
+		uriBuilder.addParameter("start", "0");
+		uriBuilder.addParameter("rows", "42");
+		try {
+			mockMvc.perform(get(uriBuilder.build()))
+			    .andExpect(status().isOk());
+		} catch (NestedServletException e) { /* swallow so we can check the pointcut worked */ }
+		assertThat(counterService.counts.get(ApiMetricsAspect.V1_TRAIT_DATA_DOT_CSV_ERRORS_COUNTER.getFullName()), is(1));
+	}
+
+	/**
+	 * Does the @AfterThrowing for the traitData with Accept=json call work?
+	 */
+	@Test
+	public void testTraitData01() throws Exception {
+		URIBuilder uriBuilder = new URIBuilder("/v1/traitData");
+		uriBuilder.addParameter("speciesName", "species1");
+		uriBuilder.addParameter("traitName", "trait1");
+		uriBuilder.addParameter("start", "0");
+		uriBuilder.addParameter("rows", "42");
+		try {
+			mockMvc.perform(get(uriBuilder.build())
+					.header("Accept", MediaType.APPLICATION_JSON_VALUE))
+			    .andExpect(status().isOk());
+		} catch (NestedServletException e) { /* swallow so we can check the pointcut worked */ }
+		assertThat(counterService.counts.get(ApiMetricsAspect.V1_TRAIT_DATA_DOT_JSON_ERRORS_COUNTER.getFullName()), is(1));
+	}
+
+	/**
+	 * Does the @AfterThrowing for the traitData with Accept=csv call work?
+	 */
+	@Test
+	public void testTraitData02() throws Exception {
+		URIBuilder uriBuilder = new URIBuilder("/v1/traitData");
+		uriBuilder.addParameter("speciesName", "species1");
+		uriBuilder.addParameter("traitName", "trait1");
+		uriBuilder.addParameter("start", "0");
+		uriBuilder.addParameter("rows", "42");
+		try {
+			mockMvc.perform(get(uriBuilder.build())
+					.header("Accept", TEXT_CSV_MIME))
+			    .andExpect(status().isOk());
+		} catch (NestedServletException e) { /* swallow so we can check the pointcut worked */ }
+		assertThat(counterService.counts.get(ApiMetricsAspect.V1_TRAIT_DATA_DOT_CSV_ERRORS_COUNTER.getFullName()), is(1));
+	}
+	
 	@Configuration
 	@ComponentScan(
-			basePackages={"au.org.aekos.service.metric", "au.org.aekos.controller"},
-			excludeFilters={
-					@Filter(type=FilterType.ASSIGNABLE_TYPE, classes=MetricsQueueWorker.class),
-					@Filter(type=FilterType.ASSIGNABLE_TYPE, classes=RootController.class),
-					@Filter(type=FilterType.ASSIGNABLE_TYPE, classes=SignupController.class),
-					@Filter(type=FilterType.ASSIGNABLE_TYPE, classes=ApiV1EnvVarRetrievalController.class),
-					@Filter(type=FilterType.ASSIGNABLE_TYPE, classes=ApiV1MaintenanceController.class),
-					@Filter(type=FilterType.ASSIGNABLE_TYPE, classes=ApiV1SpeciesRetrievalController.class),
-					@Filter(type=FilterType.ASSIGNABLE_TYPE, classes=ApiV1TraitRetrievalController.class)
-			})
+		basePackages={"au.org.aekos.service.metric", "au.org.aekos.controller"},
+		excludeFilters={
+			@Filter(type=FilterType.ASSIGNABLE_TYPE, classes=MetricsQueueWorker.class),
+			@Filter(type=FilterType.ASSIGNABLE_TYPE, classes=RootController.class),
+			@Filter(type=FilterType.ASSIGNABLE_TYPE, classes=SignupController.class),
+			@Filter(type=FilterType.ASSIGNABLE_TYPE, classes=ApiV1MaintenanceController.class)
+		})
 	@EnableAspectJAutoProxy(proxyTargetClass=true)
-	static class TestContext {
+	@Profile("force-only-ApiMetricsAspectTest2")
+	static class ApiMetricsAspectTest2Context {
 		
 		@Bean
 		public Dataset metricsDS() {
@@ -287,9 +492,31 @@ public class ApiMetricsAspectTest2 {
 		@Bean
 		public RetrievalService retrievalService() throws AekosApiRetrievalException {
 			RetrievalService result = mock(RetrievalService.class);
+			addAllSpeciesStubs(result);
+			addSpeciesStubs(result);
+			addEnvStubs(result);
+			addTraitStubs(result);
+			return result;
+		}
+		
+		private void addAllSpeciesStubs(RetrievalService result) throws AekosApiRetrievalException {
 			when(result.getAllSpeciesDataJson(anyInt(), anyInt())).thenThrow(new TriggerAfterThrowingPointcutException());
 			when(result.getAllSpeciesDataCsv(anyInt(), anyInt(), any())).thenThrow(new TriggerAfterThrowingPointcutException());
-			return result;
+		}
+
+		private void addSpeciesStubs(RetrievalService result) throws AekosApiRetrievalException {
+			when(result.getSpeciesDataJson(any(), anyInt(), anyInt())).thenThrow(new TriggerAfterThrowingPointcutException());
+			when(result.getSpeciesDataCsv(any(), anyInt(), anyInt(), any())).thenThrow(new TriggerAfterThrowingPointcutException());
+		}
+		
+		private void addEnvStubs(RetrievalService result) throws AekosApiRetrievalException {
+			when(result.getEnvironmentalDataJson(any(), any(), anyInt(), anyInt())).thenThrow(new TriggerAfterThrowingPointcutException());
+			when(result.getEnvironmentalDataCsv(any(), any(), anyInt(), anyInt(), any())).thenThrow(new TriggerAfterThrowingPointcutException());
+		}
+		
+		private void addTraitStubs(RetrievalService result) throws AekosApiRetrievalException {
+			when(result.getTraitDataJson(any(), any(), anyInt(), anyInt())).thenThrow(new TriggerAfterThrowingPointcutException());
+			when(result.getTraitDataCsv(any(), any(), anyInt(), anyInt(), any())).thenThrow(new TriggerAfterThrowingPointcutException());
 		}
 		
 		@Bean
@@ -322,4 +549,3 @@ public class ApiMetricsAspectTest2 {
 		private static final long serialVersionUID = 1L;
 	}
 }
-

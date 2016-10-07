@@ -33,28 +33,32 @@ import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 
-import au.org.aekos.controller.ApiV1EnvVarRetrievalController;
 import au.org.aekos.controller.ApiV1MaintenanceController;
-import au.org.aekos.controller.ApiV1SpeciesRetrievalController;
-import au.org.aekos.controller.ApiV1TraitRetrievalController;
 import au.org.aekos.controller.RetrievalResponseHeader;
 import au.org.aekos.controller.RootController;
 import au.org.aekos.controller.SignupController;
 import au.org.aekos.model.AbstractParams;
+import au.org.aekos.model.EnvironmentDataParams;
+import au.org.aekos.model.EnvironmentDataResponse;
 import au.org.aekos.model.ResponseHeader;
 import au.org.aekos.model.SpeciesDataParams;
 import au.org.aekos.model.SpeciesDataResponse;
+import au.org.aekos.model.TraitDataParams;
+import au.org.aekos.model.TraitDataResponse;
 import au.org.aekos.service.metric.MetricsQueueItem;
 import au.org.aekos.service.metric.MetricsQueueWorker;
 import au.org.aekos.service.metric.MetricsStorageService;
 import au.org.aekos.service.metric.RequestRecorder.RequestType;
+import au.org.aekos.service.metric.aspect.ApiMetricsAspectTest.ApiMetricsAspectTestContext;
 import au.org.aekos.service.retrieval.AekosApiRetrievalException;
 import au.org.aekos.service.retrieval.RetrievalService;
 import au.org.aekos.service.search.SearchService;
@@ -63,8 +67,9 @@ import au.org.aekos.service.search.SearchService;
  * Testing the pointcuts and that the correct stats are recorded for successful calls.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration
+@ContextConfiguration(classes=ApiMetricsAspectTestContext.class)
 @WebAppConfiguration
+@ActiveProfiles({"test", "force-only-ApiMetricsAspectTest"})
 public class ApiMetricsAspectTest {
 
 	private static final String TEXT_CSV_MIME = "text/csv";
@@ -255,20 +260,274 @@ public class ApiMetricsAspectTest {
 		verify(metricsStore).recordRequest(any(), eq(RequestType.V1_ALL_SPECIES_DATA_CSV), eq(new String[] {}), eq(new String[] {}), eq(0), eq(42));
 	}
 	
+	/**
+	 * Does the speciesData.json call work?
+	 */
+	@Test
+	public void testSpeciesDataJson01() throws Exception {
+		URIBuilder uriBuilder = new URIBuilder("/v1/speciesData.json");
+		uriBuilder.addParameter("speciesName", "species1");
+		uriBuilder.addParameter("speciesName", "species2");
+		uriBuilder.addParameter("envVarName", "var1");
+		uriBuilder.addParameter("envVarName", "var2");
+		uriBuilder.addParameter("start", "0");
+		uriBuilder.addParameter("rows", "42");
+		mockMvc.perform(get(uriBuilder.build()))
+	        .andExpect(status().isOk());
+		assertThat(metricsInnerQueue.size(), is(1));
+		MetricsStorageService metricsStore = mock(MetricsStorageService.class);
+		metricsInnerQueue.remove().doPersist(metricsStore);
+		verify(metricsStore).recordRequest(any(), eq(RequestType.V1_SPECIES_DATA_JSON), eq(new String[] {"species1", "species2"}),
+				eq(new String[] {}), eq(0), eq(42));
+	}
+	
+	/**
+	 * Does the speciesData.csv call work?
+	 */
+	@Test
+	public void testSpeciesDataCsv01() throws Exception {
+		URIBuilder uriBuilder = new URIBuilder("/v1/speciesData.csv");
+		uriBuilder.addParameter("speciesName", "species1");
+		uriBuilder.addParameter("speciesName", "species2");
+		uriBuilder.addParameter("envVarName", "var1");
+		uriBuilder.addParameter("envVarName", "var2");
+		uriBuilder.addParameter("start", "0");
+		uriBuilder.addParameter("rows", "42");
+		mockMvc.perform(get(uriBuilder.build()))
+	        .andExpect(status().isOk());
+		assertThat(metricsInnerQueue.size(), is(1));
+		MetricsStorageService metricsStore = mock(MetricsStorageService.class);
+		metricsInnerQueue.remove().doPersist(metricsStore);
+		verify(metricsStore).recordRequest(any(), eq(RequestType.V1_SPECIES_DATA_CSV), eq(new String[] {"species1", "species2"}),
+				eq(new String[] {}), eq(0), eq(42));
+	}
+	
+	/**
+	 * Does the speciesData with Accept=json call work?
+	 */
+	@Test
+	public void testSpeciesData01() throws Exception {
+		URIBuilder uriBuilder = new URIBuilder("/v1/speciesData");
+		uriBuilder.addParameter("speciesName", "species1");
+		uriBuilder.addParameter("speciesName", "species2");
+		uriBuilder.addParameter("envVarName", "var1");
+		uriBuilder.addParameter("envVarName", "var2");
+		uriBuilder.addParameter("start", "0");
+		uriBuilder.addParameter("rows", "42");
+		mockMvc.perform(get(uriBuilder.build())
+				.header("Accept", MediaType.APPLICATION_JSON_VALUE))
+	        .andExpect(status().isOk());
+		assertThat(metricsInnerQueue.size(), is(1));
+		MetricsStorageService metricsStore = mock(MetricsStorageService.class);
+		metricsInnerQueue.remove().doPersist(metricsStore);
+		verify(metricsStore).recordRequest(any(), eq(RequestType.V1_SPECIES_DATA_JSON), eq(new String[] {"species1", "species2"}),
+				eq(new String[] {}), eq(0), eq(42));
+	}
+	
+	/**
+	 * Does the speciesData with Accept=csv call work?
+	 */
+	@Test
+	public void testSpeciesData02() throws Exception {
+		URIBuilder uriBuilder = new URIBuilder("/v1/speciesData");
+		uriBuilder.addParameter("speciesName", "species1");
+		uriBuilder.addParameter("speciesName", "species2");
+		uriBuilder.addParameter("start", "0");
+		uriBuilder.addParameter("rows", "42");
+		mockMvc.perform(get(uriBuilder.build())
+				.header("Accept", TEXT_CSV_MIME))
+	        .andExpect(status().isOk());
+		assertThat(metricsInnerQueue.size(), is(1));
+		MetricsStorageService metricsStore = mock(MetricsStorageService.class);
+		metricsInnerQueue.remove().doPersist(metricsStore);
+		verify(metricsStore).recordRequest(any(), eq(RequestType.V1_SPECIES_DATA_CSV), eq(new String[] {"species1", "species2"}),
+				eq(new String[] {}), eq(0), eq(42));
+	}
+	
+	/**
+	 * Does the environmentData.json call work?
+	 */
+	@Test
+	public void testEnvironmentDataJson01() throws Exception {
+		URIBuilder uriBuilder = new URIBuilder("/v1/environmentData.json");
+		uriBuilder.addParameter("speciesName", "species1");
+		uriBuilder.addParameter("speciesName", "species2");
+		uriBuilder.addParameter("envVarName", "var1");
+		uriBuilder.addParameter("envVarName", "var2");
+		uriBuilder.addParameter("start", "0");
+		uriBuilder.addParameter("rows", "42");
+		mockMvc.perform(get(uriBuilder.build()))
+	        .andExpect(status().isOk());
+		assertThat(metricsInnerQueue.size(), is(1));
+		MetricsStorageService metricsStore = mock(MetricsStorageService.class);
+		metricsInnerQueue.remove().doPersist(metricsStore);
+		verify(metricsStore).recordRequest(any(), eq(RequestType.V1_ENVIRONMENT_DATA_JSON), eq(new String[] {"species1", "species2"}),
+				eq(new String[] {"var1", "var2"}), eq(0), eq(42));
+	}
+	
+	/**
+	 * Does the environmentData.csv call work?
+	 */
+	@Test
+	public void testEnvironmentDataCsv01() throws Exception {
+		URIBuilder uriBuilder = new URIBuilder("/v1/environmentData.csv");
+		uriBuilder.addParameter("speciesName", "species1");
+		uriBuilder.addParameter("speciesName", "species2");
+		uriBuilder.addParameter("envVarName", "var1");
+		uriBuilder.addParameter("envVarName", "var2");
+		uriBuilder.addParameter("start", "0");
+		uriBuilder.addParameter("rows", "42");
+		mockMvc.perform(get(uriBuilder.build()))
+	        .andExpect(status().isOk());
+		assertThat(metricsInnerQueue.size(), is(1));
+		MetricsStorageService metricsStore = mock(MetricsStorageService.class);
+		metricsInnerQueue.remove().doPersist(metricsStore);
+		verify(metricsStore).recordRequest(any(), eq(RequestType.V1_ENVIRONMENT_DATA_CSV), eq(new String[] {"species1", "species2"}),
+				eq(new String[] {"var1", "var2"}), eq(0), eq(42));
+	}
+	
+	/**
+	 * Does the environmentData with Accept=json call work?
+	 */
+	@Test
+	public void testEnvironmentData01() throws Exception {
+		URIBuilder uriBuilder = new URIBuilder("/v1/environmentData");
+		uriBuilder.addParameter("speciesName", "species1");
+		uriBuilder.addParameter("speciesName", "species2");
+		uriBuilder.addParameter("envVarName", "var1");
+		uriBuilder.addParameter("envVarName", "var2");
+		uriBuilder.addParameter("start", "0");
+		uriBuilder.addParameter("rows", "42");
+		mockMvc.perform(get(uriBuilder.build())
+				.header("Accept", MediaType.APPLICATION_JSON_VALUE))
+	        .andExpect(status().isOk());
+		assertThat(metricsInnerQueue.size(), is(1));
+		MetricsStorageService metricsStore = mock(MetricsStorageService.class);
+		metricsInnerQueue.remove().doPersist(metricsStore);
+		verify(metricsStore).recordRequest(any(), eq(RequestType.V1_ENVIRONMENT_DATA_JSON), eq(new String[] {"species1", "species2"}),
+				eq(new String[] {"var1", "var2"}), eq(0), eq(42));
+	}
+	
+	/**
+	 * Does the environmentData with Accept=csv call work?
+	 */
+	@Test
+	public void testEnvironmentData02() throws Exception {
+		URIBuilder uriBuilder = new URIBuilder("/v1/environmentData");
+		uriBuilder.addParameter("speciesName", "species1");
+		uriBuilder.addParameter("speciesName", "species2");
+		uriBuilder.addParameter("envVarName", "var1");
+		uriBuilder.addParameter("envVarName", "var2");
+		uriBuilder.addParameter("start", "0");
+		uriBuilder.addParameter("rows", "42");
+		mockMvc.perform(get(uriBuilder.build())
+				.header("Accept", TEXT_CSV_MIME))
+	        .andExpect(status().isOk());
+		assertThat(metricsInnerQueue.size(), is(1));
+		MetricsStorageService metricsStore = mock(MetricsStorageService.class);
+		metricsInnerQueue.remove().doPersist(metricsStore);
+		verify(metricsStore).recordRequest(any(), eq(RequestType.V1_ENVIRONMENT_DATA_CSV), eq(new String[] {"species1", "species2"}),
+				eq(new String[] {"var1", "var2"}), eq(0), eq(42));
+	}
+	
+	/**
+	 * Does the traitData.json call work?
+	 */
+	@Test
+	public void testTraitDataJson01() throws Exception {
+		URIBuilder uriBuilder = new URIBuilder("/v1/traitData.json");
+		uriBuilder.addParameter("speciesName", "species1");
+		uriBuilder.addParameter("speciesName", "species2");
+		uriBuilder.addParameter("traitName", "trait1");
+		uriBuilder.addParameter("traitName", "trait2");
+		uriBuilder.addParameter("start", "0");
+		uriBuilder.addParameter("rows", "42");
+		mockMvc.perform(get(uriBuilder.build()))
+	        .andExpect(status().isOk());
+		assertThat(metricsInnerQueue.size(), is(1));
+		MetricsStorageService metricsStore = mock(MetricsStorageService.class);
+		metricsInnerQueue.remove().doPersist(metricsStore);
+		verify(metricsStore).recordRequest(any(), eq(RequestType.V1_TRAIT_DATA_JSON), eq(new String[] {"species1", "species2"}),
+				eq(new String[] {"trait1", "trait2"}), eq(0), eq(42));
+	}
+	
+	/**
+	 * Does the traitData.csv call work?
+	 */
+	@Test
+	public void testTraitDataCsv01() throws Exception {
+		URIBuilder uriBuilder = new URIBuilder("/v1/traitData.csv");
+		uriBuilder.addParameter("speciesName", "species1");
+		uriBuilder.addParameter("speciesName", "species2");
+		uriBuilder.addParameter("traitName", "trait1");
+		uriBuilder.addParameter("traitName", "trait2");
+		uriBuilder.addParameter("start", "0");
+		uriBuilder.addParameter("rows", "42");
+		mockMvc.perform(get(uriBuilder.build()))
+	        .andExpect(status().isOk());
+		assertThat(metricsInnerQueue.size(), is(1));
+		MetricsStorageService metricsStore = mock(MetricsStorageService.class);
+		metricsInnerQueue.remove().doPersist(metricsStore);
+		verify(metricsStore).recordRequest(any(), eq(RequestType.V1_TRAIT_DATA_CSV), eq(new String[] {"species1", "species2"}),
+				eq(new String[] {"trait1", "trait2"}), eq(0), eq(42));
+	}
+	
+	/**
+	 * Does the traitData with Accept=json call work?
+	 */
+	@Test
+	public void testTraitData01() throws Exception {
+		URIBuilder uriBuilder = new URIBuilder("/v1/traitData");
+		uriBuilder.addParameter("speciesName", "species1");
+		uriBuilder.addParameter("speciesName", "species2");
+		uriBuilder.addParameter("traitName", "trait1");
+		uriBuilder.addParameter("traitName", "trait2");
+		uriBuilder.addParameter("start", "0");
+		uriBuilder.addParameter("rows", "42");
+		mockMvc.perform(get(uriBuilder.build())
+				.header("Accept", MediaType.APPLICATION_JSON_VALUE))
+	        .andExpect(status().isOk());
+		assertThat(metricsInnerQueue.size(), is(1));
+		MetricsStorageService metricsStore = mock(MetricsStorageService.class);
+		metricsInnerQueue.remove().doPersist(metricsStore);
+		verify(metricsStore).recordRequest(any(), eq(RequestType.V1_TRAIT_DATA_JSON), eq(new String[] {"species1", "species2"}),
+				eq(new String[] {"trait1", "trait2"}), eq(0), eq(42));
+	}
+	
+	/**
+	 * Does the traitData with Accept=csv call work?
+	 */
+	@Test
+	public void testTraitData02() throws Exception {
+		URIBuilder uriBuilder = new URIBuilder("/v1/traitData");
+		uriBuilder.addParameter("speciesName", "species1");
+		uriBuilder.addParameter("speciesName", "species2");
+		uriBuilder.addParameter("traitName", "trait1");
+		uriBuilder.addParameter("traitName", "trait2");
+		uriBuilder.addParameter("start", "0");
+		uriBuilder.addParameter("rows", "42");
+		mockMvc.perform(get(uriBuilder.build())
+				.header("Accept", TEXT_CSV_MIME))
+	        .andExpect(status().isOk());
+		assertThat(metricsInnerQueue.size(), is(1));
+		MetricsStorageService metricsStore = mock(MetricsStorageService.class);
+		metricsInnerQueue.remove().doPersist(metricsStore);
+		verify(metricsStore).recordRequest(any(), eq(RequestType.V1_TRAIT_DATA_CSV), eq(new String[] {"species1", "species2"}),
+				eq(new String[] {"trait1", "trait2"}), eq(0), eq(42));
+	}
+	
 	@Configuration
 	@ComponentScan(
-			basePackages={"au.org.aekos.service.metric", "au.org.aekos.controller"},
-			excludeFilters={
-					@Filter(type=FilterType.ASSIGNABLE_TYPE, classes=MetricsQueueWorker.class),
-					@Filter(type=FilterType.ASSIGNABLE_TYPE, classes=RootController.class),
-					@Filter(type=FilterType.ASSIGNABLE_TYPE, classes=SignupController.class),
-					@Filter(type=FilterType.ASSIGNABLE_TYPE, classes=ApiV1EnvVarRetrievalController.class),
-					@Filter(type=FilterType.ASSIGNABLE_TYPE, classes=ApiV1MaintenanceController.class),
-					@Filter(type=FilterType.ASSIGNABLE_TYPE, classes=ApiV1SpeciesRetrievalController.class),
-					@Filter(type=FilterType.ASSIGNABLE_TYPE, classes=ApiV1TraitRetrievalController.class)
-			})
+		basePackages={"au.org.aekos.service.metric", "au.org.aekos.controller"},
+		excludeFilters={
+			@Filter(type=FilterType.ASSIGNABLE_TYPE, classes=MetricsQueueWorker.class),
+			@Filter(type=FilterType.ASSIGNABLE_TYPE, classes=RootController.class),
+			@Filter(type=FilterType.ASSIGNABLE_TYPE, classes=SignupController.class),
+			@Filter(type=FilterType.ASSIGNABLE_TYPE, classes=ApiV1MaintenanceController.class)
+		})
 	@EnableAspectJAutoProxy(proxyTargetClass=true)
-	static class TestContext {
+	@Profile("force-only-ApiMetricsAspectTest")
+	static class ApiMetricsAspectTestContext {
 		
 		@Bean
 		public Dataset metricsDS() {
@@ -293,11 +552,39 @@ public class ApiMetricsAspectTest {
 		@Bean
 		public RetrievalService retrievalService() throws AekosApiRetrievalException {
 			RetrievalService result = mock(RetrievalService.class);
-			AbstractParams params = new SpeciesDataParams(0, 20, Collections.emptyList());
-			SpeciesDataResponse allSpeciesResponse = new SpeciesDataResponse(new ResponseHeader(123, 1, 7, 42, params), Collections.emptyList());
-			when(result.getAllSpeciesDataJson(anyInt(), anyInt())).thenReturn(allSpeciesResponse);
-			when(result.getAllSpeciesDataCsv(anyInt(), anyInt(), any())).thenReturn(RetrievalResponseHeader.newInstance(allSpeciesResponse));
+			addAllSpeciesStubs(result);
+			addSpeciesStubs(result);
+			addEnvStubs(result);
+			addTraitStubs(result);
 			return result;
+		}
+
+		private void addAllSpeciesStubs(RetrievalService result) throws AekosApiRetrievalException {
+			AbstractParams params = new SpeciesDataParams(0, 20, Collections.emptyList());
+			SpeciesDataResponse response = new SpeciesDataResponse(new ResponseHeader(123, 1, 7, 42, params), Collections.emptyList());
+			when(result.getAllSpeciesDataJson(anyInt(), anyInt())).thenReturn(response);
+			when(result.getAllSpeciesDataCsv(anyInt(), anyInt(), any())).thenReturn(RetrievalResponseHeader.newInstance(response));
+		}
+
+		private void addEnvStubs(RetrievalService result) throws AekosApiRetrievalException {
+			AbstractParams params = new EnvironmentDataParams(0, 20, Collections.emptyList(), Collections.emptyList());
+			EnvironmentDataResponse response = new EnvironmentDataResponse(new ResponseHeader(123, 1, 7, 42, params), Collections.emptyList());
+			when(result.getEnvironmentalDataJson(any(), any(), anyInt(), anyInt())).thenReturn(response);
+			when(result.getEnvironmentalDataCsv(any(), any(), anyInt(), anyInt(), any())).thenReturn(RetrievalResponseHeader.newInstance(response));
+		}
+		
+		private void addTraitStubs(RetrievalService result) throws AekosApiRetrievalException {
+			AbstractParams params = new TraitDataParams(0, 20, Collections.emptyList(), Collections.emptyList());
+			TraitDataResponse response = new TraitDataResponse(new ResponseHeader(123, 1, 7, 42, params), Collections.emptyList());
+			when(result.getTraitDataJson(any(), any(), anyInt(), anyInt())).thenReturn(response);
+			when(result.getTraitDataCsv(any(), any(), anyInt(), anyInt(), any())).thenReturn(RetrievalResponseHeader.newInstance(response));
+		}
+		
+		private void addSpeciesStubs(RetrievalService result) throws AekosApiRetrievalException {
+			AbstractParams params = new SpeciesDataParams(0, 20, Collections.emptyList());
+			SpeciesDataResponse response = new SpeciesDataResponse(new ResponseHeader(123, 1, 7, 42, params), Collections.emptyList());
+			when(result.getSpeciesDataJson(any(), anyInt(), anyInt())).thenReturn(response);
+			when(result.getSpeciesDataCsv(any(), anyInt(), anyInt(), any())).thenReturn(RetrievalResponseHeader.newInstance(response));
 		}
 		
 		@Bean
