@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="
+            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.2.xsd
+            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.2.xsd">
+	
+	<context:property-placeholder location="classpath:/au/org/aekos/retrievalContext-test.properties" />
+	
+	<context:component-scan base-package="au.org.aekos.service.retrieval">
+		<context:exclude-filter type="assignable" expression="au.org.aekos.service.retrieval.JossDataProvisionService"/>
+	</context:component-scan>
+	
+	<bean id="darwinCoreQueryTemplate" class="java.lang.String">
+	    <constructor-arg>
+	        <bean class="org.springframework.util.FileCopyUtils" factory-method="copyToByteArray">
+	            <constructor-arg value="classpath:au/org/aekos/sparql/darwin-core.rq" type="java.io.InputStream" />
+	        </bean>     
+	    </constructor-arg>
+	</bean>
+	
+	<bean id="darwinCoreCountQueryTemplate" class="java.lang.String">
+	    <constructor-arg>
+	        <bean class="org.springframework.util.FileCopyUtils" factory-method="copyToByteArray">
+	            <constructor-arg value="classpath:au/org/aekos/sparql/darwin-core-count.rq" type="java.io.InputStream" />
+	        </bean>     
+	    </constructor-arg>
+	</bean>
+	
+	<bean id="darwinCoreCountAllQueryTemplate" class="java.lang.String">
+	    <constructor-arg>
+	        <bean class="org.springframework.util.FileCopyUtils" factory-method="copyToByteArray">
+	            <constructor-arg value="classpath:au/org/aekos/sparql/darwin-core-count-all.rq" type="java.io.InputStream" />
+	        </bean>     
+	    </constructor-arg>
+	</bean>
+	
+	<bean id="environmentDataQueryTemplate" class="java.lang.String">
+	    <constructor-arg>
+	        <bean class="org.springframework.util.FileCopyUtils" factory-method="copyToByteArray">
+	            <constructor-arg value="classpath:au/org/aekos/sparql/environment-data.rq" type="java.io.InputStream" />
+	        </bean>     
+	    </constructor-arg>
+	</bean>
+	
+	<bean id="environmentDataCountQueryTemplate" class="java.lang.String">
+	    <constructor-arg>
+	        <bean class="org.springframework.util.FileCopyUtils" factory-method="copyToByteArray">
+	            <constructor-arg value="classpath:au/org/aekos/sparql/environment-data-count.rq" type="java.io.InputStream" />
+	        </bean>     
+	    </constructor-arg>
+	</bean>
+	
+	<bean id="traitDataCountQueryTemplate" class="java.lang.String">
+	    <constructor-arg>
+	        <bean class="org.springframework.util.FileCopyUtils" factory-method="copyToByteArray">
+	            <constructor-arg value="classpath:au/org/aekos/sparql/trait-data-count.rq" type="java.io.InputStream" />
+	        </bean>     
+	    </constructor-arg>
+	</bean>
+	
+	<bean id="indexLoaderQuery" class="java.lang.String">
+	    <constructor-arg>
+	        <bean class="org.springframework.util.FileCopyUtils" factory-method="copyToByteArray">
+	            <constructor-arg value="classpath:au/org/aekos/sparql/index-loader.rq" type="java.io.InputStream" />
+	        </bean>     
+	    </constructor-arg>
+	</bean>
+	
+	<bean id="testGetSpeciesDataCsv01_expected" class="java.lang.String">
+	    <constructor-arg>
+	        <bean class="org.springframework.util.FileCopyUtils" factory-method="copyToByteArray">
+	            <constructor-arg value="classpath:au/org/aekos/retrieval/testGetSpeciesDataCsv01_expected.txt" type="java.io.InputStream" />
+	        </bean>     
+	    </constructor-arg>
+	</bean>
+	
+	<bean id="testGetSpeciesDataCsv02_expected" class="java.lang.String">
+	    <constructor-arg>
+	        <bean class="org.springframework.util.FileCopyUtils" factory-method="copyToByteArray">
+	            <constructor-arg value="classpath:au/org/aekos/retrieval/testGetSpeciesDataCsv02_expected.txt" type="java.io.InputStream" />
+	        </bean>     
+	    </constructor-arg>
+	</bean>
+	
+	<bean id="testGetSpeciesDataCsv03_expected" class="java.lang.String">
+	    <constructor-arg>
+	        <bean class="org.springframework.util.FileCopyUtils" factory-method="copyToByteArray">
+	            <constructor-arg value="classpath:au/org/aekos/retrieval/testGetSpeciesDataCsv03_expected.txt" type="java.io.InputStream" />
+	        </bean>     
+	    </constructor-arg>
+	</bean>
+	
+	<bean id="testGetAllSpeciesDataCsv01_expected" class="java.lang.String">
+	    <constructor-arg>
+	        <bean class="org.springframework.util.FileCopyUtils" factory-method="copyToByteArray">
+	            <constructor-arg value="classpath:au/org/aekos/retrieval/testGetAllSpeciesDataCsv01_expected.txt" type="java.io.InputStream" />
+	        </bean>     
+	    </constructor-arg>
+	</bean>
+	
+	<bean id="testGetEnvironmentalDataCsv01_expected" class="java.lang.String">
+	    <constructor-arg>
+	        <bean class="org.springframework.util.FileCopyUtils" factory-method="copyToByteArray">
+	            <constructor-arg value="classpath:au/org/aekos/retrieval/testGetEnvironmentalDataCsv01_expected.txt" type="java.io.InputStream" />
+	        </bean>     
+	    </constructor-arg>
+	</bean>
+
+	<bean id="testGetTraitDataCsv01_expected" class="java.lang.String">
+	    <constructor-arg>
+	        <bean class="org.springframework.util.FileCopyUtils" factory-method="copyToByteArray">
+	            <constructor-arg value="classpath:au/org/aekos/retrieval/testGetTraitDataCsv01_expected.txt" type="java.io.InputStream" />
+	        </bean>     
+	    </constructor-arg>
+	</bean>	
+	
+	<bean id="modelLoader" class="au.org.aekos.util.CoreDataAekosJenaModelFactory" />
+	
+	<!-- we need a reference to the model so we can load data to it, but we use the dataset in the actual class -->
+	<bean id="dataModel" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+		<property name="targetObject" ref="modelLoader" />
+		<property name="targetMethod" value="getInstance" />
+	</bean>
+	
+	<bean id="coreDS" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+		<property name="targetObject" ref="modelLoader" />
+		<property name="targetMethod" value="getDatasetInstance" />
+	</bean>
+	
+	<!-- pre-populate the model with Darwin Core and trait data -->
+	<bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+		<property name="targetObject" ref="dataModel" />
+		<property name="targetMethod" value="read" />
+		<property name="arguments">
+			<array>
+				<value type="java.io.InputStream">classpath:au/org/aekos/test-darwin-core-plus-traits.ttl</value>
+				<value>null</value>
+				<value>TTL</value>
+			</array>
+		</property>
+	</bean>
+	
+	<!-- pre-populate the model with environmental data -->
+	<bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+		<property name="targetObject" ref="dataModel" />
+		<property name="targetMethod" value="read" />
+		<property name="arguments">
+			<array>
+				<value type="java.io.InputStream">classpath:au/org/aekos/test-environmental-data.ttl</value>
+				<value>null</value>
+				<value>TTL</value>
+			</array>
+		</property>
+	</bean>
+</beans>
