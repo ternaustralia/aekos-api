@@ -1,9 +1,6 @@
 package au.org.aekos.service.index;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,6 +30,7 @@ import org.springframework.stereotype.Service;
 
 import au.org.aekos.controller.ProgressTracker;
 import au.org.aekos.service.search.load.LoaderClient;
+import au.org.aekos.util.FieldNames;
 
 @Service
 public class LuceneIndexingService implements IndexingService {
@@ -40,6 +38,7 @@ public class LuceneIndexingService implements IndexingService {
 	private static final Logger logger = LoggerFactory.getLogger(LuceneIndexingService.class);
 	private static final String API_NS = "http://www.aekos.org.au/api/1.0#"; // FIXME make configurable and inline into SPARQL query
 	private static final String DARWIN_CORE_RECORD_TYPE = API_NS + "DarwinCoreRecord";
+	private static final String LOCATION_VISIT_TYPE = API_NS + "LocationVisit";
 	
 	@Autowired
 	@Qualifier("coreDS")
@@ -52,6 +51,10 @@ public class LuceneIndexingService implements IndexingService {
 	@Qualifier("darwinCoreAndTraitsQuery")
 	private String darwinCoreAndTraitsQuery;
 	
+	@Autowired
+	@Qualifier("environmentalVariablesQuery")
+	private String environmentalVariablesQuery;
+	
 	private int processed = 0;
 	private long lastCheckpoint;
 	private long checkpointSize = 10000;
@@ -61,17 +64,26 @@ public class LuceneIndexingService implements IndexingService {
 	public String doIndexing() throws IOException {
 //		int totalRecordCount = retrievalService.getTotalSpeciesRecordsHeld();
 		int totalRecordCount = 1000; // FIXME
-		Map<String, Integer> speciesCounts = new HashMap<>();
 		loader.beginLoad();
 		logger.info("Clearing existing index...");
 		loader.deleteAll();
+		logger.info("Phase 1: indexing darwin core records");
 		ProgressTracker tracker = new ProgressTracker(totalRecordCount);
-		getIndexStream(new IndexLoaderCallback() {
+		Map<String, Integer> speciesCounts = indexSpeciesRecords(tracker);
+		processSpeciesCounts(speciesCounts);
+		logger.info("Phase 2: indexing location visit records");
+		indexEnvironmentRecords();
+		loader.endLoad();
+		return tracker.getFinishedMessage();
+	}
+
+	private Map<String, Integer> indexSpeciesRecords(ProgressTracker tracker) {
+		Map<String, Integer> speciesCounts = new HashMap<>();
+		getSpeciesIndexStream(new IndexLoaderCallback() {
 			@Override
-			public void accept(IndexLoaderRecord record) {
+			public void accept(SpeciesLoaderRecord record) {
 				try {
 					loader.addSpeciesTraitTermsToIndex(record.getSpeciesName(), new LinkedList<>(record.getTraitNames()));
-					loader.addSpeciesEnvironmentTermsToIndex(record.getSpeciesName(), new LinkedList<>(record.getEnvironmentalVariableNames()));
 					loader.addSpeciesRecord(record);
 					Integer speciesCount = speciesCounts.get(record.getSpeciesName());
 					if (speciesCount == null) {
@@ -84,15 +96,11 @@ public class LuceneIndexingService implements IndexingService {
 				tracker.addRecord();
 			}
 		});
-		processSpeciesCounts(speciesCounts);
-		loader.endLoad();
-		return tracker.getFinishedMessage();
+		return speciesCounts;
 	}
 	
-	private void getIndexStream(IndexLoaderCallback callback) {
-		// TODO also get env data
+	private void getSpeciesIndexStream(IndexLoaderCallback callback) {
 		String sparql = darwinCoreAndTraitsQuery;
-//		logger.debug("Index loader SPARQL: " + sparql);
 		Query query = QueryFactory.create(sparql);
 		long now = now();
 		lastCheckpoint = now;
@@ -117,17 +125,14 @@ public class LuceneIndexingService implements IndexingService {
 				Triple currTriple = results.next();
 				trackProgress();
 				String tripleSubject = currTriple.getSubject().getLocalName();
-				boolean isNewSolutionRow = currTriple.getPredicate().getURI().equals(RDF.type.getURI());
-				if (isNewSolutionRow) {
+				boolean isPossiblyNewSolutionRow = currTriple.getPredicate().getURI().equals(RDF.type.getURI());
+				if (isPossiblyNewSolutionRow) {
 					boolean isDwcRecord = currTriple.getObject().getURI().equals(DARWIN_CORE_RECORD_TYPE);
 					boolean isSubjectChanged = !currentlyProcessingSubject.equals(tripleSubject);
 					boolean isSubjectAlreadySeen = seenSubjects.contains(tripleSubject);
 					if (isDwcRecord && isSubjectChanged) {
 						if (isSubjectAlreadySeen) {
 							throw new RuntimeException("FAIL town, we've already seen " + tripleSubject);
-						}
-						if (++modelsProcessed == 5) {
-							break;
 						}
 						process(model, modelsProcessed, callback);
 						model = newModel();
@@ -141,29 +146,91 @@ public class LuceneIndexingService implements IndexingService {
 	}
 
 	private void process(Model model, int counter, IndexLoaderCallback callback) {
-		try {
-			String path = "/data/model" + counter + ".ttl";
-			logger.info("Writing " + path);
-			FileOutputStream out = new FileOutputStream(path);
-			model.write(out, "TURTLE");
-		} catch (FileNotFoundException e) {
-			throw new RuntimeException("failed", e);
-		}
 		// FIXME check there's exactly one record
 		Resource dwcRecord = model.listSubjectsWithProperty(RDF.type, model.createResource(DARWIN_CORE_RECORD_TYPE)).next();
 		String speciesName = getString(dwcRecord, "scientificName");
-		// env
-		Set<String> envVarNames = Collections.emptySet();
+		Set<String> traitNames = dwcRecord.listProperties(prop("trait")).toList().stream()
+			.map(e -> e.getObject().asResource().getProperty(prop("name")).getLiteral().getString())
+			.collect(Collectors.toSet());
+		callback.accept(new SpeciesLoaderRecord(speciesName, traitNames));
+	}
+	
+	private void indexEnvironmentRecords() {
+		getEnvironmentIndexStream(new EnvironmentLoaderCallback() {
+			@Override
+			public void accept(EnvironmentLoaderRecord record) {
+				try {
+//					loader.addSpeciesEnvironmentTermsToIndex(record.getSpeciesName(), new LinkedList<>(record.getEnvironmentalVariableNames()));
+					loader.addEnvRecord(record);
+				} catch (IOException e) {
+					throw new RuntimeException("Failed to add a record to the index: " + record.toString(), e);
+				}
+			}
+		});
+	}
+	
+	interface EnvironmentLoaderCallback {
+		void accept(EnvironmentLoaderRecord record);
+	}
+	
+	private void getEnvironmentIndexStream(EnvironmentLoaderCallback callback) {
+		String sparql = environmentalVariablesQuery;
+		Query query = QueryFactory.create(sparql);
+		long now = now();
+		lastCheckpoint = now;
+		Set<String> seenSubjects = new HashSet<>();
+		try (QueryExecution qexec = QueryExecutionFactory.create(query, ds)) {
+			Iterator<Triple> results = qexec.execConstructTriples();
+			if (!results.hasNext()) {
+				throw new IllegalStateException("Data problem: no results were found. "
+						+ "Do you have RDF AEKOS data loaded?");
+			}
+			Model model = newModel();
+			int modelsProcessed = 0;
+			Triple firstRecord = results.next();
+			String firstRecordPredicateName = firstRecord.getPredicate().getURI();
+			if (!firstRecordPredicateName.equals(RDF.type.getURI())) {
+				throw new RuntimeException("Programmer problem: expected that the first record will be rdf:type but it wasn't. It was '"
+						+ firstRecordPredicateName + "'");
+			}
+			String currentlyProcessingSubject = firstRecord.getSubject().getLocalName();
+			seenSubjects.add(currentlyProcessingSubject);
+			for (; results.hasNext();) {
+				Triple currTriple = results.next();
+				trackProgress();
+				String tripleSubject = currTriple.getSubject().getLocalName();
+				boolean isPossiblyNewSolutionRow = currTriple.getPredicate().getURI().equals(RDF.type.getURI());
+				if (isPossiblyNewSolutionRow) {
+					boolean isLocationVisitRecord = currTriple.getObject().getURI().equals(LOCATION_VISIT_TYPE);
+					boolean isSubjectChanged = !currentlyProcessingSubject.equals(tripleSubject);
+					boolean isSubjectAlreadySeen = seenSubjects.contains(tripleSubject);
+					if (isLocationVisitRecord && isSubjectChanged) {
+						if (isSubjectAlreadySeen) {
+							throw new RuntimeException("FAIL town, we've already seen " + tripleSubject);
+						}
+						processEnv(model, modelsProcessed, callback);
+						model = newModel();
+						currentlyProcessingSubject = tripleSubject;
+						seenSubjects.add(currentlyProcessingSubject);
+					}
+				}
+				model.getGraph().add(currTriple);
+			}
+		}
+	}
+
+	private void processEnv(Model model, int counter, EnvironmentLoaderCallback callback) {
+		// FIXME check there's exactly one record
+		Resource locVisitRecord = model.listSubjectsWithProperty(RDF.type, model.createResource(LOCATION_VISIT_TYPE)).next();
+		String locationId = getString(locVisitRecord, "locationID"); // FIXME field name constant
 //		DummyEnvironmentDataRecord envRecord = new DummyEnvironmentDataRecord();
 //		for (Property currVarProp : Arrays.asList(prop(DISTURBANCE_EVIDENCE_VARS), prop(LANDSCAPE_VARS), prop(NO_UNITS_VARS), prop(SOIL_VARS))) {
 //			processEnvDataVars(Collections.emptyList(), s.get("loc").asResource(), envRecord, currVarProp);
 //		}
-		// traits
-		Set<String> traitNames = dwcRecord.listProperties(prop("trait")).toList().stream()
-			.map(e -> e.getObject().asResource().getProperty(prop("name")).getLiteral().getString())
+		Set<String> envVarNames = locVisitRecord.listProperties(prop(FieldNames.NO_UNITS_VARS)).toList().stream() // FIXME need to do loop like above
+			.map(e -> e.getObject().asResource().getProperty(prop("name")).getLiteral().getString()) // FIXME extract field name "name" as constant
 			.collect(Collectors.toSet());
-		// result
-		callback.accept(new IndexLoaderRecord(speciesName, traitNames, envVarNames));
+		callback.accept(new EnvironmentLoaderRecord(locationId, envVarNames));
 	}
 
 	private String getString(Resource res, String predicateName) {
@@ -179,7 +246,6 @@ public class LuceneIndexingService implements IndexingService {
 	}
 
 	private Model newModel() {
-		logger.info("new model");
 		return ModelFactory.createDefaultModel();
 	}
 

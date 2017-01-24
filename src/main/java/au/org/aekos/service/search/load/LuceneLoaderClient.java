@@ -20,7 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import au.org.aekos.service.index.IndexLoaderRecord;
+import au.org.aekos.service.index.EnvironmentLoaderRecord;
+import au.org.aekos.service.index.SpeciesLoaderRecord;
 import au.org.aekos.service.search.index.IndexConstants;
 import au.org.aekos.service.search.index.TermIndexManager;
 
@@ -124,14 +125,26 @@ public class LuceneLoaderClient implements LoaderClient {
 	}
 	
 	@Override
-	public void addSpeciesRecord(IndexLoaderRecord record) throws IOException {
+	public void addSpeciesRecord(SpeciesLoaderRecord record) throws IOException {
 		Document doc = new Document();
-		doc.add(new StringField(IndexConstants.FLD_DOC_INDEX_TYPE, "tom", Field.Store.YES));
-		doc.add(new TextField("speciesName", record.getSpeciesName(), Field.Store.YES));
+		doc.add(new StringField(IndexConstants.FLD_DOC_INDEX_TYPE, IndexConstants.SPECIES_RECORD, Field.Store.YES)); // FIXME does this need to be lowercase to be searched?
+		doc.add(new TextField(IndexConstants.FLD_SPECIES, record.getSpeciesName(), Field.Store.YES));
+		// FIXME need to index all the fields
 		for (String curr : record.getTraitNames()) {
 			doc.add(new StringField("trait", curr, Field.Store.YES));
 		}
-		// TODO add env
+		writeDocument(doc, indexWriter);
+	}
+	
+	@Override
+	public void addEnvRecord(EnvironmentLoaderRecord record) throws IOException {
+		Document doc = new Document();
+		doc.add(new StringField(IndexConstants.FLD_DOC_INDEX_TYPE, IndexConstants.ENV_RECORD, Field.Store.YES)); // FIXME does this need to be lowercase to be searched?
+		doc.add(new TextField("locationID", record.getLocationID(), Field.Store.YES)); // FIXME make field name constant
+		// FIXME need to index all the fields
+		for (String curr : record.getEnvironmentalVariableNames()) {
+			doc.add(new StringField(IndexConstants.FLD_ENVIRONMENT, curr, Field.Store.YES));
+		}
 		writeDocument(doc, indexWriter);
 	}
 

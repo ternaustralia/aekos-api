@@ -3,7 +3,8 @@ package au.org.aekos.service.search.load;
 import java.io.IOException;
 import java.util.List;
 
-import au.org.aekos.service.index.IndexLoaderRecord;
+import au.org.aekos.service.index.EnvironmentLoaderRecord;
+import au.org.aekos.service.index.SpeciesLoaderRecord;
 
 /**
  * Loads records into the index to be used for searching.
@@ -40,5 +41,7 @@ public interface LoaderClient {
 
 	void deleteAll() throws IOException;
 
-	public void addSpeciesRecord(IndexLoaderRecord record) throws IOException;
+	void addSpeciesRecord(SpeciesLoaderRecord record) throws IOException;
+
+	void addEnvRecord(EnvironmentLoaderRecord record) throws IOException;
 }

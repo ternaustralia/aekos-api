@@ -1,6 +1,6 @@
 package au.org.aekos.service.search.index;
 
-/*
+/**
  * These are all document field names
  * 
  * Document types in DocumentType enum,  BUT might put the name Strings here for consistency
@@ -20,6 +20,8 @@ public class IndexConstants {
 	public static final String TRAIT_SPECIES = DocumentType.TRAIT_SPECIES.name();
 	public static final String SPECIES_ENV = DocumentType.SPECIES_ENV.name();
 	public static final String SPECIES_SUMMARY = DocumentType.SPECIES_SUMMARY.name();
+	public static final String SPECIES_RECORD = DocumentType.SPECIES_RECORD.name();
+	public static final String ENV_RECORD = DocumentType.ENV_RECORD.name();
 	
 	//Unique term for loading unique checking
 	public static final String FLD_UNIQUE_ID = "uid";

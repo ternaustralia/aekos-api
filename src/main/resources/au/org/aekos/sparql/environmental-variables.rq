@@ -1,0 +1,321 @@
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX aekos: <http://www.aekos.org.au/ontology/1.0.0#>
+PREFIX abares_fgc: <http://www.aekos.org.au/ontology/1.0.0/abares_fgc#>
+PREFIX adelaide_koonamore: <http://www.aekos.org.au/ontology/1.0.0/adelaide_koonamore#>
+PREFIX aekos_common: <http://www.aekos.org.au/ontology/1.0.0/aekos_common#>
+PREFIX dewnr_bdbsa: <http://www.aekos.org.au/ontology/1.0.0/dewnr_bdbsa#>
+PREFIX dewnr_roadsideveg: <http://www.aekos.org.au/ontology/1.0.0/dewnr_roadsideveg#>
+PREFIX dpipwe_platypus: <http://www.aekos.org.au/ontology/1.0.0/dpipwe_platypus#>
+PREFIX oeh_vis: <http://www.aekos.org.au/ontology/1.0.0/oeh_vis#>
+PREFIX qld_corveg: <http://www.aekos.org.au/ontology/1.0.0/qld_corveg#>
+PREFIX tern_ausplots: <http://www.aekos.org.au/ontology/1.0.0/tern_ausplots#>
+PREFIX tern_natt: <http://www.aekos.org.au/ontology/1.0.0/tern_natt#>
+PREFIX tern_swatt: <http://www.aekos.org.au/ontology/1.0.0/tern_swatt#>
+PREFIX tern_trend: <http://www.aekos.org.au/ontology/1.0.0/tern_trend#>
+PREFIX uq_supersites_cover: <http://www.aekos.org.au/ontology/1.0.0/uq_supersites_cover#>
+PREFIX usyd_derg: <http://www.aekos.org.au/ontology/1.0.0/usyd_derg#>
+PREFIX wadec_ravensthorpe: <http://www.aekos.org.au/ontology/1.0.0/wadec_ravensthorpe#>
+PREFIX api: <http://www.aekos.org.au/api/1.0#>
+
+# Builds an evironmental variable dataset
+CONSTRUCT {
+  ?locationVisitEntity a api:LocationVisit .
+  ?locationVisitEntity api:decimalLongitude ?decimalLongitude .
+  ?locationVisitEntity api:decimalLatitude ?decimalLatitude .
+  ?locationVisitEntity api:geodeticDatum ?geodeticDatum .
+  ?locationVisitEntity api:locationID ?locationID .
+  ?locationVisitEntity api:eventDate ?eventDate .
+  ?locationVisitEntity api:year ?year .
+  ?locationVisitEntity api:month ?month .
+  # landscape vars
+  ?locationVisitEntity api:landscapeVars ?landscapeTraitEntity .
+  ?landscapeTraitEntity api:name ?landscapeTraitName .
+  ?landscapeTraitEntity api:value ?landscapeTraitValue .
+  ?landscapeTraitEntity api:units ?landscapeTraitUnits .
+  # no units vars
+  ?locationVisitEntity api:noUnitsVars ?noUnitsTraitEntity .
+  ?noUnitsTraitEntity api:name ?noUnitsTraitName .
+  ?noUnitsTraitEntity api:value ?noUnitsTraitValue .
+  ?noUnitsTraitEntity api:units ?noUnits .
+  # soil vars
+  ?locationVisitEntity api:soilVars ?soilTraitEntity .
+  ?soilTraitEntity api:name ?soilTraitName .
+  ?soilTraitEntity api:value ?soilTraitValue .
+  ?soilTraitEntity api:units ?soilTraitUnits .
+  # disturbance evidence
+  ?locationVisitEntity api:disturbanceEvidenceVars ?disturbanceEvidenceCoverEntity .
+  ?disturbanceEvidenceCoverEntity api:name ?disturbanceEvidenceCoverName .
+  ?disturbanceEvidenceCoverEntity api:value ?disturbanceEvidenceCoverValue .
+  ?disturbanceEvidenceCoverEntity api:units ?disturbanceEvidenceCoverUnits .
+}
+FROM abares_fgc:
+FROM adelaide_koonamore:
+FROM aekos_common:
+FROM dewnr_bdbsa:
+FROM dewnr_roadsideveg:
+FROM dpipwe_platypus:
+FROM oeh_vis:
+FROM qld_corveg:
+FROM tern_ausplots:
+FROM tern_natt:
+FROM tern_swatt:
+FROM tern_trend:
+FROM uq_supersites_cover:
+FROM usyd_derg:
+FROM wadec_ravensthorpe:
+WHERE {
+  ?slsg a ?slsgType .
+  VALUES ?slsgType {
+    aekos:STUDYLOCATIONSUBGRAPH
+    aekos:AUSPLOTSSTUDYLOCATIONSUBGRAPH
+    aekos:UQSSSTUDYLOCATIONSUBGRAPH
+    aekos:VISSTUDYLOCATIONSUBGRAPH
+    aekos:STUDYLOCATIONSUBGRAPH_RSV
+    aekos:PLATYPUSSTUDYLOCATIONSUBGRAPH
+    aekos:BDBSASTUDYLOCATIONSUBGRAPH
+    aekos:STUDYLOCATIONSUBGRAPH_KOONAMORE
+    aekos:CORVEGSTUDYLOCATIONSUBGRAPH
+    aekos:SWATTSTUDYLOCATIONSUBGRAPH
+    aekos:ABARESSTUDYLOCATIONSUBGRAPH
+    aekos:DERGSTUDYLOCATIONSUBGRAPH
+    aekos:RAVENSSTUDYLOCATIONSUBGRAPH
+    aekos:NATTSTUDYLOCATIONSUBGRAPH
+  }
+  # location ID
+  ?slsg aekos:aekoslocationidentifier ?locationID .
+  # location
+  OPTIONAL {
+    ?slsg aekos:studylocation/aekos:location/aekos:sampledpoint [
+      aekos:computedlongitude ?decimalLongitude1 ;
+      aekos:computedlatitude ?decimalLatitude1
+    ] .
+  }
+  OPTIONAL {
+    ?slsg aekos:centroidcoordinates [
+      aekos:computedlongitude ?decimalLongitude2 ;
+      aekos:computedlatitude ?decimalLatitude2
+    ] .
+  }
+  BIND(COALESCE(?decimalLongitude1, ?decimalLongitude2) AS ?decimalLongitude) .
+  BIND(COALESCE(?decimalLatitude1, ?decimalLatitude2) AS ?decimalLatitude) .
+  BIND('GDA94' as ?geodeticDatum) .
+  # empty string for variables without units
+  BIND ('' as ?noUnits) .
+  ?slsg aekos:views/rdfs:member ?vv .
+  # synthetic entity ID for the Study Location Visit
+  BIND (UUID() as ?locationVisitEntity) .
+  # eventDate
+  OPTIONAL {
+    ?vv aekos:observeditems/rdfs:member ?su1 .
+    ?su1 a ?su1Type .
+    VALUES ?su1Type {
+      aekos:SAMPLINGUNIT
+      aekos:SAMPLINGUNITVIS
+      aekos:SAMPLINGUNITRSV
+      aekos:SAMPLINGUNITATRIPLEX
+      aekos:SAMPLINGUNITRABBITWARRENS
+    } .
+    ?su1 aekos:temporality/aekos:has_start ?eventDateTemp1 .
+  }
+  OPTIONAL {
+    ?vv aekos:observeditems/rdfs:member ?sa1 .
+    ?sa1 a ?sa1Type .
+    VALUES ?sa1Type {
+      aekos:SAMPLEDAREA
+      aekos:SAMPLEDAREAACSS
+#      aekos:SAMPLEDAREAVIS # Not in the data
+    } .
+    ?sa1 aekos:temporality/aekos:has_start ?eventDateTemp2 .
+  }
+  OPTIONAL {
+    ?vv aekos:observeditems/rdfs:member ?oi .
+    ?oi a ?oiType .
+    VALUES ?oiType {
+      aekos:LANDSCAPE
+      aekos:LANDSCAPEVIS
+      aekos:SOIL
+      aekos:SOILVIS
+      aekos:SOILAP
+      aekos:FIREEVIDENCE
+      aekos:DISTURBANCEEVIDENCE
+      aekos:DISTURBANCEEVIDENCE_KOONAMORE
+      aekos:DISTURBANCEEVIDENCE_KOONAMORE_DETAILS
+      aekos:DISTURBANCEEVIDENCERSV
+      aekos:DISTURBANCEEVIDENCEVIS
+      aekos:EROSIONEVIDENCE
+      aekos:SOILSAMPLE # work around for TERN_AUSPLOTS and TERN_TREND
+    }
+    ?oi aekos:temporality/aekos:has_start ?eventDateTemp3 .
+  }
+  BIND(COALESCE(?eventDateTemp1, ?eventDateTemp2, ?eventDateTemp3) AS ?eventDateTemp)
+  BIND (CONCAT(str(year(?eventDateTemp)),"-",str(month(?eventDateTemp)),"-",str(day(?eventDateTemp))) as ?eventDate) .
+  # month
+  BIND (month(?eventDateTemp) as ?month) .
+  # year
+  BIND (year(?eventDateTemp) as ?year) .
+  # all the variables
+  OPTIONAL {
+    # latest land use
+    {
+      ?vv aekos:observeditems/rdfs:member ?sa2 .
+      ?sa2 a ?sa2Type .
+      VALUES ?sa2Type {aekos:SAMPLEDAREA aekos:SAMPLEDAREAACSS aekos:SAMPLEDAREAVIS} .
+      ?sa2 aekos:latestlanduse/aekos:category/aekos:name ?noUnitsTraitValue .
+      BIND ('latestLandUse' as ?noUnitsTraitName) .
+      BIND (URI(CONCAT("urn:",?noUnitsTraitName,":",STRUUID())) as ?noUnitsTraitEntity) .
+    }
+    # weather comment
+    UNION {
+      ?vv aekos:observeditems/rdfs:member ?sa3 .
+      ?sa3 a aekos:SAMPLEDAREA .
+      ?sa3 aekos:weather/aekos:commentary ?noUnitsTraitValue .
+      BIND ('weatherComment' as ?noUnitsTraitName) .
+      BIND (URI(CONCAT("urn:",?noUnitsTraitName,":",SHA1(?noUnitsTraitValue))) as ?noUnitsTraitEntity) .
+    }
+    # landscape
+    UNION {
+      ?vv aekos:observeditems/rdfs:member ?ls .
+      ?ls a ?lsType .
+      VALUES ?lsType {
+        aekos:LANDSCAPE
+        aekos:LANDSCAPEVIS
+      }
+      { # FIXME do these need to be optionals? Will slope appear without aspect?
+        BIND ('aspect' as ?landscapeTraitName) .
+        BIND (URI(CONCAT("urn:",?landscapeTraitName,":",STRUUID())) as ?landscapeTraitEntity) .
+        ?ls aekos:aspect/aekos:value ?landscapeTraitValue .
+        ?ls aekos:aspect/aekos:units/aekos:name ?landscapeTraitUnits .
+      }
+      UNION {
+        BIND ('slope' as ?landscapeTraitName) .
+        BIND (URI(CONCAT("urn:",?landscapeTraitName,":",STRUUID())) as ?landscapeTraitEntity) .
+        ?ls aekos:slope/aekos:value ?landscapeTraitValue .
+        ?ls aekos:slope/aekos:units/aekos:name ?landscapeTraitUnits .
+      }
+    }
+    # soil
+    UNION {
+      ?vv aekos:observeditems/rdfs:member ?so .
+      ?so a ?soType .
+      VALUES ?soType {
+        aekos:SOIL
+        aekos:SOILVIS
+        aekos:SOILAP
+      }
+      # soil type
+      {
+        BIND ('soilType' as ?noUnitsTraitName) .
+        BIND (URI(CONCAT("urn:",?noUnitsTraitName,":",STRUUID())) as ?noUnitsTraitEntity) .
+        ?so aekos:soiltype/aekos:category/aekos:name | aekos:soiltype/aekos:commentary ?noUnitsTraitValue .
+      }
+      # soil texture
+      UNION {
+        BIND ('soilTexture' as ?noUnitsTraitName) .
+        BIND (URI(CONCAT("urn:",?noUnitsTraitName,":",STRUUID())) as ?noUnitsTraitEntity) .
+        ?so aekos:soiltexture/aekos:category/aekos:name | aekos:soiltexture/aekos:commentary ?noUnitsTraitValue .
+      }
+      # surface type
+      UNION {
+        BIND ('surfaceType' as ?noUnitsTraitName) .
+        BIND (URI(CONCAT("urn:",?noUnitsTraitName,":",STRUUID())) as ?noUnitsTraitEntity) .
+        ?so aekos:surfacetype/aekos:category/aekos:name | aekos:surfacetype/aekos:commentary ?noUnitsTraitValue .
+      }
+      # electrical conductivity
+      UNION  {
+        BIND ('electricalConductivity' as ?soilTraitName) .
+        BIND (URI(CONCAT("urn:",?soilTraitName,":",STRUUID())) as ?soilTraitEntity) .
+        ?so aekos:electricalconductivity/aekos:value ?soilTraitValue .
+        ?so aekos:electricalconductivity/aekos:units/aekos:name ?soilTraitUnits .
+      }
+      # pH
+      UNION {
+        BIND ('pH' as ?soilTraitName) .
+        BIND (URI(CONCAT("urn:",?soilTraitName,":",STRUUID())) as ?soilTraitEntity) .
+        ?so aekos:ph/aekos:value ?soilTraitValue .
+        BIND (?soilTraitName as ?soilTraitUnits) .
+      }
+      # total organic carbon
+      UNION  {
+        BIND ('totalOrganicCarbon' as ?soilTraitName) .
+        BIND (URI(CONCAT("urn:",?soilTraitName,":",STRUUID())) as ?soilTraitEntity) .
+        ?so aekos:totalorganiccarbon/aekos:value ?soilTraitValue .
+        ?so aekos:totalorganiccarbon/aekos:units/aekos:name ?soilTraitUnits .
+      }
+      # clay
+      UNION {
+        BIND ('clay' as ?soilTraitName) .
+        BIND (URI(CONCAT("urn:",?soilTraitName,":",STRUUID())) as ?soilTraitEntity) .
+        ?so aekos:clay/aekos:value ?soilTraitValue .
+        ?so aekos:clay/aekos:units/aekos:name ?soilTraitUnits .
+      }
+      # silt
+      UNION {
+        BIND ('silt' as ?soilTraitName) .
+        BIND (URI(CONCAT("urn:",?soilTraitName,":",STRUUID())) as ?soilTraitEntity) .
+        ?so aekos:silt/aekos:value ?soilTraitValue .
+        ?so aekos:silt/aekos:units/aekos:name ?soilTraitUnits .
+      }
+      # sand
+      UNION {
+        BIND ('sand' as ?soilTraitName) .
+        BIND (URI(CONCAT("urn:",?soilTraitName,":",STRUUID())) as ?soilTraitEntity) .
+        ?so aekos:sand/aekos:value ?soilTraitValue .
+        ?so aekos:sand/aekos:units/aekos:name ?soilTraitUnits .
+      }
+    }
+    # visible fire evidence
+    UNION {
+      ?vv aekos:observeditems/rdfs:member ?fe .
+      ?fe a aekos:FIREEVIDENCE .
+      {
+        BIND ('visibleFireEvidence' as ?noUnitsTraitName) .
+        BIND (URI(CONCAT("urn:",?noUnitsTraitName,":",STRUUID())) as ?noUnitsTraitEntity) .
+        ?fe aekos:visiblefireevidence ?noUnitsTraitValue .
+      }
+    }
+    # disturbance evidence
+    UNION {
+      ?vv aekos:observeditems/rdfs:member ?de .
+      ?de a ?deType .
+      VALUES ?deType {
+        aekos:DISTURBANCEEVIDENCE
+        aekos:DISTURBANCEEVIDENCE_KOONAMORE
+        aekos:DISTURBANCEEVIDENCE_KOONAMORE_DETAILS
+        aekos:DISTURBANCEEVIDENCERSV
+        aekos:DISTURBANCEEVIDENCEVIS
+      }
+      # disturbance type
+      {
+        BIND ('disturbanceType' as ?noUnitsTraitName) .
+        BIND (URI(CONCAT("urn:",?noUnitsTraitName,":",STRUUID())) as ?noUnitsTraitEntity) .
+        ?de aekos:disturbancetype/aekos:category/aekos:name | aekos:disturbancetype/aekos:commentary ?noUnitsTraitValue .
+      }
+      # disturbance cover
+      UNION {
+        BIND ('disturbanceCover' as ?disturbanceEvidenceCoverName) .
+        BIND (URI(CONCAT("urn:",?disturbanceEvidenceCoverName,":",STRUUID())) as ?disturbanceEvidenceCoverEntity) .
+        ?de aekos:disturbancecover/aekos:value ?disturbanceEvidenceCoverValue .
+        ?de aekos:disturbancecover/aekos:units/aekos:name ?disturbanceEvidenceCoverUnits .
+      }
+    }
+    # erosion evidence
+    UNION {
+      ?vv aekos:observeditems/rdfs:member ?ee .
+      ?ee a aekos:EROSIONEVIDENCE .
+      # erosion type
+      {
+        BIND ('erosionType' as ?noUnitsTraitName) .
+        BIND (URI(CONCAT("urn:",?noUnitsTraitName,":",STRUUID())) as ?noUnitsTraitEntity) .
+        ?ee aekos:erosiontype/aekos:category/aekos:name | aekos:erosiontype/aekos:commentary ?noUnitsTraitValue .
+      }
+      # erosion state
+      UNION {
+        BIND ('erosionState' as ?noUnitsTraitName) .
+        BIND (URI(CONCAT("urn:",?noUnitsTraitName,":",STRUUID())) as ?noUnitsTraitEntity) .
+        ?ee aekos:erosionstate/aekos:category/aekos:name | aekos:erosionstate/aekos:commentary ?noUnitsTraitValue .
+      }
+    }
+  }
+}
