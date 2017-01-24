@@ -8,6 +8,9 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.index.Term;
@@ -17,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import au.org.aekos.service.index.IndexLoaderRecord;
 import au.org.aekos.service.search.index.IndexConstants;
 import au.org.aekos.service.search.index.TermIndexManager;
 
@@ -116,6 +120,18 @@ public class LuceneLoaderClient implements LoaderClient {
 	@Override
 	public void addSpecies(String speciesName, int speciesCount) throws IOException {
 		Document doc = buildSpeciesTermDocument(speciesName, speciesCount);
+		writeDocument(doc, indexWriter);
+	}
+	
+	@Override
+	public void addSpeciesRecord(IndexLoaderRecord record) throws IOException {
+		Document doc = new Document();
+		doc.add(new StringField(IndexConstants.FLD_DOC_INDEX_TYPE, "tom", Field.Store.YES));
+		doc.add(new TextField("speciesName", record.getSpeciesName(), Field.Store.YES));
+		for (String curr : record.getTraitNames()) {
+			doc.add(new StringField("trait", curr, Field.Store.YES));
+		}
+		// TODO add env
 		writeDocument(doc, indexWriter);
 	}
 

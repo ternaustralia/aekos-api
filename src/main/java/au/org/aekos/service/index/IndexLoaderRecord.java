@@ -3,7 +3,7 @@ package au.org.aekos.service.index;
 import java.util.Collections;
 import java.util.Set;
 
-class IndexLoaderRecord {
+public class IndexLoaderRecord {
 	// Could be scientificName or taxonRemarks
 	private final String speciesName;
 	private final Set<String> traitNames;
