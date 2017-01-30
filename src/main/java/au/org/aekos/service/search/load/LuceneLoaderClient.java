@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.StoredField;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
@@ -127,8 +128,10 @@ public class LuceneLoaderClient implements LoaderClient {
 	@Override
 	public void addSpeciesRecord(SpeciesLoaderRecord record) throws IOException {
 		Document doc = new Document();
-		doc.add(new StringField(IndexConstants.FLD_DOC_INDEX_TYPE, IndexConstants.SPECIES_RECORD, Field.Store.YES)); // FIXME does this need to be lowercase to be searched?
+		doc.add(new StringField(IndexConstants.FLD_DOC_INDEX_TYPE, IndexConstants.SPECIES_RECORD, Field.Store.YES));
 		doc.add(new TextField(IndexConstants.FLD_SPECIES, record.getSpeciesName(), Field.Store.YES));
+		doc.add(new TextField(IndexConstants.FLD_SAMPLING_PROTOCOL, record.getSamplingProtocol(), Field.Store.YES));
+		doc.add(new StoredField(IndexConstants.FLD_BIBLIOGRAPHIC_CITATION, record.getBibliographicCitation()));
 		// FIXME need to index all the fields
 		for (String curr : record.getTraitNames()) {
 			doc.add(new StringField("trait", curr, Field.Store.YES));

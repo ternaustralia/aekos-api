@@ -17,11 +17,11 @@ public class IndexConstants {
 	public static final String FLD_DOC_INDEX_TYPE = "doc_index_type";
 	
 	//Index document types for FLD_DOC_INDEX_TYPE
-	public static final String TRAIT_SPECIES = DocumentType.TRAIT_SPECIES.name();
-	public static final String SPECIES_ENV = DocumentType.SPECIES_ENV.name();
-	public static final String SPECIES_SUMMARY = DocumentType.SPECIES_SUMMARY.name();
-	public static final String SPECIES_RECORD = DocumentType.SPECIES_RECORD.name();
-	public static final String ENV_RECORD = DocumentType.ENV_RECORD.name();
+	public static final String TRAIT_SPECIES = DocumentType.TRAIT_SPECIES.name().toLowerCase();
+	public static final String SPECIES_ENV = DocumentType.SPECIES_ENV.name().toLowerCase();
+	public static final String SPECIES_SUMMARY = DocumentType.SPECIES_SUMMARY.name().toLowerCase();
+	public static final String SPECIES_RECORD = DocumentType.SPECIES_RECORD.name().toLowerCase();
+	public static final String ENV_RECORD = DocumentType.ENV_RECORD.name().toLowerCase();
 	
 	//Unique term for loading unique checking
 	public static final String FLD_UNIQUE_ID = "uid";
@@ -30,4 +30,7 @@ public class IndexConstants {
 	public static final String FLD_SPECIES = "species";
 	public static final String FLD_TRAIT = "trait";
 	public static final String FLD_ENVIRONMENT = "environment";
+	public static final String FLD_SAMPLING_PROTOCOL = "sampling_protocol";
+	public static final String FLD_SAMPLING_PROTOCOL_DV = FLD_SAMPLING_PROTOCOL + "_dv";
+	public static final String FLD_BIBLIOGRAPHIC_CITATION = "bibliographic_citation";
 }

@@ -4,13 +4,17 @@ import java.util.Collections;
 import java.util.Set;
 
 public class SpeciesLoaderRecord {
-	// Could be scientificName or taxonRemarks
+	/** Could be scientificName or taxonRemarks */
 	private final String speciesName;
+	private final String samplingProtocol;
 	private final Set<String> traitNames;
+	private final String bibliographicCitation;
 
-	public SpeciesLoaderRecord(String speciesName, Set<String> traitNames) {
+	public SpeciesLoaderRecord(String speciesName, Set<String> traitNames, String samplingProtocol, String bibliographicCitation) {
 		this.speciesName = speciesName;
 		this.traitNames = traitNames;
+		this.samplingProtocol = samplingProtocol;
+		this.bibliographicCitation = bibliographicCitation;
 	}
 
 	public String getSpeciesName() {
@@ -19,6 +23,14 @@ public class SpeciesLoaderRecord {
 
 	public Set<String> getTraitNames() {
 		return Collections.unmodifiableSet(traitNames);
+	}
+	
+	public String getSamplingProtocol() {
+		return samplingProtocol;
+	}
+
+	public String getBibliographicCitation() {
+		return bibliographicCitation;
 	}
 
 	@Override
