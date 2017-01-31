@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import org.apache.commons.lang3.SystemUtils;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
@@ -31,9 +30,6 @@ public class TermIndexManagerImpl implements TermIndexManager, DisposableBean {
 	@Value("${lucene.index.path}")
 	private String indexPath;
 	
-	@Value("${lucene.index.wpath}")
-	private String windowsIndexPath;
-	
 	@Value("${lucene.index.createMode}")
 	private boolean createMode;
 	
@@ -46,12 +42,6 @@ public class TermIndexManagerImpl implements TermIndexManager, DisposableBean {
 			initialiseIndexDirectory();
 		}
 		return termIndex;
-	}
-	
-	@Override
-	public void resetSearcher() throws IOException {
-		searcherManager.close();
-		searcherManager = null;
 	}
 	
 	private void initialiseIndexDirectory() throws IOException{
@@ -68,9 +58,6 @@ public class TermIndexManagerImpl implements TermIndexManager, DisposableBean {
 	}
 
 	private String getIndexPath(){
-		if(SystemUtils.IS_OS_WINDOWS){
-			return windowsIndexPath;
-		}
 		return indexPath;
 	}
 	

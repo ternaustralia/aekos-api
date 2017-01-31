@@ -37,18 +37,6 @@ public class AbstractAekosJenaModelFactoryTest {
 	}
 	
 	/**
-	 * Is the expected exception thrown when we're in prod and we don't define a TDB path?
-	 */
-	@Test(expected=IllegalStateException.class)
-	public void testGetInstance02() throws Throwable {
-		ConcreteAekosJenaModelFactory objectUnderTest = new ConcreteAekosJenaModelFactory();
-		ReflectionTestUtils.setField(objectUnderTest, "notDefined", "NOT_DEFINED");
-		ReflectionTestUtils.setField(objectUnderTest, "isProd", true);
-		// leave path as not defined
-		objectUnderTest.getInstance();
-	}
-	
-	/**
 	 * Can we create an in-memory dataset when no path is provided?
 	 */
 	@Test

@@ -36,7 +36,7 @@ public class LuceneIndexingServiceTest {
 	/**
 	 * Is the expected exception thrown when we ask for a predicate that doesn't exist?
 	 */
-	@Test//(expected=IllegalStateException.class)
+	@Test(expected=IllegalStateException.class)
 	public void testGetString03() {
 		LuceneIndexingService objectUnderTest = TestGetString03Helper.INSTANCE.getObjectUnderTest();
 		Resource res = TestGetString03Helper.res3;

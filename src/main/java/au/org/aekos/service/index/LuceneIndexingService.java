@@ -161,6 +161,7 @@ public class LuceneIndexingService implements IndexingService {
 			}
 			Model model = newModel();
 			Triple firstRecord = results.next();
+			model.getGraph().add(firstRecord);
 			String firstRecordPredicateName = firstRecord.getPredicate().getURI();
 			if (!firstRecordPredicateName.equals(RDF.type.getURI())) {
 				throw new RuntimeException("Programmer problem: expected that the first record will be rdf:type but it wasn't. It was '"
@@ -267,6 +268,7 @@ public class LuceneIndexingService implements IndexingService {
 			}
 			Model model = newModel();
 			Triple firstRecord = results.next();
+			model.getGraph().add(firstRecord);
 			String firstRecordPredicateName = firstRecord.getPredicate().getURI();
 			if (!firstRecordPredicateName.equals(RDF.type.getURI())) {
 				throw new RuntimeException("Programmer problem: expected that the first record will be rdf:type but it wasn't. It was '"

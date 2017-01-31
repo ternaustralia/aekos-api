@@ -1,5 +1,6 @@
 package au.org.aekos.service.index;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.assertThat;
 
@@ -13,7 +14,10 @@ import java.util.Properties;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.Resource;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.TopDocs;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +29,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.util.StreamUtils;
 
+import au.org.aekos.service.search.index.IndexConstants;
+import au.org.aekos.service.search.index.TermIndexManager;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes=LuceneIndexingServiceTestContext.class)
 public class LuceneIndexingServiceTestSpring {
@@ -32,8 +39,8 @@ public class LuceneIndexingServiceTestSpring {
 	@Autowired
 	private LuceneIndexingService objectUnderTest;
 	
-//	@Autowired
-//	private SearchService searchService;
+	@Autowired
+	private TermIndexManager indexMgr;
 	
 	/**
 	 * Can we create the index with the expected values?
@@ -41,6 +48,8 @@ public class LuceneIndexingServiceTestSpring {
 	@Test
 	public void testDoIndexing01() throws IOException {
 		String result = objectUnderTest.doIndexing();
+		assertDocTypeCount(IndexConstants.ENV_RECORD, 1);
+		assertDocTypeCount(IndexConstants.SPECIES_RECORD, 5); // FIXME how many should we have?
 		assertThat(result, startsWith("Processed 8 records"));
 		assertSpeciesHasRecords("Calotis hispidula", 2);
 		assertSpeciesHasRecords("Goodenia havilandii", 1);
@@ -62,6 +71,12 @@ public class LuceneIndexingServiceTestSpring {
 //				"surfaceType", "totalOrganicCarbon", "visibleFireEvidence"));FIXME
 	}
 
+	private void assertDocTypeCount(String speciesRecord, int expectedCount) throws IOException {
+		Query query = new TermQuery(new Term(IndexConstants.FLD_DOC_INDEX_TYPE, IndexConstants.SPECIES_RECORD));
+		TopDocs td = indexMgr.getIndexSearcher().search(query, 100);
+		assertThat(td.totalHits, is(expectedCount));
+	}
+
 	private void assertSpeciesHasRecords(String speciesName, int count) throws IOException {
 //		List<SpeciesSummary> searchResult = searchService.speciesAutocomplete(speciesName, 10);
 //		assertThat(searchResult.size(), is(1));
@@ -73,7 +88,6 @@ public class LuceneIndexingServiceTestSpring {
 @Configuration
 @ComponentScan(
 	basePackages={
-		"au.org.aekos.service.retrieval",
 		"au.org.aekos.service.index",
 		"au.org.aekos.service.search"})
 class LuceneIndexingServiceTestContext {
@@ -81,9 +95,9 @@ class LuceneIndexingServiceTestContext {
 	@Bean
     public Dataset coreDS() {
     	Dataset result = DatasetFactory.create();
-    	Model m = result.getDefaultModel();
-    	m.read(Thread.currentThread().getContextClassLoader().getResourceAsStream("au/org/aekos/test-darwin-core-plus-traits.ttl"), null, "TURTLE");
-    	m.read(Thread.currentThread().getContextClassLoader().getResourceAsStream("au/org/aekos/test-environmental-data.ttl"), null, "TURTLE");
+    	Model m = result.getNamedModel("urn:some-model");
+    	m.read(Thread.currentThread().getContextClassLoader().getResourceAsStream("au/org/aekos/test-citation-details.ttl"), null, "TURTLE");
+    	m.read(Thread.currentThread().getContextClassLoader().getResourceAsStream("au/org/aekos/test-studylocationsubgraph-data.ttl"), null, "TURTLE");
 		return result;
     }
 	
@@ -92,16 +106,16 @@ class LuceneIndexingServiceTestContext {
 	    PropertySourcesPlaceholderConfigurer result = new PropertySourcesPlaceholderConfigurer();
 	    Properties properties = new Properties();
 	    properties.setProperty("lucene.index.createMode", "true");
-	    properties.setProperty("lucene.index.wpath", "");
 	    properties.setProperty("lucene.index.path", Files.createTempDirectory("testDoIndexing01").toString());
 	    properties.setProperty("lucene.index.writer.commitLimit", "1000");
-	    properties.setProperty("lucene.page.defaultResutsPerPage", "10");
 	    properties.setProperty("aekos-api.owl-file.namespace", "http://www.aekos.org.au/ontology/1.0.0#");
 		result.setProperties(properties);
 		return result;
 	}
 	
 	@Bean public String darwinCoreAndTraitsQuery() throws IOException { return getSparqlQuery("darwin-core-and-traits.rq"); }
+	@Bean public String citationDetailsQuery() throws IOException { return getSparqlQuery("citation-details.rq"); }
+	@Bean public String environmentalVariablesQuery() throws IOException { return getSparqlQuery("environmental-variables.rq"); }
 
 	private String getSparqlQuery(String fileName) throws IOException {
 		InputStream sparqlIS = Thread.currentThread().getContextClassLoader().getResourceAsStream("au/org/aekos/sparql/" + fileName);

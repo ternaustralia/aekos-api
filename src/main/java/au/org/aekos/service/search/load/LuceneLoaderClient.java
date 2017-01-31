@@ -71,7 +71,6 @@ public class LuceneLoaderClient implements LoaderClient {
 			indexWriter.flush();
 			indexWriter.close();
 			indexManager.flushDeletions();
-//			indexManager.resetSearcher(); // FIXME check if this works, should mean we don't have to restart the app
 		} catch (IOException e) {
 			logger.error("Failed to end the load process", e);
 		}
@@ -142,7 +141,7 @@ public class LuceneLoaderClient implements LoaderClient {
 	@Override
 	public void addEnvRecord(EnvironmentLoaderRecord record) throws IOException {
 		Document doc = new Document();
-		doc.add(new StringField(IndexConstants.FLD_DOC_INDEX_TYPE, IndexConstants.ENV_RECORD, Field.Store.YES)); // FIXME does this need to be lowercase to be searched?
+		doc.add(new StringField(IndexConstants.FLD_DOC_INDEX_TYPE, IndexConstants.ENV_RECORD, Field.Store.YES));
 		doc.add(new TextField("locationID", record.getLocationID(), Field.Store.YES)); // FIXME make field name constant
 		// FIXME need to index all the fields
 		for (String curr : record.getEnvironmentalVariableNames()) {
