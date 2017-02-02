@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <include resource="org/springframework/boot/logging/logback/base.xml" />
-    <logger name="au.org.aekos." level="WARN" />
-    <logger name="au.org.aekos.service.retrieval.JenaRetrievalService" level="DEBUG" />
-    <logger name="au.org.aekos.controller.SignupController" level="TRACE" />
+    <logger name="au.org.aekos.api.loader" level="WARN" />
     <logger name="org.apache.jena.arq.info" level="INFO" />
     <logger name="org.apache.jena.arq.exec" level="INFO" />
 </configuration>
