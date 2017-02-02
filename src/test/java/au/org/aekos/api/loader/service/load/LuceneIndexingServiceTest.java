@@ -1,4 +1,4 @@
-package au.org.aekos.api.loader.service.index;
+package au.org.aekos.api.loader.service.load;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -9,7 +9,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;
 import org.junit.Test;
 
-import au.org.aekos.api.loader.service.index.LuceneIndexingService;
+import au.org.aekos.api.loader.service.load.LuceneIndexingService;
 
 public class LuceneIndexingServiceTest {
 

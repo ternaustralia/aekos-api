@@ -1,4 +1,4 @@
-package au.org.aekos.api.loader.service.index;
+package au.org.aekos.api.loader.service.load;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;

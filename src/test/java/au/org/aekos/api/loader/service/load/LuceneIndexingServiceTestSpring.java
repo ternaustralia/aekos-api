@@ -1,4 +1,4 @@
-package au.org.aekos.api.loader.service.index;
+package au.org.aekos.api.loader.service.load;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.startsWith;
@@ -29,9 +29,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.util.StreamUtils;
 
-import au.org.aekos.api.loader.service.index.IndexConstants;
-import au.org.aekos.api.loader.service.index.LuceneIndexingService;
 import au.org.aekos.api.loader.service.index.TermIndexManager;
+import au.org.aekos.api.loader.service.load.IndexConstants;
+import au.org.aekos.api.loader.service.load.LuceneIndexingService;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes=LuceneIndexingServiceTestContext.class)
@@ -89,16 +89,16 @@ public class LuceneIndexingServiceTestSpring {
 @Configuration
 @ComponentScan(
 	basePackages={
-		"au.org.aekos.service.index",
-		"au.org.aekos.service.search"})
+		"au.org.aekos.api.loader.service.index",
+		"au.org.aekos.api.loader.service.load"})
 class LuceneIndexingServiceTestContext {
 	
 	@Bean
     public Dataset coreDS() {
     	Dataset result = DatasetFactory.create();
     	Model m = result.getNamedModel("urn:some-model");
-    	m.read(Thread.currentThread().getContextClassLoader().getResourceAsStream("au/org/aekos/test-citation-details.ttl"), null, "TURTLE");
-    	m.read(Thread.currentThread().getContextClassLoader().getResourceAsStream("au/org/aekos/test-studylocationsubgraph-data.ttl"), null, "TURTLE");
+    	m.read(Thread.currentThread().getContextClassLoader().getResourceAsStream("au/org/aekos/api/loader/test-citation-details.ttl"), null, "TURTLE");
+    	m.read(Thread.currentThread().getContextClassLoader().getResourceAsStream("au/org/aekos/api/loader/test-studylocationsubgraph-data.ttl"), null, "TURTLE");
 		return result;
     }
 	
@@ -119,7 +119,7 @@ class LuceneIndexingServiceTestContext {
 	@Bean public String environmentalVariablesQuery() throws IOException { return getSparqlQuery("environmental-variables.rq"); }
 
 	private String getSparqlQuery(String fileName) throws IOException {
-		InputStream sparqlIS = Thread.currentThread().getContextClassLoader().getResourceAsStream("au/org/aekos/sparql/" + fileName);
+		InputStream sparqlIS = Thread.currentThread().getContextClassLoader().getResourceAsStream("au/org/aekos/api/loader/sparql/" + fileName);
 		OutputStream out = new ByteArrayOutputStream();
 		StreamUtils.copy(sparqlIS, out);
 		return out.toString();

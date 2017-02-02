@@ -1,4 +1,4 @@
-package au.org.aekos.api.loader.service.index;
+package au.org.aekos.api.loader.service.load;
 
 /**
  * These are all document field names

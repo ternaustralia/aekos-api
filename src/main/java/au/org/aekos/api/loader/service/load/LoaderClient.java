@@ -3,9 +3,6 @@ package au.org.aekos.api.loader.service.load;
 import java.io.IOException;
 import java.util.List;
 
-import au.org.aekos.api.loader.service.index.EnvironmentLoaderRecord;
-import au.org.aekos.api.loader.service.index.SpeciesLoaderRecord;
-
 /**
  * Loads records into the index to be used for searching.
  */

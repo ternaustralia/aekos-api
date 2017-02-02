@@ -1,8 +1,8 @@
 package au.org.aekos.api.loader.service.load;
 
-import static au.org.aekos.api.loader.service.index.AekosTermDocumentBuilder.buildSpeciesEnvironmentTermDocument;
-import static au.org.aekos.api.loader.service.index.AekosTermDocumentBuilder.buildSpeciesTermDocument;
-import static au.org.aekos.api.loader.service.index.AekosTermDocumentBuilder.buildTraitSpeciesTermDocument;
+import static au.org.aekos.api.loader.service.load.AekosTermDocumentBuilder.buildSpeciesEnvironmentTermDocument;
+import static au.org.aekos.api.loader.service.load.AekosTermDocumentBuilder.buildSpeciesTermDocument;
+import static au.org.aekos.api.loader.service.load.AekosTermDocumentBuilder.buildTraitSpeciesTermDocument;
 
 import java.io.IOException;
 import java.util.List;
@@ -21,9 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import au.org.aekos.api.loader.service.index.EnvironmentLoaderRecord;
-import au.org.aekos.api.loader.service.index.IndexConstants;
-import au.org.aekos.api.loader.service.index.SpeciesLoaderRecord;
 import au.org.aekos.api.loader.service.index.TermIndexManager;
 
 

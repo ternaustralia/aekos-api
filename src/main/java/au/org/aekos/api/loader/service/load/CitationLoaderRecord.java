@@ -1,4 +1,4 @@
-package au.org.aekos.api.loader.service.index;
+package au.org.aekos.api.loader.service.load;
 
 public class CitationLoaderRecord {
 	private final String samplingProtocol;

@@ -1,4 +1,4 @@
-package au.org.aekos.api.loader.service.index;
+package au.org.aekos.api.loader.service.load;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -36,7 +36,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import au.org.aekos.api.loader.service.load.LoaderClient;
 import au.org.aekos.api.loader.util.FieldNames;
 import au.org.aekos.api.loader.util.ProgressTracker;
 

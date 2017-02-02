@@ -1,4 +1,4 @@
-package au.org.aekos.api.loader.service.search.load;
+package au.org.aekos.api.loader.service.load;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;

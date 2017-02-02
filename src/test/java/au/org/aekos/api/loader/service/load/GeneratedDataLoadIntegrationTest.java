@@ -1,4 +1,4 @@
-package au.org.aekos.api.loader.service.search.load;
+package au.org.aekos.api.loader.service.load;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -12,7 +12,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import au.org.aekos.api.loader.service.load.LoaderClient;
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("classpath:/au/org/aekos/genIndexContext-test.xml")
+@ContextConfiguration("classpath:/au/org/aekos/api/loader/genIndexContext-test.xml")
 public class GeneratedDataLoadIntegrationTest {
 	
 	@Autowired
