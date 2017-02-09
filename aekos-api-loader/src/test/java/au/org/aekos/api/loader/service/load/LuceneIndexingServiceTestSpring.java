@@ -49,8 +49,8 @@ public class LuceneIndexingServiceTestSpring {
 	@Test
 	public void testDoIndexing01() throws IOException {
 		String result = objectUnderTest.doIndexing();
-		assertDocTypeCount(IndexConstants.ENV_RECORD, 1);
-		assertDocTypeCount(IndexConstants.SPECIES_RECORD, 5); // FIXME how many should we have?
+		assertDocTypeCount(IndexConstants.DocTypes.ENV_RECORD, 1);
+		assertDocTypeCount(IndexConstants.DocTypes.SPECIES_RECORD, 5); // FIXME how many should we have?
 		assertThat(result, startsWith("Processed 8 records"));
 		assertSpeciesHasRecords("Calotis hispidula", 2);
 		assertSpeciesHasRecords("Goodenia havilandii", 1);
@@ -73,7 +73,7 @@ public class LuceneIndexingServiceTestSpring {
 	}
 
 	private void assertDocTypeCount(String speciesRecord, int expectedCount) throws IOException {
-		Query query = new TermQuery(new Term(IndexConstants.FLD_DOC_INDEX_TYPE, IndexConstants.SPECIES_RECORD));
+		Query query = new TermQuery(new Term(IndexConstants.FLD_DOC_INDEX_TYPE, IndexConstants.DocTypes.SPECIES_RECORD));
 		TopDocs td = indexMgr.getIndexSearcher().search(query, 100);
 		assertThat(td.totalHits, is(expectedCount));
 	}

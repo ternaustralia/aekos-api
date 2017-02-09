@@ -124,7 +124,7 @@ public class LuceneLoaderClient implements LoaderClient {
 	@Override
 	public void addSpeciesRecord(SpeciesLoaderRecord record) throws IOException {
 		Document doc = new Document();
-		doc.add(new StringField(IndexConstants.FLD_DOC_INDEX_TYPE, IndexConstants.SPECIES_RECORD, Field.Store.YES));
+		doc.add(new StringField(IndexConstants.FLD_DOC_INDEX_TYPE, IndexConstants.DocTypes.SPECIES_RECORD, Field.Store.YES));
 		doc.add(new TextField(IndexConstants.FLD_SPECIES, record.getSpeciesName(), Field.Store.YES));
 		doc.add(new TextField(IndexConstants.FLD_SAMPLING_PROTOCOL, record.getSamplingProtocol(), Field.Store.YES));
 		doc.add(new StoredField(IndexConstants.FLD_BIBLIOGRAPHIC_CITATION, record.getBibliographicCitation()));
@@ -138,7 +138,7 @@ public class LuceneLoaderClient implements LoaderClient {
 	@Override
 	public void addEnvRecord(EnvironmentLoaderRecord record) throws IOException {
 		Document doc = new Document();
-		doc.add(new StringField(IndexConstants.FLD_DOC_INDEX_TYPE, IndexConstants.ENV_RECORD, Field.Store.YES));
+		doc.add(new StringField(IndexConstants.FLD_DOC_INDEX_TYPE, IndexConstants.DocTypes.ENV_RECORD, Field.Store.YES));
 		doc.add(new TextField("locationID", record.getLocationID(), Field.Store.YES)); // FIXME make field name constant
 		// FIXME need to index all the fields
 		for (String curr : record.getEnvironmentalVariableNames()) {
