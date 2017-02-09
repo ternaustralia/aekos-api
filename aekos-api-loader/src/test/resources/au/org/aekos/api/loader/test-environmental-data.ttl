@@ -1,0 +1,180 @@
+@prefix api:   <http://www.aekos.org.au/api/1.0#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+
+<urn:uuid:0db19bb0-5bf6-4cfd-83d1-3713f2baaaaa>
+        a                           api:LocationVisit ;
+        api:decimalLatitude         -24.5318398476576 ;
+        api:decimalLongitude        137.321378247222 ;
+        api:eventDate               "2013-12-31" ;
+        api:geodeticDatum           "GDA94" ;
+        api:locationID              "aekos.org.au/collection/adelaide.edu.au/trend/SATFLB0022" ;
+        api:month                   12 ;
+        api:year                    2013 .
+
+<urn:uuid:0db19bb0-5bf6-4cfd-83d1-3713f2bbbbbb>
+        a                           api:LocationVisit ;
+        api:decimalLatitude         120.2940736736989 ;
+        api:decimalLongitude        -33.68953500855846 ;
+        api:disturbanceEvidenceVars <urn:disturbanceEvidenceCover:8239e171-b1f4-4d13-ac46-617119d43aaa> ;
+        api:eventDate               "2016-01-12" ;
+        api:geodeticDatum           "GDA94" ;
+        api:landscapeVars           <urn:aspect:162903b9-f113-4264-b379-88bd2cfc8551> , <urn:slope:1ba9eea4-668c-443d-a450-3602073875d6> ;
+        api:locationID              "aekos.org.au/collection/adelaide.edu.au/trend/SATFLB0026" ;
+        api:month                   01 ;
+        api:noUnitsVars              <urn:latestLandUse:8239e171-b1f4-4d13-ac46-617119d43aaa>, <urn:visibleFireEvidence:8239e171-b1f4-4d13-ac46-617119d43bbb>, <urn:soilType:8239e171-b1f4-4d13-ac46-617119d43ccc>, <urn:soilTexture:8239e171-b1f4-4d13-ac46-617119d43ddd>, <urn:surfaceType:8239e171-b1f4-4d13-ac46-617119d43eee>, <urn:disturbanceEvidenceType:8239e171-b1f4-4d13-ac46-617119d43fff>, <urn:erosionEvidenceType:8239e171-b1f4-4d13-ac46-617119d43ggg>, <urn:erosionEvidenceState:8239e171-b1f4-4d13-ac46-617119d43hhh> ;
+        api:soilVars                <urn:electricalConductivity:8239e171-b1f4-4d13-ac46-617119d43aaa>, <urn:totalOrganicCarbon:8239e171-b1f4-4d13-ac46-617119d43bbb>, <urn:clay:8239e171-b1f4-4d13-ac46-617119d43ccc>, <urn:ph:8239e171-b1f4-4d13-ac46-617119d43ddd>, <urn:silt:8239e171-b1f4-4d13-ac46-617119d43eee>, <urn:sand:8239e171-b1f4-4d13-ac46-617119d43fff> ;
+        api:year                    2016 .
+
+<urn:aspect:162903b9-f113-4264-b379-88bd2cfc8551>
+        api:name         "aspect" ;
+        api:units        "degrees" ;
+        api:value        "230"^^xsd:decimal .
+        
+<urn:slope:1ba9eea4-668c-443d-a450-3602073875d6>
+        api:name         "slope" ;
+        api:units        "degrees" ;
+        api:value        "10"^^xsd:decimal .
+        
+<urn:latestLandUse:8239e171-b1f4-4d13-ac46-617119d43aaa>
+        api:name         "latestLandUse" ;
+        api:units        "" ;
+        api:value        "Farming" .
+
+<urn:visibleFireEvidence:8239e171-b1f4-4d13-ac46-617119d43bbb>
+        api:name         "visibleFireEvidence" ;
+        api:units        "" ;
+        api:value        "No evidence" .
+
+<urn:soilType:8239e171-b1f4-4d13-ac46-617119d43ccc>
+        api:name         "soilType" ;
+        api:units        "" ;
+        api:value        "Clay" .
+
+<urn:soilTexture:8239e171-b1f4-4d13-ac46-617119d43ddd>
+        api:name         "soilTexture" ;
+        api:units        "" ;
+        api:value        "Coarse" .
+
+<urn:surfaceType:8239e171-b1f4-4d13-ac46-617119d43eee>
+        api:name         "surfaceType" ;
+        api:units        "" ;
+        api:value        "Flat" .
+
+<urn:disturbanceEvidenceType:8239e171-b1f4-4d13-ac46-617119d43fff>
+        api:name         "disturbanceEvidenceType" ;
+        api:units        "" ;
+        api:value        "No effective disturbance" .
+        
+<urn:erosionEvidenceType:8239e171-b1f4-4d13-ac46-617119d43ggg>
+        api:name         "erosionEvidenceType" ;
+        api:units        "" ;
+        api:value        "No evidence" .
+        
+<urn:erosionEvidenceState:8239e171-b1f4-4d13-ac46-617119d43hhh>
+        api:name         "erosionEvidenceState" ;
+        api:units        "" ;
+        api:value        "Good" .
+        
+<urn:electricalConductivity:8239e171-b1f4-4d13-ac46-617119d43aaa>
+        api:name         "electricalConductivity" ;
+        api:units        "millisiemens per metre" ;
+        api:value        "4"^^xsd:decimal .
+        
+<urn:totalOrganicCarbon:8239e171-b1f4-4d13-ac46-617119d43bbb>
+        api:name         "totalOrganicCarbon" ;
+        api:units        "percent" ;
+        api:value        1.34 .
+        
+<urn:clay:8239e171-b1f4-4d13-ac46-617119d43ccc>
+        api:name         "clay" ;
+        api:units        "dunno" ;
+        api:value        "Very" .
+        
+<urn:ph:8239e171-b1f4-4d13-ac46-617119d43ddd>
+        api:name         "ph" ;
+        api:units        "pH" ;
+        api:value        5.4 .
+        
+<urn:silt:8239e171-b1f4-4d13-ac46-617119d43eee>
+        api:name         "silt" ;
+        api:units        "siltiness" ;
+        api:value        "A lot" .
+        
+<urn:sand:8239e171-b1f4-4d13-ac46-617119d43fff>
+        api:name         "sand" ;
+        api:units        "sandiness" ;
+        api:value        "it's everywhere" .
+
+<urn:disturbanceEvidenceCover:8239e171-b1f4-4d13-ac46-617119d43aaa>
+        api:name         "disturbanceEvidenceCover" ;
+        api:units        "percent" ;
+        api:value        50 .
+        
+<urn:uuid:0db19bb0-5bf6-4cfd-83d1-3713f2bccccc>
+        a                     api:LocationVisit ;
+        api:decimalLatitude   -23.5318398476576 ;
+        api:decimalLongitude  138.321378247854 ;
+        api:eventDate         "1990-03-30" ;
+        api:geodeticDatum     "GDA94" ;
+        api:locationID        "aekos.org.au/collection/sydney.edu.au/DERG/Plum Pudding" ;
+        api:month             03 ;
+        api:year              1990 .
+        
+<urn:uuid:0db19bb0-5bf6-4cfd-83d1-3713f2dddddd>
+        a                     api:LocationVisit ;
+        api:decimalLatitude   -33.60974828576365 ;
+        api:decimalLongitude  120.15047758874314 ;
+        api:eventDate         "1990-03-30" ;
+        api:geodeticDatum     "GDA94" ;
+        api:landscapeVars     <urn:aspect:73b72f96-df34-4a23-a74a-bd2edbac9ca7> , <urn:slope:02399d04-9739-4a38-b5b0-b5d791b87f03> ;
+        api:locationID        "aekos.org.au/collection/wa.gov.au/ravensthorpe/R002" ;
+        api:month             03 ;
+        api:noUnitsVars       <urn:surfaceType:fb3f04d4-4785-4ed3-9605-1860ceba8a04> , <urn:disturbanceType:9b38a6a6-5fa4-417a-be2e-fb1575cdc521> ;
+        api:soilVars          <urn:electricalConductivity:078640eb-48b8-483f-8d3c-654357a8a36c> ;
+        api:year              1990 .
+
+<urn:electricalConductivity:078640eb-48b8-483f-8d3c-654357a8a36c>
+        api:name   "electricalConductivity" ;
+        api:units  "millisiemens per metre" ;
+        api:value  "40"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+<urn:aspect:73b72f96-df34-4a23-a74a-bd2edbac9ca7>
+        api:name   "aspect" ;
+        api:units  "degrees" ;
+        api:value  "215"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+<urn:surfaceType:fb3f04d4-4785-4ed3-9605-1860ceba8a04>
+        api:name   "surfaceType" ;
+        api:units  "" ;
+        api:value  "Soft" .
+
+<urn:slope:02399d04-9739-4a38-b5b0-b5d791b87f03>
+        api:name   "slope" ;
+        api:units  "degrees" ;
+        api:value  "4"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+<urn:disturbanceType:9b38a6a6-5fa4-417a-be2e-fb1575cdc521>
+        api:name   "disturbanceType" ;
+        api:units  "" ;
+        api:value  "No effective disturbance" .
+        
+<urn:uuid:0db19bb0-5bf6-4cfd-83d1-3713f2beeeee>
+        a                     api:LocationVisit ;
+        api:decimalLatitude   -33.60974828576365 ;
+        api:decimalLongitude  120.15047758874314 ;
+        api:eventDate         "1991-04-29" ;
+        api:geodeticDatum     "GDA94" ;
+        api:landscapeVars     <urn:aspect:73b72f96-df34-4a23-a74a-bd2edbacaaaa> , <urn:slope:02399d04-9739-4a38-b5b0-b5d791b8aaaa> ;
+        api:locationID        "aekos.org.au/collection/wa.gov.au/ravensthorpe/R002" ;
+        api:month             04 ;
+        api:year              1991 .
+        
+<urn:aspect:73b72f96-df34-4a23-a74a-bd2edbacaaaa>
+        api:name   "aspect" ;
+        api:units  "degrees" ;
+        api:value  "216"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+<urn:slope:02399d04-9739-4a38-b5b0-b5d791b8aaaa>
+        api:name   "slope" ;
+        api:units  "degrees" ;
+        api:value  "5"^^<http://www.w3.org/2001/XMLSchema#decimal> .
