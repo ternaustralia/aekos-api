@@ -11,15 +11,15 @@ This repository requires the following technologies:
 You can use the repository like this:
 
     git clone <this url>
-    cd aekos-api/
+    cd aekos-api/aekos-api-server/
     ./run-server.sh
 
 Or, an alternate way if you like to run the steps yourself:
 
     git clone <this url>
-    cd aekos-api/
+    cd aekos-api/aekos-api-server/
     mvn clean package
-    java -jar target/aekos-api-X.Y.jar # replace X.Y with the version
+    java -jar target/aekos-api-server-X.Y.jar # replace X.Y with the version
 Then you'll be able to see the endpoint at https://localhost:8443/.
 
 You can build a docker container that's configured to run this webapp with:
