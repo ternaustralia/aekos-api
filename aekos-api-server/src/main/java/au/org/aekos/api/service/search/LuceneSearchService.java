@@ -53,7 +53,7 @@ public class LuceneSearchService implements SearchService {
 	@Autowired
 	private VocabService vocabService;
 	
-	@Override //TODO throw a nice exception to perhaps return a tidy error in the json response?
+	@Override
 	public List<TraitOrEnvironmentalVariableVocabEntry> getTraitBySpecies(List<String> SpeciesSummarys, PageRequest pagination) {
 		Query query = buildFieldOrQuery(SpeciesSummarys, IndexConstants.FLD_SPECIES, DocumentType.TRAIT_SPECIES);
 		return performSpeciesTraitSearch(query, pagination);
@@ -284,7 +284,7 @@ public class LuceneSearchService implements SearchService {
 			TopDocs td = searcher.search(query, Integer.MAX_VALUE, new Sort(new SortField(IndexConstants.FLD_ENVIRONMENT, SortField.Type.STRING)));
 		    int totalTraits = td.totalHits;
 		    if(totalTraits > 0){
-		    	LinkedHashSet<TraitOrEnvironmentalVariableVocabEntry> uniqueResults = new LinkedHashSet<>();
+		    	Set<TraitOrEnvironmentalVariableVocabEntry> uniqueResults = new LinkedHashSet<>();
 		    	int startDocIndex = getTopDocStartIndex(pagination, td.totalHits);
 		    	if(startDocIndex > -1){
 		    		int endDocIndex = getTopDocEndIndex(pagination, td.totalHits);
@@ -351,20 +351,18 @@ public class LuceneSearchService implements SearchService {
 	@Override
 	public List<TraitOrEnvironmentalVariableVocabEntry> getTraitVocabData() {
 		Query allTraitToSpeciesDocumentsQuery = buildAllDocumentsOfTypeQuery(DocumentType.TRAIT_SPECIES);
-		//FIXME will it perform with a full index? Should we pre-bake?
 		return performSpeciesTraitSearch(allTraitToSpeciesDocumentsQuery, EVERYTHING);
 	}
 
 	@Override
 	public List<TraitOrEnvironmentalVariableVocabEntry> getEnvironmentalVariableVocabData() {
 		Query allEnvVarToSpeciesDocumentsQuery = buildAllDocumentsOfTypeQuery(DocumentType.SPECIES_ENV);
-		//FIXME will it perform with a full index? Should we pre-bake?
 		return performSpeciesEnvironmentSearch(allEnvVarToSpeciesDocumentsQuery, EVERYTHING);
 	}
 	
 	private Query buildAllDocumentsOfTypeQuery(DocumentType documentType) {
 		BooleanQuery.Builder queryBuilder = new BooleanQuery.Builder();
-		Query docTypeQuery = new TermQuery(new Term(IndexConstants.FLD_DOC_INDEX_TYPE, documentType.name()));
+		Query docTypeQuery = new TermQuery(new Term(IndexConstants.FLD_DOC_INDEX_TYPE, documentType.getCode()));
 		queryBuilder.add(docTypeQuery, Occur.MUST);
 		Query allTraitToSpeciesDocumentsQuery = queryBuilder.build();
 		return allTraitToSpeciesDocumentsQuery;

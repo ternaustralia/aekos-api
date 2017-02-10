@@ -9,12 +9,14 @@ import java.util.List;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.SortedDocValuesField;
 import org.apache.lucene.document.StoredField;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.util.BytesRef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -129,9 +131,12 @@ public class LuceneLoaderClient implements LoaderClient {
 		doc.add(new TextField(IndexConstants.FLD_SAMPLING_PROTOCOL, record.getSamplingProtocol(), Field.Store.YES));
 		doc.add(new StoredField(IndexConstants.FLD_BIBLIOGRAPHIC_CITATION, record.getBibliographicCitation()));
 		// FIXME need to index all the fields
+		StringBuilder allValues = new StringBuilder();
 		for (String curr : record.getTraitNames()) {
 			doc.add(new StringField("trait", curr, Field.Store.YES));
+			allValues.append(curr);
 		}
+		doc.add(new SortedDocValuesField("trait", new BytesRef(allValues.toString())));
 		writeDocument(doc, indexWriter);
 	}
 	
@@ -141,9 +146,12 @@ public class LuceneLoaderClient implements LoaderClient {
 		doc.add(new StringField(IndexConstants.FLD_DOC_INDEX_TYPE, IndexConstants.DocTypes.ENV_RECORD, Field.Store.YES));
 		doc.add(new TextField("locationID", record.getLocationID(), Field.Store.YES)); // FIXME make field name constant
 		// FIXME need to index all the fields
+		StringBuilder allValues = new StringBuilder();
 		for (String curr : record.getEnvironmentalVariableNames()) {
 			doc.add(new StringField(IndexConstants.FLD_ENVIRONMENT, curr, Field.Store.YES));
+			allValues.append(curr);
 		}
+		doc.add(new SortedDocValuesField(IndexConstants.FLD_ENVIRONMENT, new BytesRef(allValues.toString())));
 		writeDocument(doc, indexWriter);
 	}
 

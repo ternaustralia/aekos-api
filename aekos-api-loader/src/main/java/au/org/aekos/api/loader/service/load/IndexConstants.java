@@ -15,11 +15,11 @@ public class IndexConstants {
 	
 	public static class DocTypes {
 		private DocTypes() {}
-		public static final String TRAIT_SPECIES = DocumentType.TRAIT_SPECIES.name().toLowerCase();
-		public static final String SPECIES_ENV = DocumentType.SPECIES_ENV.name().toLowerCase();
-		public static final String SPECIES_SUMMARY = DocumentType.SPECIES_SUMMARY.name().toLowerCase();
-		public static final String SPECIES_RECORD = DocumentType.SPECIES_RECORD.name().toLowerCase();
-		public static final String ENV_RECORD = DocumentType.ENV_RECORD.name().toLowerCase();
+		public static final String TRAIT_SPECIES = DocumentType.TRAIT_SPECIES.getCode();
+		public static final String SPECIES_ENV = DocumentType.SPECIES_ENV.getCode();
+		public static final String SPECIES_SUMMARY = DocumentType.SPECIES_SUMMARY.getCode();
+		public static final String SPECIES_RECORD = DocumentType.SPECIES_RECORD.getCode();
+		public static final String ENV_RECORD = DocumentType.ENV_RECORD.getCode();
 	}
 	
 	//Unique term for loading unique checking
@@ -30,6 +30,5 @@ public class IndexConstants {
 	public static final String FLD_TRAIT = "trait";
 	public static final String FLD_ENVIRONMENT = "environment";
 	public static final String FLD_SAMPLING_PROTOCOL = "sampling_protocol";
-	public static final String FLD_SAMPLING_PROTOCOL_DV = FLD_SAMPLING_PROTOCOL + "_dv";
 	public static final String FLD_BIBLIOGRAPHIC_CITATION = "bibliographic_citation";
 }

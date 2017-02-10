@@ -74,8 +74,9 @@ public class LuceneIndexingService implements IndexingService {
 	
 	@Override
 	public String doIndexing() throws IOException {
-//		int totalRecordCount = retrievalService.getTotalSpeciesRecordsHeld();
+//		int totalRecordCount = retrievalService.getTotalSpeciesRecordsHeld(); Can we count something else to get a feel for how many models we need to process?
 		int totalRecordCount = 1000; // FIXME
+		logger.info("Starting load process");
 		loader.beginLoad();
 		logger.info("Clearing existing index...");
 		loader.deleteAll();
@@ -91,7 +92,7 @@ public class LuceneIndexingService implements IndexingService {
 		return tracker.getFinishedMessage();
 	}
 
-	private void collectCitationDetails() {
+	void collectCitationDetails() {
 		String sparql = citationDetailsQuery;
 		Query query = QueryFactory.create(sparql);
 		long start = now();
@@ -146,7 +147,7 @@ public class LuceneIndexingService implements IndexingService {
 		return speciesCounts;
 	}
 	
-	private void getSpeciesIndexStream(IndexLoaderCallback callback) {
+	void getSpeciesIndexStream(IndexLoaderCallback callback) {
 		String sparql = darwinCoreAndTraitsQuery;
 		Query query = QueryFactory.create(sparql);
 		long now = now();
@@ -176,10 +177,10 @@ public class LuceneIndexingService implements IndexingService {
 				if (isPossiblyNewSolutionRow) {
 					boolean isDwcRecord = currTriple.getObject().getURI().equals(DARWIN_CORE_RECORD_TYPE);
 					boolean isSubjectChanged = !currentlyProcessingSubject.equals(tripleSubject);
-					boolean isSubjectAlreadySeen = seenSubjects.contains(tripleSubject);
 					if (isDwcRecord && isSubjectChanged) {
+						boolean isSubjectAlreadySeen = seenSubjects.contains(tripleSubject);
 						if (isSubjectAlreadySeen) {
-							throw new RuntimeException("FAIL town, we've already seen " + tripleSubject);
+							throw new RuntimeException("FAIL town, we've already seen " + tripleSubject); // FIXME make a nicer message
 						}
 						processSpecies(model, callback);
 						model = newModel();
@@ -189,6 +190,7 @@ public class LuceneIndexingService implements IndexingService {
 				}
 				model.getGraph().add(currTriple);
 			}
+			processSpecies(model, callback);
 		}
 	}
 
@@ -296,6 +298,7 @@ public class LuceneIndexingService implements IndexingService {
 				}
 				model.getGraph().add(currTriple);
 			}
+			processEnv(model, callback);
 		}
 	}
 

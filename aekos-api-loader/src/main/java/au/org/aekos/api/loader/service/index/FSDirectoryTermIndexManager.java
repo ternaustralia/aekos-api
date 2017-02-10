@@ -19,9 +19,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TermIndexManagerImpl implements TermIndexManager, DisposableBean {
+public class FSDirectoryTermIndexManager implements TermIndexManager, DisposableBean {
 
-	private static final Logger logger = LoggerFactory.getLogger(TermIndexManagerImpl.class);
+	private static final Logger logger = LoggerFactory.getLogger(FSDirectoryTermIndexManager.class);
 	
 	private FSDirectory termIndex;
 	

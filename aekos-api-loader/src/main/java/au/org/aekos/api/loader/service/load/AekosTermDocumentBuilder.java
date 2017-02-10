@@ -104,7 +104,7 @@ public class AekosTermDocumentBuilder {
 	}
 	
 	private static void addDocumentType(DocumentType docType, Document doc){
-		doc.add(new StringField(IndexConstants.FLD_DOC_INDEX_TYPE , docType.name(), Field.Store.NO));
+		doc.add(new StringField(IndexConstants.FLD_DOC_INDEX_TYPE , docType.getCode(), Field.Store.NO));
 	}
 	
 	private static String getUidField(String term1, String term2, String docType) {

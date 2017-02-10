@@ -3,6 +3,10 @@ package au.org.aekos.api.loader.service.load;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -29,9 +33,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.util.StreamUtils;
 
+import au.org.aekos.api.loader.service.index.RAMDirectoryTermIndexManager;
 import au.org.aekos.api.loader.service.index.TermIndexManager;
 import au.org.aekos.api.loader.service.load.IndexConstants;
 import au.org.aekos.api.loader.service.load.LuceneIndexingService;
+import au.org.aekos.api.loader.service.load.LuceneIndexingService.IndexLoaderCallback;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes=LuceneIndexingServiceTestContext.class)
@@ -49,9 +55,9 @@ public class LuceneIndexingServiceTestSpring {
 	@Test
 	public void testDoIndexing01() throws IOException {
 		String result = objectUnderTest.doIndexing();
-		assertDocTypeCount(IndexConstants.DocTypes.ENV_RECORD, 1);
-		assertDocTypeCount(IndexConstants.DocTypes.SPECIES_RECORD, 5); // FIXME how many should we have?
-		assertThat(result, startsWith("Processed 8 records"));
+		assertDocTypeCount("Should have processed the two VISITVIEWs", IndexConstants.DocTypes.ENV_RECORD, 2);
+		assertDocTypeCount("Should have processed the 9 SPECIESORGANISMGROUPs", IndexConstants.DocTypes.SPECIES_RECORD, 9);
+		assertThat(result, startsWith("Processed 9 records"));
 		assertSpeciesHasRecords("Calotis hispidula", 2);
 		assertSpeciesHasRecords("Goodenia havilandii", 1);
 		assertSpeciesHasRecords("Rosa canina", 1);
@@ -71,18 +77,30 @@ public class LuceneIndexingServiceTestSpring {
 //				"sand", "silt", "slope", "soilTexture", "soilType",
 //				"surfaceType", "totalOrganicCarbon", "visibleFireEvidence"));FIXME
 	}
-
-	private void assertDocTypeCount(String speciesRecord, int expectedCount) throws IOException {
-		Query query = new TermQuery(new Term(IndexConstants.FLD_DOC_INDEX_TYPE, IndexConstants.DocTypes.SPECIES_RECORD));
-		TopDocs td = indexMgr.getIndexSearcher().search(query, 100);
-		assertThat(td.totalHits, is(expectedCount));
+	
+	/**
+	 * Is the callback called the expected number of times?
+	 */
+	@Test
+	public void testGetSpeciesIndexStream01() {
+		objectUnderTest.collectCitationDetails();
+		IndexLoaderCallback callback = mock(IndexLoaderCallback.class);
+		objectUnderTest.getSpeciesIndexStream(callback);
+		verify(callback, times(9)).accept(any());
 	}
 
-	private void assertSpeciesHasRecords(String speciesName, int count) throws IOException {
-//		List<SpeciesSummary> searchResult = searchService.speciesAutocomplete(speciesName, 10);
-//		assertThat(searchResult.size(), is(1));
-//		SpeciesSummary speciesSummary = searchResult.get(0);
-//		assertThat(speciesSummary.getRecordsHeld(), is(count));
+	private void assertDocTypeCount(String reason, String recordTypeCode, int expectedCount) throws IOException {
+		Query query = new TermQuery(new Term(IndexConstants.FLD_DOC_INDEX_TYPE, recordTypeCode));
+		int onlyAfterTotalHitsDontCareAboutScoreDocs = 1;
+		TopDocs td = indexMgr.getIndexSearcher().search(query, onlyAfterTotalHitsDontCareAboutScoreDocs);
+		assertThat(reason, td.totalHits, is(expectedCount));
+	}
+
+	private void assertSpeciesHasRecords(String speciesName, int expectedRecordCount) throws IOException {
+		Query query = new TermQuery(new Term(IndexConstants.FLD_SPECIES, speciesName));
+		int onlyAfterTotalHitsDontCareAboutScoreDocs = 1;
+		TopDocs td = indexMgr.getIndexSearcher().search(query, onlyAfterTotalHitsDontCareAboutScoreDocs);
+		assertThat(String.format("Expected to find %d '%s' records", expectedRecordCount, speciesName), td.totalHits, is(expectedRecordCount));
 	}
 }
 
@@ -101,6 +119,11 @@ class LuceneIndexingServiceTestContext {
     	m.read(Thread.currentThread().getContextClassLoader().getResourceAsStream("au/org/aekos/api/loader/test-studylocationsubgraph-data.ttl"), null, "TURTLE");
 		return result;
     }
+	
+	@Bean
+	public TermIndexManager /*override the bean from the component scan*/FSDirectoryTermIndexManager() {
+		return new RAMDirectoryTermIndexManager();
+	}
 	
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer propertyPlaceholderConfigurer() throws IOException {
