@@ -12,9 +12,11 @@ import java.util.List;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.SortedDocValuesField;
+import org.apache.lucene.document.SortedSetDocValuesField;
 import org.apache.lucene.document.StoredField;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
+import org.apache.lucene.facet.FacetsConfig;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.index.Term;
@@ -137,28 +139,29 @@ public class LuceneLoaderClient implements LoaderClient {
 		doc.add(new TextField(IndexConstants.FLD_SAMPLING_PROTOCOL, record.getSamplingProtocol(), Field.Store.YES));
 		doc.add(new StoredField(IndexConstants.FLD_BIBLIOGRAPHIC_CITATION, record.getBibliographicCitation()));
 		// FIXME need to index all the fields
-		StringBuilder allValues = new StringBuilder();
+//		StringBuilder allTraitValues = new StringBuilder();
+		FacetsConfig config = new FacetsConfig(); // FIXME move to field
 		for (String curr : record.getTraitNames()) {
 			doc.add(new StringField(IndexConstants.FLD_TRAIT, curr, Field.Store.YES));
-			allValues.append(curr);
+			doc.add(new SortedSetDocValuesField(IndexConstants.FLD_TRAIT, new BytesRef(curr)));
+//			allTraitValues.append(curr);
 		}
-		doc.add(new SortedDocValuesField(IndexConstants.FLD_TRAIT, new BytesRef(allValues.toString())));
 		writeTraitsTo(doc, record.getTraits());
-		writeDocument(doc, indexWriter);
+		writeDocument(config.build(doc), indexWriter);
 	}
 	
 	@Override
 	public void addEnvRecord(EnvironmentLoaderRecord record) throws IOException {
 		Document doc = new Document();
 		doc.add(new StringField(IndexConstants.FLD_DOC_INDEX_TYPE, IndexConstants.DocTypes.ENV_RECORD, Field.Store.YES));
-		doc.add(new TextField("locationID", record.getLocationID(), Field.Store.YES)); // FIXME make field name constant
+		doc.add(new TextField(IndexConstants.FLD_LOCATION_ID, record.getLocationID(), Field.Store.YES));
 		// FIXME need to index all the fields
-		StringBuilder allValues = new StringBuilder();
+		StringBuilder allVariableValues = new StringBuilder();
 		for (String curr : record.getEnvironmentalVariableNames()) {
 			doc.add(new StringField(IndexConstants.FLD_ENVIRONMENT, curr, Field.Store.YES));
-			allValues.append(curr);
+			allVariableValues.append(curr);
 		}
-		doc.add(new SortedDocValuesField(IndexConstants.FLD_ENVIRONMENT, new BytesRef(allValues.toString())));
+		doc.add(new SortedDocValuesField(IndexConstants.FLD_ENVIRONMENT, new BytesRef(allVariableValues.toString())));
 		writeDocument(doc, indexWriter);
 	}
 

@@ -31,5 +31,6 @@ public class IndexConstants {
 	public static final String FLD_ENVIRONMENT = "environment";
 	public static final String FLD_SAMPLING_PROTOCOL = "sampling_protocol";
 	public static final String FLD_BIBLIOGRAPHIC_CITATION = "bibliographic_citation";
-	public static final String FLD_STORED_TRAITS = "traitStorage";
+	public static final String FLD_STORED_TRAITS = "trait_storage";
+	public static final String FLD_LOCATION_ID = "location_id";
 }

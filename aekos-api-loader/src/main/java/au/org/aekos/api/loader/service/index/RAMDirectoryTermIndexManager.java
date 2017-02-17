@@ -47,6 +47,7 @@ public class RAMDirectoryTermIndexManager implements TermIndexManager {
 	@Override
 	public void releaseIndexSearcher(IndexSearcher searcher) throws IOException {
 		searcherManager.release(searcher);
+		searcherManager = null;
 	}
 
 	@Override
@@ -55,6 +56,7 @@ public class RAMDirectoryTermIndexManager implements TermIndexManager {
 			return;
 		}
 		index.close();
+		index = null;
 	}
 
 }

@@ -13,7 +13,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Properties;
@@ -24,14 +23,12 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.junit.Test;
@@ -70,16 +67,6 @@ public class LuceneIndexingServiceTestSpring {
 		assertDocTypeCount("Should have processed the 5 SPECIESORGANISMGROUPs", IndexConstants.DocTypes.SPECIES_RECORD, 5);
 		assertThat(result, startsWith("Processed 5 records"));
 		assertTotalRecordCountIs(11);
-		Query q = new QueryParser("species", new StandardAnalyzer()).parse("\"Acacia octonervia R.S.Cowan & Maslin\"");
-		TopDocs td = indexMgr.getIndexSearcher().search(q, 3);
-		for (ScoreDoc curr : td.scoreDocs) {
-			System.out.println("## Doc " + curr.doc);
-			Document doc = indexMgr.getIndexSearcher().doc(curr.doc);
-			for (IndexableField currField : doc.getFields()) {
-				String name = currField.name();
-				System.out.println(String.format("%s=%s", name, doc.get(name)));
-			}
-		}
 		// FIXME do we need to test the taxonRemarks field too?
 		assertSpeciesHasTraits("Dampiera lavandulacea Lindl.",
 				unitsTrait("averageHeight", "0.2", "metres"),
@@ -105,6 +92,7 @@ public class LuceneIndexingServiceTestSpring {
 					noUnitsTrait("lifeForm", "Shrub"),
 					noUnitsTrait("phenology", "in flower"))
 				);
+		
 //		List<TraitOrEnvironmentalVariableVocabEntry> traits = searchService.getTraitVocabData();
 //		assertThat(traits.size(), is(6));
 //		assertThat(traits.stream().map(e -> e.getCode()).collect(Collectors.toList()), hasItems(
@@ -245,8 +233,6 @@ class LuceneIndexingServiceTestContext {
 	public static PropertySourcesPlaceholderConfigurer propertyPlaceholderConfigurer() throws IOException {
 	    PropertySourcesPlaceholderConfigurer result = new PropertySourcesPlaceholderConfigurer();
 	    Properties properties = new Properties();
-	    properties.setProperty("lucene.index.createMode", "true");
-	    properties.setProperty("lucene.index.path", Files.createTempDirectory("testDoIndexing01").toString());
 	    properties.setProperty("lucene.index.writer.commitLimit", "1000");
 	    properties.setProperty("aekos-api.owl-file.namespace", "http://www.aekos.org.au/ontology/1.0.0#");
 		result.setProperties(properties);
