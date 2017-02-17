@@ -5,6 +5,8 @@ import static au.org.aekos.api.loader.service.load.AekosTermDocumentBuilder.buil
 import static au.org.aekos.api.loader.service.load.AekosTermDocumentBuilder.buildTraitSpeciesTermDocument;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.lucene.document.Document;
@@ -23,7 +25,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.gson.Gson;
+
 import au.org.aekos.api.loader.service.index.TermIndexManager;
+import au.org.aekos.api.loader.service.index.Trait;
 
 
 /**
@@ -41,6 +46,7 @@ import au.org.aekos.api.loader.service.index.TermIndexManager;
 public class LuceneLoaderClient implements LoaderClient {
 
 	private static final Logger logger = LoggerFactory.getLogger(LuceneLoaderClient.class);
+	private static final Gson gson = new Gson();
 	
 	@Value("${lucene.index.writer.commitLimit}")
 	private int commitLimit = 1000;
@@ -127,16 +133,17 @@ public class LuceneLoaderClient implements LoaderClient {
 	public void addSpeciesRecord(SpeciesLoaderRecord record) throws IOException {
 		Document doc = new Document();
 		doc.add(new StringField(IndexConstants.FLD_DOC_INDEX_TYPE, IndexConstants.DocTypes.SPECIES_RECORD, Field.Store.YES));
-		doc.add(new TextField(IndexConstants.FLD_SPECIES, record.getSpeciesName(), Field.Store.YES));
+		doc.add(new TextField(IndexConstants.FLD_SPECIES, record.getSpeciesName(), Field.Store.YES)); // FIXME split into scientificName and taxonRemarks
 		doc.add(new TextField(IndexConstants.FLD_SAMPLING_PROTOCOL, record.getSamplingProtocol(), Field.Store.YES));
 		doc.add(new StoredField(IndexConstants.FLD_BIBLIOGRAPHIC_CITATION, record.getBibliographicCitation()));
 		// FIXME need to index all the fields
 		StringBuilder allValues = new StringBuilder();
 		for (String curr : record.getTraitNames()) {
-			doc.add(new StringField("trait", curr, Field.Store.YES));
+			doc.add(new StringField(IndexConstants.FLD_TRAIT, curr, Field.Store.YES));
 			allValues.append(curr);
 		}
-		doc.add(new SortedDocValuesField("trait", new BytesRef(allValues.toString())));
+		doc.add(new SortedDocValuesField(IndexConstants.FLD_TRAIT, new BytesRef(allValues.toString())));
+		writeTraitsTo(doc, record.getTraits());
 		writeDocument(doc, indexWriter);
 	}
 	
@@ -175,5 +182,19 @@ public class LuceneLoaderClient implements LoaderClient {
 
 	public void setIndexManager(TermIndexManager indexManager) {
 		this.indexManager = indexManager;
+	}
+
+	static Collection<Trait> getTraitsFrom(Document doc) {
+		String field = IndexConstants.FLD_STORED_TRAITS;
+		String traitJson = doc.get(field);
+		if (traitJson == null) {
+			throw new IllegalStateException(String.format("Data problem: no data stored for '%s' field", field));
+		}
+		return Arrays.asList(gson.fromJson(traitJson, Trait[].class));
+	}
+	
+	static void writeTraitsTo(Document doc, Collection<Trait> traits) {
+		String traitsJson = gson.toJson(traits);
+		doc.add(new StoredField(IndexConstants.FLD_STORED_TRAITS, traitsJson));
 	}
 }

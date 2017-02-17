@@ -8,11 +8,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -36,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import au.org.aekos.api.loader.service.index.Trait;
 import au.org.aekos.api.loader.util.FieldNames;
 import au.org.aekos.api.loader.util.ProgressTracker;
 
@@ -131,7 +132,8 @@ public class LuceneIndexingService implements IndexingService {
 			@Override
 			public void accept(SpeciesLoaderRecord record) {
 				try {
-					loader.addSpeciesTraitTermsToIndex(record.getSpeciesName(), new LinkedList<>(record.getTraitNames()));
+					// FIXME do we even need to add separate species-trait records or can we search the single species record? 
+//					loader.addSpeciesTraitTermsToIndex(record.getSpeciesName(), new LinkedList<>(record.getTraitNames()));
 					loader.addSpeciesRecord(record);
 					Integer speciesCount = speciesCounts.get(record.getSpeciesName());
 					if (speciesCount == null) {
@@ -200,15 +202,24 @@ public class LuceneIndexingService implements IndexingService {
 		Resource dwcResource = dwcResources.get(0);
 		String speciesName = getString(dwcResource, "scientificName");
 		String samplingProtocol = getString(dwcResource, "samplingProtocol");
-		Set<String> traitNames = dwcResource.listProperties(prop("trait")).toList().stream()
-			.map(e -> e.getObject().asResource().getProperty(prop("name")).getLiteral().getString())
+		Set<Trait> traits = dwcResource.listProperties(prop("trait")).toList().stream()
+			.map(new Function<Statement, Trait>() {
+				@Override
+				public Trait apply(Statement e) {
+					Resource traitResource = e.getObject().asResource();
+					String name = traitResource.getProperty(prop("name")).getLiteral().getString();
+					String value = traitResource.getProperty(prop("value")).getLiteral().getString();
+					String units = traitResource.getProperty(prop("units")).getLiteral().getString();
+					return new Trait(name, value, units);
+				}
+			})
 			.collect(Collectors.toSet());
 		String bibliographicCitation = citationRecords.get(samplingProtocol);
 		if (bibliographicCitation == null) {
 			String template = "Data problem: couldn't find a citation for the sampling protocol '%s'";
 			throw new RuntimeException(String.format(template, samplingProtocol));
 		}
-		callback.accept(new SpeciesLoaderRecord(speciesName, traitNames, samplingProtocol, bibliographicCitation));
+		callback.accept(new SpeciesLoaderRecord(speciesName, traits, samplingProtocol, bibliographicCitation));
 	}
 
 	private enum RecordType {
