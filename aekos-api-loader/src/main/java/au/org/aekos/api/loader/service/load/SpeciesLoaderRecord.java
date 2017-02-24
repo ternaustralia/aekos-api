@@ -12,12 +12,17 @@ public class SpeciesLoaderRecord {
 	private final String samplingProtocol;
 	private final Set<Trait> traits;
 	private final String bibliographicCitation;
+	private final String locationId;
+	private final String eventDate; // TODO consider giving toLongEventDate() method
 
-	public SpeciesLoaderRecord(String speciesName, Set<Trait> traits, String samplingProtocol, String bibliographicCitation) {
+	public SpeciesLoaderRecord(String speciesName, Set<Trait> traits, String samplingProtocol, String bibliographicCitation
+			,String locationId, String eventDate) {
 		this.speciesName = speciesName;
 		this.traits = traits;
 		this.samplingProtocol = samplingProtocol;
 		this.bibliographicCitation = bibliographicCitation;
+		this.locationId = locationId;
+		this.eventDate = eventDate;
 	}
 
 	public String getSpeciesName() {
@@ -41,6 +46,18 @@ public class SpeciesLoaderRecord {
 
 	public String getBibliographicCitation() {
 		return bibliographicCitation;
+	}
+
+	public String getLocationId() {
+		return locationId;
+	}
+
+	public String getEventDate() {
+		return eventDate;
+	}
+	
+	public String getJoinKey() {
+		return locationId + eventDate;
 	}
 
 	@Override

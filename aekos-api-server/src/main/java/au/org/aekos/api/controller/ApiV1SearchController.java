@@ -28,7 +28,7 @@ import io.swagger.annotations.ApiParam;
 
 @Api(description="Find species, traits and environmental variables", produces=MediaType.APPLICATION_JSON_VALUE, tags="Search")
 @RestController
-@RequestMapping("/v1")
+@RequestMapping(path="/v1", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 public class ApiV1SearchController {
 
 	// TODO do we accept LSID/species ID and/or a species name for the species related services?
@@ -40,7 +40,7 @@ public class ApiV1SearchController {
 	@Autowired
 	private SearchService searchService;
 	
-	@RequestMapping(path="/getTraitVocab.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping("/getTraitVocab.json")
 	@ApiOperation(value = "Get trait vocabulary",
 		notes = "Gets a distinct list of all the traits that appear in the system. The code and label are "
 				+ "supplied for each trait. The codes are required to use as parameters for other resources "
@@ -49,7 +49,7 @@ public class ApiV1SearchController {
 		return searchService.getTraitVocabData();
 	}
 
-	@RequestMapping(path="/getEnvironmentalVariableVocab.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping("/getEnvironmentalVariableVocab.json")
 	@ApiOperation(value = "Get environmental variable vocabulary",
 			notes = "Gets a distinct list of all the environmental variables that appear in the system. The code and label are "
 					+ "supplied for each variable. The codes are required to use as parameters for other resources "
@@ -58,7 +58,7 @@ public class ApiV1SearchController {
 		return searchService.getEnvironmentalVariableVocabData();
 	}
 	
-	@RequestMapping(path="/speciesAutocomplete.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping("/speciesAutocomplete.json")
 	@ApiOperation(value = "Autocomplete partial species names",
 			notes = "Performs an autocomplete on the partial species name supplied. Results starting with the supplied fragment"
 					+ "will be returned ordered by most relevant.")
@@ -70,7 +70,7 @@ public class ApiV1SearchController {
 		return searchService.speciesAutocomplete(partialSpeciesName, 50);
 	}
 
-	@RequestMapping(path="/getTraitsBySpecies.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping("/getTraitsBySpecies.json")
 	@ApiOperation(value = "Get all available traits for specified species",
 			notes = "Finds the traits that the supplied species have. Note that the result doesn't include the value"
 					+ "of the traits, it only shows that the supplied species have values for those traits. To get the"
@@ -85,7 +85,7 @@ public class ApiV1SearchController {
 		return searchService.getTraitBySpecies(Arrays.asList(speciesNames), pagination);
 	}
 	
-	@RequestMapping(path="/getSpeciesByTrait.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping("/getSpeciesByTrait.json")
 	@ApiOperation(value = "Get all available species for specified traits",
 			notes = "Finds the species names that the supplied trait(s). Note that the result only shows that the "
 					+ "supplied traits have species records present in the system. To get the values, you need "
@@ -99,7 +99,7 @@ public class ApiV1SearchController {
 		return searchService.getSpeciesByTrait(Arrays.asList(traitNames), pagination);
 	}
 	
-	@RequestMapping(path="/getEnvironmentBySpecies.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping("/getEnvironmentBySpecies.json")
 	@ApiOperation(value = "Get all available environment variable names for specified species",
 			notes = "Finds the environmental variables that the supplied species have. Note that the result doesn't include the value"
 					+ "of the environmental variables, it only shows that the supplied species have values for those variable. To get the"
@@ -113,7 +113,7 @@ public class ApiV1SearchController {
 		return searchService.getEnvironmentBySpecies(Arrays.asList(speciesNames), pagination);
 	}
 	
-	@RequestMapping(path="/speciesSummary.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping("/speciesSummary.json")
 	@ApiOperation(value = "Get a summary of the specified species",
 			notes = "A summary of the information that the system holds on the supplied species name(s) "
 					+ "including a count of records. If the system doesn't have any data on a species name, "

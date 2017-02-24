@@ -118,7 +118,7 @@ WHERE {
       }
       ?oi aekos:temporality/aekos:has_start ?eventDateTemp3 .
     }
-    BIND(COALESCE(?eventDateTemp1, ?eventDateTemp2, ?eventDateTemp3) AS ?eventDateTemp)
+    BIND (COALESCE(?eventDateTemp1, ?eventDateTemp2, ?eventDateTemp3) AS ?eventDateTemp)
     BIND (CONCAT(str(year(?eventDateTemp)),"-",str(month(?eventDateTemp)),"-",str(day(?eventDateTemp))) as ?eventDate) .
     # month
     BIND (month(?eventDateTemp) as ?month) .
@@ -130,7 +130,11 @@ WHERE {
       {
         ?vv aekos:observeditems/rdfs:member ?sa2 .
         ?sa2 a ?sa2Type .
-        VALUES ?sa2Type {aekos:SAMPLEDAREA aekos:SAMPLEDAREAACSS aekos:SAMPLEDAREAVIS} .
+        VALUES ?sa2Type {
+          aekos:SAMPLEDAREA
+          aekos:SAMPLEDAREAACSS
+          aekos:SAMPLEDAREAVIS
+        }
         ?sa2 aekos:latestlanduse/aekos:category/aekos:name ?noUnitsTraitValue .
         BIND ('latestLandUse' as ?noUnitsTraitName) .
         BIND (URI(CONCAT("urn:",?noUnitsTraitName,":",STRUUID())) as ?noUnitsTraitEntity) .

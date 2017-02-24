@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -15,7 +16,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
@@ -23,12 +27,15 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.junit.Test;
@@ -69,41 +76,35 @@ public class LuceneIndexingServiceTestSpring {
 		assertTotalRecordCountIs(11);
 		// FIXME do we need to test the taxonRemarks field too?
 		assertSpeciesHasTraits("Dampiera lavandulacea Lindl.",
-				unitsTrait("averageHeight", "0.2", "metres"),
-				noUnitsTrait("cover", "Isolated plants"),
-				noUnitsTrait("lifeForm", "Forb"));
+			unitsTrait("averageHeight", "0.2", "metres"),
+			noUnitsTrait("cover", "Isolated plants"),
+			noUnitsTrait("lifeForm", "Forb"));
 		assertSpeciesHasTraits("Acacia ingrata Benth.",
-				unitsTrait("averageHeight", "0.4", "metres"),
-				noUnitsTrait("cover", "Isolated plants"),
-				noUnitsTrait("lifeForm", "Shrub"));
+			unitsTrait("averageHeight", "0.4", "metres"),
+			noUnitsTrait("cover", "Isolated plants"),
+			noUnitsTrait("lifeForm", "Shrub"));
 		assertSpeciesHasTraits("Eutaxia cuneata Meisn.",
-				unitsTrait("averageHeight", "0.6", "metres"),
-				noUnitsTrait("cover", "Isolated plants"),
-				noUnitsTrait("lifeForm", "Shrub"),
-				noUnitsTrait("phenology", "in flower"));
+			unitsTrait("averageHeight", "0.6", "metres"),
+			noUnitsTrait("cover", "Isolated plants"),
+			noUnitsTrait("lifeForm", "Shrub"),
+			noUnitsTrait("phenology", "in flower"));
 		assertSpeciesHasTraits("Acacia octonervia R.S.Cowan & Maslin",
-				traitSet(
-					unitsTrait("averageHeight", "0.3", "metres"),
-					noUnitsTrait("cover", "<10% cover"),
-					noUnitsTrait("lifeForm", "Shrub")),
-				traitSet(
-					unitsTrait("averageHeight", "0.3", "metres"),
-					noUnitsTrait("cover", "<10% cover"),
-					noUnitsTrait("lifeForm", "Shrub"),
-					noUnitsTrait("phenology", "in flower"))
-				);
-		
-//		List<TraitOrEnvironmentalVariableVocabEntry> traits = searchService.getTraitVocabData();
-//		assertThat(traits.size(), is(6));
-//		assertThat(traits.stream().map(e -> e.getCode()).collect(Collectors.toList()), hasItems(
-//				"totalLength", "lifeStage", "phenology", "heightOfBreak", "averageHeight", "cover"));
-//		List<TraitOrEnvironmentalVariableVocabEntry> envVars = searchService.getEnvironmentalVariableVocabData();
-//		assertThat(envVars.size(), is(18));
-//		assertThat(envVars.stream().map(e -> e.getCode()).collect(Collectors.toList()), hasItems(
-//				"aspect", "clay", "disturbanceEvidenceCover", "disturbanceEvidenceType", "disturbanceType",
-//				"electricalConductivity", "erosionEvidenceState", "erosionEvidenceType", "latestLandUse", "ph",
-//				"sand", "silt", "slope", "soilTexture", "soilType",
-//				"surfaceType", "totalOrganicCarbon", "visibleFireEvidence"));FIXME
+			traitSet(
+				unitsTrait("averageHeight", "0.3", "metres"),
+				noUnitsTrait("cover", "<10% cover"),
+				noUnitsTrait("lifeForm", "Shrub")),
+			traitSet(
+				unitsTrait("averageHeight", "0.3", "metres"),
+				noUnitsTrait("cover", "<10% cover"),
+				noUnitsTrait("lifeForm", "Shrub"),
+				noUnitsTrait("phenology", "in flower"))
+			);
+		assertEnvRecords(
+			envRecord("aekos.org.au/collection/wa.gov.au/ravensthorpe/R054", "2007-04-20",
+				vars("disturbanceType", "surfaceType", "soilTexture", "pH", "totalOrganicCarbon", "electricalConductivity")),
+			envRecord("aekos.org.au/collection/wa.gov.au/ravensthorpe/R054", "2009-05-21",
+				vars("slope", "aspect"))
+		);
 	}
 
 	/**
@@ -141,6 +142,7 @@ public class LuceneIndexingServiceTestSpring {
 		TopDocs td = indexMgr.getIndexSearcher().search(q, onlyAfterTotalHits);
 		assertThat(String.format("%s should have %d records", speciesName, expectedRecordCount), td.totalHits, is(expectedRecordCount));
 		int zeroBasedRecordIndex = 0;
+		// This bit is a bit brittle as it depends on order
 		for (ExpectedTraitSet curr : traitSet) {
 			assertSpeciesHasTraits(speciesName, zeroBasedRecordIndex++, curr.traits.toArray(new ExpectedTrait[0]));
 		}
@@ -204,6 +206,51 @@ public class LuceneIndexingServiceTestSpring {
 
 		public ExpectedTraitSet(Collection<ExpectedTrait> traits) {
 			this.traits = traits;
+		}
+	}
+	
+	private class ExpectedEnvRecord {
+		private final String locationId;
+		private final String eventDate;
+		private final Set<String> vars;
+
+		public ExpectedEnvRecord(String locationId, String eventDate, Set<String> vars) {
+			this.locationId = locationId;
+			this.eventDate = eventDate;
+			this.vars = vars;
+		}
+	}
+	
+	private ExpectedEnvRecord envRecord(String locationId, String eventDate, Set<String> vars) {
+		return new ExpectedEnvRecord(locationId, eventDate, vars);
+	}
+
+	private Set<String> vars(String...vars) {
+		return new HashSet<>(Arrays.asList(vars));
+	}
+
+	private void assertEnvRecords(ExpectedEnvRecord...expectedEnvRecords) throws Throwable {
+		Query q = new TermQuery(new Term(IndexConstants.FLD_DOC_INDEX_TYPE, IndexConstants.DocTypes.ENV_RECORD.toLowerCase()));
+		IndexSearcher indexSearcher = indexMgr.getIndexSearcher();
+		int expectedRecordCount = expectedEnvRecords.length;
+		TopDocs td = indexSearcher.search(q, expectedRecordCount);
+		assertThat(String.format("Should have %d records", expectedRecordCount), td.totalHits, is(expectedRecordCount));
+		int currentlyProcessingExpectedIndex = 0;
+		for (ScoreDoc curr : td.scoreDocs) {
+			Document doc = indexSearcher.doc(curr.doc);
+			assertThat("LocationID doesn't match for expectation at index " + currentlyProcessingExpectedIndex,
+					doc.get(IndexConstants.FLD_LOCATION_ID), is(expectedEnvRecords[currentlyProcessingExpectedIndex].locationId));
+			assertThat("eventDate doesn't match for expectation at index " + currentlyProcessingExpectedIndex,
+					doc.get(IndexConstants.FLD_EVENT_DATE), is(expectedEnvRecords[currentlyProcessingExpectedIndex].eventDate));
+			IndexableField[] vars = doc.getFields(IndexConstants.FLD_ENVIRONMENT);
+			assertThat("Variable collection length doesn't match for expectation at index " + currentlyProcessingExpectedIndex,
+					vars.length, is(expectedEnvRecords[currentlyProcessingExpectedIndex].vars.size()));
+			assertTrue("Variables content doesn't match for expectation at index " + currentlyProcessingExpectedIndex,
+					Arrays.stream(vars)
+					.map(e -> e.stringValue())
+					.collect(Collectors.toList())
+					.containsAll(expectedEnvRecords[currentlyProcessingExpectedIndex].vars));
+			currentlyProcessingExpectedIndex++;
 		}
 	}
 }

@@ -190,7 +190,9 @@ test:STUDYLOCATIONVISITVIEW-T1485141126861
                           <http://www.w3.org/1999/02/22-rdf-syntax-ns#_2>
                                   test:SPECIESORGANISMGROUP-T1485141126864 ;
                           <http://www.w3.org/1999/02/22-rdf-syntax-ns#_3>
-                                  test:SPECIESORGANISMGROUP-T1485141126873
+                                  test:SPECIESORGANISMGROUP-T1485141126873 ;
+                          <http://www.w3.org/1999/02/22-rdf-syntax-ns#_4>
+                                  test:LANDSCAPE-T1485141126288
                         ] ;
         :title          " - visited on 30-09-2007" ;
         :visitnumber    "2"^^<http://www.w3.org/2001/XMLSchema#decimal> .
@@ -844,8 +846,8 @@ test:PHENOLOGYVALUE-D7226
 
 test:TimeRangeValue-C6783
         a                     :TimeRangeValue ;
-        :has_end              "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
-        :has_start            "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_end              "2009-05-21T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_start            "2009-05-21T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
         :has_time_range_type  test:ObservedTimeRangeType ;
         :is_end_sampled       true ;
         :is_start_sampled     true .
@@ -856,10 +858,8 @@ test:STUDYLOCATIONVISITVIEW-T1485141126286
         :observeditems  [ a       <http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag> ;
                           <http://www.w3.org/1999/02/22-rdf-syntax-ns#_1>
                                   test:DISTURBANCEEVIDENCE-T1485141126335 ;
-                          <http://www.w3.org/1999/02/22-rdf-syntax-ns#_10>
-                                  test:SPECIESORGANISMGROUP-T1485141126538 ;
                           <http://www.w3.org/1999/02/22-rdf-syntax-ns#_2>
-                                  test:LANDSCAPE-T1485141126288 ;
+                                  test:SPECIESORGANISMGROUP-T1485141126538 ;
                           <http://www.w3.org/1999/02/22-rdf-syntax-ns#_3>
                                   test:ORGANISMASSEMBLAGE-T1485141126809 ;
                           <http://www.w3.org/1999/02/22-rdf-syntax-ns#_4>

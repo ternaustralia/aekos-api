@@ -41,6 +41,6 @@ public class ProgressTracker {
 	}
 	
 	private long getElapsedSeconds() {
-		return (new Date().getTime() - start.getTime()) / 1000;
+		return (now() - start.getTime()) / 1000;
 	}
 }

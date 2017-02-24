@@ -1,16 +1,21 @@
 package au.org.aekos.api.loader.service.load;
 
+import static au.org.aekos.api.loader.util.FieldNames.DISTURBANCE_EVIDENCE_VARS;
+import static au.org.aekos.api.loader.util.FieldNames.LANDSCAPE_VARS;
+import static au.org.aekos.api.loader.util.FieldNames.NO_UNITS_VARS;
+import static au.org.aekos.api.loader.util.FieldNames.SOIL_VARS;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -37,7 +42,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import au.org.aekos.api.loader.service.index.Trait;
-import au.org.aekos.api.loader.util.FieldNames;
 import au.org.aekos.api.loader.util.ProgressTracker;
 
 @Service
@@ -76,7 +80,7 @@ public class LuceneIndexingService implements IndexingService {
 	@Override
 	public String doIndexing() throws IOException {
 //		int totalRecordCount = retrievalService.getTotalSpeciesRecordsHeld(); Can we count something else to get a feel for how many models we need to process?
-		int totalRecordCount = 1000; // FIXME
+		int totalRecordCount = 292000; // FIXME
 		logger.info("Starting load process");
 		loader.beginLoad();
 		logger.info("Clearing existing index...");
@@ -85,8 +89,7 @@ public class LuceneIndexingService implements IndexingService {
 		collectCitationDetails();
 		logger.info("Phase 2: indexing darwin core records");
 		ProgressTracker tracker = new ProgressTracker(totalRecordCount);
-		Map<String, Integer> speciesCounts = indexSpeciesRecords(tracker);
-		processSpeciesCounts(speciesCounts);
+		indexSpeciesRecords(tracker);
 		logger.info("Phase 3: indexing location visit records");
 		indexEnvironmentRecords();
 		loader.endLoad();
@@ -126,27 +129,18 @@ public class LuceneIndexingService implements IndexingService {
 		void accept(SpeciesLoaderRecord record);
 	}
 	
-	private Map<String, Integer> indexSpeciesRecords(ProgressTracker tracker) {
-		Map<String, Integer> speciesCounts = new HashMap<>();
+	private void indexSpeciesRecords(ProgressTracker tracker) {
 		getSpeciesIndexStream(new IndexLoaderCallback() {
 			@Override
 			public void accept(SpeciesLoaderRecord record) {
 				try {
-					// FIXME do we even need to add separate species-trait records or can we search the single species record? 
-//					loader.addSpeciesTraitTermsToIndex(record.getSpeciesName(), new LinkedList<>(record.getTraitNames()));
 					loader.addSpeciesRecord(record);
-					Integer speciesCount = speciesCounts.get(record.getSpeciesName());
-					if (speciesCount == null) {
-						speciesCount = 0;
-					}
-					speciesCounts.put(record.getSpeciesName(), ++speciesCount);
 				} catch (IOException e) {
 					throw new RuntimeException("Failed to add a record to the index: " + record.toString(), e);
 				}
 				tracker.addRecord();
 			}
 		});
-		return speciesCounts;
 	}
 	
 	void getSpeciesIndexStream(IndexLoaderCallback callback) {
@@ -202,6 +196,8 @@ public class LuceneIndexingService implements IndexingService {
 		Resource dwcResource = dwcResources.get(0);
 		String speciesName = getString(dwcResource, "scientificName");
 		String samplingProtocol = getString(dwcResource, "samplingProtocol");
+		String locationId = getString(dwcResource, "locationID");
+		String eventDate = getString(dwcResource, "eventDate");
 		Set<Trait> traits = dwcResource.listProperties(prop("trait")).toList().stream()
 			.map(new Function<Statement, Trait>() {
 				@Override
@@ -219,7 +215,7 @@ public class LuceneIndexingService implements IndexingService {
 			String template = "Data problem: couldn't find a citation for the sampling protocol '%s'";
 			throw new RuntimeException(String.format(template, samplingProtocol));
 		}
-		callback.accept(new SpeciesLoaderRecord(speciesName, traits, samplingProtocol, bibliographicCitation));
+		callback.accept(new SpeciesLoaderRecord(speciesName, traits, samplingProtocol, bibliographicCitation, locationId, eventDate));
 	}
 
 	private enum RecordType {
@@ -253,7 +249,6 @@ public class LuceneIndexingService implements IndexingService {
 			@Override
 			public void accept(EnvironmentLoaderRecord record) {
 				try {
-//					loader.addSpeciesEnvironmentTermsToIndex(record.getSpeciesName(), new LinkedList<>(record.getEnvironmentalVariableNames()));
 					loader.addEnvRecord(record);
 				} catch (IOException e) {
 					throw new RuntimeException("Failed to add a record to the index: " + record.toString(), e);
@@ -317,15 +312,29 @@ public class LuceneIndexingService implements IndexingService {
 		List<Resource> locVisitResources = model.listSubjectsWithProperty(RDF.type, model.createResource(LOCATION_VISIT_TYPE)).toList();
 		assertExactlyOneResource(model, locVisitResources, RecordType.ENV);
 		Resource locVisitResource = locVisitResources.get(0);
-		String locationId = getString(locVisitResource, "locationID"); // FIXME field name constant
-//		DummyEnvironmentDataRecord envRecord = new DummyEnvironmentDataRecord();
-//		for (Property currVarProp : Arrays.asList(prop(DISTURBANCE_EVIDENCE_VARS), prop(LANDSCAPE_VARS), prop(NO_UNITS_VARS), prop(SOIL_VARS))) {
-//			processEnvDataVars(Collections.emptyList(), s.get("loc").asResource(), envRecord, currVarProp);
-//		}
-		Set<String> envVarNames = locVisitResource.listProperties(prop(FieldNames.NO_UNITS_VARS)).toList().stream() // FIXME need to do loop like above
-			.map(e -> e.getObject().asResource().getProperty(prop("name")).getLiteral().getString()) // FIXME extract field name "name" as constant
-			.collect(Collectors.toSet());
-		callback.accept(new EnvironmentLoaderRecord(locationId, envVarNames));
+		String locationId = getString(locVisitResource, "locationID");
+String eventDate;
+try {
+	eventDate = getString(locVisitResource, "eventDate");
+} catch (IllegalStateException e1) {
+	String tempFilePath;
+	try {
+		Path tempFile = Files.createTempFile("envModel", ".ttl");
+		tempFilePath = tempFile.toString();
+		model.write(new FileOutputStream(tempFile.toFile()), "TURTLE");
+	} catch (IOException e) {
+		throw new RuntimeException("FAIL", e);
+	}
+	logger.warn(String.format("Data problem: some visit on '%s' doesn't have an eventDate. Wrote model to '%s'", locationId, tempFilePath));
+	eventDate = "ERROR";
+}
+		Set<String> envVarNames = new HashSet<>();
+		for (Property currVarProp : Arrays.asList(prop(DISTURBANCE_EVIDENCE_VARS), prop(LANDSCAPE_VARS), prop(NO_UNITS_VARS), prop(SOIL_VARS))) {
+			envVarNames.addAll(locVisitResource.listProperties(currVarProp).toList().stream()
+					.map(e -> e.getObject().asResource().getProperty(prop("name")).getLiteral().getString())
+					.collect(Collectors.toSet()));
+		}
+		callback.accept(new EnvironmentLoaderRecord(locationId, envVarNames, eventDate));
 	}
 
 	String getString(Resource res, String predicateName) {
@@ -365,12 +374,6 @@ public class LuceneIndexingService implements IndexingService {
 
 	private long now() {
 		return new Date().getTime();
-	}
-	
-	private void processSpeciesCounts(Map<String, Integer> speciesCounts) throws IOException {
-		for (Entry<String, Integer> curr : speciesCounts.entrySet()) {
-			loader.addSpecies(curr.getKey(), curr.getValue());
-		}
 	}
 
 	public void setLoader(LoaderClient loader) {

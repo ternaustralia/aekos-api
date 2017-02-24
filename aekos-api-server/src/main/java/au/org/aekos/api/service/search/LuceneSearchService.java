@@ -4,11 +4,18 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.lucene.document.Document;
+import org.apache.lucene.facet.FacetResult;
+import org.apache.lucene.facet.LabelAndValue;
+import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
@@ -20,6 +27,8 @@ import org.apache.lucene.search.SortField;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.WildcardQuery;
+import org.apache.lucene.search.join.JoinUtil;
+import org.apache.lucene.search.join.ScoreMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +36,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import au.org.aekos.api.loader.service.SearchHelper;
 import au.org.aekos.api.loader.service.index.TermIndexManager;
 import au.org.aekos.api.loader.service.load.DocumentType;
 import au.org.aekos.api.loader.service.load.IndexConstants;
@@ -54,21 +64,21 @@ public class LuceneSearchService implements SearchService {
 	private VocabService vocabService;
 	
 	@Override
-	public List<TraitOrEnvironmentalVariableVocabEntry> getTraitBySpecies(List<String> SpeciesSummarys, PageRequest pagination) {
-		Query query = buildFieldOrQuery(SpeciesSummarys, IndexConstants.FLD_SPECIES, DocumentType.TRAIT_SPECIES);
+	public List<TraitOrEnvironmentalVariableVocabEntry> getTraitBySpecies(List<String> speciesNames, PageRequest pagination) {
+		List<String> lowerCasedSpeciesNames = speciesNames.stream().map(e -> e.toLowerCase()).collect(Collectors.toList());
+		Query query = buildFieldOrQuery(lowerCasedSpeciesNames, IndexConstants.FLD_SPECIES, DocumentType.SPECIES_RECORD);
 		return performSpeciesTraitSearch(query, pagination);
 	}
 	
 	@Override
 	public List<SpeciesName> getSpeciesByTrait(List<String> traitNames,PageRequest pagination) {
-		Query query = buildFieldOrQuery(traitNames, IndexConstants.FLD_TRAIT, DocumentType.TRAIT_SPECIES);
-		return performTraitSpeciesSearch(query, pagination );
+		Query query = buildFieldOrQuery(traitNames, IndexConstants.FLD_TRAIT, DocumentType.SPECIES_RECORD);
+		return performTraitSpeciesSearch(query, pagination);
 	}
 	
 	@Override
-	public List<TraitOrEnvironmentalVariableVocabEntry> getEnvironmentBySpecies(List<String> SpeciesSummarys,PageRequest pagination) {
-		Query query = buildFieldOrQuery(SpeciesSummarys, IndexConstants.FLD_SPECIES, DocumentType.SPECIES_ENV);
-		return performSpeciesEnvironmentSearch(query, pagination);
+	public List<TraitOrEnvironmentalVariableVocabEntry> getEnvironmentBySpecies(List<String> speciesNames, PageRequest pagination) {
+		return performSpeciesEnvironmentSearch(speciesNames, pagination);
 	}
 
 	@Override
@@ -83,33 +93,33 @@ public class LuceneSearchService implements SearchService {
 			return primaryResults;
 		}
 		String searchTerm = term.toLowerCase().replace(" ", "").replace(".", "");
-		Query q = new PrefixQuery(new Term(IndexConstants.FLD_SEARCH, searchTerm ));
-		Query q2 = new PrefixQuery(new Term(IndexConstants.FLD_SEARCH_SUB, searchTerm ));
+		Query q = new PrefixQuery(new Term(IndexConstants.FLD_SEARCH, searchTerm));
 		TopDocs td = searcher.search(q, numResults, new Sort(new SortField(IndexConstants.FLD_SEARCH, SortField.Type.STRING)));
 		if( td.totalHits > 0 ){
-			for(ScoreDoc sd :td.scoreDocs ){
+			for(ScoreDoc sd :td.scoreDocs){
 				Document d = searcher.doc(sd.doc);
 				if(d != null){
-					String speciesName = d.getField(IndexConstants.FLD_DISPLAY_VALUE).stringValue();
-					int count = Integer.parseInt(d.get(IndexConstants.FLD_INSTANCE_COUNT));
+					String speciesName = d.getField(IndexConstants.FLD_SPECIES).stringValue();
+int count = 123; // FIXME get this from facets
 					primaryResults.add(new SpeciesSummary(speciesName, count));
 				}
 			}
 		}
+		Query q2 = new PrefixQuery(new Term(IndexConstants.FLD_SEARCH_SUB, searchTerm ));
 		TopDocs td2 = searcher.search(q2, numResults, new Sort(new SortField(IndexConstants.FLD_SEARCH, SortField.Type.STRING)));
 		if( td2.totalHits > 0 ){
-			for(ScoreDoc sd :td2.scoreDocs ){
+			for(ScoreDoc sd :td2.scoreDocs){
 				Document d = searcher.doc(sd.doc);
 				if(d != null){
-					String speciesName = d.getField(IndexConstants.FLD_DISPLAY_VALUE).stringValue();
-					int count = Integer.parseInt(d.get(IndexConstants.FLD_INSTANCE_COUNT));
+					String speciesName = d.getField(IndexConstants.FLD_SPECIES).stringValue();
+int count = 123; // FIXME get this from facets
 					secondaryResults.add(new SpeciesSummary(speciesName, count));
 				}
 			}
 		}
 		List<SpeciesSummary> resultList ;
 		if(td.totalHits == 0 && td2.totalHits == 0 ){
-			resultList = doWildcardQuery(searchTerm, numResults, searcher );
+			resultList = doWildcardQuery(searchTerm, numResults, searcher);
 		}else{
 		    resultList = mergePrimaryAndSecondaryResults(primaryResults, secondaryResults, numResults, 30, 20);
 		}
@@ -124,8 +134,8 @@ public class LuceneSearchService implements SearchService {
 			for(ScoreDoc sd :td.scoreDocs ){
 				Document d = searcher.doc(sd.doc);
 				if(d != null){
-					String speciesName = d.getField(IndexConstants.FLD_DISPLAY_VALUE).stringValue();
-					int count = Integer.parseInt(d.get(IndexConstants.FLD_INSTANCE_COUNT));
+					String speciesName = d.getField(IndexConstants.FLD_SPECIES).stringValue();
+int count = 123; // FIXME get this from facets
 					result.add(new SpeciesSummary(speciesName, count));
 				}
 			}
@@ -186,65 +196,73 @@ public class LuceneSearchService implements SearchService {
 	
 	private Query buildFieldOrQuery(List<String> fieldStrings, String searchField, DocumentType documentType) {
 		BooleanQuery.Builder queryBuilder = new BooleanQuery.Builder();
-		Query docTypeQuery = new TermQuery(new Term(IndexConstants.FLD_DOC_INDEX_TYPE, documentType.name()));
+		Query docTypeQuery = new TermQuery(new Term(IndexConstants.FLD_DOC_INDEX_TYPE, documentType.name().toLowerCase()));
 		queryBuilder.add(docTypeQuery, Occur.MUST);
 		queryBuilder.setMinimumNumberShouldMatch(1); //For optional field matches- i.e. the OR condition
-		for(String fieldString : fieldStrings ){
+		for(String fieldString : fieldStrings) {
+//			String lowerCaseBecauseSearchingTextField = fieldString.toLowerCase();
+//			Query q = new TermQuery(new Term(searchField, lowerCaseBecauseSearchingTextField));
 			Query q = new TermQuery(new Term(searchField, fieldString));
 			queryBuilder.add(q, Occur.SHOULD);
 		}
-		Query query = queryBuilder.build();
-		return query;
+		return queryBuilder.build();
 	}
 	
 	private List<TraitOrEnvironmentalVariableVocabEntry> performSpeciesTraitSearch(Query query, PageRequest pagination){
-		List<TraitOrEnvironmentalVariableVocabEntry> responseList = new ArrayList<>();
+		List<TraitOrEnvironmentalVariableVocabEntry> result = new ArrayList<>();
 		IndexSearcher searcher = null;
-		PageResultMetadata pageMeta = new PageResultMetadata();
 		try {
 			searcher = termIndexManager.getIndexSearcher();
 		} catch (IOException e) {
-			logger.error("Can't search trait by species - IOException - returning empty list", e);
-			return responseList;
+			throw new RuntimeException("Can't access index", e);
 		}
 		try {
-			TopDocs td = searcher.search(query, Integer.MAX_VALUE, new Sort(new SortField(IndexConstants.FLD_TRAIT, SortField.Type.STRING)));
-			pageMeta.totalResults = td.totalHits;
-		    if(td.totalHits > 0){
-		    	LinkedHashSet<TraitOrEnvironmentalVariableVocabEntry> uniqueResults = new LinkedHashSet<>();
-		    	int startDocIndex = getTopDocStartIndex(pagination, td.totalHits);
-		    	if(startDocIndex > -1){
-		    		int endDocIndex = getTopDocEndIndex(pagination, td.totalHits);
-		    		for(int x = startDocIndex; x <= endDocIndex; x++ ){
-			    	    ScoreDoc scoreDoc = td.scoreDocs[x];
-			    		Document matchedDoc = searcher.doc(scoreDoc.doc);
-			    		String trait = matchedDoc.get(IndexConstants.FLD_TRAIT);
-			    		String title = vocabService.getLabelForPropertyCode(trait);
-			    		if(StringUtils.hasLength(trait)){
-			    			uniqueResults.add(new TraitOrEnvironmentalVariableVocabEntry(trait, title));
-			    		}
-			    	}
-		    	}
-		    	responseList.addAll(uniqueResults);
+			TopDocs td = searcher.search(query, Integer.MAX_VALUE); // TODO add sorting back
+		    if (td.totalHits == 0) {
+		    	return Collections.emptyList();
 		    }
-		    termIndexManager.releaseIndexSearcher(searcher);
+		    Set<TraitOrEnvironmentalVariableVocabEntry> uniqueResults = new LinkedHashSet<>();
+		    int startDocIndex = getTopDocStartIndex(pagination, td.totalHits);
+		    if (startDocIndex == -1) {
+		    	return Collections.emptyList();
+		    }
+		    int endDocIndex = getTopDocEndIndex(pagination, td.totalHits);
+		    for(int x = startDocIndex; x <= endDocIndex; x++ ){
+		    	ScoreDoc scoreDoc = td.scoreDocs[x];
+		    	Document matchedDoc = searcher.doc(scoreDoc.doc);
+		    	IndexableField[] traits = matchedDoc.getFields(IndexConstants.FLD_TRAIT);
+		    	for (IndexableField curr : traits) {
+		    		String trait = curr.stringValue();
+		    		String title = vocabService.getLabelForPropertyCode(trait);
+		    		if(StringUtils.hasLength(trait)){
+		    			uniqueResults.add(new TraitOrEnvironmentalVariableVocabEntry(trait, title));
+		    		}
+		    	}
+		    }
+		    result.addAll(uniqueResults);
 		} catch (IOException e) {
-			logger.error("Failed to query index", e);
+			throw new RuntimeException("Failed to query index", e);
+		} finally {
+			try {
+				termIndexManager.releaseIndexSearcher(searcher);
+			} catch (IOException e) {
+				throw new RuntimeException("Failed to release the searcher", e);
+			}
 		}
-		return responseList;
+		return result;
 	}
 	
 	private List<SpeciesName> performTraitSpeciesSearch(Query query, PageRequest pagination){
-		List<SpeciesName> responseList = new ArrayList<>();
+		List<SpeciesName> result = new ArrayList<>();
 		IndexSearcher searcher = null;
 		try {
 			searcher = termIndexManager.getIndexSearcher();
 		} catch (IOException e) {
 			logger.error("Can't search trait by species - IOException - returning empty list", e);
-			return responseList;
+			return result;
 		}
 		try {
-			TopDocs td = searcher.search(query, Integer.MAX_VALUE, new Sort(new SortField(IndexConstants.FLD_SPECIES, SortField.Type.STRING)));
+			TopDocs td = searcher.search(query, Integer.MAX_VALUE); // TODO add sorting back
 		    int totalSpecies = td.totalHits;
 		    if(totalSpecies > 0){
 		    	Set<SpeciesName> uniqueResults = new LinkedHashSet<>();
@@ -260,30 +278,41 @@ public class LuceneSearchService implements SearchService {
 			    		}
 			    	}
 		    	}
-		    	responseList.addAll(uniqueResults);
+		    	result.addAll(uniqueResults);
 		    }
 		    termIndexManager.releaseIndexSearcher(searcher);
 		} catch (IOException e) {
 			logger.error("Failed to query index", e);
 		}
-		return responseList;
+		return result;
 	}
 	
-	private List<TraitOrEnvironmentalVariableVocabEntry> performSpeciesEnvironmentSearch(Query query, PageRequest pagination ){
-		List<TraitOrEnvironmentalVariableVocabEntry> responseList = new ArrayList<TraitOrEnvironmentalVariableVocabEntry>();
+	private List<TraitOrEnvironmentalVariableVocabEntry> performSpeciesEnvironmentSearch(List<String> speciesNames, PageRequest pagination){
+		boolean multipleValuesPerDocument = false;
+		ScoreMode scoreMode = ScoreMode.Max; // Defines how the scores are translated into the other side of the join.
+String FIXMEfirstname = speciesNames.get(0); // FIXME iterate to add all
+		Query fromQuery = new BooleanQuery.Builder()
+				.add(new TermQuery(new Term(IndexConstants.FLD_DOC_INDEX_TYPE, IndexConstants.DocTypes.SPECIES_RECORD)), BooleanClause.Occur.MUST)
+				.add(new TermQuery(new Term(IndexConstants.FLD_SPECIES, FIXMEfirstname)), BooleanClause.Occur.MUST)
+				.build();
 		IndexSearcher searcher = null;
-		
+		List<TraitOrEnvironmentalVariableVocabEntry> result = new ArrayList<TraitOrEnvironmentalVariableVocabEntry>();
 		try {
 			searcher = termIndexManager.getIndexSearcher();
 		} catch (IOException e) {
 			logger.error("Can't search species by environment - IOException - returning empty list", e);
-			return responseList;
+			return result;
 		}
-		
 		try {
-			TopDocs td = searcher.search(query, Integer.MAX_VALUE, new Sort(new SortField(IndexConstants.FLD_ENVIRONMENT, SortField.Type.STRING)));
-		    int totalTraits = td.totalHits;
-		    if(totalTraits > 0){
+//TopDocs fromQueryTopDocs = searcher.search(fromQuery, 1);
+//assertThat("fromQuery should find the employee record", fromQueryTopDocs.totalHits, is(1));
+//SearchHelper.dumpFirstNDocs(searcher, 10);
+			Query joinQuery = JoinUtil.createJoinQuery(IndexConstants.FLD_JOIN_KEY, multipleValuesPerDocument,
+					IndexConstants.FLD_JOIN_KEY+"a", fromQuery, searcher, scoreMode);
+			TopDocs td = searcher.search(joinQuery, 2);// FIXME Integer.MAX_VALUE); // TODO add sorting
+		    int totalHits = td.totalHits;
+//assertThat(totalHits, is(2));
+		    if(totalHits > 0){
 		    	Set<TraitOrEnvironmentalVariableVocabEntry> uniqueResults = new LinkedHashSet<>();
 		    	int startDocIndex = getTopDocStartIndex(pagination, td.totalHits);
 		    	if(startDocIndex > -1){
@@ -298,13 +327,13 @@ public class LuceneSearchService implements SearchService {
 			    		}
 			    	}
 		    	}
-		    	responseList.addAll(uniqueResults);
+		    	result.addAll(uniqueResults);
 		    }
 			termIndexManager.releaseIndexSearcher(searcher);
 		} catch (IOException e) {
 			logger.error("Failed to query index", e);
 		}
-		return responseList;
+		return result;
 	}
 	
 	/**
@@ -350,21 +379,45 @@ public class LuceneSearchService implements SearchService {
 	
 	@Override
 	public List<TraitOrEnvironmentalVariableVocabEntry> getTraitVocabData() {
-		Query allTraitToSpeciesDocumentsQuery = buildAllDocumentsOfTypeQuery(DocumentType.TRAIT_SPECIES);
-		return performSpeciesTraitSearch(allTraitToSpeciesDocumentsQuery, EVERYTHING);
+		try {
+			IndexSearcher searcher = termIndexManager.getIndexSearcher();
+			FacetResult traitFacet = SearchHelper.facetSpeciesRecordTraits(searcher);
+			List<TraitOrEnvironmentalVariableVocabEntry> result = new LinkedList<>();
+			for (LabelAndValue curr : traitFacet.labelValues) {
+				String traitCode = curr.label;
+				String title = vocabService.getLabelForPropertyCode(traitCode);
+				result.add(new TraitOrEnvironmentalVariableVocabEntry(traitCode, title));
+				// TODO add count
+			}
+			return result;
+		} catch (IOException | ParseException e) {
+			throw new RuntimeException("Index problem: failed to query the index", e);
+		}
 	}
 
 	@Override
 	public List<TraitOrEnvironmentalVariableVocabEntry> getEnvironmentalVariableVocabData() {
-		Query allEnvVarToSpeciesDocumentsQuery = buildAllDocumentsOfTypeQuery(DocumentType.SPECIES_ENV);
-		return performSpeciesEnvironmentSearch(allEnvVarToSpeciesDocumentsQuery, EVERYTHING);
+		try {
+			IndexSearcher searcher = termIndexManager.getIndexSearcher();
+			FacetResult envVarsFacet = SearchHelper.facetEnvironmentRecordVariables(searcher);
+			List<TraitOrEnvironmentalVariableVocabEntry> result = new LinkedList<>();
+			for (LabelAndValue curr : envVarsFacet.labelValues) {
+				String traitCode = curr.label;
+				String title = vocabService.getLabelForPropertyCode(traitCode);
+				result.add(new TraitOrEnvironmentalVariableVocabEntry(traitCode, title));
+				// TODO add count
+			}
+			return result;
+		} catch (IOException | ParseException e) {
+			throw new RuntimeException("Index problem: failed to query the index", e);
+		}
 	}
-	
-	private Query buildAllDocumentsOfTypeQuery(DocumentType documentType) {
-		BooleanQuery.Builder queryBuilder = new BooleanQuery.Builder();
-		Query docTypeQuery = new TermQuery(new Term(IndexConstants.FLD_DOC_INDEX_TYPE, documentType.getCode()));
-		queryBuilder.add(docTypeQuery, Occur.MUST);
-		Query allTraitToSpeciesDocumentsQuery = queryBuilder.build();
-		return allTraitToSpeciesDocumentsQuery;
+
+	public void setTermIndexManager(TermIndexManager termIndexManager) {
+		this.termIndexManager = termIndexManager;
+	}
+
+	public void setVocabService(VocabService vocabService) {
+		this.vocabService = vocabService;
 	}
 }
