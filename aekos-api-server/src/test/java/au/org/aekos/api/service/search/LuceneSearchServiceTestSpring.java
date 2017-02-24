@@ -62,8 +62,8 @@ public class LuceneSearchServiceTestSpring {
 		List<SpeciesSummary> result = objectUnderTest.speciesAutocomplete("abac", 100);
 		assertNotNull(result);
 		assertThat(result.size(), is(4));
-		List<String> names = result.stream().map(s -> s.getSpeciesName()).collect(Collectors.toList());
-		assertThat(names, hasItems("Abacopteris aspera", "Abacopteris presliana", "Abacopteris sp.", "Abacopteris triphylla"));
+		List<String> names = result.stream().map(s -> s.getSpeciesName() + "|" + s.getRecordsHeld()).collect(Collectors.toList());
+		assertThat(names, hasItems("Abacopteris aspera|1", "Abacopteris presliana|1", "Abacopteris sp.|1", "Abacopteris triphylla|1"));
 	}
 
 	/**
@@ -76,6 +76,32 @@ public class LuceneSearchServiceTestSpring {
 		assertEquals(100, result.size());
 		SpeciesSummary species = result.get(0);
 		assertEquals("Mariosousa millefolia", species.getSpeciesName());
+	}
+	
+	/**
+	 * Can we get the facet count for a species when we trigger the 'sub-search'?
+	 */
+	@Test
+	public void testSpeciesAutocomplete03() throws IOException{
+		loadTaxaNamesCsv();
+		List<SpeciesSummary> result = objectUnderTest.speciesAutocomplete("pres", 100);
+		assertNotNull(result);
+		assertThat(result.size(), is(1));
+		assertThat(result.get(0).getSpeciesName(), is("Abacopteris presliana"));
+		assertThat(result.get(0).getRecordsHeld(), is(1));
+	}
+	
+	/**
+	 * Can we get the facet count for a species when we trigger the 'wildcard-search'?
+	 */
+	@Test
+	public void testSpeciesAutocomplete04() throws IOException{
+		loadTaxaNamesCsv();
+		List<SpeciesSummary> result = objectUnderTest.speciesAutocomplete("reslian", 100);
+		assertNotNull(result);
+		assertThat(result.size(), is(1));
+		assertThat(result.get(0).getSpeciesName(), is("Abacopteris presliana"));
+		assertThat(result.get(0).getRecordsHeld(), is(1));
 	}
 	
 	private void loadTaxaNamesCsv() throws IOException {

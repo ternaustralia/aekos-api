@@ -93,6 +93,7 @@ public class LuceneLoaderClient implements LoaderClient {
 		doc.add(new StringField(IndexConstants.FLD_DOC_INDEX_TYPE, IndexConstants.DocTypes.SPECIES_RECORD, Field.Store.YES));
 		String speciesName = record.getSpeciesName();
 		doc.add(new TextField(IndexConstants.FLD_SPECIES, speciesName, Field.Store.YES)); // FIXME split into scientificName and taxonRemarks
+		doc.add(new SortedSetDocValuesFacetField(IndexConstants.FLD_SPECIES, speciesName));
 		doc.add(new TextField(IndexConstants.FLD_SAMPLING_PROTOCOL, record.getSamplingProtocol(), Field.Store.YES));
 		doc.add(new StoredField(IndexConstants.FLD_BIBLIOGRAPHIC_CITATION, record.getBibliographicCitation()));
 		doc.add(new StringField(IndexConstants.FLD_LOCATION_ID, record.getLocationId(), Field.Store.YES));
@@ -138,11 +139,11 @@ doc.add(new StoredField("join_dump", record.getJoinKey()));
 		tokenise(speciesName, doc);
 	}
 
-	private static void tokenise(String traitDisplayValue, Document doc) {
-		if(!traitDisplayValue.contains(" ")){
+	private static void tokenise(String value, Document doc) {
+		if(!value.contains(" ")){
 			return;
 		}
-		String lc = traitDisplayValue.toLowerCase();
+		String lc = value.toLowerCase();
 		String[] tokens = lc.split(" ");
 		if(tokens.length == 0){
 			return;

@@ -60,6 +60,12 @@ public class SearchHelper {
 		return doFacetQueryForField(searcher, q, IndexConstants.FLD_TRAIT);
 	}
 	
+	/**
+	 * Executes a search for all env records and returns the facet values for the environment field.
+	 * 
+	 * @param searcher			searcher to execute against
+	 * @return					facet values
+	 */
 	public static FacetResult facetEnvironmentRecordVariables(IndexSearcher searcher) throws IOException, ParseException {
 		Query q = new QueryParser(IndexConstants.FLD_DOC_INDEX_TYPE, new StandardAnalyzer()).parse(IndexConstants.DocTypes.ENV_RECORD);
 		return doFacetQueryForField(searcher, q, IndexConstants.FLD_ENVIRONMENT);

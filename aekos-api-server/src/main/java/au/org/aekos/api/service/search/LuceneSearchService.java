@@ -2,16 +2,22 @@ package au.org.aekos.api.service.search;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.facet.FacetResult;
+import org.apache.lucene.facet.FacetsCollector;
 import org.apache.lucene.facet.LabelAndValue;
+import org.apache.lucene.facet.sortedset.DefaultSortedSetDocValuesReaderState;
+import org.apache.lucene.facet.sortedset.SortedSetDocValuesFacetCounts;
+import org.apache.lucene.facet.sortedset.SortedSetDocValuesReaderState;
 import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
@@ -83,59 +89,82 @@ public class LuceneSearchService implements SearchService {
 
 	@Override
 	public List<SpeciesSummary> speciesAutocomplete(String term, int numResults) throws IOException{
-		List<SpeciesSummary> primaryResults = new ArrayList<SpeciesSummary>();
-		List<SpeciesSummary> secondaryResults = new ArrayList<SpeciesSummary>();
 		IndexSearcher searcher = null;
 		try {
 			searcher = termIndexManager.getIndexSearcher();
 		} catch (IOException e) {
 			logger.error("Can't do species autocomplete - IOException - returning empty list", e);
-			return primaryResults;
+			return Collections.emptyList();
 		}
+		List<SpeciesSummary> primaryResults = new ArrayList<SpeciesSummary>();
 		String searchTerm = term.toLowerCase().replace(" ", "").replace(".", "");
+		TopDocs td = doPrimaryAutocomplete(numResults, searcher, primaryResults, searchTerm);
+		List<SpeciesSummary> secondaryResults = new ArrayList<SpeciesSummary>();
+		TopDocs td2 = doSecondaryAutocomplete(numResults, searcher, searchTerm, secondaryResults);
+		if(td.totalHits == 0 && td2.totalHits == 0 ){
+			return Collections.unmodifiableList(doWildcardQuery(searchTerm, numResults, searcher));
+		}
+		return Collections.unmodifiableList(mergePrimaryAndSecondaryResults(primaryResults, secondaryResults, numResults, 30, 20));
+	}
+
+	private TopDocs doPrimaryAutocomplete(int numResults, IndexSearcher searcher, List<SpeciesSummary> primaryResults, String searchTerm) throws IOException {
 		Query q = new PrefixQuery(new Term(IndexConstants.FLD_SEARCH, searchTerm));
-		TopDocs td = searcher.search(q, numResults, new Sort(new SortField(IndexConstants.FLD_SEARCH, SortField.Type.STRING)));
-		if( td.totalHits > 0 ){
-			for(ScoreDoc sd :td.scoreDocs){
+		SortedSetDocValuesReaderState state = new DefaultSortedSetDocValuesReaderState(searcher.getIndexReader());
+		FacetsCollector fc = new FacetsCollector();
+		TopDocs result = FacetsCollector.search(searcher, q, numResults, new Sort(new SortField(IndexConstants.FLD_SEARCH, SortField.Type.STRING)), fc);
+		if( result.totalHits > 0 ){
+			SortedSetDocValuesFacetCounts facets = new SortedSetDocValuesFacetCounts(state, fc);
+			FacetResult speciesFacet = facets.getTopChildren(numResults, IndexConstants.FLD_SPECIES); // TODO is 'numResults' enough? Is it possible to have the result but not the facet?
+			Map<String, Number> facetMap = Arrays.stream(speciesFacet.labelValues).collect(Collectors.toMap(e -> e.label, e -> e.value));
+			for(ScoreDoc sd :result.scoreDocs){
 				Document d = searcher.doc(sd.doc);
 				if(d != null){
 					String speciesName = d.getField(IndexConstants.FLD_SPECIES).stringValue();
-int count = 123; // FIXME get this from facets
+					int count = facetMap.get(speciesName).intValue();
 					primaryResults.add(new SpeciesSummary(speciesName, count));
 				}
 			}
 		}
-		Query q2 = new PrefixQuery(new Term(IndexConstants.FLD_SEARCH_SUB, searchTerm ));
-		TopDocs td2 = searcher.search(q2, numResults, new Sort(new SortField(IndexConstants.FLD_SEARCH, SortField.Type.STRING)));
-		if( td2.totalHits > 0 ){
-			for(ScoreDoc sd :td2.scoreDocs){
+		return result;
+	}
+	
+	private TopDocs doSecondaryAutocomplete(int numResults, IndexSearcher searcher, String searchTerm, List<SpeciesSummary> secondaryResults)
+			throws IOException {
+		Query q = new PrefixQuery(new Term(IndexConstants.FLD_SEARCH_SUB, searchTerm));
+		SortedSetDocValuesReaderState state = new DefaultSortedSetDocValuesReaderState(searcher.getIndexReader());
+		FacetsCollector fc = new FacetsCollector();
+		TopDocs result = FacetsCollector.search(searcher, q, numResults, new Sort(new SortField(IndexConstants.FLD_SEARCH, SortField.Type.STRING)), fc);
+		if( result.totalHits > 0 ){
+			SortedSetDocValuesFacetCounts facets = new SortedSetDocValuesFacetCounts(state, fc);
+			FacetResult speciesFacet = facets.getTopChildren(numResults, IndexConstants.FLD_SPECIES); // TODO is 'numResults' enough? Is it possible to have the result but not the facet?
+			Map<String, Number> facetMap = Arrays.stream(speciesFacet.labelValues).collect(Collectors.toMap(e -> e.label, e -> e.value));
+			for(ScoreDoc sd :result.scoreDocs){
 				Document d = searcher.doc(sd.doc);
 				if(d != null){
 					String speciesName = d.getField(IndexConstants.FLD_SPECIES).stringValue();
-int count = 123; // FIXME get this from facets
+					int count = facetMap.get(speciesName).intValue();
 					secondaryResults.add(new SpeciesSummary(speciesName, count));
 				}
 			}
 		}
-		List<SpeciesSummary> resultList ;
-		if(td.totalHits == 0 && td2.totalHits == 0 ){
-			resultList = doWildcardQuery(searchTerm, numResults, searcher);
-		}else{
-		    resultList = mergePrimaryAndSecondaryResults(primaryResults, secondaryResults, numResults, 30, 20);
-		}
-		return Collections.unmodifiableList(resultList);
+		return result;
 	}
 	
 	private List<SpeciesSummary> doWildcardQuery(String searchTerm, int numResults, IndexSearcher searcher) throws IOException{
 		List<SpeciesSummary> result = new ArrayList<SpeciesSummary>();
-		Query q = new WildcardQuery(new Term("search", "*" + searchTerm + "*" ));
-		TopDocs td = searcher.search(q, numResults, new Sort(new SortField("search", SortField.Type.STRING)));
+		Query q = new WildcardQuery(new Term(IndexConstants.FLD_SEARCH, "*" + searchTerm + "*" ));
+		SortedSetDocValuesReaderState state = new DefaultSortedSetDocValuesReaderState(searcher.getIndexReader());
+		FacetsCollector fc = new FacetsCollector();
+		TopDocs td = FacetsCollector.search(searcher, q, numResults, new Sort(new SortField(IndexConstants.FLD_SEARCH, SortField.Type.STRING)), fc);
+		SortedSetDocValuesFacetCounts facets = new SortedSetDocValuesFacetCounts(state, fc);
+		FacetResult speciesFacet = facets.getTopChildren(numResults, IndexConstants.FLD_SPECIES); // TODO is 'numResults' enough? Is it possible to have the result but not the facet?
+		Map<String, Number> facetMap = Arrays.stream(speciesFacet.labelValues).collect(Collectors.toMap(e -> e.label, e -> e.value));
 		if( td.totalHits > 0 ){
 			for(ScoreDoc sd :td.scoreDocs ){
 				Document d = searcher.doc(sd.doc);
 				if(d != null){
 					String speciesName = d.getField(IndexConstants.FLD_SPECIES).stringValue();
-int count = 123; // FIXME get this from facets
+					int count = facetMap.get(speciesName).intValue();
 					result.add(new SpeciesSummary(speciesName, count));
 				}
 			}
@@ -200,8 +229,6 @@ int count = 123; // FIXME get this from facets
 		queryBuilder.add(docTypeQuery, Occur.MUST);
 		queryBuilder.setMinimumNumberShouldMatch(1); //For optional field matches- i.e. the OR condition
 		for(String fieldString : fieldStrings) {
-//			String lowerCaseBecauseSearchingTextField = fieldString.toLowerCase();
-//			Query q = new TermQuery(new Term(searchField, lowerCaseBecauseSearchingTextField));
 			Query q = new TermQuery(new Term(searchField, fieldString));
 			queryBuilder.add(q, Occur.SHOULD);
 		}

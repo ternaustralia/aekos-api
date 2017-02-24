@@ -121,27 +121,27 @@ public class ApiV1SearchController {
     public List<SpeciesSummary> speciesSummary(
     		@RequestParam(name="speciesName") @ApiParam("list of species names") String[] speciesNames,
     		HttpServletResponse resp) {
-			List<SpeciesSummary> result = new LinkedList<>();
-			for (String curr : speciesNames) {
-				try {
-					List<SpeciesSummary> records = searchService.speciesAutocomplete(curr, 1);
-					if (records.size() == 0) {
-						result.add(new SpeciesSummary("0", curr, 0));
-						continue;
-					}
-					SpeciesSummary match = records.get(0);
-					boolean searchReturnedSomethingButItsNotWhatWeAskedFor = !match.getSpeciesName().equalsIgnoreCase(curr);
-					if (searchReturnedSomethingButItsNotWhatWeAskedFor) {
-						result.add(new SpeciesSummary("0", curr, 0));
-						continue;
-					}
-					result.add(match);
-				} catch (IOException e) {
-					logger.error("Failed when retrieving species summaries, died on: " + curr, e);
-					resp.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-					return null;
+		List<SpeciesSummary> result = new LinkedList<>();
+		for (String curr : speciesNames) {
+			try {
+				List<SpeciesSummary> records = searchService.speciesAutocomplete(curr, 1);
+				if (records.size() == 0) {
+					result.add(new SpeciesSummary("0", curr, 0));
+					continue;
 				}
+				SpeciesSummary match = records.get(0);
+				boolean searchReturnedSomethingButItsNotWhatWeAskedFor = !match.getSpeciesName().equalsIgnoreCase(curr);
+				if (searchReturnedSomethingButItsNotWhatWeAskedFor) {
+					result.add(new SpeciesSummary("0", curr, 0));
+					continue;
+				}
+				result.add(match);
+			} catch (IOException e) {
+				logger.error("Failed when retrieving species summaries, died on: " + curr, e);
+				resp.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+				return null;
 			}
-			return result;
+		}
+		return result;
 	}
 }
