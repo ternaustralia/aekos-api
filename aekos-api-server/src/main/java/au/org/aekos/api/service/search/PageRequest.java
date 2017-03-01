@@ -13,11 +13,7 @@ public class PageRequest {
 	
 	private final int pageNumber;
 	private final int resultsPerPage;
-	
-	//TODO Dubious on hiding this here, perhaps rename this object PaginationContext or something
-	//Left it so the interface is uncluttered tonight . .  not sure what to do with the results yet
-	public PageResultMetadata resultMetadata = null;
-	
+
 	public PageRequest(int pageNumber, int resultsPerPage) {
 		this.pageNumber = pageNumber;
 		this.resultsPerPage = resultsPerPage;
@@ -31,11 +27,28 @@ public class PageRequest {
 		return resultsPerPage;
 	}
 
-	public PageResultMetadata getResultMetadata() {
-		return resultMetadata;
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + pageNumber;
+		result = prime * result + resultsPerPage;
+		return result;
 	}
 
-	public void setResultMetadata(PageResultMetadata resultMetadata) {
-		this.resultMetadata = resultMetadata;
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		PageRequest other = (PageRequest) obj;
+		if (pageNumber != other.pageNumber)
+			return false;
+		if (resultsPerPage != other.resultsPerPage)
+			return false;
+		return true;
 	}
 }
