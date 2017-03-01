@@ -16,7 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang.SystemUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +32,6 @@ import au.org.aekos.api.model.TraitDataRecord;
 import au.org.aekos.api.model.TraitDataResponse;
 import au.org.aekos.api.model.TraitOrEnvironmentalVariable;
 import au.org.aekos.api.model.VisitInfo;
-import au.org.aekos.api.service.retrieval.JenaRetrievalService;
-import au.org.aekos.api.service.retrieval.VisitTracker;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("classpath:/au/org/aekos/api/retrievalContext-test.xml")

@@ -16,7 +16,7 @@ public class SpeciesLoaderRecordTest {
 		String locationID = "loc1";
 		String eventDate = "2016-03-20";
 		SpeciesLoaderRecord objectUnderTest = new SpeciesLoaderRecord("species1", Collections.emptySet(),
-				"not important", "not important", locationID, eventDate);
+				"not important", "not important", locationID, eventDate, "not important", "not important");
 		EnvironmentLoaderRecord envRecord = new EnvironmentLoaderRecord(locationID, Collections.emptySet(), eventDate);
 		String result = objectUnderTest.getJoinKey();
 		String otherJoinKey = envRecord.getJoinKey();

@@ -1,6 +1,6 @@
 package au.org.aekos.api.util;
 
-import org.apache.commons.lang.SystemUtils;
+import org.apache.commons.lang3.SystemUtils;
 
 public class WinCRUtil {
 	
@@ -10,6 +10,4 @@ public class WinCRUtil {
 		}
 		return in;
 	}
-	
-
 }

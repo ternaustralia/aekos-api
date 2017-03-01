@@ -20,18 +20,19 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.Profile;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.util.StreamUtils;
 
 import au.org.aekos.api.model.EnvironmentDataResponse;
-import au.org.aekos.api.service.retrieval.JenaRetrievalService;
+import au.org.aekos.api.service.retrieval.JenaRetrievalServiceTestSpring2.JenaRetrievalServiceTestContext;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes=JenaRetrievalServiceTestContext.class)
+@ActiveProfiles({"test", "force-only-JenaRetrievalServiceTestSpring2"})
 public class JenaRetrievalServiceTestSpring2 {
 
 	@Autowired
@@ -52,36 +53,33 @@ public class JenaRetrievalServiceTestSpring2 {
 			isEnvRecord("2013-04-29", "aekos.org.au/collection/sydney.edu.au/DERG/Tobermorey%20East"),
 			isEnvRecord("2014-04-29", "aekos.org.au/collection/sydney.edu.au/DERG/Tobermorey%20East")));
 	}
-}
-
-@Configuration
-@ComponentScan(
-	basePackages={"au.org.aekos.api.service.retrieval"},
-	excludeFilters={
-		@Filter(type=FilterType.ASSIGNABLE_TYPE, classes=au.org.aekos.api.service.retrieval.JossDataProvisionService.class)
-	})
-class JenaRetrievalServiceTestContext {
 	
-	@Bean
-    public Dataset coreDS() {
-    	Dataset result = DatasetFactory.create();
-    	Model m = result.getDefaultModel();
-    	m.read(Thread.currentThread().getContextClassLoader().getResourceAsStream("au/org/aekos/api/JenaRetrievalServiceTestSpring2-data.ttl"), null, "TURTLE");
-		return result;
-    }
-	
-    @Bean public String darwinCoreQueryTemplate() throws IOException { return getSparqlQuery("darwin-core.rq"); }
-    @Bean public String darwinCoreCountQueryTemplate() throws IOException { return getSparqlQuery("darwin-core-count.rq"); }
-    @Bean public String darwinCoreCountAllQueryTemplate() throws IOException { return getSparqlQuery("darwin-core-count-all.rq"); }
-    @Bean public String environmentDataQueryTemplate() throws IOException { return getSparqlQuery("environment-data.rq"); }
-    @Bean public String environmentDataCountQueryTemplate() throws IOException { return getSparqlQuery("environment-data-count.rq"); }
-    @Bean public String traitDataCountQueryTemplate() throws IOException { return getSparqlQuery("trait-data-count.rq"); }
-    @Bean public String indexLoaderQuery() throws IOException { return getSparqlQuery("index-loader.rq"); }
-
-	private String getSparqlQuery(String fileName) throws IOException {
-		InputStream sparqlIS = Thread.currentThread().getContextClassLoader().getResourceAsStream("au/org/aekos/api/sparql/" + fileName);
-		OutputStream out = new ByteArrayOutputStream();
-		StreamUtils.copy(sparqlIS, out);
-		return out.toString();
+	@Configuration
+	@ComponentScan(basePackages={"au.org.aekos.api.service.retrieval"})
+	@Profile("force-only-JenaRetrievalServiceTestSpring2")
+	static class JenaRetrievalServiceTestContext {
+		
+		@Bean
+		public Dataset coreDS() {
+			Dataset result = DatasetFactory.create();
+			Model m = result.getDefaultModel();
+			m.read(Thread.currentThread().getContextClassLoader().getResourceAsStream("au/org/aekos/api/JenaRetrievalServiceTestSpring2-data.ttl"), null, "TURTLE");
+			return result;
+		}
+		
+		@Bean public String darwinCoreQueryTemplate() throws IOException { return getSparqlQuery("darwin-core.rq"); }
+		@Bean public String darwinCoreCountQueryTemplate() throws IOException { return getSparqlQuery("darwin-core-count.rq"); }
+		@Bean public String darwinCoreCountAllQueryTemplate() throws IOException { return getSparqlQuery("darwin-core-count-all.rq"); }
+		@Bean public String environmentDataQueryTemplate() throws IOException { return getSparqlQuery("environment-data.rq"); }
+		@Bean public String environmentDataCountQueryTemplate() throws IOException { return getSparqlQuery("environment-data-count.rq"); }
+		@Bean public String traitDataCountQueryTemplate() throws IOException { return getSparqlQuery("trait-data-count.rq"); }
+		@Bean public String indexLoaderQuery() throws IOException { return getSparqlQuery("index-loader.rq"); }
+		
+		private String getSparqlQuery(String fileName) throws IOException {
+			InputStream sparqlIS = Thread.currentThread().getContextClassLoader().getResourceAsStream("au/org/aekos/api/sparql/" + fileName);
+			OutputStream out = new ByteArrayOutputStream();
+			StreamUtils.copy(sparqlIS, out);
+			return out.toString();
+		}
 	}
 }

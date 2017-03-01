@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import au.org.aekos.api.controller.ProgressTracker;
 
-public class ApiV1MaintenanceControllerTest {
+public class ProgressTrackerTest {
 
 	/**
 	 * Can we run through the life of the progress tracker without exploding?

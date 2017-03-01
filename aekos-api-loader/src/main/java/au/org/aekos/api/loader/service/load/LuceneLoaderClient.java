@@ -97,6 +97,8 @@ public class LuceneLoaderClient implements LoaderClient {
 		doc.add(new TextField(IndexConstants.FLD_SAMPLING_PROTOCOL, record.getSamplingProtocol(), Field.Store.YES));
 		doc.add(new StoredField(IndexConstants.FLD_BIBLIOGRAPHIC_CITATION, record.getBibliographicCitation()));
 		doc.add(new StringField(IndexConstants.FLD_LOCATION_ID, record.getLocationId(), Field.Store.YES));
+		doc.add(new StoredField(IndexConstants.FLD_LOCATION_NAME, record.getLocationName()));
+		doc.add(new StoredField(IndexConstants.FLD_DATASET_NAME, record.getDatasetName()));
 		doc.add(new StringField(IndexConstants.FLD_EVENT_DATE, record.getEventDate(), Field.Store.YES));
 		doc.add(new SortedDocValuesField(IndexConstants.FLD_JOIN_KEY, new BytesRef(record.getJoinKey())));
 doc.add(new StoredField("join_dump", record.getJoinKey()));

@@ -13,16 +13,19 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import au.org.aekos.api.service.vocab.JenaVocabService;
-import au.org.aekos.api.service.vocab.JenaVocabServiceTest.JenaVocabServiceTest_Application;
+import au.org.aekos.api.service.vocab.JenaVocabServiceTest.JenaVocabServiceTestContext;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes=JenaVocabServiceTest_Application.class)
+@ContextConfiguration(classes=JenaVocabServiceTestContext.class)
+@ActiveProfiles({"test", "force-only-JenaVocabServiceTest"})
 public class JenaVocabServiceTest {
 
 	@Autowired
@@ -58,7 +61,8 @@ public class JenaVocabServiceTest {
 	@Configuration
 	@ComponentScan(basePackages="au.org.aekos.api.service.vocab")
 	@PropertySource("classpath:/au/org/aekos/api/vocabService-test.properties")
-	public static class JenaVocabServiceTest_Application {
+	@Profile("force-only-JenaVocabServiceTest")
+	static class JenaVocabServiceTestContext {
 
 		@Value("${aekos-api.owl-file.location}")
 		private String owlFileLocation;

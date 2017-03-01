@@ -75,7 +75,7 @@ public class LuceneIndexingService implements IndexingService {
 	private long lastCheckpoint;
 	private long checkpointSize = 10000;
 	private Model helperModel;
-	private final Map<String, String> citationRecords = new HashMap<>();
+	private final Map<String, SurveyDetails> citationRecords = new HashMap<>();
 	
 	@Override
 	public String doIndexing() throws IOException {
@@ -112,7 +112,8 @@ public class LuceneIndexingService implements IndexingService {
 				try {
 					String samplingProtocol = currSolution.getLiteral("samplingProtocol").getString();
 					String bibliographicCitation = currSolution.getLiteral("bibliographicCitation").getString();
-					citationRecords.put(samplingProtocol, bibliographicCitation);
+					String datasetName = currSolution.getLiteral("datasetName").getString();
+					citationRecords.put(samplingProtocol, new SurveyDetails(bibliographicCitation, datasetName));
 					processedCitationRecords++;
 				} catch (NullPointerException e) {
 					Iterable<String> iterable = () -> currSolution.varNames();
@@ -123,6 +124,35 @@ public class LuceneIndexingService implements IndexingService {
 		}
 		long elapsed = (now() - start) / 1000;
 		logger.info(String.format("Processed %d citation records in %d seconds", processedCitationRecords, elapsed));
+	}
+	
+	static class SurveyDetails {
+		private final String bibliographicCitation;
+		private final String datasetName;
+		
+		public SurveyDetails(String bibliographicCitation, String datasetName) {
+			this.bibliographicCitation = bibliographicCitation;
+			this.datasetName = datasetName;
+		}
+
+		public String getBibliographicCitation() {
+			return bibliographicCitation;
+		}
+
+		public String getDatasetName() {
+			return datasetName;
+		}
+
+		public void validate(String samplingProtocol) {
+			if (bibliographicCitation == null) {
+				String template = "Data problem: couldn't find a citation for the sampling protocol '%s'";
+				throw new RuntimeException(String.format(template, samplingProtocol));
+			}
+			if (datasetName == null) {
+				String template = "Data problem: couldn't find a dataset name for the sampling protocol '%s'";
+				throw new RuntimeException(String.format(template, samplingProtocol));
+			}
+		}
 	}
 
 	interface IndexLoaderCallback {
@@ -197,6 +227,7 @@ public class LuceneIndexingService implements IndexingService {
 		String speciesName = getString(dwcResource, "scientificName");
 		String samplingProtocol = getString(dwcResource, "samplingProtocol");
 		String locationId = getString(dwcResource, "locationID");
+		String locationName = getString(dwcResource, "locationName");
 		String eventDate = getString(dwcResource, "eventDate");
 		Set<Trait> traits = dwcResource.listProperties(prop("trait")).toList().stream()
 			.map(new Function<Statement, Trait>() {
@@ -210,12 +241,10 @@ public class LuceneIndexingService implements IndexingService {
 				}
 			})
 			.collect(Collectors.toSet());
-		String bibliographicCitation = citationRecords.get(samplingProtocol);
-		if (bibliographicCitation == null) {
-			String template = "Data problem: couldn't find a citation for the sampling protocol '%s'";
-			throw new RuntimeException(String.format(template, samplingProtocol));
-		}
-		callback.accept(new SpeciesLoaderRecord(speciesName, traits, samplingProtocol, bibliographicCitation, locationId, eventDate));
+		SurveyDetails surveyDetails = citationRecords.get(samplingProtocol);
+		surveyDetails.validate(samplingProtocol);
+		callback.accept(new SpeciesLoaderRecord(speciesName, traits, samplingProtocol, surveyDetails.getBibliographicCitation(),
+				locationId, eventDate, locationName, surveyDetails.getDatasetName()));
 	}
 
 	private enum RecordType {

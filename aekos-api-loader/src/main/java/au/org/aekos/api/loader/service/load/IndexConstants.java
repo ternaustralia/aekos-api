@@ -28,4 +28,6 @@ public class IndexConstants {
 	public static final String FLD_LOCATION_ID = "location_id";
 	public static final String FLD_EVENT_DATE = "event_date";
 	public static final String FLD_JOIN_KEY = "jk";
+	public static final String FLD_LOCATION_NAME = "loc_name";
+	public static final String FLD_DATASET_NAME = "ds_name";
 }

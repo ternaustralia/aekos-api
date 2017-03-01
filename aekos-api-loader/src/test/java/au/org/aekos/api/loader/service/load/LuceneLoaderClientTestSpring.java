@@ -54,7 +54,8 @@ public class LuceneLoaderClientTestSpring {
 		traits.add(new Trait("happiness", "100", "utils"));
 		traits.add(new Trait("averageHeight", "1.3", "metres"));
 		traits.add(new Trait("lifeForm", "Forb", ""));
-		SpeciesLoaderRecord record = new SpeciesLoaderRecord("species1", traits, "not important", "not important", "not important", "not important");
+		SpeciesLoaderRecord record = new SpeciesLoaderRecord("species1", traits, "not important", "not important",
+				"not important", "not important", "not important", "not important");
 		objectUnderTest.beginLoad();
 		objectUnderTest.addSpeciesRecord(record);
 		objectUnderTest.endLoad();

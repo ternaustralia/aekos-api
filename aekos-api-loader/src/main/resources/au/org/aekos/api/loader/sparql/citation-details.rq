@@ -1,7 +1,7 @@
 PREFIX aekos: <http://www.aekos.org.au/ontology/1.0.0#>
 
 # Finds all surveys to extract citation information
-SELECT ?samplingProtocol ?bibliographicCitation
+SELECT ?samplingProtocol ?bibliographicCitation ?datasetName
 WHERE {
   GRAPH ?g {
     ?ssg a ?ssgType .
@@ -20,9 +20,11 @@ WHERE {
       aekos:AUSPLOTSSURVEYSUBGRAPH
       aekos:NATTSURVEYSUBGRAPH
     }
-    # dataset ID
+    # sampling protocol
     ?ssg aekos:aekossurveyidentifier ?samplingProtocol .
     # citation
     ?ssg aekos:metadata/aekos:rights/aekos:citation/aekos:formattedcitationtext ?bibliographicCitation .
+    # survey ID
+    ?ssg aekos:surveyidentifiertext ?datasetName .
   }
 }

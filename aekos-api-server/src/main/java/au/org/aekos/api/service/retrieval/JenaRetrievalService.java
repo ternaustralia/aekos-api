@@ -25,7 +25,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.jena.query.Dataset;
@@ -202,58 +201,6 @@ public class JenaRetrievalService implements RetrievalService {
 			return RetrievalResponseHeader.newInstance(jsonResponse);
 		} catch (IOException e) {
 			throw new AekosApiRetrievalException("Failed to write to the supplied writer: " + respWriter.getClass(), e);
-		}
-	}
-	
-	@Override
-	public void getIndexStream(IndexLoaderCallback callback) {
-		String sparql = indexLoaderQuery;
-		logger.debug("Index loader SPARQL: " + sparql);
-		Query query = QueryFactory.create(sparql);
-		try (QueryExecution qexec = QueryExecutionFactory.create(query, ds)) {
-			ResultSet results = qexec.execSelect();
-			if (!results.hasNext()) {
-				throw new IllegalStateException("Data problem: no results were found. "
-						+ "Do you have Darwin Core and environmental variable records loaded?");
-			}
-			for (; results.hasNext();) {
-				QuerySolution s = results.next();
-				String speciesName = getString(s, "speciesName");
-				// env
-				DummyEnvironmentDataRecord envRecord = new DummyEnvironmentDataRecord();
-				for (Property currVarProp : Arrays.asList(prop(DISTURBANCE_EVIDENCE_VARS), prop(LANDSCAPE_VARS), prop(NO_UNITS_VARS), prop(SOIL_VARS))) {
-					processEnvDataVars(Collections.emptyList(), s.get("loc").asResource(), envRecord, currVarProp);
-				}
-				// traits
-				DummyTraitDataRecord traitRecord = new DummyTraitDataRecord();
-				processTraitDataVars(s.get("dwr").asResource(), traitRecord, TRAIT_PROP, Collections.emptyList());
-				Set<String> traitNames = traitRecord.getTraits().stream()
-						.map(e -> e.getName())
-						.collect(Collectors.toSet());
-				Set<String> envVarNames = envRecord.getVariables().stream()
-						.map(e -> e.getName())
-						.collect(Collectors.toSet());
-				// result
-				callback.accept(new IndexLoaderRecord(speciesName, traitNames, envVarNames));
-			}
-		}
-	}
-	
-	/**
-	 * Acts as a dumb container to hold environmental variables so we can index them
-	 */
-	private class DummyEnvironmentDataRecord extends EnvironmentDataRecord {
-		public DummyEnvironmentDataRecord() {
-			super(0, 0, "", "", "", 0, 0, "", "");
-		}
-	}
-	
-	/**
-	 * Acts as a dumb container to hold traits so we can index them
-	 */
-	private class DummyTraitDataRecord extends TraitDataRecord {
-		public DummyTraitDataRecord() {
-			super(0, 0, "", "", "", 0, "", 0, 0, "", "");
 		}
 	}
 	

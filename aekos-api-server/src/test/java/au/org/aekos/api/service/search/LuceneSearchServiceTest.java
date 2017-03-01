@@ -269,7 +269,7 @@ public class LuceneSearchServiceTest {
     
     private SpeciesLoaderRecord speciesRecordWithJoinKey(String speciesName, String locationId, String eventDate) {
 		return new SpeciesLoaderRecord(speciesName, Collections.emptySet(), "not important",
-				"not important", locationId, eventDate);
+				"not important", locationId, eventDate, "not important", "not important");
 	}
     
     private SpeciesLoaderRecord speciesRecordWithTraits(String speciesName, String...traitNames) {
@@ -278,7 +278,7 @@ public class LuceneSearchServiceTest {
 			traits.add(new Trait(curr, "not important", "not important"));
 		}
 		return new SpeciesLoaderRecord(speciesName, traits, "not important", "not important",
-				"not important", "not important");
+				"not important", "not important", "not important", "not important");
 	}
     
     interface LoaderCallback {

@@ -45,7 +45,7 @@ public class ApiV1SearchController {
 		notes = "Gets a distinct list of all the traits that appear in the system. The code and label are "
 				+ "supplied for each trait. The codes are required to use as parameters for other resources "
 				+ "and the label information is useful for creating UIs.")
-    public List<TraitOrEnvironmentalVariableVocabEntry> getTraitVocab(HttpServletResponse resp) {
+    public List<TraitOrEnvironmentalVariableVocabEntry> getTraitVocab() {
 		return searchService.getTraitVocabData();
 	}
 
@@ -54,7 +54,7 @@ public class ApiV1SearchController {
 			notes = "Gets a distinct list of all the environmental variables that appear in the system. The code and label are "
 					+ "supplied for each variable. The codes are required to use as parameters for other resources "
 					+ "and the label information is useful for creating UIs.")
-    public List<TraitOrEnvironmentalVariableVocabEntry> getEnvironmentalVariableVocab(HttpServletResponse resp) {
+    public List<TraitOrEnvironmentalVariableVocabEntry> getEnvironmentalVariableVocab() {
 		return searchService.getEnvironmentalVariableVocabData();
 	}
 	

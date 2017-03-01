@@ -10,9 +10,7 @@
 	
 	<context:property-placeholder location="classpath:/au/org/aekos/api/retrievalContext-test.properties" />
 	
-	<context:component-scan base-package="au.org.aekos.api.service.retrieval">
-		<context:exclude-filter type="assignable" expression="au.org.aekos.api.service.retrieval.JossDataProvisionService"/>
-	</context:component-scan>
+	<context:component-scan base-package="au.org.aekos.api.service.retrieval" />
 	
 	<bean id="darwinCoreQueryTemplate" class="java.lang.String">
 	    <constructor-arg>

@@ -68,7 +68,8 @@ public class LuceneLoaderClientTest {
 				traits.add(new Trait("basalArea", "100", "utils"));
 				traits.add(new Trait("averageHeight", "1.3", "metres"));
 				traits.add(new Trait("lifeForm", "Forb", ""));
-				SpeciesLoaderRecord record = new SpeciesLoaderRecord("species1", traits, "sampling protocol #1", "use it for whatever", "loc1", "2012-12-30");
+				SpeciesLoaderRecord record = new SpeciesLoaderRecord("species1", traits, "sampling protocol #1", "use it for whatever",
+						"aekos.org.au/collection/loc1", "2012-12-30", "loc1", "Some Dataset");
 				objectUnderTest.addSpeciesRecord(record);
 			}
 		},new DoSearchCallback() {
@@ -85,7 +86,9 @@ public class LuceneLoaderClientTest {
 				assertThat(resultTraits.length, is(3));
 				assertThat(Arrays.asList(resultTraits), hasItems("basalArea","averageHeight","lifeForm"));
 				assertThat(LuceneLoaderClient.getTraitsFrom(result).size(), is(3));
-				assertThat(result.get(IndexConstants.FLD_LOCATION_ID), is("loc1"));
+				assertThat(result.get(IndexConstants.FLD_LOCATION_ID), is("aekos.org.au/collection/loc1"));
+				assertThat(result.get(IndexConstants.FLD_LOCATION_NAME), is("loc1"));
+				assertThat(result.get(IndexConstants.FLD_DATASET_NAME), is("Some Dataset"));
 				assertThat(result.get(IndexConstants.FLD_EVENT_DATE), is("2012-12-30"));
 			}
 		});
@@ -133,12 +136,12 @@ public class LuceneLoaderClientTest {
 						new HashSet<>(Arrays.asList(
 								new Trait("basalArea", "100", "utils"), 
 								new Trait("averageHeight", "1.3", "metres"))),
-						"not important", "not important", "not important", "not important"));
+						"not important", "not important", "not important", "not important", "not important", "not important"));
 				objectUnderTest.addSpeciesRecord(new SpeciesLoaderRecord("species2", 
 						new HashSet<>(Arrays.asList(
 								new Trait("lifeForm", "Forb", ""), 
 								new Trait("averageHeight", "0.2", "metres"))),
-						"not important", "not important", "not important", "not important"));
+						"not important", "not important", "not important", "not important", "not important", "not important"));
 			}
 		}, new DoSearchCallback() {
 			@Override
@@ -164,12 +167,12 @@ public class LuceneLoaderClientTest {
 						new HashSet<>(Arrays.asList(
 								new Trait("basalArea", "100", "utils"), 
 								new Trait("averageHeight", "1.3", "metres"))),
-						"not important", "not important", "not important", "not important"));
+						"not important", "not important", "not important", "not important", "not important", "not important"));
 				objectUnderTest.addSpeciesRecord(new SpeciesLoaderRecord("species2", 
 						new HashSet<>(Arrays.asList(
 								new Trait("lifeForm", "Forb", ""), 
 								new Trait("averageHeight", "0.2", "metres"))),
-						"not important", "not important", "not important", "not important"));
+						"not important", "not important", "not important", "not important", "not important", "not important"));
 			}
 		}, new DoSearchCallback() {
 			@Override

@@ -14,9 +14,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -53,6 +55,7 @@ import au.org.aekos.api.loader.service.index.RAMDirectoryTermIndexManager;
 import au.org.aekos.api.loader.service.index.TermIndexManager;
 import au.org.aekos.api.loader.service.index.Trait;
 import au.org.aekos.api.loader.service.load.LuceneIndexingService.IndexLoaderCallback;
+import au.org.aekos.api.loader.service.load.LuceneIndexingService.SurveyDetails;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes=LuceneIndexingServiceTestContext.class)
@@ -73,7 +76,7 @@ public class LuceneIndexingServiceTestSpring {
 		assertDocTypeCount("Should have processed the 2 VISITVIEWs", IndexConstants.DocTypes.ENV_RECORD, 2);
 		assertDocTypeCount("Should have processed the 5 SPECIESORGANISMGROUPs", IndexConstants.DocTypes.SPECIES_RECORD, 5);
 		assertThat(result, startsWith("Processed 5 records"));
-		assertTotalRecordCountIs(11);
+		assertTotalRecordCountIs(7);
 		// FIXME do we need to test the taxonRemarks field too?
 		assertSpeciesHasTraits("Dampiera lavandulacea Lindl.",
 			unitsTrait("averageHeight", "0.2", "metres"),
@@ -116,6 +119,22 @@ public class LuceneIndexingServiceTestSpring {
 		IndexLoaderCallback callback = mock(IndexLoaderCallback.class);
 		objectUnderTest.getSpeciesIndexStream(callback);
 		verify(callback, times(5)).accept(any());
+	}
+	
+	/**
+	 * Can we collect the citation details?
+	 */
+	@Test
+	@SuppressWarnings("unchecked")
+	public void testCollectCitationDetails01() throws Throwable {
+		Field f = LuceneIndexingService.class.getDeclaredField("citationRecords");
+		f.setAccessible(true);
+		objectUnderTest.collectCitationDetails();
+		Map<String, SurveyDetails> citationRecords = (Map<String, SurveyDetails>) f.get(objectUnderTest);
+		assertThat(citationRecords.size(), is(1));
+		SurveyDetails theRecord = citationRecords.get("aekos.org.au/collection/wa.gov.au/ravensthorpe");
+		assertThat(theRecord.getBibliographicCitation(), startsWith("Department of Parks and Wildlife"));
+		assertThat(theRecord.getDatasetName(), is("Biological Survey of the Ravensthorpe Range (Phase 1)"));
 	}
 
 	private void assertDocTypeCount(String reason, String recordTypeCode, int expectedCount) throws IOException {

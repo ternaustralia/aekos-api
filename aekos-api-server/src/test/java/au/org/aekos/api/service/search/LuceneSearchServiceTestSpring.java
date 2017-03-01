@@ -24,7 +24,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -33,10 +35,12 @@ import au.org.aekos.api.loader.service.index.TermIndexManager;
 import au.org.aekos.api.loader.service.load.LoaderClient;
 import au.org.aekos.api.loader.service.load.SpeciesLoaderRecord;
 import au.org.aekos.api.model.SpeciesSummary;
+import au.org.aekos.api.service.search.LuceneSearchServiceTestSpring.LuceneSearchServiceTestSpringContext;
 import au.org.aekos.api.service.vocab.VocabService;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes=LuceneSearchServiceTestSpringContext.class)
+@ActiveProfiles({"test", "force-only-LuceneSearchServiceTestSpring"})
 public class LuceneSearchServiceTestSpring {
 	
 	@Autowired
@@ -111,49 +115,49 @@ public class LuceneSearchServiceTestSpring {
 			String line = null;
 			loader.beginLoad();
 			while ((line = reader.readLine()) != null) {
-				SpeciesLoaderRecord minimalRecord = new SpeciesLoaderRecord(line, Collections.emptySet(), "", "", "", "");
+				SpeciesLoaderRecord minimalRecord = new SpeciesLoaderRecord(line, Collections.emptySet(), "", "", "", "", "", "");
 				loader.addSpeciesRecord(minimalRecord);
 			}
 			loader.endLoad();
 		}
 	}
-}
-
-@Configuration
-@ComponentScan(
-	basePackages={
-		"au.org.aekos.api.service.search",
-		"au.org.aekos.api.loader.service.index",
-		"au.org.aekos.api.loader.service.load"})
-class LuceneSearchServiceTestSpringContext {
 	
-	@Bean
-	public TermIndexManager /*override the bean from the component scan*/FSDirectoryTermIndexManager() {
-		return new RAMDirectoryTermIndexManager();
+	@Configuration
+	@ComponentScan(
+			basePackages={
+				"au.org.aekos.api.service.search",
+				"au.org.aekos.api.loader.service.index",
+				"au.org.aekos.api.loader.service.load"})
+	@Profile("force-only-LuceneSearchServiceTestSpring")
+	static class LuceneSearchServiceTestSpringContext {
+		
+		@Bean
+		public TermIndexManager /*override the bean from the component scan*/FSDirectoryTermIndexManager() {
+			return new RAMDirectoryTermIndexManager();
+		}
+		
+		@Bean
+		public VocabService vocabService() {
+			return new StubVocabService();
+		}
+		
+		@Bean
+		public Dataset coreDS() {
+			return DatasetFactory.create();
+		}
+		
+		@Bean
+		public static PropertySourcesPlaceholderConfigurer propertyPlaceholderConfigurer() throws IOException {
+			PropertySourcesPlaceholderConfigurer result = new PropertySourcesPlaceholderConfigurer();
+			Properties properties = new Properties();
+			properties.setProperty("lucene.index.writer.commitLimit", "1000");
+			properties.setProperty("lucene.page.defaultResutsPerPage", "200");
+			result.setProperties(properties);
+			return result;
+		}
+		
+		@Bean public String darwinCoreAndTraitsQuery() { return ""; }
+		@Bean public String citationDetailsQuery() { return ""; }
+		@Bean public String environmentalVariablesQuery() { return ""; }
 	}
-	
-	@Bean
-	public VocabService vocabService() {
-		return new StubVocabService();
-	}
-	
-	@Bean
-	public Dataset coreDS() {
-		return DatasetFactory.create();
-	}
-	
-	
-	@Bean
-	public static PropertySourcesPlaceholderConfigurer propertyPlaceholderConfigurer() throws IOException {
-	    PropertySourcesPlaceholderConfigurer result = new PropertySourcesPlaceholderConfigurer();
-	    Properties properties = new Properties();
-	    properties.setProperty("lucene.index.writer.commitLimit", "1000");
-	    properties.setProperty("lucene.page.defaultResutsPerPage", "200");
-		result.setProperties(properties);
-		return result;
-	}
-	
-	@Bean public String darwinCoreAndTraitsQuery() { return ""; }
-	@Bean public String citationDetailsQuery() { return ""; }
-	@Bean public String environmentalVariablesQuery() { return ""; }
 }

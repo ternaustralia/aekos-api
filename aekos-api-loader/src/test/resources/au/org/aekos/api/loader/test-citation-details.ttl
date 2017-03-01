@@ -4,7 +4,8 @@
 test:SURVEYSUBGRAPH-T1485140988693
         a                       :SURVEYSUBGRAPH ;
         :aekossurveyidentifier  "aekos.org.au/collection/wa.gov.au/ravensthorpe" ;
-        :metadata               test:METADATAOBJECT-T1485141523067 .
+        :metadata               test:METADATAOBJECT-T1485141523067 ;
+        :surveyidentifiertext   "Biological Survey of the Ravensthorpe Range (Phase 1)" .
 
 test:METADATAOBJECT-T1485141523067
         a                  :METADATAOBJECT ;
