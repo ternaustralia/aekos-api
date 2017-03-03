@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import au.org.aekos.api.Constants;
 import au.org.aekos.api.model.EnvironmentDataResponse;
 import au.org.aekos.api.service.retrieval.AekosApiRetrievalException;
 import au.org.aekos.api.service.retrieval.RetrievalService;
@@ -36,7 +37,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 @Api(description=RETRIEVAL_BY_SPECIES_DESC, produces=MediaType.APPLICATION_JSON_VALUE, tags=DATA_RETRIEVAL_BY_SPECIES_TAG)
 @RestController
-@RequestMapping("/v1")
+@RequestMapping(path=Constants.V1_0, method=RequestMethod.GET)
 public class ApiV1EnvVarRetrievalController {
 
 	private static final String SITE_FRAGMENT = "site/study location/plot visits";
@@ -48,7 +49,7 @@ public class ApiV1EnvVarRetrievalController {
 	@Autowired
 	private RetrievalService retrievalService;
 	
-    @RequestMapping(path="/environmentData.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(path="/environmentData.json", produces=MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get environmental variable data in JSON format",
     		notes = "Gets environmental variable data records for the " + SITE_FRAGMENT + " that the supplied species "
     				+ "name(s) appear at in JSON format." + ENVVAR_FILTERING_FRAGMENT + NO_VARS_NOTE_FRAGMENT)
@@ -64,7 +65,7 @@ public class ApiV1EnvVarRetrievalController {
     	return result;
 	}
     
-    @RequestMapping(path="/environmentData", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(path="/environmentData", produces=MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get environmental variable data",
 			notes = "Gets environmental variable data records for the " + SITE_FRAGMENT + " that the supplied species "
 					+ "name(s) appear at " + CONTENT_NEGOTIATION_FRAGMENT + ENVVAR_FILTERING_FRAGMENT + NO_VARS_NOTE_FRAGMENT
@@ -79,7 +80,7 @@ public class ApiV1EnvVarRetrievalController {
     	return environmentDataDotJson(speciesNames, envVarNames, start, rows, req, resp);
 	}
     
-    @RequestMapping(path="/environmentData.csv", method=RequestMethod.GET, produces=TEXT_CSV_MIME)
+    @RequestMapping(path="/environmentData.csv", produces=TEXT_CSV_MIME)
     @ApiOperation(value = "Get environmental variable data in CSV format",
     		notes = "Gets environmental variable data records for the " + SITE_FRAGMENT + " that the supplied species "
     				+ "name(s) appear at in CSV format." + ENVVAR_FILTERING_FRAGMENT + NO_VARS_NOTE_FRAGMENT)
@@ -95,7 +96,7 @@ public class ApiV1EnvVarRetrievalController {
 		resp.addHeader(HttpHeaders.LINK, buildHateoasLinkHeader(UriComponentsBuilder.fromHttpUrl(extractFullUrl(req)), header));
 	}
     
-    @RequestMapping(path="/environmentData", method=RequestMethod.GET, produces=TEXT_CSV_MIME, headers="Accept="+TEXT_CSV_MIME)
+    @RequestMapping(path="/environmentData", produces=TEXT_CSV_MIME, headers="Accept="+TEXT_CSV_MIME)
     // Not defining another @ApiOperation as it won't generate the expected swagger doco. Remove @ApiIgnore when fixed
     // See https://github.com/springfox/springfox/issues/1367 for more info about when this is coming.
     @ApiIgnore

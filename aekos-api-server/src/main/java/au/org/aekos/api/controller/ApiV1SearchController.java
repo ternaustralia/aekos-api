@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import au.org.aekos.api.Constants;
 import au.org.aekos.api.model.SpeciesName;
 import au.org.aekos.api.model.SpeciesSummary;
 import au.org.aekos.api.model.TraitOrEnvironmentalVariableVocabEntry;
@@ -28,7 +29,7 @@ import io.swagger.annotations.ApiParam;
 
 @Api(description="Find species, traits and environmental variables", produces=MediaType.APPLICATION_JSON_VALUE, tags="Search")
 @RestController
-@RequestMapping(path="/v1", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(path=Constants.V1_0, method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 public class ApiV1SearchController {
 
 	// TODO do we accept LSID/species ID and/or a species name for the species related services?

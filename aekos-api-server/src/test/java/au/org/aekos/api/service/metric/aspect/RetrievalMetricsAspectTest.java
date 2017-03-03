@@ -51,14 +51,14 @@ import au.org.aekos.api.model.EnvironmentDataParams;
 import au.org.aekos.api.model.EnvironmentDataResponse;
 import au.org.aekos.api.model.ResponseHeader;
 import au.org.aekos.api.model.SpeciesDataParams;
-import au.org.aekos.api.model.SpeciesDataResponse;
+import au.org.aekos.api.model.SpeciesDataResponseV1_0;
 import au.org.aekos.api.model.TraitDataParams;
 import au.org.aekos.api.model.TraitDataResponse;
 import au.org.aekos.api.service.metric.MetricsQueueItem;
 import au.org.aekos.api.service.metric.MetricsQueueWorker;
 import au.org.aekos.api.service.metric.MetricsStorageService;
 import au.org.aekos.api.service.metric.RequestRecorder.RequestType;
-import au.org.aekos.api.service.metric.aspect.ApiMetricsAspectTest.ApiMetricsAspectTestContext;
+import au.org.aekos.api.service.metric.aspect.RetrievalMetricsAspectTest.RetrievalMetricsAspectTestContext;
 import au.org.aekos.api.service.retrieval.AekosApiRetrievalException;
 import au.org.aekos.api.service.retrieval.RetrievalService;
 import au.org.aekos.api.service.search.SearchService;
@@ -67,10 +67,10 @@ import au.org.aekos.api.service.search.SearchService;
  * Testing the pointcuts and that the correct stats are recorded for successful calls.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes=ApiMetricsAspectTestContext.class)
+@ContextConfiguration(classes=RetrievalMetricsAspectTestContext.class)
 @WebAppConfiguration
-@ActiveProfiles({"test", "force-only-ApiMetricsAspectTest"})
-public class ApiMetricsAspectTest {
+@ActiveProfiles({"test", "force-only-RetrievalMetricsAspectTest"})
+public class RetrievalMetricsAspectTest {
 
 	private static final String TEXT_CSV_MIME = "text/csv";
 	
@@ -85,113 +85,6 @@ public class ApiMetricsAspectTest {
 	@Before
 	public void setup() {
 		this.mockMvc = webAppContextSetup(this.wac).build();
-	}
-	
-	/**
-	 * Does the getTraitVocab.json call work?
-	 */
-	@Test
-	public void testGetTraitVocabJson01() throws Exception {
-		mockMvc.perform(get("/v1/getTraitVocab.json"))
-	        .andExpect(status().isOk());
-		assertThat(metricsInnerQueue.size(), is(1));
-		MetricsStorageService metricsStore = mock(MetricsStorageService.class);
-		metricsInnerQueue.remove().doPersist(metricsStore);
-		verify(metricsStore).recordRequest(any(), eq(RequestType.V1_TRAIT_VOCAB));
-	}
-	
-	/**
-	 * Does the getEnvironmentalVariableVocab.json call work?
-	 */
-	@Test
-	public void testGetEnvironmentalVariableVocabJson01() throws Exception {
-		mockMvc.perform(get("/v1/getEnvironmentalVariableVocab.json"))
-	        .andExpect(status().isOk());
-		assertThat(metricsInnerQueue.size(), is(1));
-		MetricsStorageService metricsStore = mock(MetricsStorageService.class);
-		metricsInnerQueue.remove().doPersist(metricsStore);
-		verify(metricsStore).recordRequest(any(), eq(RequestType.V1_ENVVAR_VOCAB));
-	}
-	
-	/**
-	 * Does the speciesAutocomplete.json call work?
-	 */
-	@Test
-	public void testSpeciesAutocompleteJson01() throws Exception {
-		URIBuilder uriBuilder = new URIBuilder("/v1/speciesAutocomplete.json");
-		uriBuilder.addParameter("q", "t");
-		mockMvc.perform(get(uriBuilder.build()))
-	        .andExpect(status().isOk());
-		assertThat(metricsInnerQueue.size(), is(1));
-		MetricsStorageService metricsStore = mock(MetricsStorageService.class);
-		metricsInnerQueue.remove().doPersist(metricsStore);
-		verify(metricsStore).recordRequestAutocomplete(any(), eq(RequestType.V1_SPECIES_AUTOCOMPLETE), eq("t"));
-	}
-	
-	/**
-	 * Does the getTraitsBySpecies.json call work?
-	 */
-	@Test
-	public void testGetTraitsBySpeciesJson01() throws Exception {
-		URIBuilder uriBuilder = new URIBuilder("/v1/getTraitsBySpecies.json");
-		uriBuilder.addParameter("speciesName", "Tachyglossus aculeatus");
-		uriBuilder.addParameter("pageNum", "1");
-		uriBuilder.addParameter("pageSize", "15");
-		mockMvc.perform(get(uriBuilder.build()))
-	        .andExpect(status().isOk());
-		assertThat(metricsInnerQueue.size(), is(1));
-		MetricsStorageService metricsStore = mock(MetricsStorageService.class);
-		metricsInnerQueue.remove().doPersist(metricsStore);
-		verify(metricsStore).recordRequestWithSpecies(any(), eq(RequestType.V1_TRAIT_BY_SPECIES), eq(new String[] {"Tachyglossus+aculeatus"}), eq(1), eq(15));
-	}
-	
-	/**
-	 * Does the getSpeciesByTrait.json call work?
-	 */
-	@Test
-	public void testGetSpeciesByTraitJson01() throws Exception {
-		URIBuilder uriBuilder = new URIBuilder("/v1/getSpeciesByTrait.json");
-		uriBuilder.addParameter("traitName", "averageHeight");
-		uriBuilder.addParameter("pageNum", "1");
-		uriBuilder.addParameter("pageSize", "15");
-		mockMvc.perform(get(uriBuilder.build()))
-	        .andExpect(status().isOk());
-		assertThat(metricsInnerQueue.size(), is(1));
-		MetricsStorageService metricsStore = mock(MetricsStorageService.class);
-		metricsInnerQueue.remove().doPersist(metricsStore);
-		verify(metricsStore).recordRequestWithTraitsOrEnvVars(any(), eq(RequestType.V1_SPECIES_BY_TRAIT), eq(new String[] {"averageHeight"}), eq(1), eq(15));
-	}
-	
-	/**
-	 * Does the getEnvironmentBySpecies.json call work?
-	 */
-	@Test
-	public void testGetEnvironmentBySpeciesJson01() throws Exception {
-		URIBuilder uriBuilder = new URIBuilder("/v1/getEnvironmentBySpecies.json");
-		uriBuilder.addParameter("speciesName", "Tachyglossus aculeatus");
-		uriBuilder.addParameter("pageNum", "1");
-		uriBuilder.addParameter("pageSize", "15");
-		mockMvc.perform(get(uriBuilder.build()))
-	        .andExpect(status().isOk());
-		assertThat(metricsInnerQueue.size(), is(1));
-		MetricsStorageService metricsStore = mock(MetricsStorageService.class);
-		metricsInnerQueue.remove().doPersist(metricsStore);
-		verify(metricsStore).recordRequestWithSpecies(any(), eq(RequestType.V1_ENVIRONMENT_BY_SPECIES), eq(new String[] {"Tachyglossus+aculeatus"}), eq(1), eq(15));
-	}
-	
-	/**
-	 * Does the speciesSummary.json call work?
-	 */
-	@Test
-	public void testGetSpeciesSummaryJson01() throws Exception {
-		URIBuilder uriBuilder = new URIBuilder("/v1/speciesSummary.json");
-		uriBuilder.addParameter("speciesName", "Tachyglossus aculeatus");
-		mockMvc.perform(get(uriBuilder.build()))
-	        .andExpect(status().isOk());
-		assertThat(metricsInnerQueue.size(), is(1));
-		MetricsStorageService metricsStore = mock(MetricsStorageService.class);
-		metricsInnerQueue.remove().doPersist(metricsStore);
-		verify(metricsStore).recordRequest(any(), eq(RequestType.V1_SPECIES_SUMMARY), eq(new String[] {"Tachyglossus+aculeatus"}));
 	}
 	
 	/**
@@ -526,8 +419,8 @@ public class ApiMetricsAspectTest {
 			@Filter(type=FilterType.ASSIGNABLE_TYPE, classes=ApiV1MaintenanceController.class)
 		})
 	@EnableAspectJAutoProxy(proxyTargetClass=true)
-	@Profile("force-only-ApiMetricsAspectTest")
-	static class ApiMetricsAspectTestContext {
+	@Profile("force-only-RetrievalMetricsAspectTest")
+	static class RetrievalMetricsAspectTestContext {
 		
 		@Bean
 		public Dataset metricsDS() {
@@ -561,9 +454,9 @@ public class ApiMetricsAspectTest {
 
 		private void addAllSpeciesStubs(RetrievalService result) throws AekosApiRetrievalException {
 			AbstractParams params = new SpeciesDataParams(0, 20, Collections.emptyList());
-			SpeciesDataResponse response = new SpeciesDataResponse(new ResponseHeader(123, 1, 7, 42, params), Collections.emptyList());
-			when(result.getAllSpeciesDataJson(anyInt(), anyInt())).thenReturn(response);
-			when(result.getAllSpeciesDataCsv(anyInt(), anyInt(), any())).thenReturn(RetrievalResponseHeader.newInstance(response));
+			SpeciesDataResponseV1_0 response = new SpeciesDataResponseV1_0(new ResponseHeader(123, 1, 7, 42, params), Collections.emptyList());
+			when(result.getAllSpeciesDataJsonV1_0(anyInt(), anyInt())).thenReturn(response);
+			when(result.getAllSpeciesDataCsvV1_0(anyInt(), anyInt(), any())).thenReturn(RetrievalResponseHeader.newInstance(response));
 		}
 
 		private void addEnvStubs(RetrievalService result) throws AekosApiRetrievalException {
@@ -582,9 +475,9 @@ public class ApiMetricsAspectTest {
 		
 		private void addSpeciesStubs(RetrievalService result) throws AekosApiRetrievalException {
 			AbstractParams params = new SpeciesDataParams(0, 20, Collections.emptyList());
-			SpeciesDataResponse response = new SpeciesDataResponse(new ResponseHeader(123, 1, 7, 42, params), Collections.emptyList());
-			when(result.getSpeciesDataJson(any(), anyInt(), anyInt())).thenReturn(response);
-			when(result.getSpeciesDataCsv(any(), anyInt(), anyInt(), any())).thenReturn(RetrievalResponseHeader.newInstance(response));
+			SpeciesDataResponseV1_0 response = new SpeciesDataResponseV1_0(new ResponseHeader(123, 1, 7, 42, params), Collections.emptyList());
+			when(result.getSpeciesDataJsonV1_0(any(), anyInt(), anyInt())).thenReturn(response);
+			when(result.getSpeciesDataCsvV1_0(any(), anyInt(), anyInt(), any())).thenReturn(RetrievalResponseHeader.newInstance(response));
 		}
 		
 		@Bean

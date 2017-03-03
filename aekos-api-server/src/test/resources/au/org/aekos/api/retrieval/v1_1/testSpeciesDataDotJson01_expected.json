@@ -1,0 +1,33 @@
+{
+  "responseHeader": {
+    "numFound": 1,
+    "pageNumber": 1,
+    "totalPages": 1,
+    "elapsedTime": 54,
+    "params": {
+      "start": 0,
+      "rows": 20,
+      "speciesNames": [
+        "Acacia aneura"
+      ]
+    }
+  },
+  "response": [
+    {
+      "decimalLatitude": -27.4046619945479,
+      "decimalLongitude": 120.681093054999,
+      "geodeticDatum": "GDA94",
+      "locationID": "aekos.org.au/collection/wa.gov.au/swatt/Wanjarri",
+      "scientificName": "Acacia aneura",
+      "individualCount": 1,
+      "eventDate": "2013-08-27",
+      "year": 2013,
+      "month": 8,
+      "bibliographicCitation": "TERN Australian Transect Network, Department of Parks and Wildlife, Western Australia (2013). South West Australian Transitional Transect (SWATT), Version 11/2014. Persistent Hyperlink: http://www.aekos.org.au/collection/wa.gov.au/swatt. &#198;KOS Data Portal, rights owned by The University of Adelaide, Adelaide, South Australia and the State of Western Australia (Department of Parks and Wildlife). Accessed [dd mmm yyyy, e.g. 01 Jan 2016].",
+      "samplingProtocol": "aekos.org.au/collection/wa.gov.au/swatt",
+      "taxonRemarks": null,
+      "locationName": "Wanjarri",
+      "datasetName": "Some Title"
+    }
+  ]
+}

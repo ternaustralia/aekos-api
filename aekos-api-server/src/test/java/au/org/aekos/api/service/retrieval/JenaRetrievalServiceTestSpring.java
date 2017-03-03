@@ -27,7 +27,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import au.org.aekos.api.model.EnvironmentDataRecord;
 import au.org.aekos.api.model.EnvironmentDataResponse;
 import au.org.aekos.api.model.ResponseHeader;
-import au.org.aekos.api.model.SpeciesDataResponse;
+import au.org.aekos.api.model.SpeciesDataResponseV1_0;
 import au.org.aekos.api.model.TraitDataRecord;
 import au.org.aekos.api.model.TraitDataResponse;
 import au.org.aekos.api.model.TraitOrEnvironmentalVariable;
@@ -68,8 +68,8 @@ public class JenaRetrievalServiceTestSpring {
 	 * Can we get all the records that are available for the specified species?
 	 */
 	@Test
-	public void testGetSpeciesDataJson01() throws Throwable {
-		SpeciesDataResponse result = objectUnderTest.getSpeciesDataJson(Arrays.asList("Calotis hispidula"), 0, 10);
+	public void testGetSpeciesDataJsonV1_0_01() throws Throwable {
+		SpeciesDataResponseV1_0 result = objectUnderTest.getSpeciesDataJsonV1_0(Arrays.asList("Calotis hispidula"), 0, 10);
 		assertThat(result.getResponse().size(), is(2));
 	}
 
@@ -77,8 +77,8 @@ public class JenaRetrievalServiceTestSpring {
 	 * Can we get all the records that are available for multiple species?
 	 */
 	@Test
-	public void testGetSpeciesDataJson02() throws Throwable {
-		SpeciesDataResponse result = objectUnderTest.getSpeciesDataJson(Arrays.asList("Calotis hispidula", "Goodenia havilandii"), 0, 10);
+	public void testGetSpeciesDataJsonV1_0_02() throws Throwable {
+		SpeciesDataResponseV1_0 result = objectUnderTest.getSpeciesDataJsonV1_0(Arrays.asList("Calotis hispidula", "Goodenia havilandii"), 0, 10);
 		assertThat(result.getResponse().size(), is(3));
 	}
 
@@ -86,9 +86,9 @@ public class JenaRetrievalServiceTestSpring {
 	 * Can we limit the records that we get for the specified species?
 	 */
 	@Test
-	public void testGetSpeciesDataJson03() throws Throwable {
+	public void testGetSpeciesDataJsonV1_0_03() throws Throwable {
 		int onlyOne = 1;
-		SpeciesDataResponse result = objectUnderTest.getSpeciesDataJson(Arrays.asList("Calotis hispidula"), 0, onlyOne);
+		SpeciesDataResponseV1_0 result = objectUnderTest.getSpeciesDataJsonV1_0(Arrays.asList("Calotis hispidula"), 0, onlyOne);
 		assertThat(result.getResponse().size(), is(1));
 		assertThat(result.getResponseHeader().getNumFound(), is(2));
 	}
@@ -97,8 +97,8 @@ public class JenaRetrievalServiceTestSpring {
 	 * Can we defend against a SPARQL injection attack?
 	 */
 	@Test
-	public void testGetSpeciesDataJson04() throws Throwable {
-		SpeciesDataResponse result = objectUnderTest.getSpeciesDataJson(Arrays.asList("\" UNDEF \""), 0, 1);
+	public void testGetSpeciesDataJsonV1_0_04() throws Throwable {
+		SpeciesDataResponseV1_0 result = objectUnderTest.getSpeciesDataJsonV1_0(Arrays.asList("\" UNDEF \""), 0, 1);
 		assertThat("should be nothing because no species match the escaped text", result.getResponse().size(), is(0));
 		assertThat(result.getResponseHeader().getNumFound(), is(0));
 	}
@@ -107,8 +107,8 @@ public class JenaRetrievalServiceTestSpring {
 	 * Can we get a species record that uses taxonRemarks rather than scientificName?
 	 */
 	@Test
-	public void testGetSpeciesDataJson05() throws Throwable {
-		SpeciesDataResponse result = objectUnderTest.getSpeciesDataJson(Arrays.asList("Hakea obtusa"), 0, 1);
+	public void testGetSpeciesDataJsonV1_0_05() throws Throwable {
+		SpeciesDataResponseV1_0 result = objectUnderTest.getSpeciesDataJsonV1_0(Arrays.asList("Hakea obtusa"), 0, 1);
 		assertThat(result.getResponse().size(), is(1));
 		assertThat(result.getResponse().get(0).getTaxonRemarks(), is("Hakea obtusa"));
 	}
@@ -118,7 +118,7 @@ public class JenaRetrievalServiceTestSpring {
 	 */
 	@Test
 	public void testGetAllSpeciesDataJson01() throws Throwable {
-		SpeciesDataResponse result = objectUnderTest.getAllSpeciesDataJson(0, 10);
+		SpeciesDataResponseV1_0 result = objectUnderTest.getAllSpeciesDataJsonV1_0(0, 10);
 		assertThat(result.getResponse().size(), is(8));
 	}
 	
@@ -128,7 +128,7 @@ public class JenaRetrievalServiceTestSpring {
 	@Test
 	public void testGetSpeciesDataCsv01() throws Throwable {
 		Writer writer = new StringWriter();
-		objectUnderTest.getSpeciesDataCsv(Arrays.asList("Calotis hispidula"), 0, 20, writer);
+		objectUnderTest.getSpeciesDataCsvV1_0(Arrays.asList("Calotis hispidula"), 0, 20, writer);
 		String compareStr = testGetSpeciesDataCsv01_expected;
 		if(SystemUtils.IS_OS_WINDOWS){
 			compareStr = testGetSpeciesDataCsv01_expected.replaceAll("\r", "");
@@ -142,7 +142,7 @@ public class JenaRetrievalServiceTestSpring {
 	@Test
 	public void testGetSpeciesDataCsv02() throws Throwable {
 		Writer writer = new StringWriter();
-		objectUnderTest.getSpeciesDataCsv(Arrays.asList("Calotis hispidula", "Goodenia havilandii"), 0, 20, writer);
+		objectUnderTest.getSpeciesDataCsvV1_0(Arrays.asList("Calotis hispidula", "Goodenia havilandii"), 0, 20, writer);
 		String compareStr = testGetSpeciesDataCsv02_expected;
 		if(SystemUtils.IS_OS_WINDOWS){
 			compareStr = testGetSpeciesDataCsv02_expected.replaceAll("\r", "");
@@ -157,7 +157,7 @@ public class JenaRetrievalServiceTestSpring {
 	public void testGetSpeciesDataCsv03() throws Throwable {
 		int onlyOne = 1;
 		Writer writer = new StringWriter();
-		objectUnderTest.getSpeciesDataCsv(Arrays.asList("Calotis hispidula"), 0, onlyOne, writer);
+		objectUnderTest.getSpeciesDataCsvV1_0(Arrays.asList("Calotis hispidula"), 0, onlyOne, writer);
 		String compareStr = testGetSpeciesDataCsv03_expected;
 		if(SystemUtils.IS_OS_WINDOWS){
 			compareStr = testGetSpeciesDataCsv03_expected.replaceAll("\r", "");
@@ -171,7 +171,7 @@ public class JenaRetrievalServiceTestSpring {
 	@Test
 	public void testGetAllSpeciesDataCsv01() throws Throwable {
 		Writer writer = new StringWriter();
-		objectUnderTest.getAllSpeciesDataCsv(0, 20, writer);
+		objectUnderTest.getAllSpeciesDataCsvV1_0(0, 20, writer);
 		String compareStr = testGetAllSpeciesDataCsv01_expected;
 		if(SystemUtils.IS_OS_WINDOWS){
 			compareStr = testGetAllSpeciesDataCsv01_expected.replaceAll("\r", "");

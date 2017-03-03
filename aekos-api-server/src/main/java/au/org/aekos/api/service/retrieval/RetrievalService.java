@@ -5,11 +5,33 @@ import java.util.List;
 
 import au.org.aekos.api.controller.RetrievalResponseHeader;
 import au.org.aekos.api.model.EnvironmentDataResponse;
-import au.org.aekos.api.model.SpeciesDataResponse;
+import au.org.aekos.api.model.SpeciesDataResponseV1_0;
+import au.org.aekos.api.model.SpeciesDataResponseV1_1;
 import au.org.aekos.api.model.TraitDataResponse;
 
 public interface RetrievalService {
 
+	/**
+	 * <b>Old version!</b> Retrieves JSON serialised Darwin Core compliant records for the specified species.
+	 * 
+	 * @param speciesNames	names of the species to retrieve data for
+	 * @param start			offset to start retrieving records
+	 * @param rows			number of rows to return (page size), 0 means all
+	 * @return				some metadata and specified number of requested records
+	 * @throws AekosApiRetrievalException	when something goes wrong
+	 */
+	SpeciesDataResponseV1_0 getSpeciesDataJsonV1_0(List<String> speciesNames, int start, int rows) throws AekosApiRetrievalException;
+
+	/**
+	 * <b>Old version!</b> Retrieves all records as JSON serialised Darwin Core compliant records.
+	 * 
+	 * @param start			offset to start retrieving records
+	 * @param rows			number of rows to return (page size), 0 means all
+	 * @return				some metadata and specified number of requested records
+	 * @throws AekosApiRetrievalException	when something goes wrong
+	 */
+	SpeciesDataResponseV1_0 getAllSpeciesDataJsonV1_0(int start, int rows);
+	
 	/**
 	 * Retrieves JSON serialised Darwin Core compliant records for the specified species.
 	 * 
@@ -19,7 +41,7 @@ public interface RetrievalService {
 	 * @return				some metadata and specified number of requested records
 	 * @throws AekosApiRetrievalException	when something goes wrong
 	 */
-	SpeciesDataResponse getSpeciesDataJson(List<String> speciesNames, int start, int rows) throws AekosApiRetrievalException;
+	SpeciesDataResponseV1_1 getSpeciesDataJsonV1_1(List<String> speciesNames, int start, int rows) throws AekosApiRetrievalException;
 
 	/**
 	 * Retrieves all records as JSON serialised Darwin Core compliant records.
@@ -29,7 +51,30 @@ public interface RetrievalService {
 	 * @return				some metadata and specified number of requested records
 	 * @throws AekosApiRetrievalException	when something goes wrong
 	 */
-	SpeciesDataResponse getAllSpeciesDataJson(int start, int rows);
+	SpeciesDataResponseV1_1 getAllSpeciesDataJsonV1_1(int start, int rows);
+	
+	/**
+	 * <b>Old version!</b> Retrieves CSV serialised Darwin Core compliant records for the specified species.
+	 * 
+	 * @param speciesNames	names of the species to retrieve data for
+	 * @param start			offset to start retrieving records
+	 * @param rows			number of rows to return (page size), 0 means all
+	 * @param respWriter 	writer to write records to
+	 * @return				metadata about the response (the data goes to the writer)
+	 * @throws AekosApiRetrievalException
+	 */
+	RetrievalResponseHeader getSpeciesDataCsvV1_0(List<String> speciesNames, int start, int rows, Writer respWriter) throws AekosApiRetrievalException;
+
+	/**
+	 * <b>Old version!</b> Retrieves all records as CSV serialised Darwin Core compliant records.
+	 * 
+	 * @param start			offset to start retrieving records
+	 * @param rows			number of rows to return (page size), 0 means all
+	 * @param respWriter 	writer to write records to
+	 * @return				metadata about the response (the data goes to the writer)
+	 * @throws AekosApiRetrievalException when something goes wrong
+	 */
+	RetrievalResponseHeader getAllSpeciesDataCsvV1_0(int start, int rows, Writer responseWriter) throws AekosApiRetrievalException;
 	
 	/**
 	 * Retrieves CSV serialised Darwin Core compliant records for the specified species.
@@ -41,7 +86,7 @@ public interface RetrievalService {
 	 * @return				metadata about the response (the data goes to the writer)
 	 * @throws AekosApiRetrievalException
 	 */
-	RetrievalResponseHeader getSpeciesDataCsv(List<String> speciesNames, int start, int rows, Writer respWriter) throws AekosApiRetrievalException;
+	RetrievalResponseHeader getSpeciesDataCsvV1_1(List<String> speciesNames, int start, int rows, Writer respWriter) throws AekosApiRetrievalException;
 
 	/**
 	 * Retrieves all records as CSV serialised Darwin Core compliant records.
@@ -52,13 +97,13 @@ public interface RetrievalService {
 	 * @return				metadata about the response (the data goes to the writer)
 	 * @throws AekosApiRetrievalException when something goes wrong
 	 */
-	RetrievalResponseHeader getAllSpeciesDataCsv(int start, int rows, Writer responseWriter) throws AekosApiRetrievalException;
+	RetrievalResponseHeader getAllSpeciesDataCsvV1_1(int start, int rows, Writer responseWriter) throws AekosApiRetrievalException;
 	
 	/**
 	 * Retrieves JSON serialised trait data for the specified species.
 	 * 
 	 * The traits can be filtered by supplying <code>traitNames</code>. The result data is
-	 * Darwin Core (as per {@link #getSpeciesDataJson(List, int, int)} plus trait data.
+	 * Darwin Core (as per {@link #getSpeciesDataJsonV1_0(List, int, int)} plus trait data.
 	 * 
 	 * @param speciesNames	names of the species to retrieve data for
 	 * @param traitNames	list of trait names to filter by or an empty list to get all traits

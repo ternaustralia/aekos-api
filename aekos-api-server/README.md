@@ -14,6 +14,10 @@ You can use the repository like this:
     cd aekos-api/aekos-api-server/
     ./run-server.sh
 
+You can change the port(s) that the server starts on with:
+
+    ./run-server.sh -Drun.arguments="--server.http.port=8081,--server.port=8444"
+
 Or, an alternate way if you like to run the steps yourself:
 
     git clone <this url>

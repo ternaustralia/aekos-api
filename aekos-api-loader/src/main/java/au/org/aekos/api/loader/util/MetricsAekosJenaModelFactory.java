@@ -4,11 +4,7 @@ import org.apache.jena.rdf.model.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
-import au.org.aekos.api.loader.util.AbstractAekosJenaModelFactory;
-
-@Service
 public class MetricsAekosJenaModelFactory extends AbstractAekosJenaModelFactory {
 
 	private static final Logger logger = LoggerFactory.getLogger(MetricsAekosJenaModelFactory.class);

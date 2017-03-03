@@ -47,8 +47,7 @@ import au.org.aekos.api.controller.RootController;
 import au.org.aekos.api.controller.SignupController;
 import au.org.aekos.api.service.metric.MetricsQueueItem;
 import au.org.aekos.api.service.metric.MetricsQueueWorker;
-import au.org.aekos.api.service.metric.aspect.ApiMetricsAspect;
-import au.org.aekos.api.service.metric.aspect.ApiMetricsAspectTest2.ApiMetricsAspectTest2Context;
+import au.org.aekos.api.service.metric.aspect.RetrievalMetricsAspectTest2.RetrievalMetricsAspectTest2Context;
 import au.org.aekos.api.service.retrieval.AekosApiRetrievalException;
 import au.org.aekos.api.service.retrieval.RetrievalService;
 import au.org.aekos.api.service.search.SearchService;
@@ -57,10 +56,10 @@ import au.org.aekos.api.service.search.SearchService;
  * Testing the pointcuts and that the correct stats are recorded for thrown exceptions.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes=ApiMetricsAspectTest2Context.class)
+@ContextConfiguration(classes=RetrievalMetricsAspectTest2Context.class)
 @WebAppConfiguration
-@ActiveProfiles({"test", "force-only-ApiMetricsAspectTest2"})
-public class ApiMetricsAspectTest2 {
+@ActiveProfiles({"test", "force-only-RetrievalMetricsAspectTest2"})
+public class RetrievalMetricsAspectTest2 {
 
 	private static final String TEXT_CSV_MIME = "text/csv";
 	
@@ -82,105 +81,7 @@ public class ApiMetricsAspectTest2 {
 		counterService.counts.clear();
 	}
 	
-	/**
-	 * Does the @AfterThrowing for the getTraitVocab.json call work?
-	 */
-	@Test
-	public void testGetTraitVocabJson01() throws Exception {
-		try {
-			mockMvc.perform(get("/v1/getTraitVocab.json"))
-			    .andExpect(status().isOk());
-		} catch (NestedServletException e) { /* swallow so we can check the pointcut worked */ }
-		assertThat(counterService.counts.get(ApiMetricsAspect.V1_GET_TRAIT_VOCAB_ERRORS_COUNTER.getFullName()), is(1));
-	}
-
-	/**
-	 * Does the @AfterThrowing for the getEnvironmentalVariableVocab.json call work?
-	 */
-	@Test
-	public void testGetEnvironmentalVariableVocabJson01() throws Exception {
-		try {
-			mockMvc.perform(get("/v1/getEnvironmentalVariableVocab.json"))
-			    .andExpect(status().isOk());
-		} catch (NestedServletException e) { /* swallow so we can check the pointcut worked */ }
-		assertThat(counterService.counts.get(ApiMetricsAspect.V1_GET_ENVIRONMENTAL_VARIABLE_VOCAB_ERRORS_COUNTER.getFullName()), is(1));
-	}
-
-	/**
-	 * Does the @AfterThrowing for the speciesAutocomplete.json call work?
-	 */
-	@Test
-	public void testSpeciesAutocompleteJson01() throws Exception {
-		URIBuilder uriBuilder = new URIBuilder("/v1/speciesAutocomplete.json");
-		uriBuilder.addParameter("q", "t");
-		try {
-			mockMvc.perform(get(uriBuilder.build()))
-			    .andExpect(status().isOk());
-		} catch (NestedServletException e) { /* swallow so we can check the pointcut worked */ }
-		assertThat(counterService.counts.get(ApiMetricsAspect.V1_SPECIES_AUTOCOMPLETE_ERRORS_COUNTER.getFullName()), is(1));
-	}
-
-	/**
-	 * Does the @AfterThrowing for the getTraitsBySpecies.json call work?
-	 */
-	@Test
-	public void testGetTraitsBySpeciesJson01() throws Exception {
-		URIBuilder uriBuilder = new URIBuilder("/v1/getTraitsBySpecies.json");
-		uriBuilder.addParameter("speciesName", "Tachyglossus aculeatus");
-		uriBuilder.addParameter("pageNum", "1");
-		uriBuilder.addParameter("pageSize", "15");
-		try {
-			mockMvc.perform(get(uriBuilder.build()))
-			    .andExpect(status().isOk());
-		} catch (NestedServletException e) { /* swallow so we can check the pointcut worked */ }
-		assertThat(counterService.counts.get(ApiMetricsAspect.V1_GET_TRAITS_BY_SPECIES_ERRORS_COUNTER.getFullName()), is(1));
-	}
-
-	/**
-	 * Does the @AfterThrowing for the getSpeciesByTrait.json call work?
-	 */
-	@Test
-	public void testGetSpeciesByTraitJson01() throws Exception {
-		URIBuilder uriBuilder = new URIBuilder("/v1/getSpeciesByTrait.json");
-		uriBuilder.addParameter("traitName", "averageHeight");
-		uriBuilder.addParameter("pageNum", "1");
-		uriBuilder.addParameter("pageSize", "15");
-		try {
-			mockMvc.perform(get(uriBuilder.build()))
-			    .andExpect(status().isOk());
-		} catch (NestedServletException e) { /* swallow so we can check the pointcut worked */ }
-		assertThat(counterService.counts.get(ApiMetricsAspect.V1_GET_SPECIES_BY_TRAIT_ERRORS_COUNTER.getFullName()), is(1));
-	}
-
-	/**
-	 * Does the @AfterThrowing for the getEnvironmentBySpecies.json call work?
-	 */
-	@Test
-	public void testGetEnvironmentBySpeciesJson01() throws Exception {
-		URIBuilder uriBuilder = new URIBuilder("/v1/getEnvironmentBySpecies.json");
-		uriBuilder.addParameter("speciesName", "Tachyglossus aculeatus");
-		uriBuilder.addParameter("pageNum", "1");
-		uriBuilder.addParameter("pageSize", "15");
-		try {
-			mockMvc.perform(get(uriBuilder.build()))
-			    .andExpect(status().isOk());
-		} catch (NestedServletException e) { /* swallow so we can check the pointcut worked */ }
-		assertThat(counterService.counts.get(ApiMetricsAspect.V1_GET_ENVIRONMENT_BY_SPECIES_ERRORS_COUNTER.getFullName()), is(1));
-	}
-
-	/**
-	 * Does the @AfterThrowing for the speciesSummary.json call work?
-	 */
-	@Test
-	public void testSpeciesSummaryJson01() throws Exception {
-		URIBuilder uriBuilder = new URIBuilder("/v1/speciesSummary.json");
-		uriBuilder.addParameter("speciesName", "Tachyglossus aculeatus");
-		try {
-			mockMvc.perform(get(uriBuilder.build()))
-			    .andExpect(status().isOk());
-		} catch (NestedServletException e) { /* swallow so we can check the pointcut worked */ }
-		assertThat(counterService.counts.get(ApiMetricsAspect.V1_SPECIES_SUMMARY_ERRORS_COUNTER.getFullName()), is(1));
-	}
+	// FIXME add v1.1 tests
 	
 	/**
 	 * Does the @AfterThrowing for the allSpeciesData.json call work?
@@ -194,7 +95,7 @@ public class ApiMetricsAspectTest2 {
 			mockMvc.perform(get(uriBuilder.build()))
 			    .andExpect(status().isOk());
 		} catch (NestedServletException e) { /* swallow so we can check the pointcut worked */ }
-		assertThat(counterService.counts.get(ApiMetricsAspect.V1_ALL_SPECIES_DATA_DOT_JSON_ERRORS_COUNTER.getFullName()), is(1));
+		assertThat(counterService.counts.get(RetrievalMetricsAspect.V1_ALL_SPECIES_DATA_DOT_JSON_ERRORS_COUNTER.getFullName()), is(1));
 	}
 	
 	/**
@@ -209,7 +110,7 @@ public class ApiMetricsAspectTest2 {
 			mockMvc.perform(get(uriBuilder.build()))
 			    .andExpect(status().isOk());
 		} catch (NestedServletException e) { /* swallow so we can check the pointcut worked */ }
-		assertThat(counterService.counts.get(ApiMetricsAspect.V1_ALL_SPECIES_DATA_DOT_CSV_ERRORS_COUNTER.getFullName()), is(1));
+		assertThat(counterService.counts.get(RetrievalMetricsAspect.V1_ALL_SPECIES_DATA_DOT_CSV_ERRORS_COUNTER.getFullName()), is(1));
 	}
 
 	/**
@@ -225,7 +126,7 @@ public class ApiMetricsAspectTest2 {
 					.header("Accept", MediaType.APPLICATION_JSON_VALUE))
 			    .andExpect(status().isOk());
 		} catch (NestedServletException e) { /* swallow so we can check the pointcut worked */ }
-		assertThat(counterService.counts.get(ApiMetricsAspect.V1_ALL_SPECIES_DATA_DOT_JSON_ERRORS_COUNTER.getFullName()), is(1));
+		assertThat(counterService.counts.get(RetrievalMetricsAspect.V1_ALL_SPECIES_DATA_DOT_JSON_ERRORS_COUNTER.getFullName()), is(1));
 	}
 
 	/**
@@ -241,7 +142,7 @@ public class ApiMetricsAspectTest2 {
 					.header("Accept", TEXT_CSV_MIME))
 			    .andExpect(status().isOk());
 		} catch (NestedServletException e) { /* swallow so we can check the pointcut worked */ }
-		assertThat(counterService.counts.get(ApiMetricsAspect.V1_ALL_SPECIES_DATA_DOT_CSV_ERRORS_COUNTER.getFullName()), is(1));
+		assertThat(counterService.counts.get(RetrievalMetricsAspect.V1_ALL_SPECIES_DATA_DOT_CSV_ERRORS_COUNTER.getFullName()), is(1));
 	}
 	
 	/**
@@ -257,7 +158,7 @@ public class ApiMetricsAspectTest2 {
 			mockMvc.perform(get(uriBuilder.build()))
 			    .andExpect(status().isOk());
 		} catch (NestedServletException e) { /* swallow so we can check the pointcut worked */ }
-		assertThat(counterService.counts.get(ApiMetricsAspect.V1_SPECIES_DATA_DOT_JSON_ERRORS_COUNTER.getFullName()), is(1));
+		assertThat(counterService.counts.get(RetrievalMetricsAspect.V1_SPECIES_DATA_DOT_JSON_ERRORS_COUNTER.getFullName()), is(1));
 	}
 	
 	/**
@@ -273,7 +174,7 @@ public class ApiMetricsAspectTest2 {
 			mockMvc.perform(get(uriBuilder.build()))
 			    .andExpect(status().isOk());
 		} catch (NestedServletException e) { /* swallow so we can check the pointcut worked */ }
-		assertThat(counterService.counts.get(ApiMetricsAspect.V1_SPECIES_DATA_DOT_CSV_ERRORS_COUNTER.getFullName()), is(1));
+		assertThat(counterService.counts.get(RetrievalMetricsAspect.V1_SPECIES_DATA_DOT_CSV_ERRORS_COUNTER.getFullName()), is(1));
 	}
 
 	/**
@@ -290,7 +191,7 @@ public class ApiMetricsAspectTest2 {
 					.header("Accept", MediaType.APPLICATION_JSON_VALUE))
 			    .andExpect(status().isOk());
 		} catch (NestedServletException e) { /* swallow so we can check the pointcut worked */ }
-		assertThat(counterService.counts.get(ApiMetricsAspect.V1_SPECIES_DATA_DOT_JSON_ERRORS_COUNTER.getFullName()), is(1));
+		assertThat(counterService.counts.get(RetrievalMetricsAspect.V1_SPECIES_DATA_DOT_JSON_ERRORS_COUNTER.getFullName()), is(1));
 	}
 
 	/**
@@ -307,7 +208,7 @@ public class ApiMetricsAspectTest2 {
 					.header("Accept", TEXT_CSV_MIME))
 			    .andExpect(status().isOk());
 		} catch (NestedServletException e) { /* swallow so we can check the pointcut worked */ }
-		assertThat(counterService.counts.get(ApiMetricsAspect.V1_SPECIES_DATA_DOT_CSV_ERRORS_COUNTER.getFullName()), is(1));
+		assertThat(counterService.counts.get(RetrievalMetricsAspect.V1_SPECIES_DATA_DOT_CSV_ERRORS_COUNTER.getFullName()), is(1));
 	}
 	
 	/**
@@ -324,7 +225,7 @@ public class ApiMetricsAspectTest2 {
 			mockMvc.perform(get(uriBuilder.build()))
 			    .andExpect(status().isOk());
 		} catch (NestedServletException e) { /* swallow so we can check the pointcut worked */ }
-		assertThat(counterService.counts.get(ApiMetricsAspect.V1_ENVIRONMENT_DATA_DOT_JSON_ERRORS_COUNTER.getFullName()), is(1));
+		assertThat(counterService.counts.get(RetrievalMetricsAspect.V1_ENVIRONMENT_DATA_DOT_JSON_ERRORS_COUNTER.getFullName()), is(1));
 	}
 	
 	/**
@@ -341,7 +242,7 @@ public class ApiMetricsAspectTest2 {
 			mockMvc.perform(get(uriBuilder.build()))
 			    .andExpect(status().isOk());
 		} catch (NestedServletException e) { /* swallow so we can check the pointcut worked */ }
-		assertThat(counterService.counts.get(ApiMetricsAspect.V1_ENVIRONMENT_DATA_DOT_CSV_ERRORS_COUNTER.getFullName()), is(1));
+		assertThat(counterService.counts.get(RetrievalMetricsAspect.V1_ENVIRONMENT_DATA_DOT_CSV_ERRORS_COUNTER.getFullName()), is(1));
 	}
 
 	/**
@@ -359,7 +260,7 @@ public class ApiMetricsAspectTest2 {
 					.header("Accept", MediaType.APPLICATION_JSON_VALUE))
 			    .andExpect(status().isOk());
 		} catch (NestedServletException e) { /* swallow so we can check the pointcut worked */ }
-		assertThat(counterService.counts.get(ApiMetricsAspect.V1_ENVIRONMENT_DATA_DOT_JSON_ERRORS_COUNTER.getFullName()), is(1));
+		assertThat(counterService.counts.get(RetrievalMetricsAspect.V1_ENVIRONMENT_DATA_DOT_JSON_ERRORS_COUNTER.getFullName()), is(1));
 	}
 
 	/**
@@ -377,7 +278,7 @@ public class ApiMetricsAspectTest2 {
 					.header("Accept", TEXT_CSV_MIME))
 			    .andExpect(status().isOk());
 		} catch (NestedServletException e) { /* swallow so we can check the pointcut worked */ }
-		assertThat(counterService.counts.get(ApiMetricsAspect.V1_ENVIRONMENT_DATA_DOT_CSV_ERRORS_COUNTER.getFullName()), is(1));
+		assertThat(counterService.counts.get(RetrievalMetricsAspect.V1_ENVIRONMENT_DATA_DOT_CSV_ERRORS_COUNTER.getFullName()), is(1));
 	}
 	
 	/**
@@ -394,7 +295,7 @@ public class ApiMetricsAspectTest2 {
 			mockMvc.perform(get(uriBuilder.build()))
 			    .andExpect(status().isOk());
 		} catch (NestedServletException e) { /* swallow so we can check the pointcut worked */ }
-		assertThat(counterService.counts.get(ApiMetricsAspect.V1_TRAIT_DATA_DOT_JSON_ERRORS_COUNTER.getFullName()), is(1));
+		assertThat(counterService.counts.get(RetrievalMetricsAspect.V1_TRAIT_DATA_DOT_JSON_ERRORS_COUNTER.getFullName()), is(1));
 	}
 	
 	/**
@@ -411,7 +312,7 @@ public class ApiMetricsAspectTest2 {
 			mockMvc.perform(get(uriBuilder.build()))
 			    .andExpect(status().isOk());
 		} catch (NestedServletException e) { /* swallow so we can check the pointcut worked */ }
-		assertThat(counterService.counts.get(ApiMetricsAspect.V1_TRAIT_DATA_DOT_CSV_ERRORS_COUNTER.getFullName()), is(1));
+		assertThat(counterService.counts.get(RetrievalMetricsAspect.V1_TRAIT_DATA_DOT_CSV_ERRORS_COUNTER.getFullName()), is(1));
 	}
 
 	/**
@@ -429,7 +330,7 @@ public class ApiMetricsAspectTest2 {
 					.header("Accept", MediaType.APPLICATION_JSON_VALUE))
 			    .andExpect(status().isOk());
 		} catch (NestedServletException e) { /* swallow so we can check the pointcut worked */ }
-		assertThat(counterService.counts.get(ApiMetricsAspect.V1_TRAIT_DATA_DOT_JSON_ERRORS_COUNTER.getFullName()), is(1));
+		assertThat(counterService.counts.get(RetrievalMetricsAspect.V1_TRAIT_DATA_DOT_JSON_ERRORS_COUNTER.getFullName()), is(1));
 	}
 
 	/**
@@ -447,7 +348,7 @@ public class ApiMetricsAspectTest2 {
 					.header("Accept", TEXT_CSV_MIME))
 			    .andExpect(status().isOk());
 		} catch (NestedServletException e) { /* swallow so we can check the pointcut worked */ }
-		assertThat(counterService.counts.get(ApiMetricsAspect.V1_TRAIT_DATA_DOT_CSV_ERRORS_COUNTER.getFullName()), is(1));
+		assertThat(counterService.counts.get(RetrievalMetricsAspect.V1_TRAIT_DATA_DOT_CSV_ERRORS_COUNTER.getFullName()), is(1));
 	}
 	
 	@Configuration
@@ -460,8 +361,8 @@ public class ApiMetricsAspectTest2 {
 			@Filter(type=FilterType.ASSIGNABLE_TYPE, classes=ApiV1MaintenanceController.class)
 		})
 	@EnableAspectJAutoProxy(proxyTargetClass=true)
-	@Profile("force-only-ApiMetricsAspectTest2")
-	static class ApiMetricsAspectTest2Context {
+	@Profile("force-only-RetrievalMetricsAspectTest2")
+	static class RetrievalMetricsAspectTest2Context {
 		
 		@Bean
 		public Dataset metricsDS() {
@@ -501,13 +402,13 @@ public class ApiMetricsAspectTest2 {
 		}
 		
 		private void addAllSpeciesStubs(RetrievalService result) throws AekosApiRetrievalException {
-			when(result.getAllSpeciesDataJson(anyInt(), anyInt())).thenThrow(new TriggerAfterThrowingPointcutException());
-			when(result.getAllSpeciesDataCsv(anyInt(), anyInt(), any())).thenThrow(new TriggerAfterThrowingPointcutException());
+			when(result.getAllSpeciesDataJsonV1_0(anyInt(), anyInt())).thenThrow(new TriggerAfterThrowingPointcutException());
+			when(result.getAllSpeciesDataCsvV1_0(anyInt(), anyInt(), any())).thenThrow(new TriggerAfterThrowingPointcutException());
 		}
 
 		private void addSpeciesStubs(RetrievalService result) throws AekosApiRetrievalException {
-			when(result.getSpeciesDataJson(any(), anyInt(), anyInt())).thenThrow(new TriggerAfterThrowingPointcutException());
-			when(result.getSpeciesDataCsv(any(), anyInt(), anyInt(), any())).thenThrow(new TriggerAfterThrowingPointcutException());
+			when(result.getSpeciesDataJsonV1_0(any(), anyInt(), anyInt())).thenThrow(new TriggerAfterThrowingPointcutException());
+			when(result.getSpeciesDataCsvV1_0(any(), anyInt(), anyInt(), any())).thenThrow(new TriggerAfterThrowingPointcutException());
 		}
 		
 		private void addEnvStubs(RetrievalService result) throws AekosApiRetrievalException {

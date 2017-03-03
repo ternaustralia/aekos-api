@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import au.org.aekos.api.Constants;
 import au.org.aekos.api.model.TraitOrEnvironmentalVariableVocabEntry;
 import au.org.aekos.api.service.auth.AuthStorageService;
 import au.org.aekos.api.service.auth.AuthStorageService.KeySummary;
@@ -27,7 +28,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 @ApiIgnore
 @RestController
-@RequestMapping("/v1")
+@RequestMapping(path=Constants.V1_0, method=RequestMethod.GET)
 public class ApiV1MaintenanceController {
 
 	private static final String TURTLE_MEDIA_TYPE = "text/turtle";
@@ -50,11 +51,8 @@ public class ApiV1MaintenanceController {
 	
 	@Value("${lucene.index.path}")
 	private String indexPath;
-	
-	@Value("${lucene.index.wpath}")
-	private String windowsIndexPath;
     
-	@RequestMapping(path="/doHealthCheck", method=RequestMethod.GET, produces=MediaType.TEXT_PLAIN_VALUE)
+	@RequestMapping(path="/doHealthCheck", produces=MediaType.TEXT_PLAIN_VALUE)
     @ApiIgnore
     public void doHealthCheck(@RequestParam String password,
     		HttpServletResponse resp, Writer responseWriter) {
@@ -65,7 +63,7 @@ public class ApiV1MaintenanceController {
     	checkEnvironmentalVariableVocabMapping(responseWriter);
     }
 
-	@RequestMapping(path="/getMetricsSummary", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(path="/getMetricsSummary", produces=MediaType.APPLICATION_JSON_VALUE)
 	@ApiIgnore
     public void getMetricsSummary(@RequestParam String password,
     		HttpServletResponse resp, Writer responseWriter) throws IOException {
@@ -82,7 +80,7 @@ public class ApiV1MaintenanceController {
 		}
 	}
 	
-	@RequestMapping(path="/getMetricsDump", method=RequestMethod.GET, produces=TURTLE_MEDIA_TYPE)
+	@RequestMapping(path="/getMetricsDump", produces=TURTLE_MEDIA_TYPE)
 	@ApiIgnore
     public void getMetricsDump(@RequestParam String password,
     		HttpServletResponse resp, Writer responseWriter) throws IOException {
@@ -93,7 +91,7 @@ public class ApiV1MaintenanceController {
 		metricsService.writeRdfDump(responseWriter);
 	}
 	
-	@RequestMapping(path="/getAuthSummary", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(path="/getAuthSummary", produces=MediaType.APPLICATION_JSON_VALUE)
 	@ApiIgnore
     public void getAuthSummary(@RequestParam String password,
     		HttpServletResponse resp, Writer responseWriter) throws IOException {

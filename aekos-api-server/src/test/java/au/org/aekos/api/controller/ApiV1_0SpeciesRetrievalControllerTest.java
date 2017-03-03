@@ -42,19 +42,19 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import au.org.aekos.api.controller.ApiV1SpeciesRetrievalControllerTest.ApiV1SpeciesRetrievalControllerTestContext;
+import au.org.aekos.api.controller.ApiV1_0SpeciesRetrievalControllerTest.ApiV1_0SpeciesRetrievalControllerTestContext;
 import au.org.aekos.api.model.ResponseHeader;
 import au.org.aekos.api.model.SpeciesDataParams;
-import au.org.aekos.api.model.SpeciesDataResponse;
-import au.org.aekos.api.model.SpeciesOccurrenceRecord;
+import au.org.aekos.api.model.SpeciesDataResponseV1_0;
+import au.org.aekos.api.model.SpeciesOccurrenceRecordV1_0;
 import au.org.aekos.api.service.retrieval.RetrievalService;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @EnableWebMvc
 @WebAppConfiguration
-@ContextConfiguration(classes=ApiV1SpeciesRetrievalControllerTestContext.class)
-@ActiveProfiles({"test", "force-only-ApiV1SpeciesRetrievalControllerTest"})
-public class ApiV1SpeciesRetrievalControllerTest {
+@ContextConfiguration(classes=ApiV1_0SpeciesRetrievalControllerTestContext.class)
+@ActiveProfiles({"test", "force-only-ApiV1_0SpeciesRetrievalControllerTest"})
+public class ApiV1_0SpeciesRetrievalControllerTest {
 	
 	@Autowired
 	private WebApplicationContext wac;
@@ -143,16 +143,16 @@ public class ApiV1SpeciesRetrievalControllerTest {
 					@Filter(type=FilterType.ASSIGNABLE_TYPE, classes=ApiV1SearchController.class),
 			},
 			excludeFilters={
-					@Filter(type=FilterType.REGEX, pattern="au.org.aekos.api.(?!controller.ApiV1SpeciesRetrieval).*"),	
+					@Filter(type=FilterType.REGEX, pattern="au.org.aekos.api.(?!controller.ApiV1_0SpeciesRetrieval).*"),	
 			})
-	@Profile("force-only-ApiV1SpeciesRetrievalControllerTest")
-	static class ApiV1SpeciesRetrievalControllerTestContext {
+	@Profile("force-only-ApiV1_0SpeciesRetrievalControllerTest")
+	static class ApiV1_0SpeciesRetrievalControllerTestContext {
 		@Bean
 		public RetrievalService retrievalService() throws Throwable {
 			RetrievalService result = mock(RetrievalService.class);
-			when(result.getSpeciesDataJson(Arrays.asList("Acacia aneura"), 0, 20)).thenReturn(
-					new SpeciesDataResponse(new ResponseHeader(1, 1, 1, 54, new SpeciesDataParams(0, 20, Arrays.asList("Acacia aneura"))),
-							Arrays.asList(new SpeciesOccurrenceRecord(-27.4046619945479d, 120.681093054999d, "GDA94",
+			when(result.getSpeciesDataJsonV1_0(Arrays.asList("Acacia aneura"), 0, 20)).thenReturn(
+					new SpeciesDataResponseV1_0(new ResponseHeader(1, 1, 1, 54, new SpeciesDataParams(0, 20, Arrays.asList("Acacia aneura"))),
+							Arrays.asList(new SpeciesOccurrenceRecordV1_0(-27.4046619945479d, 120.681093054999d, "GDA94",
 									"aekos.org.au/collection/wa.gov.au/swatt/Wanjarri", "Acacia aneura", 1, "2013-08-27", 2013, 8,
 									"TERN Australian Transect Network, Department of Parks and Wildlife, Western Australia (2013). South "
 									+ "West Australian Transitional Transect (SWATT), Version 11/2014. Persistent Hyperlink: "
@@ -160,7 +160,7 @@ public class ApiV1SpeciesRetrievalControllerTest {
 									+ "University of Adelaide, Adelaide, South Australia and the State of Western Australia (Department "
 									+ "of Parks and Wildlife). Accessed [dd mmm yyyy, e.g. 01 Jan 2016].",
 									"aekos.org.au/collection/wa.gov.au/swatt"))));
-			when(result.getSpeciesDataCsv(eq(Arrays.asList("Acacia aneura")), eq(0), eq(20), any(Writer.class))).then(getSpeciesDataCsvAnswer());
+			when(result.getSpeciesDataCsvV1_0(eq(Arrays.asList("Acacia aneura")), eq(0), eq(20), any(Writer.class))).then(getSpeciesDataCsvAnswer());
 			return result;
 		}
 		
@@ -169,8 +169,8 @@ public class ApiV1SpeciesRetrievalControllerTest {
 				@Override
 				public RetrievalResponseHeader answer(InvocationOnMock invocation) throws Throwable {
 					Writer w = invocation.getArgumentAt(3, Writer.class);
-					w.append(SpeciesOccurrenceRecord.getCsvHeader() + "\n");
-					CharSequence record = new SpeciesOccurrenceRecord(-27.4046619945479d, 120.681093054999d, "GDA94",
+					w.append(SpeciesOccurrenceRecordV1_0.getCsvHeader() + "\n");
+					CharSequence record = new SpeciesOccurrenceRecordV1_0(-27.4046619945479d, 120.681093054999d, "GDA94",
 							"aekos.org.au/collection/wa.gov.au/swatt/Wanjarri", "Acacia aneura", 1, "2013-08-27", 2013, 8,
 							"TERN Australian Transect Network, Department of Parks and Wildlife, Western Australia (2013). South "
 							+ "West Australian Transitional Transect (SWATT), Version 11/2014. Persistent Hyperlink: "
@@ -185,11 +185,11 @@ public class ApiV1SpeciesRetrievalControllerTest {
 			return result;
 		}
 
-		@Bean public String testSpeciesDataDotJson01_expected() throws IOException { return getJsonWithoutWhitespace("testSpeciesDataDotJson01_expected.json"); }
+		@Bean public String testSpeciesDataDotJson01_expected() throws IOException { return getJsonWithoutWhitespace("v1_0/testSpeciesDataDotJson01_expected.json"); }
 		@Bean public String testSpeciesDataJson01_expected(String testSpeciesDataDotJson01_expected) {
 			return testSpeciesDataDotJson01_expected;
 		}
-		@Bean public String testSpeciesDataDotCsv01_expected() throws IOException { return getFileVerbatim("testSpeciesDataDotCsv01_expected.csv"); }
+		@Bean public String testSpeciesDataDotCsv01_expected() throws IOException { return getFileVerbatim("v1_0/testSpeciesDataDotCsv01_expected.csv"); }
 		@Bean public String testSpeciesDataCsv01_expected(String testSpeciesDataDotCsv01_expected) {
 			return testSpeciesDataDotCsv01_expected;
 		}

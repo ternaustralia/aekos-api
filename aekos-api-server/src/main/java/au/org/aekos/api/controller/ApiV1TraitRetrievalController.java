@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import au.org.aekos.api.Constants;
 import au.org.aekos.api.model.TraitDataResponse;
 import au.org.aekos.api.service.retrieval.AekosApiRetrievalException;
 import au.org.aekos.api.service.retrieval.RetrievalService;
@@ -37,7 +38,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 @Api(description=RETRIEVAL_BY_SPECIES_DESC, produces=MediaType.APPLICATION_JSON_VALUE, tags=DATA_RETRIEVAL_BY_SPECIES_TAG)
 @RestController
-@RequestMapping("/v1")
+@RequestMapping(path=Constants.V1_0, method=RequestMethod.GET)
 public class ApiV1TraitRetrievalController {
 
 	private static final String TRAIT_FILTERING_FRAGMENT = " If you supply "
@@ -47,7 +48,7 @@ public class ApiV1TraitRetrievalController {
 	@Autowired
 	private RetrievalService retrievalService;
 	
-    @RequestMapping(path="/traitData.json", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(path="/traitData.json", produces=MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get trait data in JSON format",
 			notes = "Gets Darwin Core records with added trait information in JSON format." + TRAIT_FILTERING_FRAGMENT)
     public TraitDataResponse traitDataDotJson(
@@ -64,7 +65,7 @@ public class ApiV1TraitRetrievalController {
     	return result;
     }
 
-    @RequestMapping(path="/traitData", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(path="/traitData", produces=MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get trait data",
     		notes = "Gets Darwin Core records with added trait information for the supplied "
     				+ "species name(s)" + CONTENT_NEGOTIATION_FRAGMENT + TRAIT_FILTERING_FRAGMENT
@@ -79,7 +80,7 @@ public class ApiV1TraitRetrievalController {
 		return traitDataDotJson(speciesNames, traitNames, start, rows, req, resp);
 	}
     
-    @RequestMapping(path="/traitData.csv", method=RequestMethod.GET, produces=TEXT_CSV_MIME)
+    @RequestMapping(path="/traitData.csv", produces=TEXT_CSV_MIME)
     @ApiOperation(value = "Get trait data in CSV format",
     		notes = "Gets Darwin Core records with added trait information in CSV format." + TRAIT_FILTERING_FRAGMENT)
     public void traitDataDotCsv(
@@ -101,7 +102,7 @@ public class ApiV1TraitRetrievalController {
     	resp.addHeader(HttpHeaders.LINK, buildHateoasLinkHeader(UriComponentsBuilder.fromHttpUrl(fullReqUrl), header));
     }
     
-    @RequestMapping(path="/traitData", method=RequestMethod.GET, produces=TEXT_CSV_MIME, headers="Accept="+TEXT_CSV_MIME)
+    @RequestMapping(path="/traitData", produces=TEXT_CSV_MIME, headers="Accept="+TEXT_CSV_MIME)
     // Not defining another @ApiOperation as it won't generate the expected swagger doco. Remove @ApiIgnore when fixed
     // See https://github.com/springfox/springfox/issues/1367 for more info about when this is coming.
     @ApiIgnore

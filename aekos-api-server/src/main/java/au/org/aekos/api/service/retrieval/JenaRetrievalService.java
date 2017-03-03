@@ -52,15 +52,16 @@ import au.org.aekos.api.model.EnvironmentDataRecord;
 import au.org.aekos.api.model.EnvironmentDataResponse;
 import au.org.aekos.api.model.ResponseHeader;
 import au.org.aekos.api.model.SpeciesDataParams;
-import au.org.aekos.api.model.SpeciesDataResponse;
-import au.org.aekos.api.model.SpeciesOccurrenceRecord;
+import au.org.aekos.api.model.SpeciesDataResponseV1_0;
+import au.org.aekos.api.model.SpeciesDataResponseV1_1;
+import au.org.aekos.api.model.SpeciesOccurrenceRecordV1_0;
 import au.org.aekos.api.model.TraitDataParams;
 import au.org.aekos.api.model.TraitDataRecord;
 import au.org.aekos.api.model.TraitDataResponse;
 import au.org.aekos.api.model.TraitOrEnvironmentalVariable;
 import au.org.aekos.api.model.VisitInfo;
 
-@Service
+@Deprecated
 public class JenaRetrievalService implements RetrievalService {
 
 	private static final Logger logger = LoggerFactory.getLogger(JenaRetrievalService.class);
@@ -110,24 +111,36 @@ public class JenaRetrievalService implements RetrievalService {
 	private String indexLoaderQuery;
 	
 	@Override
-	public SpeciesDataResponse getSpeciesDataJson(List<String> speciesNames, int start, int rows) throws AekosApiRetrievalException {
+	public SpeciesDataResponseV1_0 getSpeciesDataJsonV1_0(List<String> speciesNames, int start, int rows) throws AekosApiRetrievalException {
 		return getSpeciesDataJsonPrivate(speciesNames, start, rows);
 	}
 
 	@Override
-	public SpeciesDataResponse getAllSpeciesDataJson(int start, int rows) {
+	public SpeciesDataResponseV1_0 getAllSpeciesDataJsonV1_0(int start, int rows) {
 		return getSpeciesDataJsonPrivate(ALL_SPECIES, start, rows);
 	}
 	
 	@Override
-	public RetrievalResponseHeader getSpeciesDataCsv(List<String> speciesNames, int start, int rows, Writer responseWriter) throws AekosApiRetrievalException {
-		SpeciesDataResponse jsonResponse = getSpeciesDataJsonPrivate(speciesNames, start, rows);
+	public SpeciesDataResponseV1_1 getSpeciesDataJsonV1_1(List<String> speciesNames, int start, int rows) throws AekosApiRetrievalException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public SpeciesDataResponseV1_1 getAllSpeciesDataJsonV1_1(int start, int rows) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public RetrievalResponseHeader getSpeciesDataCsvV1_0(List<String> speciesNames, int start, int rows, Writer responseWriter) throws AekosApiRetrievalException {
+		SpeciesDataResponseV1_0 jsonResponse = getSpeciesDataJsonPrivate(speciesNames, start, rows);
 		return transformToCsv(responseWriter, jsonResponse);
 	}
 
 	@Override
-	public RetrievalResponseHeader getAllSpeciesDataCsv(int start, int rows, Writer responseWriter) throws AekosApiRetrievalException {
-		SpeciesDataResponse jsonResponse = getSpeciesDataJsonPrivate(ALL_SPECIES, start, rows);
+	public RetrievalResponseHeader getAllSpeciesDataCsvV1_0(int start, int rows, Writer responseWriter) throws AekosApiRetrievalException {
+		SpeciesDataResponseV1_0 jsonResponse = getSpeciesDataJsonPrivate(ALL_SPECIES, start, rows);
 		return transformToCsv(responseWriter, jsonResponse);
 	}
 	
@@ -215,23 +228,23 @@ public class JenaRetrievalService implements RetrievalService {
 		return getTotalNumFoundForSpeciesData(ALL_SPECIES);
 	}
 	
-	private SpeciesDataResponse getSpeciesDataJsonPrivate(List<String> speciesNames, int start, int rows) {
+	private SpeciesDataResponseV1_0 getSpeciesDataJsonPrivate(List<String> speciesNames, int start, int rows) {
 		long startTime = new Date().getTime();
-		List<SpeciesOccurrenceRecord> records = new LinkedList<>();
+		List<SpeciesOccurrenceRecordV1_0> records = new LinkedList<>();
 		doDarwinCoreResultStream(speciesNames, start, rows, UrlEncodeSpaces.YES, new DarwinCoreResultStreamCallback() {
 			@Override
-			public void handleRecord(SpeciesOccurrenceRecord record) {
+			public void handleRecord(SpeciesOccurrenceRecordV1_0 record) {
 				records.add(record);
 			}
 		});
 		int numFound = getTotalNumFoundForSpeciesData(speciesNames);
 		AbstractParams params = new SpeciesDataParams(start, rows, speciesNames);
 		ResponseHeader responseHeader = ResponseHeader.newInstance(start, rows, numFound, startTime, params);
-		return new SpeciesDataResponse(responseHeader, records);
+		return new SpeciesDataResponseV1_0(responseHeader, records);
 	}
 
 	private interface DarwinCoreResultStreamCallback {
-		void handleRecord(SpeciesOccurrenceRecord record);
+		void handleRecord(SpeciesOccurrenceRecordV1_0 record);
 	}
 	
 	private void doDarwinCoreResultStream(List<String> speciesNames, int start, int rows, UrlEncodeSpaces encodeSpaces, DarwinCoreResultStreamCallback callback) {
@@ -244,19 +257,19 @@ public class JenaRetrievalService implements RetrievalService {
 			if (results.hasNext()) {
 				for (; results.hasNext();) {
 					QuerySolution s = results.next();
-					SpeciesOccurrenceRecord record = processSpeciesDataSolution(s, encodeSpaces);
+					SpeciesOccurrenceRecordV1_0 record = processSpeciesDataSolution(s, encodeSpaces);
 					callback.handleRecord(record);
 				}
 			}
 		}
 	}
 	
-	private RetrievalResponseHeader transformToCsv(Writer responseWriter, SpeciesDataResponse jsonResponse)
+	private RetrievalResponseHeader transformToCsv(Writer responseWriter, SpeciesDataResponseV1_0 jsonResponse)
 			throws AekosApiRetrievalException {
 		try {
-			responseWriter.write(SpeciesOccurrenceRecord.getCsvHeader() + "\n");
-			for (Iterator<SpeciesOccurrenceRecord> it = jsonResponse.getResponse().iterator();it.hasNext();) {
-				SpeciesOccurrenceRecord curr = it.next();
+			responseWriter.write(SpeciesOccurrenceRecordV1_0.getCsvHeader() + "\n");
+			for (Iterator<SpeciesOccurrenceRecordV1_0> it = jsonResponse.getResponse().iterator();it.hasNext();) {
+				SpeciesOccurrenceRecordV1_0 curr = it.next();
 				responseWriter.write(curr.toCsv());
 				if (it.hasNext()) {
 					responseWriter.write("\n");
@@ -277,16 +290,16 @@ public class JenaRetrievalService implements RetrievalService {
 		}
 	}
 	
-	private SpeciesOccurrenceRecord processSpeciesDataSolution(QuerySolution s, UrlEncodeSpaces encodeSpaces) {
+	private SpeciesOccurrenceRecordV1_0 processSpeciesDataSolution(QuerySolution s, UrlEncodeSpaces encodeSpaces) {
 		String locationID = encodeSpaces.areSpacesEncoded() ? replaceSpaces(getString(s, LOCATION_ID)) : getString(s, LOCATION_ID);
 		if (hasScientificName(s)) {
-			return new SpeciesOccurrenceRecord(getDouble(s, DECIMAL_LATITUDE),
+			return new SpeciesOccurrenceRecordV1_0(getDouble(s, DECIMAL_LATITUDE),
 				getDouble(s, DECIMAL_LONGITUDE), getString(s, GEODETIC_DATUM), locationID,
 				getString(s, SCIENTIFIC_NAME), getInt(s, INDIVIDUAL_COUNT), getString(s, EVENT_DATE),
 				getInt(s, YEAR), getInt(s, MONTH), getString(s, BIBLIOGRAPHIC_CITATION),
 				getString(s, SAMPLING_PROTOCOL));
 		}
-		return new SpeciesOccurrenceRecord(getDouble(s, DECIMAL_LATITUDE),
+		return new SpeciesOccurrenceRecordV1_0(getDouble(s, DECIMAL_LATITUDE),
 			getDouble(s, DECIMAL_LONGITUDE), getString(s, GEODETIC_DATUM), locationID,
 			getInt(s, INDIVIDUAL_COUNT), getString(s, EVENT_DATE),
 			getInt(s, YEAR), getInt(s, MONTH), getString(s, BIBLIOGRAPHIC_CITATION),
@@ -421,7 +434,7 @@ public class JenaRetrievalService implements RetrievalService {
 		VisitTracker result = new VisitTracker();
 		doDarwinCoreResultStream(speciesNames, 0, Integer.MAX_VALUE, UrlEncodeSpaces.NO, new DarwinCoreResultStreamCallback() {
 			@Override
-			public void handleRecord(SpeciesOccurrenceRecord currSpeciesRecord) {
+			public void handleRecord(SpeciesOccurrenceRecordV1_0 currSpeciesRecord) {
 				String locationID = currSpeciesRecord.getLocationID();
 				String eventDate = currSpeciesRecord.getEventDate();
 				VisitInfo item = result.getVisitInfoFor(locationID, eventDate);
@@ -602,5 +615,17 @@ public class JenaRetrievalService implements RetrievalService {
 		return sparqlParam
 				.replace("\\", sparqlEscapedBackslash)
 				.replace("\"", sparqlEscapedDoubleQuote);
+	}
+
+	@Override
+	public RetrievalResponseHeader getSpeciesDataCsvV1_1(List<String> speciesNames, int start, int rows, Writer respWriter) throws AekosApiRetrievalException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public RetrievalResponseHeader getAllSpeciesDataCsvV1_1(int start, int rows, Writer responseWriter) throws AekosApiRetrievalException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

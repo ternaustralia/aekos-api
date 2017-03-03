@@ -1,6 +1,6 @@
 package au.org.aekos.api.model;
 
-public class SpeciesOccurrenceRecord {
+public class SpeciesOccurrenceRecordV1_0 {
 
 	static final String CSV_SEPARATOR = ",";
 	private final double decimalLatitude;
@@ -19,7 +19,7 @@ public class SpeciesOccurrenceRecord {
 	/**
 	 * Construct a record with a scientificName
 	 */
-	public SpeciesOccurrenceRecord(double decimalLatitude, double decimalLongitude, String geodeticDatum, String locationID,
+	public SpeciesOccurrenceRecordV1_0(double decimalLatitude, double decimalLongitude, String geodeticDatum, String locationID,
 			String scientificName, int individualCount, String eventDate, int year, int month, String bibliographicCitation,
 			String samplingProtocol) {
 		this.decimalLatitude = decimalLatitude;
@@ -39,7 +39,7 @@ public class SpeciesOccurrenceRecord {
 	/**
 	 * Construct a record with taxonRemarks
 	 */
-	public SpeciesOccurrenceRecord(double decimalLatitude, double decimalLongitude, String geodeticDatum, String locationID,
+	public SpeciesOccurrenceRecordV1_0(double decimalLatitude, double decimalLongitude, String geodeticDatum, String locationID,
 			int individualCount, String eventDate, int year, int month, String bibliographicCitation, String samplingProtocol,
 			String taxonRemarks) {
 		this.decimalLatitude = decimalLatitude;

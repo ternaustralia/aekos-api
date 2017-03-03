@@ -87,10 +87,16 @@ public class Application extends SpringBootServletInitializer {
         return new WebMvcConfigurerAdapter() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/v1/**");
+                registry.addMapping(Constants.V1_0 + "/**");
+                registry.addMapping(Constants.V1_1 + "/**");
             }
         };
     }
+    
+    // These two factory beans should live in this project but doing so causes "AbstractMethodError: null"
+    // so the workaround is to move them to aekos-api-loader, remove @Service (otherwise the loader finds them) and do this...
+    @Bean public MetricsAekosJenaModelFactory metricsAekosJenaModelFactory() { return new MetricsAekosJenaModelFactory(); }
+    @Bean public AuthAekosJenaModelFactory authAekosJenaModelFactory() { return new AuthAekosJenaModelFactory(); }
     
     @Bean
     public Dataset coreDS(CoreDataAekosJenaModelFactory loader) {
@@ -182,7 +188,7 @@ public class Application extends SpringBootServletInitializer {
 		tomcat.addAdditionalTomcatConnectors(createHttpConnector());
 		return tomcat;
 	}
-
+	
 	private Connector createHttpConnector() {
 		Connector connector = new Connector("org.apache.coyote.http11.Http11NioProtocol");
 		connector.setScheme("http");

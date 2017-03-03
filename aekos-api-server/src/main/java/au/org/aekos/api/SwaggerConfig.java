@@ -42,7 +42,7 @@ public class SwaggerConfig {
 				.ignoredParameterTypes(Writer.class)
 				.select()
 				.apis(RequestHandlerSelectors.any())
-				.paths(PathSelectors.ant("/v1/*"))
+				.paths(PathSelectors.ant("/v*/*"))
 				.build()
 				.securitySchemes(newArrayList(apiKey()))
 		        .securityContexts(newArrayList(securityContext()));
@@ -55,7 +55,7 @@ public class SwaggerConfig {
 	private SecurityContext securityContext() {
 		return SecurityContext.builder()
 				.securityReferences(defaultAuth())
-				.forPaths(PathSelectors.regex("/v1.*"))
+				.forPaths(PathSelectors.regex("/v.*"))
 				.build();
 	}
 

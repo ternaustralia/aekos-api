@@ -1,5 +1,9 @@
 package au.org.aekos.api.service.metric.aspect;
 
+import static au.org.aekos.api.service.metric.aspect.MetricsAspectHelper.AEKOS_CONTROLLER_PACKAGE;
+import static au.org.aekos.api.service.metric.aspect.MetricsAspectHelper.errorsCounter;
+import static au.org.aekos.api.service.metric.aspect.MetricsAspectHelper.servicesCounter;
+
 import java.util.Arrays;
 
 import org.aspectj.lang.JoinPoint;
@@ -15,9 +19,9 @@ import org.springframework.stereotype.Component;
 
 import au.org.aekos.api.controller.ApiV1AllSpeciesRetrievalController;
 import au.org.aekos.api.controller.ApiV1EnvVarRetrievalController;
-import au.org.aekos.api.controller.ApiV1SearchController;
-import au.org.aekos.api.controller.ApiV1SpeciesRetrievalController;
 import au.org.aekos.api.controller.ApiV1TraitRetrievalController;
+import au.org.aekos.api.controller.ApiV1_0SpeciesRetrievalController;
+import au.org.aekos.api.controller.ApiV1_1SpeciesRetrievalController;
 import au.org.aekos.api.service.auth.AekosApiAuthKey;
 import au.org.aekos.api.service.auth.AekosApiAuthKey.InvalidKeyException;
 import au.org.aekos.api.service.metric.RequestRecorder;
@@ -25,16 +29,13 @@ import au.org.aekos.api.service.metric.RequestRecorder.RequestType;
 
 @Aspect
 @Component
-public class ApiMetricsAspect {
+public class RetrievalMetricsAspect {
 	
-	private static final Logger logger = LoggerFactory.getLogger(ApiMetricsAspect.class);
+	private static final Logger logger = LoggerFactory.getLogger(RetrievalMetricsAspect.class);
 	private static final String[] NO_DATA_FOR_THIS = new String[] {};
-	private static final String AEKOS_CONTROLLER_PACKAGE = "au.org.aekos.api.controller.";
-	private static final String V1_SEARCH_CONTROLLER_NAME = "ApiV1SearchController";
-	private static final String V1_SEARCH_CONTROLLER = AEKOS_CONTROLLER_PACKAGE + V1_SEARCH_CONTROLLER_NAME;
 	private static final String V1_ENV_VAR_RETRIEVAL_CONTROLLER_NAME = "ApiV1EnvVarRetrievalController";
 	private static final String V1_ENV_VAR_RETRIEVAL_CONTROLLER = AEKOS_CONTROLLER_PACKAGE + V1_ENV_VAR_RETRIEVAL_CONTROLLER_NAME;
-	private static final String V1_SPECIES_RETRIEVAL_CONTROLLER_NAME = "ApiV1SpeciesRetrievalController";
+	private static final String V1_SPECIES_RETRIEVAL_CONTROLLER_NAME = "ApiV1_0SpeciesRetrievalController";
 	private static final String V1_SPECIES_RETRIEVAL_CONTROLLER = AEKOS_CONTROLLER_PACKAGE + V1_SPECIES_RETRIEVAL_CONTROLLER_NAME;
 	private static final String V1_TRAIT_RETRIEVAL_CONTROLLER_NAME = "ApiV1TraitRetrievalController";
 	private static final String V1_TRAIT_RETRIEVAL_CONTROLLER = AEKOS_CONTROLLER_PACKAGE + V1_TRAIT_RETRIEVAL_CONTROLLER_NAME;
@@ -47,102 +48,8 @@ public class ApiMetricsAspect {
 	@Autowired
 	@Qualifier("metricsQueue")
 	private RequestRecorder metricsQueue;
-
-	private static final String GET_ENVIRONMENT_BY_SPECIES = "getEnvironmentBySpecies";
-	static final ErrorCounterName V1_GET_ENVIRONMENT_BY_SPECIES_ERRORS_COUNTER = v1SearchControllerErrors(GET_ENVIRONMENT_BY_SPECIES);
-
-	@AfterReturning(pointcut = "execution(* " + V1_SEARCH_CONTROLLER + "." + GET_ENVIRONMENT_BY_SPECIES + "(..))")
-    public void afterCallingGetEnvironmentBySpecies(JoinPoint joinPoint) {
-		recordCallWithSpeciesNamesAndSearchPaging(v1SearchControllerServices(GET_ENVIRONMENT_BY_SPECIES), RequestType.V1_ENVIRONMENT_BY_SPECIES, joinPoint);
-    }
-
-	@AfterThrowing(pointcut = "execution(* " + V1_SEARCH_CONTROLLER + "." + GET_ENVIRONMENT_BY_SPECIES + "(..))", throwing = "e")
-    public void afterGetEnvironmentBySpeciesThrowsException(Exception e) {
-        counterService.increment(V1_GET_ENVIRONMENT_BY_SPECIES_ERRORS_COUNTER.getFullName());
-    }
-    
-	private static final String GET_SPECIES_BY_TRAIT = "getSpeciesByTrait";
-	static final ErrorCounterName V1_GET_SPECIES_BY_TRAIT_ERRORS_COUNTER = v1SearchControllerErrors(GET_SPECIES_BY_TRAIT);
-
-    @AfterReturning(pointcut = "execution(* " + V1_SEARCH_CONTROLLER + "." + GET_SPECIES_BY_TRAIT + "(..))")
-    public void afterCallingGetSpeciesByTrait(JoinPoint joinPoint) {
-    	recordCallWithTraitsOrEnvVarsAndSearchPaging(v1SearchControllerServices(GET_SPECIES_BY_TRAIT), RequestType.V1_SPECIES_BY_TRAIT, joinPoint);
-    }
-
-	@AfterThrowing(pointcut = "execution(* " + V1_SEARCH_CONTROLLER + "." + GET_SPECIES_BY_TRAIT + "(..))", throwing = "e")
-    public void afterGetSpeciesByTraitThrowsException(Exception e) {
-        counterService.increment(V1_GET_SPECIES_BY_TRAIT_ERRORS_COUNTER.getFullName());
-    }
-
-	private static final String SPECIES_SUMMARY = "speciesSummary";
-	static final ErrorCounterName V1_SPECIES_SUMMARY_ERRORS_COUNTER = v1SearchControllerErrors(SPECIES_SUMMARY);
 	
-    @AfterReturning(pointcut = "execution(* " + V1_SEARCH_CONTROLLER + "." + SPECIES_SUMMARY + "(..))")
-    public void afterCallingGetSpeciesSummary(JoinPoint joinPoint) {
-    	recordCallWithSpecies(v1SearchControllerServices(SPECIES_SUMMARY), RequestType.V1_SPECIES_SUMMARY, joinPoint);
-    }
-
-	@AfterThrowing(pointcut = "execution(* " + V1_SEARCH_CONTROLLER + "." + SPECIES_SUMMARY + "(..))", throwing = "e")
-    public void afterGetSpeciesSummaryThrowsException(Exception e) {
-        counterService.increment(V1_SPECIES_SUMMARY_ERRORS_COUNTER.getFullName());
-    }
-    
-    private static final String GET_TRAITS_BY_SPECIES = "getTraitsBySpecies";
-	static final ErrorCounterName V1_GET_TRAITS_BY_SPECIES_ERRORS_COUNTER = v1SearchControllerErrors(GET_TRAITS_BY_SPECIES);
-    
-    @AfterReturning(pointcut = "execution(* " + V1_SEARCH_CONTROLLER + "." + GET_TRAITS_BY_SPECIES + "(..))")
-    public void afterCallingGetTraitsBySpecies(JoinPoint joinPoint) {
-    	recordCallWithSpeciesNamesAndSearchPaging(v1SearchControllerServices(GET_TRAITS_BY_SPECIES), RequestType.V1_TRAIT_BY_SPECIES, joinPoint);
-    }
-
-    @AfterThrowing(pointcut = "execution(* " + V1_SEARCH_CONTROLLER + "." + GET_TRAITS_BY_SPECIES + "(..))", throwing = "e")
-    public void afterGetTraitsBySpeciesThrowsException(Exception e) {
-        counterService.increment(V1_GET_TRAITS_BY_SPECIES_ERRORS_COUNTER.getFullName());
-    }
-
-    private static final String GET_TRAIT_VOCAB = "getTraitVocab";
-	static final ErrorCounterName V1_GET_TRAIT_VOCAB_ERRORS_COUNTER = v1SearchControllerErrors(GET_TRAIT_VOCAB);
-    
-    @AfterReturning(pointcut = "execution(* " + V1_SEARCH_CONTROLLER + "." + GET_TRAIT_VOCAB + "(..))")
-    public void afterCallingGetTraitVocab() {
-    	recordCallWithoutParams(v1SearchControllerServices(GET_TRAIT_VOCAB), RequestType.V1_TRAIT_VOCAB);
-    }
-
-    @AfterThrowing(pointcut = "execution(* " + V1_SEARCH_CONTROLLER + "." + GET_TRAIT_VOCAB + "(..))", throwing = "e")
-    public void afterGetTraitVocabThrowsException(Exception e) {
-        counterService.increment(V1_GET_TRAIT_VOCAB_ERRORS_COUNTER.getFullName());
-    }
-    
-    private static final String GET_ENVIRONMENTAL_VARIABLE_VOCAB = "getEnvironmentalVariableVocab";
-	static final ErrorCounterName V1_GET_ENVIRONMENTAL_VARIABLE_VOCAB_ERRORS_COUNTER = v1SearchControllerErrors(GET_ENVIRONMENTAL_VARIABLE_VOCAB);
-    
-    @AfterReturning(pointcut = "execution(* " + V1_SEARCH_CONTROLLER + "." + GET_ENVIRONMENTAL_VARIABLE_VOCAB + "(..))")
-    public void afterCallingGetEnvironmentalVariableVocab() {
-    	recordCallWithoutParams(v1SearchControllerServices(GET_ENVIRONMENTAL_VARIABLE_VOCAB), RequestType.V1_ENVVAR_VOCAB);
-    }
-
-	@AfterThrowing(pointcut = "execution(* " + V1_SEARCH_CONTROLLER + "." + GET_ENVIRONMENTAL_VARIABLE_VOCAB + "(..))", throwing = "e")
-    public void afterGetEnvironmentalVariableVocabThrowsException(Exception e) {
-        counterService.increment(V1_GET_ENVIRONMENTAL_VARIABLE_VOCAB_ERRORS_COUNTER.getFullName());
-    }
-
-    private static final String SPECIES_AUTOCOMPLETE = "speciesAutocomplete";
-	static final ErrorCounterName V1_SPECIES_AUTOCOMPLETE_ERRORS_COUNTER = v1SearchControllerErrors(SPECIES_AUTOCOMPLETE);
-    
-    @AfterReturning(pointcut = "execution(* " + V1_SEARCH_CONTROLLER + "." + SPECIES_AUTOCOMPLETE + "(..))")
-    public void afterCallingSpeciesAutocomplete(JoinPoint joinPoint) {
-    	ServicesCounterName counterName = v1SearchControllerServices(SPECIES_AUTOCOMPLETE);
-		counterService.increment(counterName.getFullName());
-    	String speciesFragment = (String) joinPoint.getArgs()[0];
-		logMethodCall(" *** " + counterName.getMethodName() + " called.. " + speciesFragment);
-		metricsQueue.recordRequestAutocomplete(apiAuthKey("TODO", counterName), RequestType.V1_SPECIES_AUTOCOMPLETE, speciesFragment);
-    }
-
-    @AfterThrowing(pointcut = "execution(* " + V1_SEARCH_CONTROLLER + "." + SPECIES_AUTOCOMPLETE + "(..))", throwing = "e")
-    public void afterSpeciesAutocompleteThrowsException(Exception e) {
-        counterService.increment(V1_SPECIES_AUTOCOMPLETE_ERRORS_COUNTER.getFullName());
-    }
-    
+	// FIXME add v1.1 coverage
     
     private static final String ENVIRONMENT_DATA_DOT_CSV = "environmentDataDotCsv";
 	private static final String ENVIRONMENT_DATA_CSV = "environmentDataCsv";
@@ -272,19 +179,6 @@ public class ApiMetricsAspect {
         counterService.increment(V1_TRAIT_DATA_DOT_JSON_ERRORS_COUNTER.getFullName());
     }
     
-	private void recordCallWithoutParams(ServicesCounterName counterName, RequestType reqType) {
-		counterService.increment(counterName.getFullName());
-		logMethodCall(" *** " + counterName.getMethodName() + " called..");
-		metricsQueue.recordRequest(apiAuthKey("TODO", counterName), reqType);
-	}
-	
-	private void recordCallWithSpecies(ServicesCounterName counterName, RequestType reqType, JoinPoint joinPoint) {
-		counterService.increment(counterName.getFullName());
-    	String[] speciesNames = (String[]) joinPoint.getArgs()[0];
-		logMethodCall(" *** " + counterName.getMethodName() + " called.. " + Arrays.toString(speciesNames));
-		metricsQueue.recordRequest(apiAuthKey("TODO", counterName), reqType, speciesNames);
-	}
-	
 	private void recordCallWithSpeciesNamesAndRetrievalPaging(ServicesCounterName counterName, RequestType reqType, JoinPoint joinPoint) {
         counterService.increment(counterName.getFullName());
     	String[] speciesNames = (String[]) joinPoint.getArgs()[0];
@@ -292,24 +186,6 @@ public class ApiMetricsAspect {
     	int rows = (int) joinPoint.getArgs()[2];
 		logMethodCall(" *** " + counterName.getMethodName() + " called.. " + Arrays.toString(speciesNames));
 		metricsQueue.recordRequest(apiAuthKey("TODO", counterName), reqType, speciesNames, NO_DATA_FOR_THIS, start, rows);
-	}
-	
-	private void recordCallWithSpeciesNamesAndSearchPaging(ServicesCounterName counterName, RequestType reqType, JoinPoint joinPoint) {
-		counterService.increment(counterName.getFullName());
-    	String[] speciesNames = (String[]) joinPoint.getArgs()[0];
-    	int pageNum = (int) joinPoint.getArgs()[1];
-    	int pageSize = (int) joinPoint.getArgs()[2];
-		logMethodCall(" *** " + counterName.getMethodName() + " called.. " + Arrays.toString(speciesNames));
-		metricsQueue.recordRequestWithSpecies(apiAuthKey("TODO", counterName), reqType, speciesNames, pageNum, pageSize);
-	}
-	
-	private void recordCallWithTraitsOrEnvVarsAndSearchPaging(ServicesCounterName counterName, RequestType reqType, JoinPoint joinPoint) {
-		counterService.increment(counterName.getFullName());
-    	String[] traitsOrEnvVars = (String[]) joinPoint.getArgs()[0];
-    	int pageNum = (int) joinPoint.getArgs()[1];
-    	int pageSize = (int) joinPoint.getArgs()[2];
-		logMethodCall(" *** " + counterName.getMethodName() + " called.. " + Arrays.toString(traitsOrEnvVars));
-		metricsQueue.recordRequestWithTraitsOrEnvVars(apiAuthKey("TODO", counterName), reqType, traitsOrEnvVars, pageNum, pageSize);
 	}
 	
 	private void recordCallWithSpeciesNamesAndTraitsOrEnvVarsAndPaging(ServicesCounterName counterName, RequestType reqType, JoinPoint joinPoint) {
@@ -344,14 +220,6 @@ public class ApiMetricsAspect {
     	metricsQueue.recordRequest(apiAuthKey("TODO", counterName), reqType, NO_DATA_FOR_THIS, NO_DATA_FOR_THIS, start, rows);
 	}
 	
-	private static ServicesCounterName v1SearchControllerServices(String methodName) {
-    	return servicesCounter(V1_SEARCH_CONTROLLER_NAME, methodName);
-    }
-    
-    private static ErrorCounterName v1SearchControllerErrors(String methodName) {
-		return errorsCounter(V1_SEARCH_CONTROLLER_NAME, methodName);
-	}
-	
     private static ServicesCounterName v1EnvVarRetrievalControllerServices(String methodName) {
     	return servicesCounter(V1_ENV_VAR_RETRIEVAL_CONTROLLER_NAME, methodName);
     }
@@ -384,14 +252,6 @@ public class ApiMetricsAspect {
     	return errorsCounter(V1_ALL_SPECIES_RETRIEVAL_CONTROLLER_NAME, methodName);
 	}
     
-    private static ErrorCounterName errorsCounter(String controllerName, String methodName) {
-    	return new ErrorCounterName(controllerName, methodName);
-    }
-    
-    private static ServicesCounterName servicesCounter(String controllerName, String methodName) {
-    	return new ServicesCounterName(controllerName, methodName);
-    }
-    
     private void logMethodCall(String msg) {
 		logger.debug(msg);
 	}
@@ -401,9 +261,9 @@ public class ApiMetricsAspect {
      */
     static {
     	ApiV1EnvVarRetrievalController.class.toString();
-		ApiV1SpeciesRetrievalController.class.toString();
+		ApiV1_0SpeciesRetrievalController.class.toString();
+		ApiV1_1SpeciesRetrievalController.class.toString();
 		ApiV1AllSpeciesRetrievalController.class.toString();
 		ApiV1TraitRetrievalController.class.toString();
-		ApiV1SearchController.class.toString();
 	}
 }

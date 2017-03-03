@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-public class TraitDataRecord extends SpeciesOccurrenceRecord {
+public class TraitDataRecord extends SpeciesOccurrenceRecordV1_0 {
 
     private final Collection<TraitOrEnvironmentalVariable> traits = new LinkedList<>();
 

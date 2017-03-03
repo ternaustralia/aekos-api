@@ -18,6 +18,7 @@ class ControllerHelper {
 	static final String DL_PARAM_MSG = "Makes the response trigger a downloadable file rather than streaming the response";
 	static final String DATA_RETRIEVAL_ALL_TAG = "Data Retrieval (everything)";
 	static final String DATA_RETRIEVAL_BY_SPECIES_TAG = "Data Retrieval by Species";
+	static final String DATA_RETRIEVAL_BY_SPECIES_ARCHIVED_TAG = "Data Retrieval by Species - Archived";
 	private static SimpleDateFormat SDF = new SimpleDateFormat("YYYYMMdd");
 	
 	private ControllerHelper() {}
