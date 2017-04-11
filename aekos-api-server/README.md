@@ -40,13 +40,13 @@ Documentation is automatically generated using Swagger. You will see a link to t
 ### Preparing SSL certificates (run every 90 days)
 We're using https://letsencrypt.org/ to generate SSL certificates. Here's how to (re)generate them.
  1. check https://certbot.eff.org/#ubuntuxenial-other for updated steps and update doco if required
- 1. SSH to the prod machine. You need to run `letsencrypt` from the machine that has the DNS record pointing to it
+ 1. SSH to the prod machine. We have to run `letsencrypt` from the machine that has the DNS record pointing to it
  1. make sure `letsencrypt` is installed with `$ sudo apt-get install letsencrypt` (on Ubuntu Xenial, might not work on earlier versions)
  1. stop the API server because we're going to use the standalone certbot server that needs to bind to the 443 port
- 1. generate a new certificate: `letsencrypt certonly --standalone -d api.aekos.org.au`. You could also just run `letsencrypt certonly` to do the process interactively.
+ 1. generate a new certificate: `letsencrypt certonly --standalone -d api.aekos.org.au`. You could also just run `letsencrypt certonly` to do the process interactively. You might have to `sudo` those commands.
  1. the log output will tell you where the certificates are written to. Copy the `fullchain.pem` and `privkey.pem` files to somewhere the current user can read (like the aekos-api git repo dir, probably the current dir): `sudo cp /etc/letsencrypt/live/api.aekos.org.au/{fullchain,privkey}.pem ~/git/aekos-api/`
  1. build a JKS keystore from the certificates with `./generate-keystore-from-cert.sh ./fullchain.pem ./privkey.pem somePassw0rd` (choose your own password)
- 1. the JKS keystore and password will be written to the location expected by the next step so it'll include them in the build of the docker image.
+ 1. the JKS keystore and password will be written to the location expected by the next step (Steps to run every production build) so it'll include them in the build of the docker image.
 
 ### Steps to run every production build
  1. build a Docker container using `build-docker-image.sh` (Maven will include the keystore and password)
