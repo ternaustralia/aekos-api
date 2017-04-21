@@ -17,6 +17,7 @@
 		<java.version>1.8</java.version>
 		<docker.image.prefix>aekos</docker.image.prefix>
 		<springfox.version>2.6.0</springfox.version>
+		<appengine.maven.plugin>1.0.0</appengine.maven.plugin>
 	</properties>
 
 	<dependencies>
@@ -136,65 +137,16 @@
 					</excludes>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>com.google.cloud.tools</groupId>
+				<artifactId>appengine-maven-plugin</artifactId>
+				<version>${appengine.maven.plugin}</version>
+			</plugin>
 		</plugins>
 	</build>
 
 	<profiles>
-		<profile>
-			<id>prod</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-antrun-plugin</artifactId>
-						<version>1.8</version>
-						<executions>
-							<execution>
-								<id>keystore-copy</id>
-								<phase>prepare-package</phase>
-								<configuration>
-									<target>
-							    		<taskdef resource="net/sf/antcontrib/antlib.xml" classpathref="maven.dependency.classpath" />
-										<if>
-											<available file="src/main/docker/prod-keystore.jks" />
-											<then>
-												<property file="src/main/docker/prod-keystore.properties" />
-												<echo>Copying prod keystore</echo>
-												<copy file="src/main/docker/prod-keystore.jks" tofile="${project.build.directory}/classes/keystore.jks" overwrite="true"/>
-												<echo>Replacing keystore password in application.properties file</echo>
-												<replaceregexp match="server.ssl.key-store-password=.*" replace="server.ssl.key-store-password=${keystore-password}" 
-													file="${project.build.directory}/classes/application.properties" />
-											</then>
-										</if>
-									</target>
-								</configuration>
-								<goals>
-									<goal>run</goal>
-								</goals>
-							</execution>
-						</executions>
-						<dependencies>
-							<dependency>
-								<groupId>ant-contrib</groupId>
-								<artifactId>ant-contrib</artifactId>
-								<version>1.0b3</version>
-								<exclusions>
-									<exclusion>
-										<groupId>ant</groupId>
-										<artifactId>ant</artifactId>
-									</exclusion>
-								</exclusions>
-							</dependency>
-							<dependency>
-								<groupId>org.apache.ant</groupId>
-								<artifactId>ant-nodeps</artifactId>
-								<version>1.8.1</version>
-							</dependency>
-						</dependencies>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
+	<!-- TODO add dev (default) and prod profiles that pull in config files for GCP project name, etc -->
 	</profiles>
 
 	<repositories>
