@@ -1,9 +1,15 @@
 package au.org.aekos.api.controller;
 
+import static au.org.aekos.api.controller.ControllerHelper.TEXT_CSV_MIME;
+
 import java.io.IOException;
+import java.io.Writer;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -16,6 +22,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.google.cloud.bigquery.BigQuery;
+import com.google.cloud.bigquery.BigQueryOptions;
+import com.google.cloud.bigquery.FieldValue;
+import com.google.cloud.bigquery.Job;
+import com.google.cloud.bigquery.JobId;
+import com.google.cloud.bigquery.JobInfo;
+import com.google.cloud.bigquery.QueryJobConfiguration;
+import com.google.cloud.bigquery.QueryResponse;
+import com.google.cloud.bigquery.QueryResult;
+import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.DatastoreOptions;
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.QueryResults;
+import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 
 import au.org.aekos.api.Constants;
 import au.org.aekos.api.model.SpeciesName;
@@ -40,6 +62,88 @@ public class ApiV1SearchController {
 
 	@Autowired
 	private SearchService searchService;
+	
+	@RequestMapping(path="/bqTest", produces=TEXT_CSV_MIME)
+	public void bqTest(Writer responseWriter) throws Throwable {
+		long start = new Date().getTime();
+		List<String> result = runSimpleQuery("SELECT * FROM acacia.test WHERE eventDate = '2013-08-29'");
+		System.out.println("Query took " + (new Date().getTime() - start) + "ms");
+		for (String curr : result) {
+			responseWriter.write(curr + "\n");
+		}
+//		return Arrays.asList("asdf,2314", "asdfsd,87687");
+	}
+
+	public static List<String> runSimpleQuery(String queryString) throws TimeoutException, InterruptedException {
+		QueryJobConfiguration queryConfig = QueryJobConfiguration.newBuilder(queryString).build();
+		return runQuery(queryConfig);
+	}
+
+	public static List<String> runQuery(QueryJobConfiguration queryConfig) throws TimeoutException, InterruptedException {
+		List<String> result = new LinkedList<>();
+		BigQuery bigquery = BigQueryOptions.getDefaultInstance().getService();
+long start = new Date().getTime();
+		// Create a job ID so that we can safely retry.
+		JobId jobId = JobId.of(UUID.randomUUID().toString());
+		Job queryJob = bigquery.create(JobInfo.newBuilder(queryConfig).setJobId(jobId).build());
+
+		// Wait for the query to complete.
+		queryJob = queryJob.waitFor();
+System.out.println("initial query execution took " + (new Date().getTime() - start) + "ms");
+		// Check for errors
+		if (queryJob == null) {
+			throw new RuntimeException("Job no longer exists");
+		} else if (queryJob.getStatus().getError() != null) {
+			// You can also look at queryJob.getStatus().getExecutionErrors()
+			// for all
+			// errors, not just the latest one.
+			throw new RuntimeException(queryJob.getStatus().getError().toString());
+		}
+
+		// Get the results.
+		QueryResponse response = bigquery.getQueryResults(jobId);
+		QueryResult queryResult = response.getResult();
+
+		// Print all pages of the results.
+		while (queryResult != null) {
+			for (List<FieldValue> row : queryResult.getValues()) {
+				StringBuilder sb = new StringBuilder();
+				for (FieldValue val : row) {
+					if (val.isNull()) {
+						sb.append(",");
+						continue;
+					}
+					sb.append(val.getStringValue());
+					sb.append(",");
+				}
+				result.add(sb.toString());
+			}
+			long pagingStart = new Date().getTime();
+			queryResult = queryResult.getNextPage();
+			System.out.println("paging took " + (new Date().getTime() - pagingStart) + "ms");
+		}
+		return result;
+	}
+	
+	@RequestMapping(path="dsTest", produces=TEXT_CSV_MIME)
+	public void dsTest(Writer responseWriter) throws Throwable {
+		Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
+		Query<Entity> query = Query.newEntityQueryBuilder().setKind("thingy")
+//				.setFilter(PropertyFilter.eq("favorite_food", "pizza"))
+				.build();
+		long start = new Date().getTime();
+		QueryResults<Entity> results = datastore.run(query);
+		System.out.println("query run took " + (new Date().getTime() - start) + "ms");
+		while (results.hasNext()) {
+			Entity currentEntity = results.next();
+			StringBuilder sb = new StringBuilder();
+			for (String curr : currentEntity.getNames()) {
+				sb.append(currentEntity.getValue(curr).get().toString());
+			}
+			responseWriter.write(sb.toString() + "\n");
+		}
+		System.out.println("total processing took " + (new Date().getTime() - start) + "ms");
+	}
 	
 	@RequestMapping("/getTraitVocab.json")
 	@ApiOperation(value = "Get trait vocabulary",

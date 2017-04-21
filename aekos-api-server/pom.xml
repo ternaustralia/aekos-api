@@ -18,6 +18,7 @@
 		<docker.image.prefix>aekos</docker.image.prefix>
 		<springfox.version>2.6.0</springfox.version>
 		<appengine.maven.plugin>1.0.0</appengine.maven.plugin>
+		<google.cloud.version>0.13.0-beta</google.cloud.version>
 	</properties>
 
 	<dependencies>
@@ -72,6 +73,16 @@
 	        <groupId>org.springframework.boot</groupId>
 	        <artifactId>spring-boot-starter-mail</artifactId>
    		</dependency>
+		<dependency>
+			<groupId>com.google.cloud</groupId>
+			<artifactId>google-cloud-bigquery</artifactId>
+			<version>${google.cloud.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.cloud</groupId>
+			<artifactId>google-cloud-datastore</artifactId>
+			<version>${google.cloud.version}</version>
+		</dependency>
    		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
