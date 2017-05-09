@@ -1,0 +1,383 @@
+diff --git a/pom.xml b/pom.xml
+index 51d01b8..62882d5 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -16,7 +16,7 @@
+ 	<properties>
+ 		<java.version>1.8</java.version>
+ 		<docker.image.prefix>aekos</docker.image.prefix>
+-		<lucene.version>6.0.0</lucene.version>
++		<lucene.version>6.2.1</lucene.version>
+ 		<springfox.version>2.6.0</springfox.version>
+ 	</properties>
+ 
+diff --git a/run-server.sh b/run-server.sh
+index 94cea2d..7d64ecf 100755
+--- a/run-server.sh
++++ b/run-server.sh
+@@ -1,3 +1,4 @@
+ #!/bin/bash
+ cd `dirname $0`
++export MAVEN_OPTS="$MAVEN_OPTS -Xmx8g"
+ ./mvnw clean spring-boot:run $@
+diff --git a/src/main/java/au/org/aekos/controller/ProgressTracker.java b/src/main/java/au/org/aekos/controller/ProgressTracker.java
+index cf8130a..f7b0c80 100644
+--- a/src/main/java/au/org/aekos/controller/ProgressTracker.java
++++ b/src/main/java/au/org/aekos/controller/ProgressTracker.java
+@@ -2,16 +2,20 @@ package au.org.aekos.controller;
+ 
+ import java.util.Date;
+ 
++import org.apache.commons.lang3.time.DurationFormatUtils;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+ 
+ public class ProgressTracker {
+ 	private static final Logger logger = LoggerFactory.getLogger(ProgressTracker.class);
+ 	private static final long TEN_SECONDS = 10 * 1000;
++	private static final long TEN_MINUTES = 10 * 60 * 1000;
++	private static final int LOG_INTERVAL_INCREASE_THRESHOLD = 100 * 1000;
+ 	private final Date start = new Date();
+ 	private final int totalRecordCount;
+ 	private int processedRecords = 0;
+ 	private long nextLogCheckpoint = start.getTime() + TEN_SECONDS;
++	private long nextLogInterval = TEN_SECONDS;
+ 	
+ 	public ProgressTracker(int totalRecordCount) {
+ 		this.totalRecordCount = totalRecordCount;
+@@ -22,17 +26,32 @@ public class ProgressTracker {
+ 		if (now() < nextLogCheckpoint) {
+ 			return;
+ 		}
+-		nextLogCheckpoint += TEN_SECONDS;
+-		long elapsedSeconds = getElapsedSeconds();
++		checkForLogIntervalIncrease();
++		nextLogCheckpoint +=nextLogInterval;
++		long elapsedMillis = getElapsedMillis();
++		String elapsedTime = DurationFormatUtils.formatDuration(elapsedMillis, "HH:mm:ss");
+ 		double processedPercentage = 100.0 * processedRecords / totalRecordCount;
+-		double timeLeft = (100 - processedPercentage) * (elapsedSeconds / processedPercentage);
+-		String msg = String.format("Processed %d/%d records (%3.1f%%) in %ds with estimated %5.0fs left",
+-				processedRecords, totalRecordCount, processedPercentage, elapsedSeconds, timeLeft);
++		long timeLeftMillis = (long) ((100 - processedPercentage) * (elapsedMillis / processedPercentage));
++		String timeLeft = DurationFormatUtils.formatDuration(timeLeftMillis, "HH:mm:ss");
++		long recordsPerSecond = processedRecords / (elapsedMillis / 1000);
++		String msg = String.format("Processed %d/%d records (%3.1f%%) in %s with estimated %s left. %d records/second.",
++				processedRecords, totalRecordCount, processedPercentage, elapsedTime, timeLeft, recordsPerSecond);
+ 		logger.info(msg);
+ 	}
+ 	
++	private void checkForLogIntervalIncrease() {
++		if (nextLogInterval == TEN_MINUTES) {
++			return;
++		}
++		if (processedRecords < LOG_INTERVAL_INCREASE_THRESHOLD) {
++			return;
++		}
++		nextLogInterval = TEN_MINUTES;
++		logger.info("Increasing logging interval to " + (TEN_MINUTES / 60 / 1000) + " minutes.");
++	}
++
+ 	public String getFinishedMessage() {
+-		long elapsedSeconds = getElapsedSeconds();
++		long elapsedSeconds = getElapsedMillis();
+ 		return "Processed " + processedRecords + " records in " + elapsedSeconds + " seconds.";
+ 	}
+ 
+@@ -40,7 +59,7 @@ public class ProgressTracker {
+ 		return new Date().getTime();
+ 	}
+ 	
+-	private long getElapsedSeconds() {
+-		return (new Date().getTime() - start.getTime()) / 1000;
++	private long getElapsedMillis() {
++		return new Date().getTime() - start.getTime();
+ 	}
+ }
+\ No newline at end of file
+diff --git a/src/main/java/au/org/aekos/service/index/LuceneIndexingService.java b/src/main/java/au/org/aekos/service/index/LuceneIndexingService.java
+index d2d4d93..4c45e52 100644
+--- a/src/main/java/au/org/aekos/service/index/LuceneIndexingService.java
++++ b/src/main/java/au/org/aekos/service/index/LuceneIndexingService.java
+@@ -3,13 +3,26 @@ package au.org.aekos.service.index;
+ import java.io.IOException;
+ import java.util.HashMap;
+ import java.util.LinkedList;
++import java.util.List;
+ import java.util.Map;
+ import java.util.Map.Entry;
++import java.util.concurrent.BlockingQueue;
++import java.util.concurrent.CountDownLatch;
++import java.util.concurrent.ExecutionException;
++import java.util.concurrent.ExecutorService;
++import java.util.concurrent.Executors;
++import java.util.concurrent.Future;
++import java.util.concurrent.LinkedBlockingQueue;
++import java.util.concurrent.TimeUnit;
++import java.util.concurrent.atomic.AtomicBoolean;
+ 
++import org.slf4j.Logger;
++import org.slf4j.LoggerFactory;
+ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.stereotype.Service;
+ 
+ import au.org.aekos.controller.ProgressTracker;
++import au.org.aekos.service.retrieval.FirstRecordProcessedCallback;
+ import au.org.aekos.service.retrieval.IndexLoaderCallback;
+ import au.org.aekos.service.retrieval.IndexLoaderRecord;
+ import au.org.aekos.service.retrieval.RetrievalService;
+@@ -18,6 +31,8 @@ import au.org.aekos.service.search.load.LoaderClient;
+ @Service
+ public class LuceneIndexingService implements IndexingService {
+ 
++	private static final Logger logger = LoggerFactory.getLogger(LuceneIndexingService.class);
++	
+ 	@Autowired
+ 	private RetrievalService retrievalService;
+ 	
+@@ -27,27 +42,96 @@ public class LuceneIndexingService implements IndexingService {
+ 	@Override
+ 	public String doIndexing() throws IOException {
+ 		int totalRecordCount = retrievalService.getTotalSpeciesRecordsHeld();
++		System.out.println("Total " + totalRecordCount);
+ 		Map<String, Integer> speciesCounts = new HashMap<>();
+ 		loader.beginLoad();
+ 		loader.deleteAll();
+-		ProgressTracker tracker = new ProgressTracker(totalRecordCount);
+-		retrievalService.getIndexStream(new IndexLoaderCallback() {
+-			@Override
+-			public void accept(IndexLoaderRecord record) {
+-				try {
+-					loader.addSpeciesTraitTermsToIndex(record.getSpeciesName(), new LinkedList<>(record.getTraitNames()));
+-					loader.addSpeciesEnvironmentTermsToIndex(record.getSpeciesName(), new LinkedList<>(record.getEnvironmentalVariableNames()));
+-					Integer speciesCount = speciesCounts.get(record.getSpeciesName());
+-					if (speciesCount == null) {
+-						speciesCount = 0;
++		ProgressTracker tracker = new ProgressTracker(totalRecordCount); // FIXME will probably fail with more than one worker because no thread safety
++		int numWorkers = 1;
++		ExecutorService workerExecutorService = Executors.newFixedThreadPool(numWorkers);
++		ExecutorService jenaReaderService = Executors.newFixedThreadPool(1);
++		List<Future<?>> futures = new LinkedList<>();
++		AtomicBoolean jenaReaderDoneFlag = new AtomicBoolean(false);
++		CountDownLatch workerStartSignal = new CountDownLatch(numWorkers);
++		try {
++			int workQueueSize = 1000;
++			BlockingQueue<IndexLoaderRecord> recordQueue = new LinkedBlockingQueue<>(workQueueSize);
++			futures.add(jenaReaderService.submit(new Runnable() {
++				@Override
++				public void run() {
++					Thread.currentThread().setName("JENA-reader");
++					retrievalService.getIndexStream(recordQueue, new FirstRecordProcessedCallback() {
++						@Override
++						public void doIt() {
++							workerStartSignal.countDown();
++						}
++					});
++					logger.info("DB reading done, waiting for workers to finish.");
++					jenaReaderDoneFlag.set(true);
++				}
++			}));
++			futures.add(workerExecutorService.submit(new Runnable() {
++				@Override
++				public void run() {
++					Thread.currentThread().setName("queue-processor");
++					IndexLoaderCallback callback = new IndexLoaderCallback() {
++						@Override
++						public void accept(IndexLoaderRecord record) {
++							try {
++								loader.addSpeciesTraitTermsToIndex(record.getSpeciesName(), new LinkedList<>(record.getTraitNames()));
++								loader.addSpeciesEnvironmentTermsToIndex(record.getSpeciesName(), new LinkedList<>(record.getEnvironmentalVariableNames()));
++								Integer speciesCount = speciesCounts.get(record.getSpeciesName());
++								if (speciesCount == null) {
++									speciesCount = 0;
++								}
++								speciesCounts.put(record.getSpeciesName(), ++speciesCount);
++							} catch (IOException e) {
++								throw new RuntimeException("Failed to add a record to the index: " + record.toString(), e);
++							}
++							tracker.addRecord();
++						}
++					};
++					try {
++						workerStartSignal.await();
++					} catch (InterruptedException e) {
++						throw new RuntimeException("Queue processor was interrupted while waiting for the start signal");
++					}
++					while (true) {
++						try {
++							if (recordQueue.isEmpty() && jenaReaderDoneFlag.get()) {
++								logger.info("Queue processor thinks the work is all done.");
++								break;
++							}
++							IndexLoaderRecord record = recordQueue.poll(300, TimeUnit.MILLISECONDS);
++							if (record == null) {
++								continue;
++							}
++							callback.accept(record);
++						} catch (InterruptedException e) {
++							throw new RuntimeException("Queue processor was interrupted while waiting for another item in the queue");
++						}
+ 					}
+-					speciesCounts.put(record.getSpeciesName(), ++speciesCount);
+-				} catch (IOException e) {
+-					throw new RuntimeException("Failed to add a record to the index: " + record.toString(), e);
+ 				}
+-				tracker.addRecord();
++			}));
++			logger.info("Waiting for workers to start...");
++			for (Future<?> curr: futures) {
++				try {
++					curr.get();
++				} catch (ExecutionException e) {
++					throw new RuntimeException("A worker failed", e);
++				}
+ 			}
+-		});
++			jenaReaderService.shutdown();
++			workerExecutorService.shutdown();
++		} catch (InterruptedException e) {
++			workerExecutorService.shutdownNow();
++			jenaReaderService.shutdownNow();
++			throw new RuntimeException("Failed while waiting for futures to return", e);
++		} catch (Throwable t) {
++			workerExecutorService.shutdownNow();
++			jenaReaderService.shutdownNow();
++			throw t;
++		}
+ 		processSpeciesCounts(speciesCounts);
+ 		loader.endLoad();
+ 		return tracker.getFinishedMessage();
+diff --git a/src/main/java/au/org/aekos/service/retrieval/JenaRetrievalService.java b/src/main/java/au/org/aekos/service/retrieval/JenaRetrievalService.java
+index 0f770a0..4662d7b 100644
+--- a/src/main/java/au/org/aekos/service/retrieval/JenaRetrievalService.java
++++ b/src/main/java/au/org/aekos/service/retrieval/JenaRetrievalService.java
+@@ -26,6 +26,7 @@ import java.util.Iterator;
+ import java.util.LinkedList;
+ import java.util.List;
+ import java.util.Set;
++import java.util.concurrent.BlockingQueue;
+ import java.util.stream.Collectors;
+ 
+ import org.apache.jena.query.Dataset;
+@@ -206,10 +207,11 @@ public class JenaRetrievalService implements RetrievalService {
+ 	}
+ 	
+ 	@Override
+-	public void getIndexStream(IndexLoaderCallback callback) {
++	public void getIndexStream(BlockingQueue<IndexLoaderRecord> recordQueue, FirstRecordProcessedCallback callback) {
+ 		String sparql = indexLoaderQuery;
+ 		logger.debug("Index loader SPARQL: " + sparql);
+ 		Query query = QueryFactory.create(sparql);
++		boolean isCallbackCalled = false;
+ 		try (QueryExecution qexec = QueryExecutionFactory.create(query, ds)) {
+ 			ResultSet results = qexec.execSelect();
+ 			if (!results.hasNext()) {
+@@ -227,14 +229,23 @@ public class JenaRetrievalService implements RetrievalService {
+ 				// traits
+ 				DummyTraitDataRecord traitRecord = new DummyTraitDataRecord();
+ 				processTraitDataVars(s.get("dwr").asResource(), traitRecord, TRAIT_PROP, Collections.emptyList());
+-				Set<String> traitNames = traitRecord.getTraits().stream()
++				Set<String> traitNames = traitRecord.getTraits().parallelStream()
+ 						.map(e -> e.getName())
+ 						.collect(Collectors.toSet());
+-				Set<String> envVarNames = envRecord.getVariables().stream()
++				Set<String> envVarNames = envRecord.getVariables().parallelStream()
+ 						.map(e -> e.getName())
+ 						.collect(Collectors.toSet());
+ 				// result
+-				callback.accept(new IndexLoaderRecord(speciesName, traitNames, envVarNames));
++				try {
++					recordQueue.put(new IndexLoaderRecord(speciesName, traitNames, envVarNames));
++					if (!isCallbackCalled) {
++						callback.doIt();
++						isCallbackCalled = true;
++					}
++				} catch (InterruptedException e) {
++					throw new RuntimeException("Interrupted while waiting to put more records on queue. "
++							+ "This isn't the cause of a problem, it's a symptom.", e);
++				}
+ 			}
+ 		}
+ 	}
+diff --git a/src/main/java/au/org/aekos/service/retrieval/RetrievalService.java b/src/main/java/au/org/aekos/service/retrieval/RetrievalService.java
+index ca07724..aa9de41 100644
+--- a/src/main/java/au/org/aekos/service/retrieval/RetrievalService.java
++++ b/src/main/java/au/org/aekos/service/retrieval/RetrievalService.java
+@@ -2,6 +2,7 @@ package au.org.aekos.service.retrieval;
+ 
+ import java.io.Writer;
+ import java.util.List;
++import java.util.concurrent.BlockingQueue;
+ 
+ import au.org.aekos.controller.RetrievalResponseHeader;
+ import au.org.aekos.model.EnvironmentDataResponse;
+@@ -112,9 +113,10 @@ public interface RetrievalService {
+ 	/**
+ 	 * Gets the data required to build up the search index.
+ 	 * 
+-	 * @param callback	processor to handle the found records
++	 * @param recordQueue	queue to add found records to
++	 * @param callback		called when the first record has been processed
+ 	 */
+-	void getIndexStream(IndexLoaderCallback callback);
++	void getIndexStream(BlockingQueue<IndexLoaderRecord> recordQueue, FirstRecordProcessedCallback callback);
+ 
+ 	/**
+ 	 * Gets the total number of records we hold for the supplied species name.
+diff --git a/src/main/java/au/org/aekos/service/search/index/TermIndexManagerImpl.java b/src/main/java/au/org/aekos/service/search/index/TermIndexManagerImpl.java
+index f1cdc22..c9a6352 100644
+--- a/src/main/java/au/org/aekos/service/search/index/TermIndexManagerImpl.java
++++ b/src/main/java/au/org/aekos/service/search/index/TermIndexManagerImpl.java
+@@ -5,7 +5,7 @@ import java.nio.file.Files;
+ import java.nio.file.Paths;
+ 
+ import org.apache.commons.lang.SystemUtils;
+-import org.apache.lucene.analysis.standard.StandardAnalyzer;
++import org.apache.lucene.analysis.core.SimpleAnalyzer;
+ import org.apache.lucene.index.IndexWriter;
+ import org.apache.lucene.index.IndexWriterConfig;
+ import org.apache.lucene.search.IndexSearcher;
+@@ -92,9 +92,14 @@ public class TermIndexManagerImpl implements TermIndexManager, DisposableBean {
+ 	@Override
+ 	public IndexWriter getIndexWriter() throws IOException {
+ 		flushDeletions();
+-		IndexWriterConfig config = new IndexWriterConfig(new StandardAnalyzer());
++		IndexWriterConfig config = new IndexWriterConfig(new SimpleAnalyzer());
+ 		IndexWriterConfig.OpenMode openMode = createMode ? IndexWriterConfig.OpenMode.CREATE : IndexWriterConfig.OpenMode.CREATE_OR_APPEND;
+ 		config.setOpenMode(openMode);
++		int bytesToMb = 1024 * 1024;
++		double memoryAllocationPercentage = 0.7;
++		double allocatedMemory = Runtime.getRuntime().maxMemory() * memoryAllocationPercentage / bytesToMb;
++		logger.info("Allocated " + allocatedMemory + "MB to Lucene for index writing.");
++		config.setRAMBufferSizeMB(allocatedMemory);
+ 		return new IndexWriter(getTermIndex(), config);
+ 	}
+ 
+diff --git a/src/main/resources/logback-spring.xml b/src/main/resources/logback-spring.xml
+index 8945a89..b6ac3ff 100644
+--- a/src/main/resources/logback-spring.xml
++++ b/src/main/resources/logback-spring.xml
+@@ -2,7 +2,7 @@
+ <configuration>
+     <include resource="org/springframework/boot/logging/logback/base.xml" />
+     <logger name="au.org.aekos." level="WARN" />
+-    <logger name="au.org.aekos.service.retrieval.JenaRetrievalService" level="DEBUG" />
++    <logger name="au.org.aekos.service.retrieval.JenaRetrievalService" level="WARN" />
+     <logger name="au.org.aekos.controller.SignupController" level="TRACE" />
+     <logger name="org.apache.jena.arq.info" level="INFO" />
+     <logger name="org.apache.jena.arq.exec" level="INFO" />
+diff --git a/src/test/resources/locustfile.py b/src/test/resources/locustfile.py
+index 1b6c083..07527f9 100644
+--- a/src/test/resources/locustfile.py
++++ b/src/test/resources/locustfile.py
+@@ -15,8 +15,8 @@ class MyTaskSet(TaskSet):
+   @task
+   def my_task(self):
+     print "executing my_task"
+-    #self.client.get("/v1/speciesAutocomplete.json?q=acacia")
+-    self.client.get("/v1/speciesData.json?speciesName=Acacia%20aneura%20var.%20intermedia&rows=20")
++    self.client.get("/v1/speciesAutocomplete.json?q=acacia")
++    #self.client.get("/v1/speciesData.json?speciesName=Acacia%20aneura%20var.%20intermedia&rows=20")
+ 
+ 
+ class MyLocust(HttpLocust):
