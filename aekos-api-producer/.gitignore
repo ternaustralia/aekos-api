@@ -1,0 +1,6 @@
+*.csv
+*.zip
+.classpath
+.settings/
+.project
+target/
