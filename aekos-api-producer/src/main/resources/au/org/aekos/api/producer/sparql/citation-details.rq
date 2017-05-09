@@ -7,18 +7,6 @@ WHERE {
     ?ssg a ?ssgType .
     VALUES ?ssgType {
       aekos:SURVEYSUBGRAPH
-      aekos:SWATTSURVEYSUBGRAPH
-      aekos:RAVENSSURVEYSUBGRAPH
-      aekos:PLATYPUSSURVEYSUBGRAPH
-      aekos:SURVEYSUBGRAPH_KOONAMORE
-      aekos:DERGSURVEYSUBGRAPH
-      aekos:VISSURVEYSUBGRAPH
-      aekos:ABARESSURVEYSUBGRAPH
-      aekos:UQSSSURVEYSUBGRAPH
-      aekos:CORVEGSURVEYSUBGRAPH
-      aekos:BDBSASURVEYSUBGRAPH
-      aekos:AUSPLOTSSURVEYSUBGRAPH
-      aekos:NATTSURVEYSUBGRAPH
     }
     # sampling protocol
     ?ssg aekos:aekossurveyidentifier ?samplingProtocol .
