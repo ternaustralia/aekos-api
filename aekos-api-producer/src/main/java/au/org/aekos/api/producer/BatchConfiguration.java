@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Paths;
 
 import org.apache.jena.query.Dataset;
 import org.springframework.batch.core.Job;
@@ -18,6 +19,7 @@ import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor;
 import org.springframework.batch.item.file.transform.DelimitedLineAggregator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.PathResource;
@@ -36,6 +38,9 @@ public class BatchConfiguration {
 
     @Autowired
     public StepBuilderFactory stepBuilderFactory;
+    
+    @Value("${aekos-api.output-dir}")
+    private String outputDir;
 
     @Bean
     public ItemReader<InputCitationRecord> readerCitation(String citationDetailsQuery, Dataset coreDS) {
@@ -47,7 +52,7 @@ public class BatchConfiguration {
     
     @Bean
     public FlatFileItemWriter<InputCitationRecord> writerCitation() {
-    	return csvWriter(InputCitationRecord.class, "citations.csv", InputCitationRecord.getCsvFields());
+    	return csvWriter(InputCitationRecord.class, "citations", InputCitationRecord.getCsvFields());
     }
 
 //    @Bean
@@ -122,7 +127,7 @@ public class BatchConfiguration {
 		return out.toString();
 	}
     
-    private <T> FlatFileItemWriter<T> csvWriter(Class<T> type, String outputFileName, String[] fields) {
+    private <T> FlatFileItemWriter<T> csvWriter(Class<T> type, String outputTableName, String[] fields) {
     	FlatFileItemWriter<T> result = new FlatFileItemWriter<>();
     	result.setShouldDeleteIfExists(true);
     	BeanWrapperFieldExtractor<T> fieldEx = new BeanWrapperFieldExtractor<>();
@@ -130,7 +135,7 @@ public class BatchConfiguration {
     	DelimitedLineAggregator<T> lineAgg = new DelimitedLineAggregator<>();
     	lineAgg.setFieldExtractor(fieldEx);
     	result.setLineAggregator(lineAgg);
-    	result.setResource(new PathResource(outputFileName));
+    	result.setResource(new PathResource(Paths.get(outputDir, outputTableName + ".csv")));
 		return result;
 	}
 }
