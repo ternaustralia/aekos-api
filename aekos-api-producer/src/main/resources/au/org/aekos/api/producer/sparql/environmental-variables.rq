@@ -9,9 +9,6 @@ SELECT
 	?geodeticDatum
 	?locationID
 	?locationName
-	?eventDate
-	?year
-	?month
 WHERE {
   GRAPH ?g {
     ?slsg a aekos:STUDYLOCATIONSUBGRAPH .
@@ -34,44 +31,5 @@ WHERE {
     BIND(COALESCE(?decimalLongitude1, ?decimalLongitude2) AS ?decimalLongitude) .
     BIND(COALESCE(?decimalLatitude1, ?decimalLatitude2) AS ?decimalLatitude) .
     BIND('GDA94' as ?geodeticDatum) .
-    ?slsg aekos:views/rdfs:member ?vv .
-    # eventDate
-    OPTIONAL {
-      ?vv aekos:observeditems/rdfs:member ?su1 .
-      ?su1 a ?su1Type .
-      VALUES ?su1Type {
-        aekos:SAMPLINGUNIT
-        aekos:SAMPLINGUNITVIS
-        aekos:SAMPLINGUNITRSV
-        aekos:SAMPLINGUNITATRIPLEX
-        aekos:SAMPLINGUNITRABBITWARRENS # FIXME can I remove?
-      } .
-      ?su1 aekos:temporality/aekos:has_start ?eventDateTemp1 .
-    }
-    OPTIONAL {
-      ?vv aekos:observeditems/rdfs:member ?sa1 .
-      ?sa1 a aekos:SAMPLEDAREA .
-      ?sa1 aekos:temporality/aekos:has_start ?eventDateTemp2 .
-    }
-    OPTIONAL {
-      ?vv aekos:observeditems/rdfs:member ?oi .
-      ?oi a ?oiType .
-      VALUES ?oiType {
-        aekos:LANDSCAPE
-        aekos:SOIL
-        aekos:SOILAP
-        aekos:FIREEVIDENCE
-        aekos:DISTURBANCEEVIDENCE
-        aekos:EROSIONEVIDENCE
-        aekos:SOILSAMPLE # work around for TERN_AUSPLOTS and TERN_TREND
-      }
-      ?oi aekos:temporality/aekos:has_start ?eventDateTemp3 .
-    }
-    BIND (COALESCE(?eventDateTemp1, ?eventDateTemp2, ?eventDateTemp3) AS ?eventDateTemp)
-    BIND (CONCAT(str(year(?eventDateTemp)),"-",str(month(?eventDateTemp)),"-",str(day(?eventDateTemp))) as ?eventDate) .
-    # month
-    BIND (month(?eventDateTemp) as ?month) .
-    # year
-    BIND (year(?eventDateTemp) as ?year) .
   }
 }

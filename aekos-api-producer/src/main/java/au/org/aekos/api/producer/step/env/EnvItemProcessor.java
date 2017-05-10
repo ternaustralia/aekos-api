@@ -14,7 +14,11 @@ public class EnvItemProcessor implements ItemProcessor<InputEnvRecord, OutputEnv
 
 	@Override
 	public OutputEnvWrapper process(InputEnvRecord item) throws Exception {
-		OutputEnvRecord envRecord = new OutputEnvRecord(item);
+		// TODO get temporal information
+		String eventDate = "FIXME";
+		int month = 1;
+		int year = 1;
+		OutputEnvRecord envRecord = new OutputEnvRecord(item, eventDate, month, year);
 		// TODO enrich with variable information
 		List<EnvVarRecord> variables = Collections.emptyList();
 		return new OutputEnvWrapper(envRecord, variables);

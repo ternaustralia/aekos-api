@@ -5,9 +5,15 @@ import au.org.aekos.api.producer.step.env.in.InputEnvRecord;
 
 public class OutputEnvRecord {
 	private final InputEnvRecord coreRecord;
+	private final String eventDate;
+	private final int month;
+	private final int year;
 
-	public OutputEnvRecord(InputEnvRecord coreRecord) {
+	public OutputEnvRecord(InputEnvRecord coreRecord, String eventDate, int month, int year) {
 		this.coreRecord = coreRecord;
+		this.eventDate = eventDate;
+		this.month = month;
+		this.year = year;
 	}
 
 	public double getDecimalLatitude() {
@@ -16,10 +22,6 @@ public class OutputEnvRecord {
 
 	public double getDecimalLongitude() {
 		return coreRecord.getDecimalLongitude();
-	}
-
-	public String getEventDate() {
-		return Utils.quote(coreRecord.getEventDate());
 	}
 
 	public String getGeodeticDatum() {
@@ -34,12 +36,16 @@ public class OutputEnvRecord {
 		return Utils.quote(coreRecord.getLocationName());
 	}
 
+	public String getEventDate() {
+		return Utils.quote(eventDate);
+	}
+	
 	public int getMonth() {
-		return coreRecord.getMonth();
+		return month;
 	}
 
 	public int getYear() {
-		return coreRecord.getYear();
+		return year;
 	}
 
 	public static String[] getCsvFields() {
