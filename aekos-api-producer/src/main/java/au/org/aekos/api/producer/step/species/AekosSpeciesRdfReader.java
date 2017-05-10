@@ -1,0 +1,46 @@
+package au.org.aekos.api.producer.step.species;
+
+import org.apache.jena.query.QuerySolution;
+
+import au.org.aekos.api.producer.step.AbstractRdfReader;
+import au.org.aekos.api.producer.step.species.in.InputSpeciesRecord;
+
+public class AekosSpeciesRdfReader extends AbstractRdfReader<InputSpeciesRecord> {
+
+	private String dwcAndTraitsQuery;
+
+	@Override
+	public InputSpeciesRecord mapSolution(QuerySolution solution) {
+		Extractor e = new Extractor(solution);
+		return new InputSpeciesRecord(
+				e.get("id"),
+				e.get("datasetName"),
+				e.getDouble("decimalLatitude"),
+				e.getDouble("decimalLongitude"),
+				e.get("eventDate"),
+				e.get("geodeticDatum"),
+				e.getInt("individualCount"),
+				e.get("locationID"),
+				e.get("locationName"),
+				e.getInt("month"),
+				e.get("samplingProtocol"),
+				e.getOptional("scientificName"),
+				e.getOptional("taxonRemarks"),
+				e.getInt("year")
+			);
+	}
+	
+	@Override
+	public String getRecordTypeName() {
+		return "species";
+	}
+
+	@Override
+	public String getSparqlQuery() {
+		return dwcAndTraitsQuery;
+	}
+	
+	public void setDwcAndTraitsQuery(String dwcAndTraitsQuery) {
+		this.dwcAndTraitsQuery = dwcAndTraitsQuery;
+	}
+}

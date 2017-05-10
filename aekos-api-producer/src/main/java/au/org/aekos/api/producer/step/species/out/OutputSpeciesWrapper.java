@@ -4,15 +4,15 @@ import java.util.Collections;
 import java.util.List;
 
 public class OutputSpeciesWrapper {
-	private final SpeciesRecord speciesRecord;
+	private final OutputSpeciesRecord speciesRecord;
 	private final List<TraitRecord> traitRecords;
 
-	public OutputSpeciesWrapper(SpeciesRecord speciesRecord, List<TraitRecord> traitRecords) {
+	public OutputSpeciesWrapper(OutputSpeciesRecord speciesRecord, List<TraitRecord> traitRecords) {
 		this.speciesRecord = speciesRecord;
 		this.traitRecords = traitRecords;
 	}
 
-	public List<SpeciesRecord> getSpeciesRecord() {
+	public List<OutputSpeciesRecord> getSpeciesRecord() {
 		return Collections.singletonList(speciesRecord);
 	}
 

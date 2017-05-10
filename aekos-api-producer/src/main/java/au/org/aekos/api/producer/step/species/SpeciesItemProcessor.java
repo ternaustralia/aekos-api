@@ -1,16 +1,14 @@
 package au.org.aekos.api.producer.step.species;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Collections;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemProcessor;
 
 import au.org.aekos.api.producer.step.species.in.InputSpeciesRecord;
+import au.org.aekos.api.producer.step.species.out.OutputSpeciesRecord;
 import au.org.aekos.api.producer.step.species.out.OutputSpeciesWrapper;
-import au.org.aekos.api.producer.step.species.out.SpeciesRecord;
-import au.org.aekos.api.producer.step.species.out.TraitRecord;
 
 public class SpeciesItemProcessor implements ItemProcessor<InputSpeciesRecord, OutputSpeciesWrapper> {
 
@@ -18,11 +16,11 @@ public class SpeciesItemProcessor implements ItemProcessor<InputSpeciesRecord, O
 
 	@Override
 	public OutputSpeciesWrapper process(InputSpeciesRecord item) throws Exception {
-		int speciesRecordId = item.hashCode();
-		SpeciesRecord speciesRecord = new SpeciesRecord(speciesRecordId, item.getSpeciesName());
-		List<TraitRecord> traitRecords = item.getTraits().stream()
-				.map(e -> new TraitRecord(speciesRecordId, e.getName(), e.getValue(), e.getUnits()))
-				.collect(Collectors.toList());
-		return new OutputSpeciesWrapper(speciesRecord, traitRecords);
+		OutputSpeciesRecord speciesRecord = new OutputSpeciesRecord(item);
+		// TODO enrich with trait information
+//		List<TraitRecord> traitRecords = item.getTraits().stream()
+//				.map(e -> new TraitRecord(speciesRecordId, e.getName(), e.getValue(), e.getUnits()))
+//				.collect(Collectors.toList());
+		return new OutputSpeciesWrapper(speciesRecord, Collections.emptyList() /*FIXME*/);
 	}
 }

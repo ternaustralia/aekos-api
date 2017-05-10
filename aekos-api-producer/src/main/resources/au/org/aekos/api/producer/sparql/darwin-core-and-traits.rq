@@ -2,31 +2,22 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX aekos: <http://www.aekos.org.au/ontology/1.0.0#>
 PREFIX api: <http://www.aekos.org.au/api/1.0#>
 
-# Builds a Darwin Core + traits dataset
-CONSTRUCT {
-  ?id a api:DarwinCoreRecord .
-  ?id api:decimalLongitude ?decimalLongitude .
-  ?id api:decimalLatitude ?decimalLatitude .
-  ?id api:geodeticDatum ?geodeticDatum .
-  ?id api:locationID ?locationID .
-  ?id api:locationName ?locationName .
-  ?id api:scientificName ?scientificName .
-  ?id api:taxonRemarks ?taxonRemarks .
-  ?id api:individualCount ?individualCount .
-  ?id api:eventDate ?eventDate .
-  ?id api:year ?year .
-  ?id api:month ?month .
-  ?id api:samplingProtocol ?samplingProtocol .
-  ?id api:samplingProtocolEntity ?samplingProtocolEntity .
-  ?id api:trait ?traitEntity .
-  ?traitEntity api:name ?traitName .
-  ?traitEntity api:value ?traitValue .
-  ?traitEntity api:units ?traitUnits .
-  ?id api:trait ?noUnitsTraitEntity .
-  ?noUnitsTraitEntity api:name ?noUnitsTraitName .
-  ?noUnitsTraitEntity api:value ?noUnitsTraitValue .
-  ?noUnitsTraitEntity api:units ?noUnits .
-}
+# Gets the easy part of the Darwin Core + traits dataset (just the 1:1 bits)
+SELECT
+	?id
+	?datasetName 
+	?decimalLongitude
+	?decimalLatitude
+	?geodeticDatum
+	?locationID
+	?locationName
+	?scientificName
+	?taxonRemarks
+	?individualCount
+	?eventDate
+	?year
+	?month
+	?samplingProtocol
 WHERE { GRAPH ?g {
    ?og a ?ogType .
    VALUES ?ogType {
@@ -67,7 +58,6 @@ WHERE { GRAPH ?g {
   ?slsg aekos:aekoslocationidentifier ?locationID .
   ?slsg aekos:aekossurveyidentifier ?samplingProtocol .
   ?slsg aekos:studylocationidentifier ?locationName .
-  BIND(URI(concat(str(api:),SHA1(?samplingProtocol))) as ?samplingProtocolEntity) .
   # location
   OPTIONAL {
     ?slsg aekos:studylocation/aekos:location/aekos:sampledpoint [
@@ -101,143 +91,8 @@ WHERE { GRAPH ?g {
   # year
   BIND (year(?eventDateTemp) as ?year) .
   # make an ID for the CONSTRUCT clause
-  BIND (UUID() as ?id) .
-  # traits
-  BIND ('' as ?noUnits) .
-  OPTIONAL {
-    {
-      BIND ('averageHeight' as ?traitName) .
-      BIND (URI(CONCAT("urn:",?traitName,":",STRUUID())) as ?traitEntity) .
-      ?og aekos:averageheight [
-          aekos:value ?traitValue ;
-          aekos:units/aekos:name ?traitUnits ;
-		] .
-    }
-    UNION {
-      BIND ('basalArea' as ?traitName) .
-      BIND (URI(CONCAT("urn:",?traitName,":",STRUUID())) as ?traitEntity) .
-      ?og aekos:basalarea [
-          aekos:value ?traitValue ;
-          # FIXME RDF data needs units for ?traitUnits
-		] .
-      BIND('square metres per hectare' as ?traitUnits) . # FIXME remove when we have units for BasalAreaValue
-    }
-    UNION {
-      BIND ('basalAreaFactor' as ?noUnitsTraitName) .
-      BIND (URI(CONCAT("urn:",?noUnitsTraitName,":",STRUUID())) as ?noUnitsTraitEntity) .
-      ?og aekos:basalareafactor/aekos:value ?noUnitsTraitValue .
-    }
-    UNION {
-      BIND ('basalAreaCount' as ?noUnitsTraitName) .
-      BIND (URI(CONCAT("urn:",?noUnitsTraitName,":",STRUUID())) as ?noUnitsTraitEntity) .
-      ?og aekos:basalareacount/aekos:value ?noUnitsTraitValue .
-    }
-    UNION {
-      BIND ('biomass' as ?traitName) .
-      BIND (URI(CONCAT("urn:",?traitName,":",STRUUID())) as ?traitEntity) .
-      ?og aekos:biomass [
-          aekos:value ?traitValue ;
-          aekos:units/aekos:name ?traitUnits ;
-		] .
-    }
-    UNION {
-      BIND ('canopyCover' as ?traitName) .
-      BIND (URI(CONCAT("urn:",?traitName,":",STRUUID())) as ?traitEntity) .
-      ?og aekos:canopycover [
-          aekos:value | aekos:category/aekos:name ?traitValue ;
-          aekos:units/aekos:name ?traitUnits ;
-		] .
-    }
-    UNION {
-      BIND ('cover' as ?traitName) .
-      BIND (URI(CONCAT("urn:",?traitName,":",STRUUID())) as ?traitEntity) .
-      ?og aekos:cover [
-          aekos:value | aekos:category/aekos:name ?traitValue ;
-          aekos:units/aekos:name ?traitUnits ;
-		] .
-    }
-    UNION {
-      BIND ('cover' as ?noUnitsTraitName) .
-      BIND (URI(CONCAT("urn:",?noUnitsTraitName,":",STRUUID())) as ?noUnitsTraitEntity) .
-      ?og aekos:cover [
-          aekos:category/aekos:name | aekos:commentary ?noUnitsTraitValue ;
-      ] .
-    }
-    UNION {
-      BIND ('dominance' as ?noUnitsTraitName) .
-      BIND (URI(CONCAT("urn:",?noUnitsTraitName,":",STRUUID())) as ?noUnitsTraitEntity) .
-      ?og aekos:dominance/aekos:category/aekos:name ?noUnitsTraitValue .
-    }
-    UNION {
-      BIND ('height' as ?traitName) .
-      BIND (URI(CONCAT("urn:",?traitName,":",STRUUID())) as ?traitEntity) .
-      ?og aekos:height [
-          aekos:value ?traitValue ;
-          aekos:units/aekos:name ?traitUnits ;
-		] .
-    }
-    UNION {
-      BIND ('lifeForm' as ?noUnitsTraitName) .
-      BIND (URI(CONCAT("urn:",?noUnitsTraitName,":",STRUUID())) as ?noUnitsTraitEntity) .
-      ?og aekos:lifeform ?lifeForm .
-      ?lifeForm aekos:category/aekos:name | aekos:commentary ?noUnitsTraitValue .
-    }
-    UNION {
-      BIND ('lifeStage' as ?noUnitsTraitName) .
-      BIND (URI(CONCAT("urn:",?noUnitsTraitName,":",STRUUID())) as ?noUnitsTraitEntity) .
-      ?og aekos:lifestage ?lifeStageOrBag .
-      ?lifeStageOrBag aekos:commentary | rdfs:member/aekos:category/aekos:name ?noUnitsTraitValue .
-    }
-    UNION {
-      BIND ('phenology' as ?noUnitsTraitName) .
-      BIND (URI(CONCAT("urn:",?noUnitsTraitName,":",STRUUID())) as ?noUnitsTraitEntity) .
-      ?og aekos:phenology/rdfs:member ?phenology .
-      ?phenology aekos:commentary | aekos:category/aekos:name ?noUnitsTraitValue .
-    }
-    UNION {
-      BIND ('billLength' as ?traitName) .
-      BIND (URI(CONCAT("urn:",?traitName,":",STRUUID())) as ?traitEntity) .
-      ?og ^aekos:featureof ?morphometrics .
-      ?morphometrics aekos:billlength [
-          aekos:value ?traitValue ;
-          aekos:units/aekos:name ?traitUnits ;
-		] .
-    }
-    UNION {
-      BIND ('billLengthShield' as ?traitName) .
-      BIND (URI(CONCAT("urn:",?traitName,":",STRUUID())) as ?traitEntity) .
-      ?og ^aekos:featureof ?morphometrics .
-      ?morphometrics aekos:billlengthshield [
-          aekos:value ?traitValue ;
-          aekos:units/aekos:name ?traitUnits ;
-		] .
-    }
-    UNION {
-      BIND ('billWidth' as ?traitName) .
-      BIND (URI(CONCAT("urn:",?traitName,":",STRUUID())) as ?traitEntity) .
-      ?og ^aekos:featureof ?morphometrics .
-      ?morphometrics aekos:billwidth [
-          aekos:value ?traitValue ;
-          aekos:units/aekos:name ?traitUnits ;
-		] .
-    }
-    UNION {
-      BIND ('totalLength' as ?traitName) .
-      BIND (URI(CONCAT("urn:",?traitName,":",STRUUID())) as ?traitEntity) .
-      ?og ^aekos:featureof ?morphometrics .
-      ?morphometrics aekos:totallength [
-          aekos:value ?traitValue ;
-          aekos:units/aekos:name ?traitUnits ;
-		] .
-    }
-    UNION {
-      BIND ('weight' as ?traitName) .
-      BIND (URI(CONCAT("urn:",?traitName,":",STRUUID())) as ?traitEntity) .
-      ?og ^aekos:featureof ?morphometrics .
-      ?morphometrics aekos:weight [
-          aekos:value ?traitValue ;
-          aekos:units/aekos:name ?traitUnits ;
-		] .
-    }
-  }
+  BIND (STRUUID() as ?id) .
+  
+  # fake dataset name FIXME
+  BIND ("FIXME" as ?datasetName) .
 }}

@@ -13,6 +13,7 @@ import org.springframework.batch.core.configuration.annotation.EnableBatchProces
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileItemWriter;
@@ -28,6 +29,13 @@ import org.springframework.util.StreamUtils;
 import au.org.aekos.api.producer.rdf.CoreDataAekosJenaModelFactory;
 import au.org.aekos.api.producer.step.citation.AekosCitationRdfReader;
 import au.org.aekos.api.producer.step.citation.in.InputCitationRecord;
+import au.org.aekos.api.producer.step.species.AekosRelationalCsvWriter;
+import au.org.aekos.api.producer.step.species.AekosSpeciesRdfReader;
+import au.org.aekos.api.producer.step.species.SpeciesItemProcessor;
+import au.org.aekos.api.producer.step.species.in.InputSpeciesRecord;
+import au.org.aekos.api.producer.step.species.out.OutputSpeciesWrapper;
+import au.org.aekos.api.producer.step.species.out.OutputSpeciesRecord;
+import au.org.aekos.api.producer.step.species.out.TraitRecord;
 
 @Configuration
 @EnableBatchProcessing
@@ -55,36 +63,45 @@ public class BatchConfiguration {
     	return csvWriter(InputCitationRecord.class, "citations", InputCitationRecord.getCsvFields());
     }
 
-//    @Bean
-//    public SpeciesItemProcessor processor() {
-//        return new SpeciesItemProcessor();
-//    }
-//
-//    @Bean
-//    public ItemWriter<OutputSpeciesWrapper> writer(FlatFileItemWriter<SpeciesRecord> writerSpecies, FlatFileItemWriter<TraitRecord> writerTraitRecord) {
-//    	AekosRelationalCsvWriter result = new AekosRelationalCsvWriter();
-//    	result.setSpeciesWriter(writerSpecies);
-//    	result.setTraitWriter(writerTraitRecord);
-//		return result;
-//    }
-//
-//    @Bean
-//    public FlatFileItemWriter<SpeciesRecord> writerSpecies() throws Throwable {
-//    	return csvWriter(SpeciesRecord.class, "species.csv", SpeciesRecord.getCsvFields());
-//    }
-//
-//    @Bean
-//    public FlatFileItemWriter<TraitRecord> writerTraitRecord() throws Throwable {
-//    	return csvWriter(TraitRecord.class, "traits.csv", TraitRecord.getCsvFields());
-//    }
+    @Bean
+    public ItemReader<InputSpeciesRecord> readerSpecies(String darwinCoreAndTraitsQuery, Dataset coreDS) {
+        AekosSpeciesRdfReader result = new AekosSpeciesRdfReader();
+        result.setDwcAndTraitsQuery(darwinCoreAndTraitsQuery);
+        result.setDs(coreDS);
+		return result;
+    }
+    
+    @Bean
+    public SpeciesItemProcessor processorSpecies() {
+        return new SpeciesItemProcessor();
+    }
+
+    @Bean
+    public ItemWriter<OutputSpeciesWrapper> writer(FlatFileItemWriter<OutputSpeciesRecord> writerSpecies, FlatFileItemWriter<TraitRecord> writerTraitRecord) {
+    	AekosRelationalCsvWriter result = new AekosRelationalCsvWriter();
+    	result.setSpeciesWriter(writerSpecies);
+    	result.setTraitWriter(writerTraitRecord);
+		return result;
+    }
+
+    @Bean
+    public FlatFileItemWriter<OutputSpeciesRecord> writerSpecies() throws Throwable {
+    	return csvWriter(OutputSpeciesRecord.class, "species", OutputSpeciesRecord.getCsvFields());
+    }
+
+    @Bean
+    public FlatFileItemWriter<TraitRecord> writerTraitRecord() throws Throwable {
+    	return csvWriter(TraitRecord.class, "traits", TraitRecord.getCsvFields());
+    }
 
 	@Bean
-    public Job apiDataJob(JobCompletionNotificationListener listener, Step citationStep) {
+    public Job apiDataJob(JobCompletionNotificationListener listener, Step citationStep, Step speciesStep) {
         return jobBuilderFactory.get("apiDataJob")
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
-                .flow(citationStep)
-                .end()
+                .start(citationStep)
+                .next(speciesStep)
+                // TODO add step for env data
                 .build();
     }
 
@@ -97,8 +114,17 @@ public class BatchConfiguration {
                 .build();
     }
     
-    // TODO add step for species data
-    // TODO add step for env data
+    @Bean
+    public Step speciesStep(ItemReader<InputSpeciesRecord> reader, ItemProcessor<InputSpeciesRecord, OutputSpeciesWrapper> processor,
+    		ItemWriter<OutputSpeciesWrapper> writer) {
+        return stepBuilderFactory.get("step2_species")
+                .<InputSpeciesRecord, OutputSpeciesWrapper> chunk(10)
+                .reader(reader)
+                .processor(processor)
+                .writer(writer)
+                .build();
+    }
+    
     
     @Bean
     public Dataset coreDS(CoreDataAekosJenaModelFactory loader) {
