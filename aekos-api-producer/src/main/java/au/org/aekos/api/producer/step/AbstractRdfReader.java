@@ -60,9 +60,11 @@ public abstract class AbstractRdfReader<T> implements ItemReader<T> {
 
 	protected static class Extractor {
 		private QuerySolution solution;
+		private String idVariableName;
 
-		public Extractor(QuerySolution solution) {
+		public Extractor(QuerySolution solution, String idVariableName) {
 			this.solution = solution;
+			this.idVariableName = idVariableName;
 		}
 		
 		public String get(String variableName) {
@@ -90,7 +92,8 @@ public abstract class AbstractRdfReader<T> implements ItemReader<T> {
 			if (literal == null) {
 				Iterable<String> iterable = () -> solution.varNames();
 				Set<String> vars = StreamSupport.stream(iterable.spliterator(), false).collect(Collectors.toSet());
-				throw new IllegalStateException("Data problem: couldn't find the variable '" + variableName + "', only found the vars " + vars);
+				String template = "Data problem: in record ID '%s' couldn't find the variable '%s', only found the vars %s";
+				throw new MissingDataException(String.format(template, getOptional(idVariableName), variableName, vars));
 			}
 			return literal;
 		}

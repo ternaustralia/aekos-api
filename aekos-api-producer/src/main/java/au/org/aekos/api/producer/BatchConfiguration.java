@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.nio.file.Paths;
 
 import org.apache.jena.query.Dataset;
+import org.springframework.batch.core.ItemReadListener;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -27,14 +28,22 @@ import org.springframework.core.io.PathResource;
 import org.springframework.util.StreamUtils;
 
 import au.org.aekos.api.producer.rdf.CoreDataAekosJenaModelFactory;
+import au.org.aekos.api.producer.step.MissingDataException;
 import au.org.aekos.api.producer.step.citation.AekosCitationRdfReader;
 import au.org.aekos.api.producer.step.citation.in.InputCitationRecord;
-import au.org.aekos.api.producer.step.species.AekosRelationalCsvWriter;
+import au.org.aekos.api.producer.step.env.AekosEnvRdfReader;
+import au.org.aekos.api.producer.step.env.AekosEnvRelationalCsvWriter;
+import au.org.aekos.api.producer.step.env.EnvItemProcessor;
+import au.org.aekos.api.producer.step.env.in.InputEnvRecord;
+import au.org.aekos.api.producer.step.env.out.EnvVarRecord;
+import au.org.aekos.api.producer.step.env.out.OutputEnvRecord;
+import au.org.aekos.api.producer.step.env.out.OutputEnvWrapper;
 import au.org.aekos.api.producer.step.species.AekosSpeciesRdfReader;
+import au.org.aekos.api.producer.step.species.AekosSpeciesRelationalCsvWriter;
 import au.org.aekos.api.producer.step.species.SpeciesItemProcessor;
 import au.org.aekos.api.producer.step.species.in.InputSpeciesRecord;
-import au.org.aekos.api.producer.step.species.out.OutputSpeciesWrapper;
 import au.org.aekos.api.producer.step.species.out.OutputSpeciesRecord;
+import au.org.aekos.api.producer.step.species.out.OutputSpeciesWrapper;
 import au.org.aekos.api.producer.step.species.out.TraitRecord;
 
 @Configuration
@@ -50,6 +59,10 @@ public class BatchConfiguration {
     @Value("${aekos-api.output-dir}")
     private String outputDir;
 
+    @Value("${aekos-api.skip-limit}")
+	private int errorSkipLimit;
+
+    // [start citation config]
     @Bean
     public ItemReader<InputCitationRecord> readerCitation(String citationDetailsQuery, Dataset coreDS) {
         AekosCitationRdfReader result = new AekosCitationRdfReader();
@@ -62,7 +75,9 @@ public class BatchConfiguration {
     public FlatFileItemWriter<InputCitationRecord> writerCitation() {
     	return csvWriter(InputCitationRecord.class, "citations", InputCitationRecord.getCsvFields());
     }
+    // [env citation config]
 
+    // [start species config]
     @Bean
     public ItemReader<InputSpeciesRecord> readerSpecies(String darwinCoreAndTraitsQuery, Dataset coreDS) {
         AekosSpeciesRdfReader result = new AekosSpeciesRdfReader();
@@ -77,8 +92,8 @@ public class BatchConfiguration {
     }
 
     @Bean
-    public ItemWriter<OutputSpeciesWrapper> writer(FlatFileItemWriter<OutputSpeciesRecord> writerSpecies, FlatFileItemWriter<TraitRecord> writerTraitRecord) {
-    	AekosRelationalCsvWriter result = new AekosRelationalCsvWriter();
+    public ItemWriter<OutputSpeciesWrapper> writerSpeciesWrapper(FlatFileItemWriter<OutputSpeciesRecord> writerSpecies, FlatFileItemWriter<TraitRecord> writerTraitRecord) {
+    	AekosSpeciesRelationalCsvWriter result = new AekosSpeciesRelationalCsvWriter();
     	result.setSpeciesWriter(writerSpecies);
     	result.setTraitWriter(writerTraitRecord);
 		return result;
@@ -93,15 +108,54 @@ public class BatchConfiguration {
     public FlatFileItemWriter<TraitRecord> writerTraitRecord() throws Throwable {
     	return csvWriter(TraitRecord.class, "traits", TraitRecord.getCsvFields());
     }
+    // [env species config]
 
+    // [start env config]
+    @Bean
+    public ItemReader<InputEnvRecord> readerEnv(String environmentalVariablesQuery, Dataset coreDS) {
+        AekosEnvRdfReader result = new AekosEnvRdfReader();
+        result.setEnvironmentalVariableQuery(environmentalVariablesQuery);
+        result.setDs(coreDS);
+		return result;
+    }
+    
+    @Bean
+    public EnvItemProcessor processorEnv() {
+        return new EnvItemProcessor();
+    }
+
+    @Bean
+    public ItemWriter<OutputEnvWrapper> writerEnvWrapper(FlatFileItemWriter<OutputEnvRecord> writerEnv, FlatFileItemWriter<EnvVarRecord> writerEnvVarRecord) {
+    	AekosEnvRelationalCsvWriter result = new AekosEnvRelationalCsvWriter();
+    	result.setEnvWriter(writerEnv);
+    	result.setVariableWriter(writerEnvVarRecord);
+		return result;
+    }
+
+    @Bean
+    public FlatFileItemWriter<OutputEnvRecord> writerEnv() throws Throwable {
+    	return csvWriter(OutputEnvRecord.class, "env", OutputEnvRecord.getCsvFields());
+    }
+
+    @Bean
+    public FlatFileItemWriter<EnvVarRecord> writerEnvVarRecord() throws Throwable {
+    	return csvWriter(EnvVarRecord.class, "envvars", EnvVarRecord.getCsvFields());
+    }
+    // [env species config]
+    
+    @Bean
+    public ItemReadListener<InputEnvRecord> writerListener() {
+    	return new AekosReaderListener();
+    }
+    
 	@Bean
-    public Job apiDataJob(JobCompletionNotificationListener listener, Step citationStep, Step speciesStep) {
+    public Job apiDataJob(JobCompletionNotificationListener listener, Step citationStep, Step speciesStep, Step envStep) {
         return jobBuilderFactory.get("apiDataJob")
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
                 .start(citationStep)
                 .next(speciesStep)
-                // TODO add step for env data
+                .next(envStep)
                 .build();
     }
 
@@ -115,16 +169,30 @@ public class BatchConfiguration {
     }
     
     @Bean
-    public Step speciesStep(ItemReader<InputSpeciesRecord> reader, ItemProcessor<InputSpeciesRecord, OutputSpeciesWrapper> processor,
-    		ItemWriter<OutputSpeciesWrapper> writer) {
+    public Step speciesStep(ItemReader<InputSpeciesRecord> readerSpecies, ItemProcessor<InputSpeciesRecord, OutputSpeciesWrapper> processorSpecies,
+    		ItemWriter<OutputSpeciesWrapper> writerSpeciesWrapper) {
         return stepBuilderFactory.get("step2_species")
                 .<InputSpeciesRecord, OutputSpeciesWrapper> chunk(10)
-                .reader(reader)
-                .processor(processor)
-                .writer(writer)
+                .reader(readerSpecies)
+                .processor(processorSpecies)
+                .writer(writerSpeciesWrapper)
                 .build();
     }
     
+    @Bean
+    public Step envStep(ItemReader<InputEnvRecord> readerEnv, ItemProcessor<InputEnvRecord, OutputEnvWrapper> processorEnv,
+    		ItemWriter<OutputEnvWrapper> writerEnvWrapper, ItemReadListener<InputEnvRecord> listener) {
+        return stepBuilderFactory.get("step3_env")
+                .<InputEnvRecord, OutputEnvWrapper> chunk(10)
+                .faultTolerant()
+                .skip(MissingDataException.class)
+                .skipLimit(errorSkipLimit)
+                .listener(listener)
+                .reader(readerEnv)
+                .processor(processorEnv)
+                .writer(writerEnvWrapper)
+                .build();
+    }
     
     @Bean
     public Dataset coreDS(CoreDataAekosJenaModelFactory loader) {

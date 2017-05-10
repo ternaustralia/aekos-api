@@ -11,7 +11,7 @@ public class AekosCitationRdfReader extends AbstractRdfReader<InputCitationRecor
 
 	@Override
 	public InputCitationRecord mapSolution(QuerySolution solution) {
-		Extractor e = new Extractor(solution);
+		Extractor e = new Extractor(solution, "samplingProtocol");
 		return new InputCitationRecord(
 				e.get("samplingProtocol"),
 				e.get("bibliographicCitation"),

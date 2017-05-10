@@ -11,7 +11,7 @@ import au.org.aekos.api.producer.step.species.out.OutputSpeciesRecord;
 import au.org.aekos.api.producer.step.species.out.TraitRecord;
 
 @Component
-public class AekosRelationalCsvWriter extends AbstractItemStreamItemWriter<OutputSpeciesWrapper> {
+public class AekosSpeciesRelationalCsvWriter extends AbstractItemStreamItemWriter<OutputSpeciesWrapper> {
 
 	private AbstractItemStreamItemWriter<OutputSpeciesRecord> speciesWriter;
 	private AbstractItemStreamItemWriter<TraitRecord> traitWriter;

@@ -2,45 +2,22 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX aekos: <http://www.aekos.org.au/ontology/1.0.0#>
 PREFIX api: <http://www.aekos.org.au/api/1.0#>
 
-# Builds an environmental variable dataset
-CONSTRUCT {
-  ?locationVisitEntity a api:LocationVisit .
-  ?locationVisitEntity api:decimalLongitude ?decimalLongitude .
-  ?locationVisitEntity api:decimalLatitude ?decimalLatitude .
-  ?locationVisitEntity api:geodeticDatum ?geodeticDatum .
-  ?locationVisitEntity api:locationID ?locationID .
-  ?locationVisitEntity api:eventDate ?eventDate .
-  ?locationVisitEntity api:year ?year .
-  ?locationVisitEntity api:month ?month .
-  # landscape vars
-  ?locationVisitEntity api:landscapeVars ?landscapeTraitEntity .
-  ?landscapeTraitEntity api:name ?landscapeTraitName .
-  ?landscapeTraitEntity api:value ?landscapeTraitValue .
-  ?landscapeTraitEntity api:units ?landscapeTraitUnits .
-  # no units vars
-  ?locationVisitEntity api:noUnitsVars ?noUnitsTraitEntity .
-  ?noUnitsTraitEntity api:name ?noUnitsTraitName .
-  ?noUnitsTraitEntity api:value ?noUnitsTraitValue .
-  ?noUnitsTraitEntity api:units ?noUnits .
-  # soil vars
-  ?locationVisitEntity api:soilVars ?soilTraitEntity .
-  ?soilTraitEntity api:name ?soilTraitName .
-  ?soilTraitEntity api:value ?soilTraitValue .
-  ?soilTraitEntity api:units ?soilTraitUnits .
-  # disturbance evidence
-  ?locationVisitEntity api:disturbanceEvidenceVars ?disturbanceEvidenceCoverEntity .
-  ?disturbanceEvidenceCoverEntity api:name ?disturbanceEvidenceCoverName .
-  ?disturbanceEvidenceCoverEntity api:value ?disturbanceEvidenceCoverValue .
-  ?disturbanceEvidenceCoverEntity api:units ?disturbanceEvidenceCoverUnits .
-}
+# Gets the easy part of the environmental variable dataset (just the 1:1 bits)
+SELECT
+	?decimalLongitude
+	?decimalLatitude
+	?geodeticDatum
+	?locationID
+	?locationName
+	?eventDate
+	?year
+	?month
 WHERE {
   GRAPH ?g {
-    ?slsg a ?slsgType .
-    VALUES ?slsgType {
-      aekos:STUDYLOCATIONSUBGRAPH
-    }
+    ?slsg a aekos:STUDYLOCATIONSUBGRAPH .
     # location ID
     ?slsg aekos:aekoslocationidentifier ?locationID .
+    ?slsg aekos:studylocationidentifier ?locationName .
     # location
     OPTIONAL {
       ?slsg aekos:studylocation/aekos:location/aekos:sampledpoint [
@@ -57,11 +34,7 @@ WHERE {
     BIND(COALESCE(?decimalLongitude1, ?decimalLongitude2) AS ?decimalLongitude) .
     BIND(COALESCE(?decimalLatitude1, ?decimalLatitude2) AS ?decimalLatitude) .
     BIND('GDA94' as ?geodeticDatum) .
-    # empty string for variables without units
-    BIND ('' as ?noUnits) .
     ?slsg aekos:views/rdfs:member ?vv .
-    # synthetic entity ID for the Study Location Visit
-    BIND (UUID() as ?locationVisitEntity) .
     # eventDate
     OPTIONAL {
       ?vv aekos:observeditems/rdfs:member ?su1 .
@@ -71,18 +44,13 @@ WHERE {
         aekos:SAMPLINGUNITVIS
         aekos:SAMPLINGUNITRSV
         aekos:SAMPLINGUNITATRIPLEX
-        aekos:SAMPLINGUNITRABBITWARRENS
+        aekos:SAMPLINGUNITRABBITWARRENS # FIXME can I remove?
       } .
       ?su1 aekos:temporality/aekos:has_start ?eventDateTemp1 .
     }
     OPTIONAL {
       ?vv aekos:observeditems/rdfs:member ?sa1 .
-      ?sa1 a ?sa1Type .
-      VALUES ?sa1Type {
-        aekos:SAMPLEDAREA
-        aekos:SAMPLEDAREAACSS
-  #      aekos:SAMPLEDAREAVIS # Not in the data
-      } .
+      ?sa1 a aekos:SAMPLEDAREA .
       ?sa1 aekos:temporality/aekos:has_start ?eventDateTemp2 .
     }
     OPTIONAL {
@@ -90,16 +58,10 @@ WHERE {
       ?oi a ?oiType .
       VALUES ?oiType {
         aekos:LANDSCAPE
-        aekos:LANDSCAPEVIS
         aekos:SOIL
-        aekos:SOILVIS
         aekos:SOILAP
         aekos:FIREEVIDENCE
         aekos:DISTURBANCEEVIDENCE
-        aekos:DISTURBANCEEVIDENCE_KOONAMORE
-        aekos:DISTURBANCEEVIDENCE_KOONAMORE_DETAILS
-        aekos:DISTURBANCEEVIDENCERSV
-        aekos:DISTURBANCEEVIDENCEVIS
         aekos:EROSIONEVIDENCE
         aekos:SOILSAMPLE # work around for TERN_AUSPLOTS and TERN_TREND
       }

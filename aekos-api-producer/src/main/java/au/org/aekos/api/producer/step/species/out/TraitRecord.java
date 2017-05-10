@@ -3,19 +3,19 @@ package au.org.aekos.api.producer.step.species.out;
 import au.org.aekos.api.producer.Utils;
 
 public class TraitRecord {
-	private final int parentId;
+	private final String parentId;
 	private final String name;
 	private final String value;
 	private final String units;
 	
-	public TraitRecord(int parentId, String name, String value, String units) {
+	public TraitRecord(String parentId, String name, String value, String units) {
 		this.parentId = parentId;
 		this.name = name;
 		this.value = value;
 		this.units = units;
 	}
 
-	public int getParentId() {
+	public String getParentId() {
 		return parentId;
 	}
 
