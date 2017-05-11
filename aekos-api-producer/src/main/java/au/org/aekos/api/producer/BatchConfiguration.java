@@ -25,6 +25,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.PathResource;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.core.task.SyncTaskExecutor;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.util.StreamUtils;
 
 import au.org.aekos.api.producer.rdf.CoreDataAekosJenaModelFactory;
@@ -61,6 +64,9 @@ public class BatchConfiguration {
 
     @Value("${aekos-api.skip-limit}")
 	private int errorSkipLimit;
+    
+    @Value("${aekos-api.is-async}")
+    private boolean isAsync;
 
     // [start citation config]
     @Bean
@@ -144,6 +150,14 @@ public class BatchConfiguration {
     // [env species config]
     
     @Bean
+    public TaskExecutor taskExecutor() {
+    	if (isAsync) {
+    		return new SimpleAsyncTaskExecutor("apiData");
+    	}
+    	return new SyncTaskExecutor();
+    }
+    
+    @Bean
     public ItemReadListener<InputEnvRecord> writerListener() {
     	return new AekosReaderListener();
     }
@@ -160,28 +174,30 @@ public class BatchConfiguration {
     }
 
     @Bean
-    public Step citationStep(ItemReader<InputCitationRecord> reader, ItemWriter<InputCitationRecord> writer) {
+    public Step citationStep(ItemReader<InputCitationRecord> reader, ItemWriter<InputCitationRecord> writer , TaskExecutor taskExecutor) {
         return stepBuilderFactory.get("step1_citation")
                 .<InputCitationRecord, InputCitationRecord> chunk(10)
                 .reader(reader)
                 .writer(writer)
+                .taskExecutor(taskExecutor)
                 .build();
     }
     
     @Bean
     public Step speciesStep(ItemReader<InputSpeciesRecord> readerSpecies, ItemProcessor<InputSpeciesRecord, OutputSpeciesWrapper> processorSpecies,
-    		ItemWriter<OutputSpeciesWrapper> writerSpeciesWrapper) {
+    		ItemWriter<OutputSpeciesWrapper> writerSpeciesWrapper, TaskExecutor taskExecutor) {
         return stepBuilderFactory.get("step2_species")
                 .<InputSpeciesRecord, OutputSpeciesWrapper> chunk(10)
                 .reader(readerSpecies)
                 .processor(processorSpecies)
                 .writer(writerSpeciesWrapper)
+                .taskExecutor(taskExecutor)
                 .build();
     }
     
     @Bean
     public Step envStep(ItemReader<InputEnvRecord> readerEnv, ItemProcessor<InputEnvRecord, OutputEnvWrapper> processorEnv,
-    		ItemWriter<OutputEnvWrapper> writerEnvWrapper, ItemReadListener<InputEnvRecord> listener) {
+    		ItemWriter<OutputEnvWrapper> writerEnvWrapper, ItemReadListener<InputEnvRecord> listener, TaskExecutor taskExecutor) {
         return stepBuilderFactory.get("step3_env")
                 .<InputEnvRecord, OutputEnvWrapper> chunk(10)
                 .faultTolerant()
@@ -191,6 +207,7 @@ public class BatchConfiguration {
                 .reader(readerEnv)
                 .processor(processorEnv)
                 .writer(writerEnvWrapper)
+                .taskExecutor(taskExecutor)
                 .build();
     }
     

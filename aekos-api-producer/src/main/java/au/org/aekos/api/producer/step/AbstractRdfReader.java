@@ -31,8 +31,11 @@ public abstract class AbstractRdfReader<T> implements ItemReader<T> {
 	private QueryExecution qexec;
 	
 	@Override
-	public T read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
+	public synchronized T read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
 		checkInit();
+		if (qexec.isClosed()) { // FIXME not sure why we still get a call after we've returned the pill
+			return null;
+		}
 		boolean isNoMoreRecords = !theResults.hasNext();
 		if (isNoMoreRecords) {
 			long elapsed = (now() - start) / 1000;

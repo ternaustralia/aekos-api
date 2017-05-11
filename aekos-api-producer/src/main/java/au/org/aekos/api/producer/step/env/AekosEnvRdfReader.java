@@ -17,7 +17,8 @@ public class AekosEnvRdfReader extends AbstractRdfReader<InputEnvRecord> {
 				e.getDouble("decimalLatitude"),
 				e.getDouble("decimalLongitude"),
 				e.get("geodeticDatum"),
-				e.get("locationName")
+				e.get("locationName"),
+				e.get("samplingProtocol")
 			);
 	}
 	

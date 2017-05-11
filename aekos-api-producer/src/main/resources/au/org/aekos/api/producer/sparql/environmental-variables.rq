@@ -9,12 +9,15 @@ SELECT
 	?geodeticDatum
 	?locationID
 	?locationName
+	?samplingProtocol
 WHERE {
   GRAPH ?g {
     ?slsg a aekos:STUDYLOCATIONSUBGRAPH .
     # location ID
     ?slsg aekos:aekoslocationidentifier ?locationID .
     ?slsg aekos:studylocationidentifier ?locationName .
+    # sampling protocol
+    ?slsg aekos:aekossurveyidentifier ?samplingProtocol .
     # location
     OPTIONAL {
       ?slsg aekos:studylocation/aekos:location/aekos:sampledpoint [

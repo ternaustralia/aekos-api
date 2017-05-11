@@ -4,19 +4,19 @@ import java.util.Collections;
 import java.util.List;
 
 public class OutputEnvWrapper {
-	private final OutputEnvRecord speciesRecord;
-	private final List<EnvVarRecord> traitRecords;
+	private final OutputEnvRecord envRecord;
+	private final List<EnvVarRecord> envVarRecords;
 
-	public OutputEnvWrapper(OutputEnvRecord speciesRecord, List<EnvVarRecord> traitRecords) {
-		this.speciesRecord = speciesRecord;
-		this.traitRecords = traitRecords;
+	public OutputEnvWrapper(OutputEnvRecord envRecord, List<EnvVarRecord> envVarRecords) {
+		this.envRecord = envRecord;
+		this.envVarRecords = envVarRecords;
 	}
 
-	public List<OutputEnvRecord> getSpeciesRecord() {
-		return Collections.singletonList(speciesRecord);
+	public List<OutputEnvRecord> getEnvRecord() {
+		return Collections.singletonList(envRecord);
 	}
 
-	public List<EnvVarRecord> getTraitRecords() {
-		return traitRecords;
+	public List<EnvVarRecord> getEnvVarRecords() {
+		return Collections.unmodifiableList(envVarRecords);
 	}
 }

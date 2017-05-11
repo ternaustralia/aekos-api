@@ -47,9 +47,13 @@ public class OutputEnvRecord {
 	public int getYear() {
 		return year;
 	}
+	
+	public String getSamplingProtocol() {
+		return Utils.quote(coreRecord.getSamplingProtocol());
+	}
 
 	public static String[] getCsvFields() {
-		return new String[] {"locationID", "decimalLatitude", "decimalLongitude", "eventDate", "geodeticDatum",
-				"locationName", "month", "year"};
+		return new String[] {"locationID", "decimalLatitude", "decimalLongitude", "geodeticDatum", "eventDate",
+				"month", "year", "locationName", "samplingProtocol"};
 	}
 }

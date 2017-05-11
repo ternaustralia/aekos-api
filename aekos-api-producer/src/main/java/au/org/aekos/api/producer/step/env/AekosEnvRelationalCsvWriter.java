@@ -19,8 +19,8 @@ public class AekosEnvRelationalCsvWriter extends AbstractItemStreamItemWriter<Ou
 	@Override
 	public void write(List<? extends OutputEnvWrapper> items) throws Exception {
 		for (OutputEnvWrapper curr : items) {
-			envWriter.write(curr.getSpeciesRecord());
-			variableWriter.write(curr.getTraitRecords());
+			envWriter.write(curr.getEnvRecord());
+			variableWriter.write(curr.getEnvVarRecords());
 		}
 	}
 	

@@ -6,13 +6,16 @@ public class InputEnvRecord {
 	private final double decimalLongitude;
 	private final String geodeticDatum;
 	private final String locationName;
+	private final String samplingProtocol;
 
-	public InputEnvRecord(String locationID, double decimalLatitude, double decimalLongitude, String geodeticDatum, String locationName) {
+	public InputEnvRecord(String locationID, double decimalLatitude, double decimalLongitude, String geodeticDatum, String locationName,
+			String samplingProtocol) {
 		this.locationID = locationID;
 		this.decimalLatitude = decimalLatitude;
 		this.decimalLongitude = decimalLongitude;
 		this.geodeticDatum = geodeticDatum;
 		this.locationName = locationName;
+		this.samplingProtocol = samplingProtocol;
 	}
 
 	public String getLocationID() {
@@ -33,5 +36,9 @@ public class InputEnvRecord {
 
 	public String getLocationName() {
 		return locationName;
+	}
+
+	public String getSamplingProtocol() {
+		return samplingProtocol;
 	}
 }
