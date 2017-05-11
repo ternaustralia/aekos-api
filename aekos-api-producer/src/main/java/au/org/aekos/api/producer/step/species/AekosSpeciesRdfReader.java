@@ -14,19 +14,10 @@ public class AekosSpeciesRdfReader extends AbstractRdfReader<InputSpeciesRecord>
 		Extractor e = new Extractor(solution, "scientificName"/*FIXME this isnt' specific enough to find issues*/);
 		return new InputSpeciesRecord(
 				e.get("id"),
-				e.get("datasetName"),
-				e.getDouble("decimalLatitude"),
-				e.getDouble("decimalLongitude"),
-				e.get("eventDate"),
-				e.get("geodeticDatum"),
 				e.getInt("individualCount"),
 				e.get("locationID"),
-				e.get("locationName"),
-				e.getInt("month"),
-				e.get("samplingProtocol"),
 				e.getOptional("scientificName"),
-				e.getOptional("taxonRemarks"),
-				e.getInt("year")
+				e.getOptional("taxonRemarks")
 			);
 	}
 	

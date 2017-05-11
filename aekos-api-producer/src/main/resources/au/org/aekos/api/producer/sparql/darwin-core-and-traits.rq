@@ -5,19 +5,10 @@ PREFIX api: <http://www.aekos.org.au/api/1.0#>
 # Gets the easy part of the Darwin Core + traits dataset (just the 1:1 bits)
 SELECT
 	?id
-	?datasetName 
-	?decimalLongitude
-	?decimalLatitude
-	?geodeticDatum
 	?locationID
-	?locationName
 	?scientificName
 	?taxonRemarks
 	?individualCount
-	?eventDate
-	?year
-	?month
-	?samplingProtocol
 WHERE { GRAPH ?g {
    ?og a ?ogType .
    VALUES ?ogType {
@@ -56,43 +47,9 @@ WHERE { GRAPH ?g {
   ?og ^rdfs:member/^aekos:observeditems/^rdfs:member/^aekos:views ?slsg .
   # study location IDs
   ?slsg aekos:aekoslocationidentifier ?locationID .
-  ?slsg aekos:aekossurveyidentifier ?samplingProtocol .
-  ?slsg aekos:studylocationidentifier ?locationName .
-  # location
-  OPTIONAL {
-    ?slsg aekos:studylocation/aekos:location/aekos:sampledpoint [
-      aekos:computedlongitude ?decimalLongitude1 ;
-      aekos:computedlatitude ?decimalLatitude1
-    ] .
-  }
-  OPTIONAL {
-    ?slsg aekos:centroidcoordinates [
-      aekos:computedlongitude ?decimalLongitude2 ;
-      aekos:computedlatitude ?decimalLatitude2
-    ] .
-  }
-  BIND(COALESCE(?decimalLongitude1, ?decimalLongitude2) AS ?decimalLongitude) .
-  BIND(COALESCE(?decimalLatitude1, ?decimalLatitude2) AS ?decimalLatitude) .
-  BIND('GDA94' as ?geodeticDatum) .
   # individualCount
   OPTIONAL {?og aekos:absoluteabundance/aekos:value ?absoluteAbundance . }
   BIND (COALESCE(?absoluteAbundance, 1) as ?individualCount) .
-  # eventDate
-  OPTIONAL {
-    ?og aekos:temporality/aekos:has_start ?eventDateTemp1 .
-  }
-  OPTIONAL {
-    ?og aekos:method/aekos:duration/aekos:has_start ?eventDateTemp2 .
-  }
-  BIND(COALESCE(?eventDateTemp1, ?eventDateTemp2) AS ?eventDateTemp)
-  BIND (CONCAT(str(year(?eventDateTemp)),"-",str(month(?eventDateTemp)),"-",str(day(?eventDateTemp))) as ?eventDate) .
-  # month
-  BIND (month(?eventDateTemp) as ?month) .
-  # year
-  BIND (year(?eventDateTemp) as ?year) .
-  # make an ID for the CONSTRUCT clause
+  # make an ID for this record
   BIND (STRUUID() as ?id) .
-  
-  # fake dataset name FIXME
-  BIND ("FIXME" as ?datasetName) .
 }}
