@@ -1,0 +1,12 @@
+PREFIX : <urn:>
+
+SELECT *
+WHERE {
+	GRAPH ?rdfGraph {
+		?rdfSubject :id ?id .
+		?rdfSubject :individualCount ?individualCount .
+		?rdfSubject :locationID ?locationID .
+		?rdfSubject :scientificName ?scientificName .
+		?rdfSubject :taxonRemarks ?taxonRemarks .
+	}
+}

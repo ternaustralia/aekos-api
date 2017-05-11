@@ -3,21 +3,27 @@ package au.org.aekos.api.producer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.ItemReadListener;
+import org.springframework.stereotype.Component;
 
-import au.org.aekos.api.producer.step.env.in.InputEnvRecord;
+@Component
+public class AekosReaderListener implements ItemReadListener<Object> {
 
-public class AekosReaderListener implements ItemReadListener<InputEnvRecord> {
-
-    private static Logger logger = LoggerFactory.getLogger(AekosReaderListener.class);
-
+    private static final Logger logger = LoggerFactory.getLogger(AekosReaderListener.class);
+    private int errorCounter = 0;
+    
 	@Override
 	public void beforeRead() { }
 
 	@Override
-	public void afterRead(InputEnvRecord item) { }
+	public void afterRead(Object item) { }
 
 	@Override
 	public void onReadError(Exception e) {
 		logger.error("Data read problem: Failed whilst reading a record, it will be skipped", e);
+		errorCounter++;
+	}
+
+	public int getErrorCounter() {
+		return errorCounter;
 	}
 }

@@ -11,9 +11,11 @@ public class AekosSpeciesRdfReader extends AbstractRdfReader<InputSpeciesRecord>
 
 	@Override
 	public InputSpeciesRecord mapSolution(QuerySolution solution) {
-		Extractor e = new Extractor(solution, "scientificName"/*FIXME this isnt' specific enough to find issues*/);
+		Extractor e = new Extractor(solution, "scientificName"/*FIXME this isn't specific enough to find issues*/);
 		return new InputSpeciesRecord(
 				e.get("id"),
+				e.getResourceUri("rdfSubject"),
+				e.getResourceUri("rdfGraph"),
 				e.getInt("individualCount"),
 				e.get("locationID"),
 				e.getOptional("scientificName"),

@@ -74,6 +74,10 @@ public abstract class AbstractRdfReader<T> implements ItemReader<T> {
 			return getLiteral(variableName).getString();
 		}
 		
+		public String getResourceUri(String variableName) {
+			return solution.getResource(variableName).getURI();
+		}
+		
 		public String getOptional(String variableName) {
 			Literal literal = solution.getLiteral(variableName);
 			if (literal == null) {

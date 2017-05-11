@@ -1,12 +1,11 @@
 package au.org.aekos.api.producer;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.file.Paths;
+import java.util.List;
 
 import org.apache.jena.query.Dataset;
+import org.springframework.batch.core.ItemProcessListener;
 import org.springframework.batch.core.ItemReadListener;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -28,7 +27,6 @@ import org.springframework.core.io.PathResource;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.util.StreamUtils;
 
 import au.org.aekos.api.producer.rdf.CoreDataAekosJenaModelFactory;
 import au.org.aekos.api.producer.step.MissingDataException;
@@ -44,6 +42,8 @@ import au.org.aekos.api.producer.step.env.out.OutputEnvWrapper;
 import au.org.aekos.api.producer.step.species.AekosSpeciesRdfReader;
 import au.org.aekos.api.producer.step.species.AekosSpeciesRelationalCsvWriter;
 import au.org.aekos.api.producer.step.species.SpeciesItemProcessor;
+import au.org.aekos.api.producer.step.species.TraitExtractor;
+import au.org.aekos.api.producer.step.species.UnitsBasedTraitExtractor;
 import au.org.aekos.api.producer.step.species.in.InputSpeciesRecord;
 import au.org.aekos.api.producer.step.species.out.OutputSpeciesRecord;
 import au.org.aekos.api.producer.step.species.out.OutputSpeciesWrapper;
@@ -68,6 +68,12 @@ public class BatchConfiguration {
     @Value("${aekos-api.is-async}")
     private boolean isAsync;
 
+    @Value("${aekos-api.property-namespace}")
+	private String propertyNamespace;
+
+    @Value("${aekos-api.common-graph-name}")
+	private String commonGraphName;
+
     // [start citation config]
     @Bean
     public ItemReader<InputCitationRecord> readerCitation(String citationDetailsQuery, Dataset coreDS) {
@@ -81,7 +87,7 @@ public class BatchConfiguration {
     public FlatFileItemWriter<InputCitationRecord> writerCitation() {
     	return csvWriter(InputCitationRecord.class, "citations", InputCitationRecord.getCsvFields());
     }
-    // [env citation config]
+    // [end citation config]
 
     // [start species config]
     @Bean
@@ -93,8 +99,19 @@ public class BatchConfiguration {
     }
     
     @Bean
-    public SpeciesItemProcessor processorSpecies() {
-        return new SpeciesItemProcessor();
+    public TraitExtractor heightExtractor(ExtractionHelper extractionHelper) {
+    	UnitsBasedTraitExtractor result = new UnitsBasedTraitExtractor();
+    	result.setHelper(extractionHelper);
+    	result.setReferencingPropertyName("height");
+		return result;
+    }
+    
+    @Bean
+    public SpeciesItemProcessor processorSpecies(List<TraitExtractor> traitExtractors, Dataset ds) {
+        SpeciesItemProcessor result = new SpeciesItemProcessor();
+        result.setExtractors(traitExtractors);
+        result.setDataset(ds);
+		return result;
     }
 
     @Bean
@@ -114,7 +131,7 @@ public class BatchConfiguration {
     public FlatFileItemWriter<TraitRecord> writerTraitRecord() throws Throwable {
     	return csvWriter(TraitRecord.class, "traits", TraitRecord.getCsvFields());
     }
-    // [env species config]
+    // [end species config]
 
     // [start env config]
     @Bean
@@ -147,19 +164,21 @@ public class BatchConfiguration {
     public FlatFileItemWriter<EnvVarRecord> writerEnvVarRecord() throws Throwable {
     	return csvWriter(EnvVarRecord.class, "envvars", EnvVarRecord.getCsvFields());
     }
-    // [env species config]
+    // [env env config]
+    
+    @Bean
+    public ExtractionHelper extractionHelper(Dataset ds) {
+    	ExtractionHelper result = new ExtractionHelper(propertyNamespace);
+    	result.setCommonGraph(ds.getNamedModel(commonGraphName));
+		return result;
+    }
     
     @Bean
     public TaskExecutor taskExecutor() {
     	if (isAsync) {
-    		return new SimpleAsyncTaskExecutor("apiData");
+    		return new SimpleAsyncTaskExecutor("apiData"); // Consider changing to ThreadPoolTaskExecutor
     	}
     	return new SyncTaskExecutor();
-    }
-    
-    @Bean
-    public ItemReadListener<InputEnvRecord> writerListener() {
-    	return new AekosReaderListener();
     }
     
 	@Bean
@@ -185,9 +204,15 @@ public class BatchConfiguration {
     
     @Bean
     public Step speciesStep(ItemReader<InputSpeciesRecord> readerSpecies, ItemProcessor<InputSpeciesRecord, OutputSpeciesWrapper> processorSpecies,
-    		ItemWriter<OutputSpeciesWrapper> writerSpeciesWrapper, TaskExecutor taskExecutor) {
+    		ItemWriter<OutputSpeciesWrapper> writerSpeciesWrapper, ItemReadListener<Object> readListener, ItemProcessListener<Object, Object> processListener,
+    		TaskExecutor taskExecutor) {
         return stepBuilderFactory.get("step2_species")
-                .<InputSpeciesRecord, OutputSpeciesWrapper> chunk(10)
+                .<InputSpeciesRecord, OutputSpeciesWrapper> chunk(1)
+                .faultTolerant()
+                .skip(MissingDataException.class)
+                .skipLimit(errorSkipLimit)
+                .listener(readListener)
+                .listener(processListener)
                 .reader(readerSpecies)
                 .processor(processorSpecies)
                 .writer(writerSpeciesWrapper)
@@ -197,13 +222,15 @@ public class BatchConfiguration {
     
     @Bean
     public Step envStep(ItemReader<InputEnvRecord> readerEnv, ItemProcessor<InputEnvRecord, OutputEnvWrapper> processorEnv,
-    		ItemWriter<OutputEnvWrapper> writerEnvWrapper, ItemReadListener<InputEnvRecord> listener, TaskExecutor taskExecutor) {
+    		ItemWriter<OutputEnvWrapper> writerEnvWrapper, ItemReadListener<Object> readListener, ItemProcessListener<Object, Object> processListener,
+    		TaskExecutor taskExecutor) {
         return stepBuilderFactory.get("step3_env")
                 .<InputEnvRecord, OutputEnvWrapper> chunk(10)
                 .faultTolerant()
                 .skip(MissingDataException.class)
                 .skipLimit(errorSkipLimit)
-                .listener(listener)
+                .listener(readListener)
+                .listener(processListener)
                 .reader(readerEnv)
                 .processor(processorEnv)
                 .writer(writerEnvWrapper)
@@ -232,10 +259,7 @@ public class BatchConfiguration {
     }
 
 	private String getSparqlQuery(String fileName) throws IOException {
-		InputStream sparqlIS = Thread.currentThread().getContextClassLoader().getResourceAsStream("au/org/aekos/api/producer/sparql/" + fileName);
-		OutputStream out = new ByteArrayOutputStream();
-		StreamUtils.copy(sparqlIS, out);
-		return out.toString();
+		return Utils.getResourceAsString("au/org/aekos/api/producer/sparql/" + fileName);
 	}
     
     private <T> FlatFileItemWriter<T> csvWriter(Class<T> type, String outputTableName, String[] fields) {

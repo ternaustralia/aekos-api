@@ -16,7 +16,7 @@ public class TraitRecord {
 	}
 
 	public String getParentId() {
-		return parentId;
+		return Utils.quote(parentId);
 	}
 
 	public String getName() {

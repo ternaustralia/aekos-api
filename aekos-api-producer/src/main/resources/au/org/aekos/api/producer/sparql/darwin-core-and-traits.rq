@@ -5,6 +5,8 @@ PREFIX api: <http://www.aekos.org.au/api/1.0#>
 # Gets the easy part of the Darwin Core + traits dataset (just the 1:1 bits)
 SELECT
 	?id
+	(?og as ?rdfSubject)
+	(?g as ?rdfGraph)
 	?locationID
 	?scientificName
 	?taxonRemarks

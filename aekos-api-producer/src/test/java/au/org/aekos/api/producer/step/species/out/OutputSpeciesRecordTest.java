@@ -15,7 +15,8 @@ private OutputSpeciesRecord objectUnderTest;
 	
 	@Before
 	public void before() {
-		objectUnderTest = new OutputSpeciesRecord(new InputSpeciesRecord("abc-123", 1, "location123", "macropus rufus", "buffalo grass"));
+		objectUnderTest = new OutputSpeciesRecord(new InputSpeciesRecord("abc-123", "urn:someSpeciesRecord", "urn:someGraph",
+				1, "location123", "macropus rufus", "buffalo grass"));
 	}
 	
 	/**

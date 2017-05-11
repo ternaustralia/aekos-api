@@ -2,13 +2,18 @@ package au.org.aekos.api.producer.step.species.in;
 
 public class InputSpeciesRecord {
 	private final String id;
+	private final String rdfSubject;
+	private final String rdfGraph;
 	private final int individualCount;
 	private final String locationID;
 	private final String scientificName;
 	private final String taxonRemarks;
 
-	public InputSpeciesRecord(String id, int individualCount, String locationID, String scientificName, String taxonRemarks) {
+	public InputSpeciesRecord(String id, String rdfSubject, String rdfGraph, int individualCount, String locationID,
+			String scientificName, String taxonRemarks) {
 		this.id = id;
+		this.rdfSubject = rdfSubject;
+		this.rdfGraph = rdfGraph;
 		this.individualCount = individualCount;
 		this.locationID = locationID;
 		this.scientificName = scientificName;
@@ -21,6 +26,14 @@ public class InputSpeciesRecord {
 
 	public String getId() {
 		return id;
+	}
+
+	public String getRdfSubject() {
+		return rdfSubject;
+	}
+
+	public String getRdfGraph() {
+		return rdfGraph;
 	}
 
 	public int getIndividualCount() {
