@@ -40,6 +40,7 @@ import au.org.aekos.api.producer.step.env.out.OutputEnvRecord;
 import au.org.aekos.api.producer.step.env.out.OutputEnvWrapper;
 import au.org.aekos.api.producer.step.species.AekosSpeciesRdfReader;
 import au.org.aekos.api.producer.step.species.AekosSpeciesRelationalCsvWriter;
+import au.org.aekos.api.producer.step.species.SingleBagElementNoUnitsTraitExtractor;
 import au.org.aekos.api.producer.step.species.SpeciesItemProcessor;
 import au.org.aekos.api.producer.step.species.TraitExtractor;
 import au.org.aekos.api.producer.step.species.UnitsBasedTraitExtractor;
@@ -107,6 +108,15 @@ public class BatchConfiguration {
     	UnitsBasedTraitExtractor result = new UnitsBasedTraitExtractor();
     	result.setHelper(extractionHelper);
     	result.setReferencingPropertyName("biomass");
+		return result;
+    }
+    
+    @Bean
+    public TraitExtractor lifeStageExtractor(ExtractionHelper extractionHelper) { // FIXME need to crawl whole bag
+    	SingleBagElementNoUnitsTraitExtractor result = new SingleBagElementNoUnitsTraitExtractor();
+    	result.setHelper(extractionHelper);
+    	result.setReferencingPropertyName("lifestage");
+    	result.setNestedPropertyName("commentary");
 		return result;
     }
     

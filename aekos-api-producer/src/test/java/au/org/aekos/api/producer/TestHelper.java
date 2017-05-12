@@ -2,6 +2,7 @@ package au.org.aekos.api.producer;
 
 import java.util.function.Consumer;
 
+import org.apache.jena.rdf.model.Bag;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
@@ -34,7 +35,21 @@ public class TestHelper {
 	public void addResourceReference(Resource subject, String propertyName, Resource object) {
 		subject.addProperty(prop(propertyName), object);
 	}
-
+	
+	public void addBagElement(Bag bag, Consumer<Resource> callback) {
+		Model model = bag.getModel();
+		Resource element = model.createResource();
+		callback.accept(element);
+		bag.add(element);
+	}
+	
+	public void addBag(Resource subject, String propertyName, Consumer<Bag> elementCallback) {
+		Model model = subject.getModel();
+		Bag bag = model.createBag();
+		subject.addProperty(prop(propertyName), bag);
+		elementCallback.accept(bag);
+	}
+	
 	private Property prop(String propertyName) {
 		return helperModel.createProperty(propertyNamespace + propertyName);
 	}
