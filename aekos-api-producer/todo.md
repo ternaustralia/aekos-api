@@ -1,0 +1,1 @@
+- the env.samplingProtocol is 1, not the url
