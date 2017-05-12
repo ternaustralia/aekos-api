@@ -47,6 +47,22 @@ public class SpeciesItemProcessorTest {
 		assertThat(traits.get(0).getName(), is("\"height\""));
 	}
 
+	/**
+	 * Is the expected log message printed (unfortunately we can't assert anything)?
+	 */
+	@Test
+	public void testReportProblems01() {
+		SpeciesItemProcessor objectUnderTest = new SpeciesItemProcessor();
+		TraitExtractor extractor = new TraitExtractor() {
+			@Override public String getId() { return "textExtractor1"; }
+			@Override public TraitRecord doExtractOn(Resource subject, String parentId) { return null; }
+		};
+		objectUnderTest.logErrorFor(extractor);
+		objectUnderTest.logErrorFor(extractor);
+		objectUnderTest.logErrorFor(extractor);
+		objectUnderTest.reportProblems();
+	}
+	
 	private TraitExtractor unitExtractor(String referencingPropertyName, Model commonGraph) {
 		UnitsBasedTraitExtractor result = new UnitsBasedTraitExtractor();
 		ExtractionHelper helper = new ExtractionHelper(PROPERTY_NAMESPACE);

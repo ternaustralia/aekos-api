@@ -29,7 +29,6 @@ import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 
 import au.org.aekos.api.producer.rdf.CoreDataAekosJenaModelFactory;
-import au.org.aekos.api.producer.step.MissingDataException;
 import au.org.aekos.api.producer.step.citation.AekosCitationRdfReader;
 import au.org.aekos.api.producer.step.citation.in.InputCitationRecord;
 import au.org.aekos.api.producer.step.env.AekosEnvRdfReader;
@@ -62,9 +61,6 @@ public class BatchConfiguration {
     @Value("${aekos-api.output-dir}")
     private String outputDir;
 
-    @Value("${aekos-api.skip-limit}")
-	private int errorSkipLimit;
-    
     @Value("${aekos-api.is-async}")
     private boolean isAsync;
 
@@ -107,6 +103,14 @@ public class BatchConfiguration {
     }
     
     @Bean
+    public TraitExtractor biomassExtractor(ExtractionHelper extractionHelper) {
+    	UnitsBasedTraitExtractor result = new UnitsBasedTraitExtractor();
+    	result.setHelper(extractionHelper);
+    	result.setReferencingPropertyName("biomass");
+		return result;
+    }
+    
+    @Bean(destroyMethod="reportProblems")
     public SpeciesItemProcessor processorSpecies(List<TraitExtractor> traitExtractors, Dataset ds) {
         SpeciesItemProcessor result = new SpeciesItemProcessor();
         result.setExtractors(traitExtractors);
@@ -208,9 +212,6 @@ public class BatchConfiguration {
     		TaskExecutor taskExecutor) {
         return stepBuilderFactory.get("step2_species")
                 .<InputSpeciesRecord, OutputSpeciesWrapper> chunk(1)
-                .faultTolerant()
-                .skip(MissingDataException.class)
-                .skipLimit(errorSkipLimit)
                 .listener(readListener)
                 .listener(processListener)
                 .reader(readerSpecies)
@@ -226,9 +227,6 @@ public class BatchConfiguration {
     		TaskExecutor taskExecutor) {
         return stepBuilderFactory.get("step3_env")
                 .<InputEnvRecord, OutputEnvWrapper> chunk(10)
-                .faultTolerant()
-                .skip(MissingDataException.class)
-                .skipLimit(errorSkipLimit)
                 .listener(readListener)
                 .listener(processListener)
                 .reader(readerEnv)

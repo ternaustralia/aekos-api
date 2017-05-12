@@ -19,6 +19,11 @@ public class UnitsBasedTraitExtractor implements TraitExtractor {
 		String units = helper.getLiteral(unitsSubject, "name");;
 		return new TraitRecord(parentId, name, value, units);
 	}
+	
+	@Override
+	public String getId() {
+		return referencingPropertyName;
+	}
 
 	public void setHelper(ExtractionHelper helper) {
 		this.helper = helper;

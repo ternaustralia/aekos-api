@@ -1,0 +1,1 @@
+ - the thrown exceptions from missing fields are making the whole record get skipped, we need to make it so just the trait gets skipped.
