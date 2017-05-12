@@ -6,7 +6,7 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.support.AbstractItemStreamItemWriter;
 import org.springframework.stereotype.Component;
 
-import au.org.aekos.api.producer.step.env.out.EnvVarRecord;
+import au.org.aekos.api.producer.step.AttributeRecord;
 import au.org.aekos.api.producer.step.env.out.OutputEnvRecord;
 import au.org.aekos.api.producer.step.env.out.OutputEnvWrapper;
 
@@ -14,7 +14,7 @@ import au.org.aekos.api.producer.step.env.out.OutputEnvWrapper;
 public class AekosEnvRelationalCsvWriter extends AbstractItemStreamItemWriter<OutputEnvWrapper> {
 
 	private AbstractItemStreamItemWriter<OutputEnvRecord> envWriter;
-	private AbstractItemStreamItemWriter<EnvVarRecord> variableWriter;
+	private AbstractItemStreamItemWriter<AttributeRecord> variableWriter;
 
 	@Override
 	public void write(List<? extends OutputEnvWrapper> items) throws Exception {
@@ -42,7 +42,7 @@ public class AekosEnvRelationalCsvWriter extends AbstractItemStreamItemWriter<Ou
 		this.envWriter = envWriter;
 	}
 
-	public void setVariableWriter(AbstractItemStreamItemWriter<EnvVarRecord> variableWriter) {
+	public void setVariableWriter(AbstractItemStreamItemWriter<AttributeRecord> variableWriter) {
 		this.variableWriter = variableWriter;
 	}
 }

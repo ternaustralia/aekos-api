@@ -16,9 +16,11 @@ import org.junit.Test;
 
 import au.org.aekos.api.producer.ExtractionHelper;
 import au.org.aekos.api.producer.TestHelper;
+import au.org.aekos.api.producer.step.AttributeExtractor;
+import au.org.aekos.api.producer.step.AttributeRecord;
+import au.org.aekos.api.producer.step.UnitsBasedAttributeExtractor;
 import au.org.aekos.api.producer.step.species.in.InputSpeciesRecord;
 import au.org.aekos.api.producer.step.species.out.OutputSpeciesWrapper;
-import au.org.aekos.api.producer.step.species.out.TraitRecord;
 
 public class SpeciesItemProcessorTest {
 
@@ -42,29 +44,13 @@ public class SpeciesItemProcessorTest {
 		InputSpeciesRecord item = new InputSpeciesRecord("dab27d3c-5884-4de2-bf74-9dc73f874496", dataFromRdf.get(SPECIES_RECORD_RDF_SUBJECT), 
 				dataFromRdf.get(SPECIES_RECORD_RDF_GRAPH), 1, "aekos.org.au/collection/adelaide.edu.au/TAF/TCFTNS0002", "Eucalyptus obliqua", null);
 		OutputSpeciesWrapper result = objectUnderTest.process(item);
-		List<TraitRecord> traits = result.getTraitRecords();
+		List<AttributeRecord> traits = result.getTraitRecords();
 		assertThat(traits.size(), is(1));
 		assertThat(traits.get(0).getName(), is("\"height\""));
 	}
 
-	/**
-	 * Is the expected log message printed (unfortunately we can't assert anything)?
-	 */
-	@Test
-	public void testReportProblems01() {
-		SpeciesItemProcessor objectUnderTest = new SpeciesItemProcessor();
-		TraitExtractor extractor = new TraitExtractor() {
-			@Override public String getId() { return "textExtractor1"; }
-			@Override public TraitRecord doExtractOn(Resource subject, String parentId) { return null; }
-		};
-		objectUnderTest.logErrorFor(extractor);
-		objectUnderTest.logErrorFor(extractor);
-		objectUnderTest.logErrorFor(extractor);
-		objectUnderTest.reportProblems();
-	}
-	
-	private TraitExtractor unitExtractor(String referencingPropertyName, Model commonGraph) {
-		UnitsBasedTraitExtractor result = new UnitsBasedTraitExtractor();
+	private AttributeExtractor unitExtractor(String referencingPropertyName, Model commonGraph) {
+		UnitsBasedAttributeExtractor result = new UnitsBasedAttributeExtractor();
 		ExtractionHelper helper = new ExtractionHelper(PROPERTY_NAMESPACE);
 		helper.setCommonGraph(commonGraph);
 		result.setHelper(helper);
@@ -88,8 +74,6 @@ public class SpeciesItemProcessorTest {
 			h.addLiteral(r, "value", "2.3");
 			h.addResourceReference(r, "units", measurementUnitSubject);
 		});
-//		addTrait(model, speciesSubject, "lifeForm", "Shrub", "");
-//		addTrait(model, speciesSubject, "lifeStage", "Plant is Dead = true", "");
 		result.put(COMMON_GRAPH, commonGraphName);
 		result.put(SPECIES_RECORD_RDF_GRAPH, projectGraphName);
 		result.put(SPECIES_RECORD_RDF_SUBJECT, speciesSubjectUri);

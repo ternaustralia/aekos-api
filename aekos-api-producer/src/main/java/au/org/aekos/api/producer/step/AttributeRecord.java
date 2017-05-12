@@ -1,14 +1,17 @@
-package au.org.aekos.api.producer.step.species.out;
+package au.org.aekos.api.producer.step;
 
 import au.org.aekos.api.producer.Utils;
 
-public class TraitRecord {
+/**
+ * Attribute could be a Trait or an Environmental Variable
+ */
+public class AttributeRecord {
 	private final String parentId;
 	private final String name;
 	private final String value;
 	private final String units;
 	
-	public TraitRecord(String parentId, String name, String value, String units) {
+	public AttributeRecord(String parentId, String name, String value, String units) {
 		this.parentId = parentId;
 		this.name = name;
 		this.value = value;

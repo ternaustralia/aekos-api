@@ -2,6 +2,8 @@ package au.org.aekos.api.producer;
 
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.jena.query.Dataset;
@@ -20,6 +22,7 @@ import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor;
 import org.springframework.batch.item.file.transform.DelimitedLineAggregator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,25 +32,26 @@ import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 
 import au.org.aekos.api.producer.rdf.CoreDataAekosJenaModelFactory;
+import au.org.aekos.api.producer.step.AttributeExtractor;
+import au.org.aekos.api.producer.step.AttributeRecord;
+import au.org.aekos.api.producer.step.BagAttributeExtractor;
+import au.org.aekos.api.producer.step.PropertyPathNoUnitsBagAttributeExtractor;
+import au.org.aekos.api.producer.step.SingleBagElementNoUnitsAttributeExtractor;
+import au.org.aekos.api.producer.step.UnitsBasedAttributeExtractor;
 import au.org.aekos.api.producer.step.citation.AekosCitationRdfReader;
 import au.org.aekos.api.producer.step.citation.in.InputCitationRecord;
 import au.org.aekos.api.producer.step.env.AekosEnvRdfReader;
 import au.org.aekos.api.producer.step.env.AekosEnvRelationalCsvWriter;
 import au.org.aekos.api.producer.step.env.EnvItemProcessor;
 import au.org.aekos.api.producer.step.env.in.InputEnvRecord;
-import au.org.aekos.api.producer.step.env.out.EnvVarRecord;
 import au.org.aekos.api.producer.step.env.out.OutputEnvRecord;
 import au.org.aekos.api.producer.step.env.out.OutputEnvWrapper;
 import au.org.aekos.api.producer.step.species.AekosSpeciesRdfReader;
 import au.org.aekos.api.producer.step.species.AekosSpeciesRelationalCsvWriter;
-import au.org.aekos.api.producer.step.species.SingleBagElementNoUnitsTraitExtractor;
 import au.org.aekos.api.producer.step.species.SpeciesItemProcessor;
-import au.org.aekos.api.producer.step.species.TraitExtractor;
-import au.org.aekos.api.producer.step.species.UnitsBasedTraitExtractor;
 import au.org.aekos.api.producer.step.species.in.InputSpeciesRecord;
 import au.org.aekos.api.producer.step.species.out.OutputSpeciesRecord;
 import au.org.aekos.api.producer.step.species.out.OutputSpeciesWrapper;
-import au.org.aekos.api.producer.step.species.out.TraitRecord;
 
 @Configuration
 @EnableBatchProcessing
@@ -96,40 +100,38 @@ public class BatchConfiguration {
     }
     
     @Bean
-    public TraitExtractor heightExtractor(ExtractionHelper extractionHelper) {
-    	UnitsBasedTraitExtractor result = new UnitsBasedTraitExtractor();
-    	result.setHelper(extractionHelper);
-    	result.setReferencingPropertyName("height");
-		return result;
-    }
-    
-    @Bean
-    public TraitExtractor biomassExtractor(ExtractionHelper extractionHelper) {
-    	UnitsBasedTraitExtractor result = new UnitsBasedTraitExtractor();
-    	result.setHelper(extractionHelper);
-    	result.setReferencingPropertyName("biomass");
-		return result;
-    }
-    
-    @Bean
-    public TraitExtractor lifeStageExtractor(ExtractionHelper extractionHelper) { // FIXME need to crawl whole bag
-    	SingleBagElementNoUnitsTraitExtractor result = new SingleBagElementNoUnitsTraitExtractor();
-    	result.setHelper(extractionHelper);
-    	result.setReferencingPropertyName("lifestage");
-    	result.setNestedPropertyName("commentary");
+    public List<AttributeExtractor> speciesTraitExtractors(ExtractionHelper extractionHelper) {
+		List<AttributeExtractor> result = new LinkedList<>();
+		{
+			UnitsBasedAttributeExtractor heightExtractor = new UnitsBasedAttributeExtractor();
+			heightExtractor.setHelper(extractionHelper);
+			heightExtractor.setReferencingPropertyName("height");
+			result.add(heightExtractor);
+		} {
+			UnitsBasedAttributeExtractor biomassExtractor = new UnitsBasedAttributeExtractor();
+			biomassExtractor.setHelper(extractionHelper);
+			biomassExtractor.setReferencingPropertyName("biomass");
+			result.add(biomassExtractor);
+		} {
+			SingleBagElementNoUnitsAttributeExtractor lifeStageExtractor = new SingleBagElementNoUnitsAttributeExtractor();
+			lifeStageExtractor.setHelper(extractionHelper);
+			lifeStageExtractor.setReferencingPropertyName("lifestage");
+			lifeStageExtractor.setNestedPropertyName("commentary");
+			result.add(lifeStageExtractor);
+		}
 		return result;
     }
     
     @Bean(destroyMethod="reportProblems")
-    public SpeciesItemProcessor processorSpecies(List<TraitExtractor> traitExtractors, Dataset ds) {
+    public SpeciesItemProcessor processorSpecies(@Qualifier("speciesTraitExtractors") List<AttributeExtractor> speciesTraitExtractors, Dataset ds) {
         SpeciesItemProcessor result = new SpeciesItemProcessor();
-        result.setExtractors(traitExtractors);
+        result.setExtractors(speciesTraitExtractors);
         result.setDataset(ds);
 		return result;
     }
 
     @Bean
-    public ItemWriter<OutputSpeciesWrapper> writerSpeciesWrapper(FlatFileItemWriter<OutputSpeciesRecord> writerSpecies, FlatFileItemWriter<TraitRecord> writerTraitRecord) {
+    public ItemWriter<OutputSpeciesWrapper> writerSpeciesWrapper(FlatFileItemWriter<OutputSpeciesRecord> writerSpecies, FlatFileItemWriter<AttributeRecord> writerTraitRecord) {
     	AekosSpeciesRelationalCsvWriter result = new AekosSpeciesRelationalCsvWriter();
     	result.setSpeciesWriter(writerSpecies);
     	result.setTraitWriter(writerTraitRecord);
@@ -142,8 +144,8 @@ public class BatchConfiguration {
     }
 
     @Bean
-    public FlatFileItemWriter<TraitRecord> writerTraitRecord() throws Throwable {
-    	return csvWriter(TraitRecord.class, "traits", TraitRecord.getCsvFields());
+    public FlatFileItemWriter<AttributeRecord> writerTraitRecord() throws Throwable {
+    	return csvWriter(AttributeRecord.class, "traits", AttributeRecord.getCsvFields());
     }
     // [end species config]
 
@@ -157,15 +159,34 @@ public class BatchConfiguration {
     }
     
     @Bean
-    public EnvItemProcessor processorEnv() {
-        return new EnvItemProcessor();
+    public List<BagAttributeExtractor> envVariableExtractors(ExtractionHelper extractionHelper) {
+		List<BagAttributeExtractor> result = new LinkedList<>();
+		{
+			PropertyPathNoUnitsBagAttributeExtractor disturbanceTypeExtractor = new PropertyPathNoUnitsBagAttributeExtractor();
+			disturbanceTypeExtractor.setFinalName("disturbanceType");
+			disturbanceTypeExtractor.setHelper(extractionHelper);
+			disturbanceTypeExtractor.setTargetTypeLocalName("DISTURBANCEEVIDENCE");
+			disturbanceTypeExtractor.setValuePropertyPath(Arrays.asList("disturbancetype", "commentary")); // FIXME need to handle other path
+			result.add(disturbanceTypeExtractor);
+		}
+		return result;
+    }
+    
+    @Bean(destroyMethod="reportProblems")
+    public EnvItemProcessor processorEnv(@Qualifier("envVariableExtractors") List<BagAttributeExtractor> envVariableExtractors, Dataset ds,
+    		ExtractionHelper extractionHelper) {
+        EnvItemProcessor result = new EnvItemProcessor();
+        result.setExtractors(envVariableExtractors);
+        result.setDataset(ds);
+        result.setHelper(extractionHelper);
+		return result;
     }
 
     @Bean
-    public ItemWriter<OutputEnvWrapper> writerEnvWrapper(FlatFileItemWriter<OutputEnvRecord> writerEnv, FlatFileItemWriter<EnvVarRecord> writerEnvVarRecord) {
+    public ItemWriter<OutputEnvWrapper> writerEnvWrapper(FlatFileItemWriter<OutputEnvRecord> writerEnv, FlatFileItemWriter<AttributeRecord> writerAttributeRecord) {
     	AekosEnvRelationalCsvWriter result = new AekosEnvRelationalCsvWriter();
     	result.setEnvWriter(writerEnv);
-    	result.setVariableWriter(writerEnvVarRecord);
+    	result.setVariableWriter(writerAttributeRecord);
 		return result;
     }
 
@@ -175,8 +196,8 @@ public class BatchConfiguration {
     }
 
     @Bean
-    public FlatFileItemWriter<EnvVarRecord> writerEnvVarRecord() throws Throwable {
-    	return csvWriter(EnvVarRecord.class, "envvars", EnvVarRecord.getCsvFields());
+    public FlatFileItemWriter<AttributeRecord> writerAttributeRecord() throws Throwable {
+    	return csvWriter(AttributeRecord.class, "envvars", AttributeRecord.getCsvFields());
     }
     // [env env config]
     

@@ -1,0 +1,13 @@
+PREFIX : <urn:>
+
+SELECT *
+WHERE {
+	GRAPH ?rdfGraph {
+		?rdfSubject :locationID			?locationID .      
+		?rdfSubject :decimalLatitude	?decimalLatitude .
+		?rdfSubject :decimalLongitude	?decimalLongitude .
+		?rdfSubject :geodeticDatum		?geodeticDatum .
+		?rdfSubject :locationName		?locationName .
+		?rdfSubject :samplingProtocol	?samplingProtocol .
+	}
+}

@@ -7,6 +7,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.vocabulary.RDF;
 
 public class TestHelper {
 
@@ -48,6 +49,11 @@ public class TestHelper {
 		Bag bag = model.createBag();
 		subject.addProperty(prop(propertyName), bag);
 		elementCallback.accept(bag);
+	}
+	
+	public void addType(Resource subject, String localTypeName) {
+		Resource type = helperModel.createResource(propertyNamespace + localTypeName);
+		subject.addProperty(RDF.type, type);
 	}
 	
 	private Property prop(String propertyName) {

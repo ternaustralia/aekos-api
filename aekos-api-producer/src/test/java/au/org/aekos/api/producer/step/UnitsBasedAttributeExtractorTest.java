@@ -1,4 +1,4 @@
-package au.org.aekos.api.producer.step.species;
+package au.org.aekos.api.producer.step;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -10,9 +10,10 @@ import org.junit.Test;
 
 import au.org.aekos.api.producer.ExtractionHelper;
 import au.org.aekos.api.producer.TestHelper;
-import au.org.aekos.api.producer.step.species.out.TraitRecord;
+import au.org.aekos.api.producer.step.AttributeRecord;
+import au.org.aekos.api.producer.step.UnitsBasedAttributeExtractor;
 
-public class UnitsBasedTraitExtractorTest {
+public class UnitsBasedAttributeExtractorTest {
 
 	private static final String PROPERTY_NAMESPACE = "urn:";
 	private final TestHelper h = new TestHelper(PROPERTY_NAMESPACE);
@@ -22,7 +23,7 @@ public class UnitsBasedTraitExtractorTest {
 	 */
 	@Test
 	public void testDoExtractOn01() {
-		UnitsBasedTraitExtractor objectUnderTest = new UnitsBasedTraitExtractor();
+		UnitsBasedAttributeExtractor objectUnderTest = new UnitsBasedAttributeExtractor();
 		objectUnderTest.setHelper(new ExtractionHelper(PROPERTY_NAMESPACE));
 		objectUnderTest.setReferencingPropertyName("height");
 		Model m = ModelFactory.createDefaultModel();
@@ -33,7 +34,7 @@ public class UnitsBasedTraitExtractorTest {
 				h.addLiteral(r1, "name", "metres");
 			});
 		});
-		TraitRecord result = objectUnderTest.doExtractOn(subject, "someParentId123");
+		AttributeRecord result = objectUnderTest.doExtractOn(subject, "someParentId123");
 		assertThat(result.getParentId(), is("\"someParentId123\""));
 		assertThat(result.getName(), is("\"height\""));
 		assertThat(result.getValue(), is("\"2.3\""));

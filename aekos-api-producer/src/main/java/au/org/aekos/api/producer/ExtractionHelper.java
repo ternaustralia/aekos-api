@@ -1,5 +1,6 @@
 package au.org.aekos.api.producer;
 
+import org.apache.jena.rdf.model.Bag;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
@@ -45,6 +46,14 @@ public class ExtractionHelper {
 		}
 		return object.asResource();
 	}
+	
+	public Bag getBag(Resource subject, String propertyName) {
+		Resource possibleBag = getResource(subject, propertyName);
+		if (!possibleBag.canAs(Bag.class)) {
+			throw new IllegalStateException("Data problem: expected " + propertyName + " to be a bag");
+		}
+		return possibleBag.as(Bag.class);
+	}
 
 	private RDFNode validateAndGetObject(Resource subject, Property p) {
 		if (subject == null) {
@@ -70,7 +79,7 @@ public class ExtractionHelper {
 		RDFNode object = statement.getObject();
 		return object;
 	}
-
+	
 	public void setCommonGraph(Model commonGraph) {
 		this.commonGraph = commonGraph;
 	}

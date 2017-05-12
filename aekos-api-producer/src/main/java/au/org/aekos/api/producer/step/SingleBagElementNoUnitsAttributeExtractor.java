@@ -1,12 +1,11 @@
-package au.org.aekos.api.producer.step.species;
+package au.org.aekos.api.producer.step;
 
 import org.apache.jena.rdf.model.Bag;
 import org.apache.jena.rdf.model.Resource;
 
 import au.org.aekos.api.producer.ExtractionHelper;
-import au.org.aekos.api.producer.step.species.out.TraitRecord;
 
-public class SingleBagElementNoUnitsTraitExtractor implements TraitExtractor {
+public class SingleBagElementNoUnitsAttributeExtractor implements AttributeExtractor {
 
 	private static final String NO_UNITS = "";
 	private ExtractionHelper helper;
@@ -14,12 +13,12 @@ public class SingleBagElementNoUnitsTraitExtractor implements TraitExtractor {
 	private String nestedPropertyName;
 
 	@Override
-	public TraitRecord doExtractOn(Resource subject, String parentId) {
+	public AttributeRecord doExtractOn(Resource subject, String parentId) {
 		String name = referencingPropertyName;
 		Resource bag = helper.getResource(subject, referencingPropertyName);
 		Resource firstElement = bag.as(Bag.class).iterator().next().asResource();
 		String value = helper.getLiteral(firstElement, nestedPropertyName);
-		return new TraitRecord(parentId, name, value, NO_UNITS);
+		return new AttributeRecord(parentId, name, value, NO_UNITS);
 	}
 	
 	@Override

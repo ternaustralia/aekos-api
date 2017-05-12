@@ -1,0 +1,9 @@
+@prefix :	<urn:>
+
+:record1
+	:locationID			"location1" ;      
+	:decimalLatitude	-42.682963 ;
+	:decimalLongitude	146.649282 ;
+	:geodeticDatum		"GDA94" ;
+	:locationName		"locName1" ;
+	:samplingProtocol	"sampling1" .

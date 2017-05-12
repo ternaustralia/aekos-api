@@ -3,11 +3,13 @@ package au.org.aekos.api.producer.step.species.out;
 import java.util.Collections;
 import java.util.List;
 
+import au.org.aekos.api.producer.step.AttributeRecord;
+
 public class OutputSpeciesWrapper {
 	private final OutputSpeciesRecord speciesRecord;
-	private final List<TraitRecord> traitRecords;
+	private final List<AttributeRecord> traitRecords;
 
-	public OutputSpeciesWrapper(OutputSpeciesRecord speciesRecord, List<TraitRecord> traitRecords) {
+	public OutputSpeciesWrapper(OutputSpeciesRecord speciesRecord, List<AttributeRecord> traitRecords) {
 		this.speciesRecord = speciesRecord;
 		this.traitRecords = traitRecords;
 	}
@@ -16,7 +18,7 @@ public class OutputSpeciesWrapper {
 		return Collections.singletonList(speciesRecord);
 	}
 
-	public List<TraitRecord> getTraitRecords() {
+	public List<AttributeRecord> getTraitRecords() {
 		return traitRecords;
 	}
 }

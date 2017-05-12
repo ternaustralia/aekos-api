@@ -10,6 +10,8 @@ SELECT
 	?locationID
 	?locationName
 	?samplingProtocol
+	(?slsg as ?rdfSubject)
+	(?g as ?rdfGraph)
 WHERE {
   GRAPH ?g {
     ?slsg a aekos:STUDYLOCATIONSUBGRAPH .
