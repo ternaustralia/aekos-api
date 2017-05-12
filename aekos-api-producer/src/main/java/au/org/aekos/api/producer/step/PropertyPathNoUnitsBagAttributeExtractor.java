@@ -22,21 +22,10 @@ public class PropertyPathNoUnitsBagAttributeExtractor implements BagAttributeExt
 
 	@Override
 	public AttributeRecord doExtractOn(Resource subject, String parentId) {
-		Resource currPointInPath = subject;
-		String value = null;
 		try {
-			for (Iterator<String> it = valuePropertyPath.iterator(); it.hasNext();) {
-				String nextProperty = it.next();
-				boolean isLast = !it.hasNext();
-				if (isLast) {
-					// treat as literal
-					value = helper.getLiteral(currPointInPath, nextProperty);
-				} else {
-					// treat as resource
-					currPointInPath = helper.getResource(currPointInPath, nextProperty);
-				}
-			}
-			return new AttributeRecord(parentId, finalName, value, NO_UNITS);
+			String value = followPath(subject, valuePropertyPath);
+			String units = getUnits(subject);
+			return new AttributeRecord(parentId, finalName, value, units);
 		} catch (MissingDataException e) {
 			String template = "Data problem: failed to find value for '%s' trait with path '%s' on '%s'";
 			throw new MissingDataException(String.format(template, finalName, valuePropertyPath.toString(), subject.getURI()), e);
@@ -58,6 +47,27 @@ public class PropertyPathNoUnitsBagAttributeExtractor implements BagAttributeExt
 		}
 		Resource type = statement.getResource();
 		return type.getLocalName().equals(targetTypeLocalName);
+	}
+	
+	protected String getUnits(Resource startingResource) {
+		return NO_UNITS;
+	}
+	
+	protected String followPath(Resource startingResource, List<String> propertyPath) {
+		Resource currPointInPath = startingResource;
+		String value = null;
+		for (Iterator<String> it = propertyPath.iterator(); it.hasNext();) {
+			String nextProperty = it.next();
+			boolean isLast = !it.hasNext();
+			if (isLast) {
+				// treat as literal
+				value = helper.getLiteral(currPointInPath, nextProperty);
+			} else {
+				// treat as resource
+				currPointInPath = helper.getResource(currPointInPath, nextProperty);
+			}
+		}
+		return value;
 	}
 
 	public void setTargetTypeLocalName(String targetTypeLocalName) {

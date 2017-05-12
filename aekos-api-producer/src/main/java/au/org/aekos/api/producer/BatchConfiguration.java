@@ -36,6 +36,7 @@ import au.org.aekos.api.producer.step.AttributeExtractor;
 import au.org.aekos.api.producer.step.AttributeRecord;
 import au.org.aekos.api.producer.step.BagAttributeExtractor;
 import au.org.aekos.api.producer.step.PropertyPathNoUnitsBagAttributeExtractor;
+import au.org.aekos.api.producer.step.PropertyPathWithUnitsBagAttributeExtractor;
 import au.org.aekos.api.producer.step.SingleBagElementNoUnitsAttributeExtractor;
 import au.org.aekos.api.producer.step.UnitsBasedAttributeExtractor;
 import au.org.aekos.api.producer.step.citation.AekosCitationRdfReader;
@@ -168,6 +169,29 @@ public class BatchConfiguration {
 			disturbanceTypeExtractor.setTargetTypeLocalName("DISTURBANCEEVIDENCE");
 			disturbanceTypeExtractor.setValuePropertyPath(Arrays.asList("disturbancetype", "commentary")); // FIXME need to handle other path
 			result.add(disturbanceTypeExtractor);
+		} {
+			PropertyPathNoUnitsBagAttributeExtractor fireEvidenceExtractor = new PropertyPathNoUnitsBagAttributeExtractor();
+			fireEvidenceExtractor.setFinalName("visibleFireEvidence");
+			fireEvidenceExtractor.setHelper(extractionHelper);
+			fireEvidenceExtractor.setTargetTypeLocalName("FIREEVIDENCE");
+			fireEvidenceExtractor.setValuePropertyPath(Arrays.asList("visiblefireevidence"));
+			result.add(fireEvidenceExtractor);
+		} {
+			PropertyPathWithUnitsBagAttributeExtractor aspectExtractor = new PropertyPathWithUnitsBagAttributeExtractor();
+			aspectExtractor.setFinalName("aspect");
+			aspectExtractor.setHelper(extractionHelper);
+			aspectExtractor.setTargetTypeLocalName("LANDSCAPE");
+			aspectExtractor.setValuePropertyPath(Arrays.asList("aspect", "value"));
+			aspectExtractor.setUnitsPropertyPath(Arrays.asList("aspect", "units", "name"));
+			result.add(aspectExtractor);
+		} {
+			PropertyPathWithUnitsBagAttributeExtractor slopeExtractor = new PropertyPathWithUnitsBagAttributeExtractor();
+			slopeExtractor.setFinalName("slope");
+			slopeExtractor.setHelper(extractionHelper);
+			slopeExtractor.setTargetTypeLocalName("LANDSCAPE");
+			slopeExtractor.setValuePropertyPath(Arrays.asList("slope", "value"));
+			slopeExtractor.setUnitsPropertyPath(Arrays.asList("slope", "units", "name"));
+			result.add(slopeExtractor);
 		}
 		return result;
     }
