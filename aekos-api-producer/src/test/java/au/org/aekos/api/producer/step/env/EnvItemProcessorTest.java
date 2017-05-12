@@ -41,7 +41,6 @@ public class EnvItemProcessorTest {
 		EnvItemProcessor objectUnderTest = new EnvItemProcessor();
 		Dataset ds = DatasetFactory.create();
 		Map<String, String> dataFromRdf = testProcess01_populate(ds);
-		helper.setCommonGraph(ds.getNamedModel(dataFromRdf.get(COMMON_GRAPH)));
 		objectUnderTest.setExtractors(Arrays.asList(disturbanceEvidenceExtractor()));
 		objectUnderTest.setDataset(ds);
 		objectUnderTest.setHelper(helper);
@@ -71,10 +70,14 @@ public class EnvItemProcessorTest {
 		OutputEnvWrapper result = objectUnderTest.process(item);
 		List<AttributeRecord> variables = result.getEnvVarRecords();
 		assertThat(variables.size(), is(2));
-		assertThat(variables.get(0).getName(), is("\"aspect\""));
-		assertThat(variables.get(0).getValue(), is("\"250\""));
-		assertThat(variables.get(1).getName(), is("\"slope\""));
-		assertThat(variables.get(1).getValue(), is("\"4\""));
+		AttributeRecord first = variables.get(0);
+		assertThat(first.getName(), is("\"aspect\""));
+		assertThat(first.getValue(), is("\"250\""));
+		assertThat(first.getUnits(), is("\"degrees\""));
+		AttributeRecord second = variables.get(1);
+		assertThat(second.getName(), is("\"slope\""));
+		assertThat(second.getValue(), is("\"4\""));
+		assertThat(second.getUnits(), is("\"degrees\""));
 	}
 
 	private BagAttributeExtractor disturbanceEvidenceExtractor() {
@@ -108,9 +111,6 @@ public class EnvItemProcessorTest {
 
 	private Map<String, String> testProcess01_populate(Dataset ds) {
 		Map<String, String> result = new HashMap<>();
-		// Common graph
-		String commonGraphName = TEST_PROJECT_NAMESPACE + "test_common#";
-		Model commonModel = ds.getNamedModel(commonGraphName);
 		// Project related graph
 		String projectGraphName = TEST_PROJECT_NAMESPACE + "test_project#";
 		Model model = ds.getNamedModel(projectGraphName);
@@ -128,7 +128,6 @@ public class EnvItemProcessorTest {
 				});
 			});
 		});
-		result.put(COMMON_GRAPH, commonGraphName);
 		result.put(ENV_RECORD_RDF_GRAPH, projectGraphName);
 		result.put(ENV_RECORD_RDF_SUBJECT, studyLocationSubjectUri);
 		return result;
@@ -139,32 +138,34 @@ public class EnvItemProcessorTest {
 		// Common graph
 		String commonGraphName = TEST_PROJECT_NAMESPACE + "test_common#";
 		Model commonModel = ds.getNamedModel(commonGraphName);
+		Resource measurementUnit = commonModel.createResource("urn:degreesUnits");
+		{
+			h.addLiteral(measurementUnit, "name", "degrees");
+		}
 		// Project related graph
 		String projectGraphName = TEST_PROJECT_NAMESPACE + "test_project#";
 		Model model = ds.getNamedModel(projectGraphName);
 		String studyLocationSubjectUri = TEST_PROJECT_NAMESPACE + "STUDYLOCATIONSUBGRAPH-T1493794712603";
 		Resource studyLocationSubject = model.createResource(studyLocationSubjectUri);
-		h.addBag(studyLocationSubject, "views", viewsBag -> {
-			h.addBagElement(viewsBag, view -> {
-				h.addBag(view, "observeditems", oiBag -> {
-					h.addBagElement(oiBag, ls -> {
-						h.addType(ls, "LANDSCAPE");
-						h.addResource(ls, "aspect", aspect -> {
-							h.addLiteral(aspect, "value", "250");
-							h.addResource(aspect, "units", units -> {
-								h.addLiteral(units, "name", "degrees");
+		{
+			h.addBag(studyLocationSubject, "views", viewsBag -> {
+				h.addBagElement(viewsBag, view -> {
+					h.addBag(view, "observeditems", oiBag -> {
+						h.addBagElement(oiBag, ls -> {
+							h.addType(ls, "LANDSCAPE");
+							h.addResource(ls, "aspect", aspect -> {
+								h.addLiteral(aspect, "value", "250");
+								h.addResource(aspect, "units", measurementUnit);
 							});
-						});
-						h.addResource(ls, "slope", slope -> {
-							h.addLiteral(slope, "value", "4");
-							h.addResource(slope, "units", units -> {
-								h.addLiteral(units, "name", "degrees");
+							h.addResource(ls, "slope", slope -> {
+								h.addLiteral(slope, "value", "4");
+								h.addResource(slope, "units", measurementUnit);
 							});
 						});
 					});
 				});
 			});
-		});
+		}
 		result.put(COMMON_GRAPH, commonGraphName);
 		result.put(ENV_RECORD_RDF_GRAPH, projectGraphName);
 		result.put(ENV_RECORD_RDF_SUBJECT, studyLocationSubjectUri);

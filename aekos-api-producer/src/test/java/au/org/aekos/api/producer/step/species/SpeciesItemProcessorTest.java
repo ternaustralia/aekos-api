@@ -72,7 +72,7 @@ public class SpeciesItemProcessorTest {
 		Resource speciesSubject = model.createResource(speciesSubjectUri);
 		h.addResource(speciesSubject, "height", r -> {
 			h.addLiteral(r, "value", "2.3");
-			h.addResourceReference(r, "units", measurementUnitSubject);
+			h.addResource(r, "units", measurementUnitSubject);
 		});
 		result.put(COMMON_GRAPH, commonGraphName);
 		result.put(SPECIES_RECORD_RDF_GRAPH, projectGraphName);

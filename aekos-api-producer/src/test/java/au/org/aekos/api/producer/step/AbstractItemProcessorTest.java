@@ -21,5 +21,5 @@ public class AbstractItemProcessorTest {
 		objectUnderTest.reportProblems();
 	}
 	
-	private static class ConcreteItemProcessor extends AbstractItemProcessor { }
+	private static class ConcreteItemProcessor extends AbstractItemProcessor<AttributeExtractor> { }
 }

@@ -33,7 +33,7 @@ public class TestHelper {
 		callback.accept(object);
 	}
 	
-	public void addResourceReference(Resource subject, String propertyName, Resource object) {
+	public void addResource(Resource subject, String propertyName, Resource object) {
 		subject.addProperty(prop(propertyName), object);
 	}
 	
