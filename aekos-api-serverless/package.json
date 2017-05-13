@@ -1,0 +1,14 @@
+{
+  "name": "aekos-api-serverless",
+  "version": "1.0.0",
+  "license": "MIT",
+  "scripts": {
+    "test": "jasmine",
+    "testwatch": "nodemon --exec jasmine"
+  },
+  "devDependencies": {
+    "jasmine": "^2.6.0",
+    "jasmine-core": "^2.6.1",
+    "nodemon": "^1.11.0"
+  }
+}
