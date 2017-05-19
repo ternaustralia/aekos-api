@@ -7,7 +7,7 @@ import au.org.aekos.api.producer.step.env.in.InputEnvRecord;
 
 public class AekosEnvRdfReader extends AbstractRdfReader<InputEnvRecord> {
 
-	private String environmentalVariableQuery;
+	private String siteVisitRecordsQuery;
 
 	@Override
 	public InputEnvRecord mapSolution(QuerySolution solution) {
@@ -34,10 +34,10 @@ public class AekosEnvRdfReader extends AbstractRdfReader<InputEnvRecord> {
 
 	@Override
 	public String getSparqlQuery() {
-		return environmentalVariableQuery;
+		return siteVisitRecordsQuery;
 	}
 
-	public void setEnvironmentalVariableQuery(String environmentalVariableQuery) {
-		this.environmentalVariableQuery = environmentalVariableQuery;
+	public void setSiteVisitRecordsQuery(String siteVisitRecordsQuery) {
+		this.siteVisitRecordsQuery = siteVisitRecordsQuery;
 	}
 }

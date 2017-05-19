@@ -97,7 +97,7 @@ public class BatchConfiguration {
     @Bean
     public ItemReader<InputSpeciesRecord> readerSpecies(String darwinCoreAndTraitsQuery, Dataset coreDS) {
         AekosSpeciesRdfReader result = new AekosSpeciesRdfReader();
-        result.setDwcAndTraitsQuery(darwinCoreAndTraitsQuery);
+        result.setSpeciesRecordsQuery(darwinCoreAndTraitsQuery);
         result.setDs(coreDS);
 		return result;
     }
@@ -156,7 +156,7 @@ public class BatchConfiguration {
     @Bean
     public ItemReader<InputEnvRecord> readerEnv(String environmentalVariablesQuery, Dataset coreDS) {
         AekosEnvRdfReader result = new AekosEnvRdfReader();
-        result.setEnvironmentalVariableQuery(environmentalVariablesQuery);
+        result.setSiteVisitRecordsQuery(environmentalVariablesQuery);
         result.setDs(coreDS);
 		return result;
     }
@@ -308,12 +308,12 @@ public class BatchConfiguration {
     
     @Bean
     public String darwinCoreAndTraitsQuery() throws IOException {
-		return getSparqlQuery("darwin-core-and-traits.rq");
+		return getSparqlQuery("species-records.rq");
     }
     
     @Bean
     public String environmentalVariablesQuery() throws IOException {
-		return getSparqlQuery("environmental-variables.rq");
+		return getSparqlQuery("site-visit-records.rq");
     }
 
 	private String getSparqlQuery(String fileName) throws IOException {

@@ -7,7 +7,7 @@ import au.org.aekos.api.producer.step.species.in.InputSpeciesRecord;
 
 public class AekosSpeciesRdfReader extends AbstractRdfReader<InputSpeciesRecord> {
 
-	private String dwcAndTraitsQuery;
+	private String speciesRecordsQuery;
 
 	@Override
 	public InputSpeciesRecord mapSolution(QuerySolution solution) {
@@ -30,10 +30,10 @@ public class AekosSpeciesRdfReader extends AbstractRdfReader<InputSpeciesRecord>
 
 	@Override
 	public String getSparqlQuery() {
-		return dwcAndTraitsQuery;
+		return speciesRecordsQuery;
 	}
 	
-	public void setDwcAndTraitsQuery(String dwcAndTraitsQuery) {
-		this.dwcAndTraitsQuery = dwcAndTraitsQuery;
+	public void setSpeciesRecordsQuery(String speciesRecordQuery) {
+		this.speciesRecordsQuery = speciesRecordQuery;
 	}
 }

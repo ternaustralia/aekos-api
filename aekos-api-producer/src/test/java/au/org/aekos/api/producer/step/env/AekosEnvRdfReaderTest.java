@@ -64,8 +64,8 @@ public class AekosEnvRdfReaderTest {
 		InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("au/org/aekos/api/producer/step/env/singleLocSingleVisit.ttl");
 		m.read(in, null, "TURTLE");
 		objectUnderTest.setDs(ds);
-		String environmentalVariableQuery = Utils.getResourceAsString("au/org/aekos/api/producer/sparql/environmental-variables.rq");
-		objectUnderTest.setEnvironmentalVariableQuery(environmentalVariableQuery);
+		String siteVisitRecordsQuery = Utils.getResourceAsString("au/org/aekos/api/producer/sparql/environmental-variables.rq");
+		objectUnderTest.setSiteVisitRecordsQuery(siteVisitRecordsQuery);
 		InputEnvRecord result = objectUnderTest.read();
 		assertThat(result.getLocationID(), is("aekos.org.au/collection/sydney.edu.au/DERG/Main Camp"));
 		assertThat(result.getDecimalLatitude(), is(-23.5318398476576));
@@ -91,8 +91,8 @@ public class AekosEnvRdfReaderTest {
 		InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("au/org/aekos/api/producer/step/env/singleLocSingleVisitNoObservedItems.ttl");
 		m.read(in, null, "TURTLE");
 		objectUnderTest.setDs(ds);
-		String environmentalVariableQuery = Utils.getResourceAsString("au/org/aekos/api/producer/sparql/environmental-variables.rq");
-		objectUnderTest.setEnvironmentalVariableQuery(environmentalVariableQuery);
+		String siteVisitRecordsQuery = Utils.getResourceAsString("au/org/aekos/api/producer/sparql/environmental-variables.rq");
+		objectUnderTest.setSiteVisitRecordsQuery(siteVisitRecordsQuery);
 		try {
 			objectUnderTest.read();
 			fail();
@@ -112,8 +112,8 @@ public class AekosEnvRdfReaderTest {
 		InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("au/org/aekos/api/producer/step/env/singleLocTwoVisit.ttl");
 		m.read(in, null, "TURTLE");
 		objectUnderTest.setDs(ds);
-		String environmentalVariableQuery = Utils.getResourceAsString("au/org/aekos/api/producer/sparql/environmental-variables.rq");
-		objectUnderTest.setEnvironmentalVariableQuery(environmentalVariableQuery);
+		String siteVisitRecordsQuery = Utils.getResourceAsString("au/org/aekos/api/producer/sparql/environmental-variables.rq");
+		objectUnderTest.setSiteVisitRecordsQuery(siteVisitRecordsQuery);
 		InputEnvRecord firstResult = objectUnderTest.read();
 		assertThat(firstResult.getLocationID(), is("aekos.org.au/collection/sydney.edu.au/DERG/Main Camp"));
 		assertThat(firstResult.getDecimalLatitude(), is(-23.5318398476576));
@@ -151,8 +151,8 @@ public class AekosEnvRdfReaderTest {
 		InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("au/org/aekos/api/producer/step/env/twoLocSingleVisit.ttl");
 		m.read(in, null, "TURTLE");
 		objectUnderTest.setDs(ds);
-		String environmentalVariableQuery = Utils.getResourceAsString("au/org/aekos/api/producer/sparql/environmental-variables.rq");
-		objectUnderTest.setEnvironmentalVariableQuery(environmentalVariableQuery);
+		String siteVisitRecordsQuery = Utils.getResourceAsString("au/org/aekos/api/producer/sparql/environmental-variables.rq");
+		objectUnderTest.setSiteVisitRecordsQuery(siteVisitRecordsQuery);
 		InputEnvRecord firstResult = objectUnderTest.read();
 		assertThat(firstResult.getLocationID(), is("aekos.org.au/collection/sydney.edu.au/DERG/Main Camp"));
 		assertThat(firstResult.getDecimalLatitude(), is(-23.5318398476576));

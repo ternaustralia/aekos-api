@@ -2,7 +2,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX aekos: <http://www.aekos.org.au/ontology/1.0.0#>
 PREFIX api: <http://www.aekos.org.au/api/1.0#>
 
-# Gets the easy part of the environmental variable dataset (just the 1:1 bits). Variables will come later
+# Gets the easy (1:1) part of the environmental variable dataset: the site visit records. Variables will come later
 SELECT DISTINCT
 	?decimalLongitude
 	?decimalLatitude

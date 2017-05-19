@@ -2,7 +2,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX aekos: <http://www.aekos.org.au/ontology/1.0.0#>
 PREFIX api: <http://www.aekos.org.au/api/1.0#>
 
-# Gets the easy part of the Darwin Core + traits dataset (just the 1:1 bits)
+# Gets the easy (1:1) part of the Darwin Core + traits dataset: the species records. Traits will come later
 SELECT
 	?id
 	(?og as ?rdfSubject)
