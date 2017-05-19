@@ -48,4 +48,27 @@ public class AekosEnvRdfReaderTest {
 		}
 	}
 
+	/**
+	 * Can we read a single record (the simplest case)?
+	 */
+	@Test
+	public void testRead01() throws Throwable {
+		AekosEnvRdfReader objectUnderTest = new AekosEnvRdfReader();
+		Dataset ds = DatasetFactory.create();
+		Model m = ds.getNamedModel("http://www.aekos.org.au/ontology/1.0.0/test_project#");
+		InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("au/org/aekos/api/producer/step/env/SourceEnvData.ttl");
+		m.read(in, null, "TURTLE");
+		objectUnderTest.setDs(ds);
+		String environmentalVariableQuery = Utils.getResourceAsString("au/org/aekos/api/producer/sparql/environmental-variables.rq");
+		objectUnderTest.setEnvironmentalVariableQuery(environmentalVariableQuery);
+		InputEnvRecord result = objectUnderTest.read();
+		assertThat(result.getLocationID(), is("aekos.org.au/collection/sydney.edu.au/DERG/Main Camp"));
+		assertThat(result.getDecimalLatitude(), is(-23.5318398476576));
+		assertThat(result.getDecimalLongitude(), is(138.321378247854));
+		assertThat(result.getGeodeticDatum(), is("GDA94"));
+		assertThat(result.getLocationName(), is("Main Camp"));
+		assertThat(result.getRdfGraph(), is("http://www.aekos.org.au/ontology/1.0.0/test_project#"));
+		assertThat(result.getRdfSubject(), is("http://www.aekos.org.au/ontology/1.0.0/test_project#STUDYLOCATIONSUBGRAPH-T1493794229549"));
+		assertThat(result.getSamplingProtocol(), is("aekos.org.au/collection/sydney.edu.au/DERG"));
+	}
 }
