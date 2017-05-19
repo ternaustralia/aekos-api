@@ -15,6 +15,7 @@ import org.springframework.batch.core.configuration.annotation.EnableBatchProces
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.step.skip.AlwaysSkipItemSkipPolicy;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
@@ -35,6 +36,7 @@ import au.org.aekos.api.producer.rdf.CoreDataAekosJenaModelFactory;
 import au.org.aekos.api.producer.step.AttributeExtractor;
 import au.org.aekos.api.producer.step.AttributeRecord;
 import au.org.aekos.api.producer.step.BagAttributeExtractor;
+import au.org.aekos.api.producer.step.MissingDataException;
 import au.org.aekos.api.producer.step.PropertyPathNoUnitsBagAttributeExtractor;
 import au.org.aekos.api.producer.step.PropertyPathWithUnitsBagAttributeExtractor;
 import au.org.aekos.api.producer.step.SingleBagElementNoUnitsAttributeExtractor;
@@ -281,7 +283,10 @@ public class BatchConfiguration {
     		ItemWriter<OutputEnvWrapper> writerEnvWrapper, ItemReadListener<Object> readListener, ItemProcessListener<Object, Object> processListener,
     		TaskExecutor taskExecutor) {
         return stepBuilderFactory.get("step3_env")
-                .<InputEnvRecord, OutputEnvWrapper> chunk(10)
+                .<InputEnvRecord, OutputEnvWrapper> chunk(1)
+                .faultTolerant()
+                .skip(MissingDataException.class)
+                .skipPolicy(new AlwaysSkipItemSkipPolicy())
                 .listener(readListener)
                 .listener(processListener)
                 .reader(readerEnv)

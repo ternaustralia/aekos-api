@@ -114,22 +114,21 @@ public class EnvItemProcessorTest {
 		// Project related graph
 		String projectGraphName = TEST_PROJECT_NAMESPACE + "test_project#";
 		Model model = ds.getNamedModel(projectGraphName);
-		String studyLocationSubjectUri = TEST_PROJECT_NAMESPACE + "STUDYLOCATIONSUBGRAPH-T1493794712603";
-		Resource studyLocationSubject = model.createResource(studyLocationSubjectUri);
+		Resource studyLocationSubject = model.createResource(TEST_PROJECT_NAMESPACE + "STUDYLOCATIONSUBGRAPH-T1493794712603");
 		h.addBag(studyLocationSubject, "views", viewsBag -> {
-			h.addBagElement(viewsBag, view -> {
-				h.addBag(view, "observeditems", oiBag -> {
-					h.addBagElement(oiBag, de -> {
-						h.addType(de, "DISTURBANCEEVIDENCE");
-						h.addResource(de, "disturbancetype", dt -> {
-							h.addLiteral(dt, "commentary", "the value!");
-						});
+			Resource view = model.createResource(TEST_PROJECT_NAMESPACE + "STUDYLOCATIONVISITVIEW-T1493794229804");
+			h.addBag(view, "observeditems", oiBag -> {
+				h.addBagElement(oiBag, de -> {
+					h.addType(de, "DISTURBANCEEVIDENCE");
+					h.addResource(de, "disturbancetype", dt -> {
+						h.addLiteral(dt, "commentary", "the value!");
 					});
 				});
 			});
+			h.addBagElement(viewsBag, view);
+			result.put(ENV_RECORD_RDF_SUBJECT, view.getURI());
 		});
 		result.put(ENV_RECORD_RDF_GRAPH, projectGraphName);
-		result.put(ENV_RECORD_RDF_SUBJECT, studyLocationSubjectUri);
 		return result;
 	}
 	
@@ -145,30 +144,29 @@ public class EnvItemProcessorTest {
 		// Project related graph
 		String projectGraphName = TEST_PROJECT_NAMESPACE + "test_project#";
 		Model model = ds.getNamedModel(projectGraphName);
-		String studyLocationSubjectUri = TEST_PROJECT_NAMESPACE + "STUDYLOCATIONSUBGRAPH-T1493794712603";
-		Resource studyLocationSubject = model.createResource(studyLocationSubjectUri);
+		Resource studyLocationSubject = model.createResource(TEST_PROJECT_NAMESPACE + "STUDYLOCATIONSUBGRAPH-T1493794712603");
 		{
 			h.addBag(studyLocationSubject, "views", viewsBag -> {
-				h.addBagElement(viewsBag, view -> {
-					h.addBag(view, "observeditems", oiBag -> {
-						h.addBagElement(oiBag, ls -> {
-							h.addType(ls, "LANDSCAPE");
-							h.addResource(ls, "aspect", aspect -> {
-								h.addLiteral(aspect, "value", "250");
-								h.addResource(aspect, "units", measurementUnit);
-							});
-							h.addResource(ls, "slope", slope -> {
-								h.addLiteral(slope, "value", "4");
-								h.addResource(slope, "units", measurementUnit);
-							});
+				Resource view = model.createResource("");
+				h.addBag(view, "observeditems", oiBag -> {
+					h.addBagElement(oiBag, ls -> {
+						h.addType(ls, "LANDSCAPE");
+						h.addResource(ls, "aspect", aspect -> {
+							h.addLiteral(aspect, "value", "250");
+							h.addResource(aspect, "units", measurementUnit);
+						});
+						h.addResource(ls, "slope", slope -> {
+							h.addLiteral(slope, "value", "4");
+							h.addResource(slope, "units", measurementUnit);
 						});
 					});
 				});
+				h.addBagElement(viewsBag, view);
+				result.put(ENV_RECORD_RDF_SUBJECT, view.getURI());
 			});
 		}
 		result.put(COMMON_GRAPH, commonGraphName);
 		result.put(ENV_RECORD_RDF_GRAPH, projectGraphName);
-		result.put(ENV_RECORD_RDF_SUBJECT, studyLocationSubjectUri);
 		return result;
 	}
 }

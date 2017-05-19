@@ -37,6 +37,10 @@ public class TestHelper {
 		subject.addProperty(prop(propertyName), object);
 	}
 	
+	public void addBagElement(Bag bag, Resource element) {
+		bag.add(element);
+	}
+	
 	public void addBagElement(Bag bag, Consumer<Resource> callback) {
 		Model model = bag.getModel();
 		Resource element = model.createResource();
