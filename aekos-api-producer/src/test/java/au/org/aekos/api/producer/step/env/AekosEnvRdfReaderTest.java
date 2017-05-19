@@ -102,7 +102,7 @@ public class AekosEnvRdfReaderTest {
 	}
 	
 	/**
-	 * Can we read a two visit records from one location?
+	 * Can we read two visit records from one location?
 	 */
 	@Test
 	public void testRead03() throws Throwable {
@@ -141,7 +141,7 @@ public class AekosEnvRdfReaderTest {
 	}
 	
 	/**
-	 * Can we read a two visit records, one from each of two locations?
+	 * Can we read two visit records, one from each of two locations?
 	 */
 	@Test
 	public void testRead04() throws Throwable {
