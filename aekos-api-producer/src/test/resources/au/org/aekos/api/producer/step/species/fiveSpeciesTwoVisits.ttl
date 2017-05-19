@@ -1,0 +1,1464 @@
+@prefix com:   <http://www.aekos.org.au/ontology/1.0.0/aekos_common#> .
+@prefix :      <http://www.aekos.org.au/ontology/1.0.0#> .
+@prefix test:   <http://www.aekos.org.au/ontology/1.0.0/test#> .
+
+test:CONDUCTIVITYVALUE-D7070
+        a            :CONDUCTIVITYVALUE ;
+        :anchorname  "Soil Chemical Analysis" ;
+        :method      test:METHODEXECUTION-T1485141126336 ;
+        :units       com:MEASUREMENTUNIT-T1485138678625 ;
+        :value       "4"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+test:SPATIALPOINT-B6602
+        a                   :SPATIALPOINT ;
+        :computedeasting    "249950"^^<http://www.w3.org/2001/XMLSchema#decimal> ;
+        :computedlatitude   -33.716314010394434 ;
+        :computedlongitude  120.30162653347247 ;
+        :computednorthing   "6266028"^^<http://www.w3.org/2001/XMLSchema#decimal> ;
+        :crs                com:COORDINATEREFERENCESYSTEM-T1485138678164 ;
+        :x                  "249950"^^<http://www.w3.org/2001/XMLSchema#decimal> ;
+        :y                  "6266028"^^<http://www.w3.org/2001/XMLSchema#decimal> ;
+        :zone               "51"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+test:COMPONENTAMOUNTVALUE-D7090
+        a            :COMPONENTAMOUNTVALUE ;
+        :anchorname  "Soil Chemical Analysis" ;
+        :method      test:METHODEXECUTION-T1485141126336 ;
+        :units       com:MEASUREMENTUNIT-T1485138678628 ;
+        :value       1.6 .
+
+test:TimeRangeValue-C6758
+        a                     :TimeRangeValue ;
+        :has_end              "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_start            "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_time_range_type  test:ObservedTimeRangeType ;
+        :is_end_sampled       true ;
+        :is_start_sampled     true .
+
+test:DISTANCEVALUE-D321
+        a            :DISTANCEVALUE ;
+        :anchorname  "Plant Species" ;
+        :units       com:MEASUREMENTUNIT-T1485138678610 ;
+        :value       0.3 .
+
+test:TimeRangeValue-D7089
+        a                     :TimeRangeValue ;
+        :has_end              "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_start            "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_time_range_type  test:ObservedTimeRangeType ;
+        :is_end_sampled       true ;
+        :is_start_sampled     true .
+
+test:METHODEXECUTION-T1485141126334
+        a                :METHODEXECUTION ;
+        <http://www.aekos.org.au/ontology/1.0.0#$role>
+                "Disturbance Assessment Method" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$title>
+                " Disturbance Assessment Method, 21/04/2007 " ;
+        :duration        test:TimeRangeValue-D7109 ;
+        :method          test:METHODTYPE-T1485140988816 ;
+        :parentactivity  test:METHODEXECUTION-T1485141126274 .
+
+test:QUANTITATIVEABUNDANCEVALUE-C6763
+        a       :QUANTITATIVEABUNDANCEVALUE ;
+        :range  test:NUMBERRANGE-C6764 ;
+        :units  com:MEASUREMENTUNIT-T1485138678628 .
+
+test:SURFACECOVERCATEGORY-T1485140987462
+        a       :SURFACECOVERCATEGORY ;
+        :name   "<10% cover" .
+
+com:MEASUREMENTUNIT-T1485138678627
+        a       :MEASUREMENTUNIT ;
+        :name   "milligrams per kilogram" .
+
+test:TimeRangeValue-B6598
+        a                     :TimeRangeValue ;
+        :has_end              "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_start            "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_time_range_type  test:DefaultTimeRangeType ;
+        :is_end_sampled       false ;
+        :is_start_sampled     false .
+
+test:DIRECTIONVALUE-C6775
+        a            :DIRECTIONVALUE ;
+        :anchorname  "Aspect" ;
+        :commentary  "NE" ;
+        :units       com:MEASUREMENTUNIT-T1485138678624 ;
+        :value       "43"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+test:METHODTYPE-T1485140988744
+        a       :METHODTYPE ;
+        :name   "Plot Establishment Method" .
+
+test:VEGETATIONCOVERVALUE-B6424
+        a            :VEGETATIONCOVERVALUE ;
+        :anchorname  "Plant Species" ;
+        :category    test:SURFACECOVERCATEGORY-T1485140987462 .
+
+test:COMPONENTAMOUNTVALUE-D7077
+        a            :COMPONENTAMOUNTVALUE ;
+        :anchorname  "Soil Chemical Analysis" ;
+        :method      test:METHODEXECUTION-T1485141126336 ;
+        :units       com:MEASUREMENTUNIT-T1485138678627 ;
+        :value       "0"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+test:SURFACECOVERVALUE-C6779
+        a            :SURFACECOVERVALUE ;
+        :anchorname  "Surface Fragment Description" ;
+        :category    test:COARSEFRAGCOVERCATEGORY-T1485140987430 .
+
+test:NUMBERRANGE-D7230
+        a             :NUMBERRANGE ;
+        :lowerbounds  test:BOUNDSTYPE-T1485141126874 ;
+        :lowervalue   "0"^^<http://www.w3.org/2001/XMLSchema#decimal> ;
+        :upperbounds  test:BOUNDSTYPE-T1485141126875 ;
+        :uppervalue   "10"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+test:SOILPROFILETYPE-T1485140987423
+        a       :SOILPROFILETYPE ;
+        :name   "Duplex" .
+
+test:SPECIESCONCEPT-T1485140987591
+        a                       :SPECIESCONCEPT ;
+        :authorship             "Benth." ;
+        :formattedname          "<I>Acacia ingrata</I> Benth." ;
+        :genuspart              "Acacia" ;
+        :hybridtype             com:SPECIESCONCEPTHYBRIDTYPE-T1485138684157 ;
+        :namewithauthorship     "Acacia ingrata Benth." ;
+        :namewithoutauthorship  "Acacia ingrata" ;
+        :nslid                  "apni.name:10239" ;
+        :rank                   com:TAXONOMICRANK-T1485138684121 ;
+        :speciesconcepttype     com:SPECIESCONCEPTTYPE-T1485138684133 ;
+        :specificepithet        "ingrata" ;
+        :title                  "<I>Acacia ingrata</I> Benth." .
+
+com:MEASUREMENTUNIT-T1485138678614
+        a       :MEASUREMENTUNIT ;
+        :name   "square metres" .
+
+test:SPECIESCONCEPT-T1485140987862
+        a                       :SPECIESCONCEPT ;
+        :authorship             "Lindl." ;
+        :formattedname          "<I>Dampiera lavandulacea</I> Lindl." ;
+        :genuspart              "Dampiera" ;
+        :hybridtype             com:SPECIESCONCEPTHYBRIDTYPE-T1485138684157 ;
+        :namewithauthorship     "Dampiera lavandulacea Lindl." ;
+        :namewithoutauthorship  "Dampiera lavandulacea" ;
+        :nslid                  "apni.name:24261" ;
+        :rank                   com:TAXONOMICRANK-T1485138684121 ;
+        :speciesconcepttype     com:SPECIESCONCEPTTYPE-T1485138684133 ;
+        :specificepithet        "lavandulacea" ;
+        :title                  "<I>Dampiera lavandulacea</I> Lindl." .
+
+test:QUANTITATIVEABUNDANCEVALUE-B6469
+        a       :QUANTITATIVEABUNDANCEVALUE ;
+        :range  test:NUMBERRANGE-B6470 ;
+        :units  com:MEASUREMENTUNIT-T1485138678628 .
+
+test:COMPONENTAMOUNTVALUE-D7085
+        a            :COMPONENTAMOUNTVALUE ;
+        :anchorname  "Soil Chemical Analysis" ;
+        :method      test:METHODEXECUTION-T1485141126336 ;
+        :units       com:MEASUREMENTUNIT-T1485138678627 ;
+        :value       0.3 .
+
+com:SPECIESCONCEPTHYBRIDTYPE-T1485138684157
+        a       :SPECIESCONCEPTHYBRIDTYPE ;
+        :name   "NON_HYBRID" .
+
+test:SPECIESCONCEPTVALUE-B6467
+        a            :SPECIESCONCEPTVALUE ;
+        :anchorname  "Plant Species" ;
+        :commentary  "Acacia ingrata" .
+
+test:COMMUNITYVALUE-B6574
+        a            :COMMUNITYVALUE ;
+        :commentary  "Very tall Eucalyptus falcata subsp. falcata; E. phaenophylla very tall sparse mallee shrubland over Melaleuca hamata; Petrophile fastigiata; Melaleuca rigidiflia tall open shrubland over Baeckea corynophylla mid-high open shrubland over Lepidosperma aff. " .
+
+test:LIFEFORMVALUE-B6426
+        a            :LIFEFORMVALUE ;
+        :anchorname  "Plant Species" ;
+        :category    test:LIFEFORM-T1485140987510 .
+
+test:STUDYLOCATIONVISITVIEW-T1485141126861
+        a               :STUDYLOCATIONVISITVIEW ;
+        :category       "VISIT" ;
+        :observeditems  [ a       <http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag> ;
+                          <http://www.w3.org/1999/02/22-rdf-syntax-ns#_1>
+                                  test:ORGANISMASSEMBLAGE-T1485141126884 ;
+                          <http://www.w3.org/1999/02/22-rdf-syntax-ns#_2>
+                                  test:SPECIESORGANISMGROUP-T1485141126864 ;
+                          <http://www.w3.org/1999/02/22-rdf-syntax-ns#_3>
+                                  test:SPECIESORGANISMGROUP-T1485141126873 ;
+                          <http://www.w3.org/1999/02/22-rdf-syntax-ns#_4>
+                                  test:LANDSCAPE-T1485141126288
+                        ] ;
+        :title          " - visited on 30-09-2007" ;
+        :visitnumber    "2"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+test:TimeRangeValue-D7163
+        a                     :TimeRangeValue ;
+        :has_end              "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_start            "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_time_range_type  test:TimeBoundedTimeRangeType ;
+        :is_end_sampled       false ;
+        :is_start_sampled     false .
+
+test:SURFACERUNOFFTYPE-T1485140987503
+        a       :SURFACERUNOFFTYPE ;
+        :name   "Slow" .
+
+test:SPECIESORGANISMGROUP-T1485141126490
+        a                            :SPECIESORGANISMGROUP ;
+        <http://www.aekos.org.au/ontology/1.0.0#$groupkey>
+                "2" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$importance>
+                "MEDIUM" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$orderkey>
+                "ASCENDING" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$role>
+                "Understorey Plot Species Organism Group" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$title>
+                " <I>Acacia ingrata</I> Benth. with Isolated plants " ;
+        :averageheight               test:DISTANCEVALUE-B6471 ;
+        :cover                       test:VEGETATIONCOVERVALUE-B6472 ;
+        :determinedspeciesconcept    test:SPECIESCONCEPTVALUE-B6468 ;
+        :featureof                   test:SAMPLINGUNIT-T1485141126280 ;
+        :fieldspeciesconcept         test:SPECIESCONCEPTVALUE-B6467 ;
+        :lifeform                    test:LIFEFORMVALUE-B6474 ;
+        :method                      test:METHODEXECUTION-T1485141126489 ;
+        :quantitativeabundancevalue  test:QUANTITATIVEABUNDANCEVALUE-B6469 ;
+        :temporality                 test:TimeRangeValue-B6473 .
+
+test:COMPONENTAMOUNTVALUE-D7072
+        a            :COMPONENTAMOUNTVALUE ;
+        :anchorname  "Soil Chemical Analysis" ;
+        :method      test:METHODEXECUTION-T1485141126336 ;
+        :units       com:MEASUREMENTUNIT-T1485138678627 ;
+        :value       "39"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+test:SOILTEXTURETYPE-T1485140987411
+        a             :SOILTEXTURETYPE ;
+        :claycontent  "20-30%" ;
+        :name         "Sandy clay loam" .
+
+test:TimeRangeValue-B6509
+        a                     :TimeRangeValue ;
+        :has_end              "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_start            "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_time_range_type  test:OriginatedTimeRangeType ;
+        :is_end_sampled       false ;
+        :is_start_sampled     false .
+
+test:SAMPLINGUNIT-T1485141126280
+        a                  :SAMPLINGUNIT ;
+        <http://www.aekos.org.au/ontology/1.0.0#$importance>
+                "MEDIUM" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$role>
+                "Understorey Vegetation Sampling Plot" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$title>
+                " Understorey Vegetation Sampling Plot ID: R054 " ;
+        :area              test:AREAVALUE-D7143 ;
+        :comment           "plot bearing 1 = 180 degrees; plot bearing 2 = 270 degrees" ;
+        :issampleof        test:SAMPLINGUNIT-T1485141126279 ;
+        :length            test:DISTANCEVALUE-D7142 ;
+        :method            test:METHODEXECUTION-T1485141126274 ;
+        :samplingunittype  com:SAMPLINGUNITTYPE-T1485138678354 ;
+        :temporality       test:TimeRangeValue-D7145 ;
+        :width             test:DISTANCEVALUE-D7144 .
+
+test:METHODEXECUTION-T1485141126863
+        a                :METHODEXECUTION ;
+        <http://www.aekos.org.au/ontology/1.0.0#$groupkey>
+                "2" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$importance>
+                "MEDIUM" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$orderkey>
+                "ASCENDING" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$role>
+                "Vegetation Assessment Method" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$sortkey>
+                "20070930" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$title>
+                " Understorey Vegetation Assessment Method, 30/09/2007 " ;
+        :duration        test:TimeRangeValue-B6428 ;
+        :method          test:METHODTYPE-T1485140988979 ;
+        :parentactivity  test:METHODEXECUTION-T1485141126274 .
+
+test:LIFEFORM-T1485140987519
+        a       :LIFEFORM ;
+        :name   "Forb" .
+
+test:METHODEXECUTION-T1485141126287
+        a                :METHODEXECUTION ;
+        <http://www.aekos.org.au/ontology/1.0.0#$importance>
+                "MEDIUM" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$role>
+                "Physical Assessment Method" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$title>
+                " Physical Assessment Method, 21/04/2007 " ;
+        :duration        test:TimeRangeValue-B6587 ;
+        :method          test:METHODTYPE-T1485140988767 ;
+        :parentactivity  test:METHODEXECUTION-T1485141126274 .
+
+test:TimeRangeValue-C6790
+        a                     :TimeRangeValue ;
+        :has_end              "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_start            "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_time_range_type  test:ObservedTimeRangeType ;
+        :is_end_sampled       true ;
+        :is_start_sampled     true .
+
+test:TimeBoundedTimeRangeType
+        a       :TimeBoundedTimeRangeType .
+
+test:COMPONENTAMOUNTVALUE-D7080
+        a            :COMPONENTAMOUNTVALUE ;
+        :anchorname  "Soil Chemical Analysis" ;
+        :method      test:METHODEXECUTION-T1485141126336 ;
+        :units       com:MEASUREMENTUNIT-T1485138678627 ;
+        :value       "100"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+test:SOIL-T1485141126337
+        a                        :SOIL ;
+        <http://www.aekos.org.au/ontology/1.0.0#$importance>
+                "MEDIUM" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$role>
+                "Soil Properties" ;
+        :b                       test:COMPONENTAMOUNTVALUE-D7071 ;
+        :ca                      test:COMPONENTAMOUNTVALUE-D7076 ;
+        :cd                      test:COMPONENTAMOUNTVALUE-D7077 ;
+        :co                      test:COMPONENTAMOUNTVALUE-D7078 ;
+        :colour                  test:SOILCOLOURVALUE-D7069 ;
+        :cu                      test:COMPONENTAMOUNTVALUE-D7079 ;
+        :electricalconductivity  test:CONDUCTIVITYVALUE-D7070 ;
+        :fe                      test:COMPONENTAMOUNTVALUE-D7080 ;
+        :featureof               test:SAMPLINGUNIT-T1485141126280 ;
+        :k                       test:COMPONENTAMOUNTVALUE-D7072 ;
+        :method                  test:METHODEXECUTION-T1485141126336 ;
+        :mg                      test:COMPONENTAMOUNTVALUE-D7081 ;
+        :mn                      test:COMPONENTAMOUNTVALUE-D7082 ;
+        :mo                      test:COMPONENTAMOUNTVALUE-D7083 ;
+        :n                       test:COMPONENTAMOUNTVALUE-D7073 ;
+        :na                      test:COMPONENTAMOUNTVALUE-D7084 ;
+        :ni                      test:COMPONENTAMOUNTVALUE-D7085 ;
+        :p                       test:COMPONENTAMOUNTVALUE-D7074 ;
+        :ph                      test:PHVALUE-D7086 ;
+        :s                       test:COMPONENTAMOUNTVALUE-D7075 ;
+        :soilprofile             test:SOILPROFILEVALUE-D7091 ;
+        :soiltexture             test:SOILTEXTUREVALUE-D7088 ;
+        :surfacetype             test:SOILSURFACETYPEVALUE-D7068 ;
+        :temporality             test:TimeRangeValue-D7089 ;
+        :totalorganiccarbon      test:COMPONENTAMOUNTVALUE-D7090 ;
+        :zn                      test:COMPONENTAMOUNTVALUE-D7087 .
+
+test:OriginatedTimeRangeType
+        a       :OriginatedTimeRangeType .
+
+test:METHODEXECUTION-T1485141126808
+        a                :METHODEXECUTION ;
+        <http://www.aekos.org.au/ontology/1.0.0#$groupkey>
+                "1" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$importance>
+                "MEDIUM" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$orderkey>
+                "ASCENDING" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$role>
+                "Vegetation Assessment Method" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$title>
+                " Overstorey Vegetation Assessment Method, 21/04/2007 " ;
+        :duration        test:TimeRangeValue-D7163 ;
+        :method          test:METHODTYPE-T1485140988979 ;
+        :parentactivity  test:METHODEXECUTION-T1485141126274 .
+
+test:METHODEXECUTION-T1485141126274
+        a             :METHODEXECUTION ;
+        <http://www.aekos.org.au/ontology/1.0.0#$importance>
+                "HIGH" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$role>
+                "Plot Establishment Method" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$title>
+                " Plot Establishment Method " ;
+        :duration     test:TimeRangeValue-C6814 ;
+        :method       test:METHODTYPE-T1485140988744 .
+
+test:TimeRangeValue-B6425
+        a                     :TimeRangeValue ;
+        :has_end              "2007-09-29T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_start            "2007-09-29T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_time_range_type  test:ObservedTimeRangeType ;
+        :is_end_sampled       true ;
+        :is_start_sampled     true .
+
+test:DefaultTimeRangeType
+        a       :DefaultTimeRangeType .
+
+test:LANDFORMELEMENTVALUE-C6782
+        a            :LANDFORMELEMENTVALUE ;
+        :anchorname  "Landform Element" ;
+        :category    test:LANDFORMELEMENT-T1485140987487 .
+
+com:EPSGCODE-T1485138683954
+        a       :EPSGCODE ;
+        :name   "28355" .
+
+test:SPECIESCONCEPTVALUE-D319
+        a            :SPECIESCONCEPTVALUE ;
+        :anchorname  "Plant Species" ;
+        :commentary  "Acacia ?octonervia 'longer leaf'" .
+
+test:DISTURBANCEEVIDENCE-T1485141126335
+        a                 :DISTURBANCEEVIDENCE ;
+        <http://www.aekos.org.au/ontology/1.0.0#$role>
+                "Disturbance Level" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$title>
+                " Disturbance Level of No effective disturbance " ;
+        :disturbancetype  test:DISTURBANCETYPEVALUE-B6546 ;
+        :featureof        test:SAMPLEDAREA-T1485141126278 ;
+        :method           test:METHODEXECUTION-T1485141126334 ;
+        :temporality      test:TimeRangeValue-B6547 .
+
+test:STUDYLOCATIONSUBGRAPH-T1485141126269
+        a                              :STUDYLOCATIONSUBGRAPH ;
+        :aekoslocationidentifier       "aekos.org.au/collection/wa.gov.au/ravensthorpe/R054" ;
+        :aekossurveyidentifier         "aekos.org.au/collection/wa.gov.au/ravensthorpe" ;
+        :centroidcoordinates           test:SPATIALPOINT-D7205 ;
+        :mapcoordinates                test:COORDINATES-T1485141126276 ;
+        :role                          "Study Location" ;
+        :studylocation                 test:STUDYLOCATION-T1485141126275 ;
+        :studylocationidentifier       "R054" ;
+        :studylocationphysdescription  " Landscape description:   NE facing gently inclined midslope. Pale brown coloured sandy clay loam with metamorphosed sedimentary fragments at the surface.        " ;
+        :studylocationvegdescription   " Vegetation description:   Very tall Eucalyptus falcata subsp. falcata; E. phaenophylla very tall sparse mallee shrubland over Melaleuca hamata; Petrophile fastigiata; Melaleuca rigidiflia tall open shrubland over Baeckea corynophylla mid-high open shrubland over Lepidosperma aff.  " ;
+        :surveyname                    "Biological Survey of the Ravensthorpe Range (Phase 1)" ;
+        :title                         "  Biological Survey of the Ravensthorpe Range (Phase 1)  {DPaW},   ID: R054  " ;
+        :views                         [ a       <http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag> ;
+                                         <http://www.w3.org/1999/02/22-rdf-syntax-ns#_1>
+                                                 test:STUDYLOCATIONVISITVIEW-T1485141126286 ;
+                                         <http://www.w3.org/1999/02/22-rdf-syntax-ns#_2>
+                                                 test:STUDYLOCATIONVISITVIEW-T1485141126861
+                                       ] .
+
+test:LITHOLOGYVALUE-C6786
+        a            :LITHOLOGYVALUE ;
+        :anchorname  "Rock Outcrop" .
+
+test:TimeRangeValue-C6814
+        a                     :TimeRangeValue ;
+        :has_end              "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_start            "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_time_range_type  test:TimeBoundedTimeRangeType ;
+        :is_end_sampled       false ;
+        :is_start_sampled     false .
+
+com:MEASUREMENTUNIT-T1485138678625
+        a       :MEASUREMENTUNIT ;
+        :name   "millisiemens per metre" .
+
+test:TimeRangeValue-D7145
+        a                     :TimeRangeValue ;
+        :has_end              "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_start            "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_time_range_type  test:ObservedTimeRangeType ;
+        :is_end_sampled       true ;
+        :is_start_sampled     true .
+
+test:SPATIALPOINT-C6818
+        a                   :SPATIALPOINT ;
+        :computedeasting    "249950"^^<http://www.w3.org/2001/XMLSchema#decimal> ;
+        :computedlatitude   -33.716314010394434 ;
+        :computedlongitude  120.30162653347247 ;
+        :computednorthing   "6266028"^^<http://www.w3.org/2001/XMLSchema#decimal> ;
+        :crs                com:COORDINATEREFERENCESYSTEM-T1485138678164 ;
+        :x                  "249950"^^<http://www.w3.org/2001/XMLSchema#decimal> ;
+        :y                  "6266028"^^<http://www.w3.org/2001/XMLSchema#decimal> ;
+        :zone               "51"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+test:TimeRangeValue-B6575
+        a                     :TimeRangeValue ;
+        :has_end              "2007-09-29T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_start            "2007-09-29T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_time_range_type  test:ObservedTimeRangeType ;
+        :is_end_sampled       true ;
+        :is_start_sampled     true .
+
+test:ALTITUDEVALUE-C6788
+        a        :ALTITUDEVALUE ;
+        :method  test:METHODEXECUTION-T1485141126274 ;
+        :units   com:MEASUREMENTUNIT-T1485138678610 ;
+        :value   90.7 .
+
+test:COMPONENTAMOUNTVALUE-D7075
+        a            :COMPONENTAMOUNTVALUE ;
+        :anchorname  "Soil Chemical Analysis" ;
+        :method      test:METHODEXECUTION-T1485141126336 ;
+        :units       com:MEASUREMENTUNIT-T1485138678627 ;
+        :value       "6"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+test:TOPOGRAPHICPOSITIONVALUE-C6784
+        a            :TOPOGRAPHICPOSITIONVALUE ;
+        :anchorname  "Morphological Type" ;
+        :category    test:MORPHOLOGY-T1485140987483 .
+
+test:SURFACECOVERVALUE-C6777
+        a            :SURFACECOVERVALUE ;
+        :anchorname  "Rock Outcrop" ;
+        :category    test:ROCKOUTCROPABUND-T1485140987490 .
+
+test:PHVALUE-D7086  a  :PHVALUE ;
+        :anchorname  "Soil Chemical Analysis" ;
+        :method      test:METHODEXECUTION-T1485141126336 ;
+        :value       4.7 .
+
+test:NUMBERRANGE-C6764
+        a             :NUMBERRANGE ;
+        :lowerbounds  test:BOUNDSTYPE-T1485141126539 ;
+        :lowervalue   "0"^^<http://www.w3.org/2001/XMLSchema#decimal> ;
+        :upperbounds  test:BOUNDSTYPE-T1485141126540 ;
+        :uppervalue   "10"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+test:QUANTITATIVEABUNDANCEVALUE-D7229
+        a       :QUANTITATIVEABUNDANCEVALUE ;
+        :range  test:NUMBERRANGE-D7230 ;
+        :units  com:MEASUREMENTUNIT-T1485138678628 .
+
+test:VEGETATIONCOVERVALUE-B6472
+        a            :VEGETATIONCOVERVALUE ;
+        :anchorname  "Plant Species" ;
+        :category    test:SURFACECOVERCATEGORY-T1485140987463 .
+
+test:DISTANCEVALUE-D7144
+        a       :DISTANCEVALUE ;
+        :units  com:MEASUREMENTUNIT-T1485138678610 ;
+        :value  "10"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+test:BOUNDSTYPE-T1485141126875
+        a       :BOUNDSTYPE ;
+        :name   "Inclusive" .
+
+test:SPECIESORGANISMGROUP-T1485141126864
+        a                          :SPECIESORGANISMGROUP ;
+        <http://www.aekos.org.au/ontology/1.0.0#$groupkey>
+                "2" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$importance>
+                "MEDIUM" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$orderkey>
+                "ASCENDING" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$role>
+                "Understorey Plot Species Organism Group" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$title>
+                " <I>Acacia octonervia</I> R.S.Cowan & Maslin with <10% cover " ;
+        :averageheight             test:DISTANCEVALUE-B6423 ;
+        :cover                     test:VEGETATIONCOVERVALUE-B6424 ;
+        :determinedspeciesconcept  test:SPECIESCONCEPTVALUE-B6422 ;
+        :featureof                 test:SAMPLINGUNIT-T1485141126280 ;
+        :fieldspeciesconcept       test:SPECIESCONCEPTVALUE-B6419 ;
+        :lifeform                  test:LIFEFORMVALUE-B6426 ;
+        :method                    test:METHODEXECUTION-T1485141126863 ;
+        :phenology                 [ a       <http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag> ;
+                                     <http://www.w3.org/1999/02/22-rdf-syntax-ns#_1>
+                                             test:PHENOLOGYVALUE-B6420
+                                   ] ;
+        :temporality               test:TimeRangeValue-B6425 .
+
+test:TimeRangeValue-D7111
+        a                     :TimeRangeValue ;
+        :has_end              "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_start            "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_time_range_type  test:TimeBoundedTimeRangeType ;
+        :is_end_sampled       false ;
+        :is_start_sampled     false .
+
+test:COMPONENTAMOUNTVALUE-D7083
+        a            :COMPONENTAMOUNTVALUE ;
+        :anchorname  "Soil Chemical Analysis" ;
+        :method      test:METHODEXECUTION-T1485141126336 ;
+        :units       com:MEASUREMENTUNIT-T1485138678627 ;
+        :value       "0"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+test:BOUNDSTYPE-T1485141126491
+        a       :BOUNDSTYPE ;
+        :name   "Inclusive" .
+
+test:MORPHOLOGY-T1485140987483
+        a       :MORPHOLOGY ;
+        :name   "Mid Slope" .
+
+test:ORGANISMASSEMBLAGE-T1485141126809
+        a             :ORGANISMASSEMBLAGE ;
+        <http://www.aekos.org.au/ontology/1.0.0#$role>
+                "Plot Vegetation Assemblage" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$title>
+                " Plot Vegetation Assemblage, 21/04/2007 " ;
+        :community    test:COMMUNITYVALUE-B6594 ;
+        :featureof    test:SAMPLINGUNIT-T1485141126279 ;
+        :method       test:METHODEXECUTION-T1485141126808 ;
+        :temporality  test:TimeRangeValue-B6595 .
+
+test:LOCATIONVALUE-B6510
+        a              :LOCATIONVALUE ;
+        :sampledpoint  test:SPATIALPOINT-B6511 .
+
+test:SPECIESORGANISMGROUP-T1485141126538
+        a                            :SPECIESORGANISMGROUP ;
+        <http://www.aekos.org.au/ontology/1.0.0#$groupkey>
+                "2" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$importance>
+                "MEDIUM" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$orderkey>
+                "ASCENDING" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$role>
+                "Understorey Plot Species Organism Group" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$title>
+                " <I>Dampiera lavandulacea</I> Lindl. with Isolated plants " ;
+        :averageheight               test:DISTANCEVALUE-C6765 ;
+        :cover                       test:VEGETATIONCOVERVALUE-C6766 ;
+        :determinedspeciesconcept    test:SPECIESCONCEPTVALUE-C6762 ;
+        :featureof                   test:SAMPLINGUNIT-T1485141126280 ;
+        :fieldspeciesconcept         test:SPECIESCONCEPTVALUE-C6761 ;
+        :lifeform                    test:LIFEFORMVALUE-C6768 ;
+        :method                      test:METHODEXECUTION-T1485141126489 ;
+        :quantitativeabundancevalue  test:QUANTITATIVEABUNDANCEVALUE-C6763 ;
+        :temporality                 test:TimeRangeValue-C6767 .
+
+test:TimeRangeValue-B6428
+        a                     :TimeRangeValue ;
+        :has_end              "2007-09-29T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_start            "2007-09-29T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_time_range_type  test:TimeBoundedTimeRangeType ;
+        :is_end_sampled       false ;
+        :is_start_sampled     false .
+
+test:TimeRangeValue-B6591
+        a                     :TimeRangeValue ;
+        :has_end              "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_start            "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_time_range_type  test:TimeBoundedTimeRangeType ;
+        :is_end_sampled       false ;
+        :is_start_sampled     false .
+
+test:ROCKOUTCROPABUND-T1485140987490
+        a                  :ROCKOUTCROPABUND ;
+        :name              "No bedrock exposed" ;
+        :rockoutcropcover  "0%" .
+
+test:RUNOFFVALUE-C6776
+        a            :RUNOFFVALUE ;
+        :anchorname  "Surface Runoff" ;
+        :category    test:SURFACERUNOFFTYPE-T1485140987503 .
+
+test:LIFEFORMVALUE-B6474
+        a            :LIFEFORMVALUE ;
+        :anchorname  "Plant Species" ;
+        :category    test:LIFEFORM-T1485140987510 .
+
+test:DISTANCEVALUE-D7231
+        a            :DISTANCEVALUE ;
+        :anchorname  "Plant Species" ;
+        :units       com:MEASUREMENTUNIT-T1485138678610 ;
+        :value       0.6 .
+
+test:SOILCOLOURVALUE-D7069
+        a            :SOILCOLOURVALUE ;
+        :anchorname  "Surface Colour" ;
+        :commentary  "10YR; 6/3; pale brown" .
+
+test:SPATIALPOINT-B6511
+        a                   :SPATIALPOINT ;
+        :computedeasting    "249950"^^<http://www.w3.org/2001/XMLSchema#decimal> ;
+        :computedlatitude   -33.716314010394434 ;
+        :computedlongitude  120.30162653347247 ;
+        :computednorthing   "6266028"^^<http://www.w3.org/2001/XMLSchema#decimal> ;
+        :crs                com:COORDINATEREFERENCESYSTEM-T1485138678164 ;
+        :x                  "249950"^^<http://www.w3.org/2001/XMLSchema#decimal> ;
+        :y                  "6266028"^^<http://www.w3.org/2001/XMLSchema#decimal> ;
+        :zone               "51"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+test:TimeRangeValue-D323
+        a                     :TimeRangeValue ;
+        :has_end              "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_start            "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_time_range_type  test:ObservedTimeRangeType ;
+        :is_end_sampled       true ;
+        :is_start_sampled     true .
+
+test:SURFACECOVERCATEGORY-T1485140987463
+        a       :SURFACECOVERCATEGORY ;
+        :name   "Isolated plants" .
+
+test:LOCATIONVALUE-C6787
+        a            :LOCATIONVALUE ;
+        :anchorname  "Location Description" ;
+        :commentary  "NE facing gently inclined midslope. Pale brown coloured sandy clay loam with metamorphosed sedimentary fragments at the surface." .
+
+test:METHODTYPE-T1485140988816
+        a       :METHODTYPE ;
+        :name   "Disturbance Assessment Method" .
+
+test:METHODTYPE-T1485140988979
+        a       :METHODTYPE ;
+        :name   "Vegetation Assessment Method" .
+
+com:MEASUREMENTUNIT-T1485138678628
+        a       :MEASUREMENTUNIT ;
+        :name   "percent" .
+
+test:TimeRangeValue-B6599
+        a                     :TimeRangeValue ;
+        :has_end              "2007-09-29T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_start            "2007-09-29T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_time_range_type  test:DefaultTimeRangeType ;
+        :is_end_sampled       false ;
+        :is_start_sampled     false .
+
+test:TimeRangeValue-C6767
+        a                     :TimeRangeValue ;
+        :has_end              "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_start            "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_time_range_type  test:ObservedTimeRangeType ;
+        :is_end_sampled       true ;
+        :is_start_sampled     true .
+
+test:AREAVALUE-D7143  a  :AREAVALUE ;
+        :units  com:MEASUREMENTUNIT-T1485138678614 ;
+        :value  "100"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+test:SOILSURFACETYPE-T1485140987401
+        a       :SOILSURFACETYPE ;
+        :name   "Firm" .
+
+test:SPATIALPOINT-C6771
+        a              :SPATIALPOINT ;
+        :crs           com:COORDINATEREFERENCESYSTEM-T1485138678164 ;
+        :epsg          com:EPSGCODE-T1485138683954 ;
+        :spatiallayer  test:SPATIALLAYERIDENTIFIER-252500029 ;
+        :x             "249950"^^<http://www.w3.org/2001/XMLSchema#decimal> ;
+        :y             "6266028"^^<http://www.w3.org/2001/XMLSchema#decimal> ;
+        :zone          "51"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+test:COMPONENTAMOUNTVALUE-D7078
+        a            :COMPONENTAMOUNTVALUE ;
+        :anchorname  "Soil Chemical Analysis" ;
+        :method      test:METHODEXECUTION-T1485141126336 ;
+        :units       com:MEASUREMENTUNIT-T1485138678627 ;
+        :value       0.06 .
+
+test:TimeRangeValue-D7227
+        a                     :TimeRangeValue ;
+        :has_end              "2007-09-29T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_start            "2007-09-29T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_time_range_type  test:ObservedTimeRangeType ;
+        :is_end_sampled       true ;
+        :is_start_sampled     true .
+
+test:DISTANCEVALUE-B6423
+        a            :DISTANCEVALUE ;
+        :anchorname  "Plant Species" ;
+        :units       com:MEASUREMENTUNIT-T1485138678610 ;
+        :value       0.3 .
+
+test:FRAGMENTSIZECATEGORY-T1485140987435
+        a       :FRAGMENTSIZECATEGORY ;
+        :name   "Coarse gravelly; large pebbles" .
+
+test:SAMPLEDAREA-T1485141126278
+        a             :SAMPLEDAREA ;
+        <http://www.aekos.org.au/ontology/1.0.0#$importance>
+                "MEDIUM" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$role>
+                "Sampled Area" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$title>
+                " Sampled Area for plot R054 " ;
+        :featureof    test:STUDYLOCATION-T1485141126275 ;
+        :location     test:LOCATIONVALUE-C6817 .
+
+test:VEGETATIONCOVERVALUE-D322
+        a            :VEGETATIONCOVERVALUE ;
+        :anchorname  "Plant Species" ;
+        :category    test:SURFACECOVERCATEGORY-T1485140987462 .
+
+test:TimeRangeValue-B6465
+        a                     :TimeRangeValue ;
+        :has_end              "2007-09-29T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_start            "2007-09-29T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_time_range_type  test:TimeBoundedTimeRangeType ;
+        :is_end_sampled       false ;
+        :is_start_sampled     false .
+
+test:SLOPEVALUE-C6778  a  :SLOPEVALUE ;
+        :anchorname  "Slope" ;
+        :commentary  "gently inclined" ;
+        :units       com:MEASUREMENTUNIT-T1485138678624 ;
+        :value       "5"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+test:SPECIESCONCEPTVALUE-B6468
+        a            :SPECIESCONCEPTVALUE ;
+        :anchorname  "Plant Species" ;
+        :species     test:SPECIESCONCEPT-T1485140987591 .
+
+test:SOILPROFILEVALUE-D7091
+        a            :SOILPROFILEVALUE ;
+        :anchorname  "Soil Profile" ;
+        :category    test:SOILPROFILETYPE-T1485140987423 .
+
+test:SPECIESCONCEPT-T1485140988025
+        a                       :SPECIESCONCEPT ;
+        :authorship             "Meisn." ;
+        :formattedname          "<I>Eutaxia cuneata</I> Meisn." ;
+        :genuspart              "Eutaxia" ;
+        :hybridtype             com:SPECIESCONCEPTHYBRIDTYPE-T1485138684157 ;
+        :namewithauthorship     "Eutaxia cuneata Meisn." ;
+        :namewithoutauthorship  "Eutaxia cuneata" ;
+        :nslid                  "apni.name:34801" ;
+        :rank                   com:TAXONOMICRANK-T1485138684121 ;
+        :speciesconcepttype     com:SPECIESCONCEPTTYPE-T1485138684133 ;
+        :specificepithet        "cuneata" ;
+        :title                  "<I>Eutaxia cuneata</I> Meisn." .
+
+test:TimeRangeValue-B6473
+        a                     :TimeRangeValue ;
+        :has_end              "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_start            "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_time_range_type  test:ObservedTimeRangeType ;
+        :is_end_sampled       true ;
+        :is_start_sampled     true .
+
+test:SOILSURFACETYPEVALUE-D7068
+        a            :SOILSURFACETYPEVALUE ;
+        :anchorname  "Surface Soil Condition" ;
+        :category    test:SOILSURFACETYPE-T1485140987401 .
+
+test:COARSEFRAGCOVERCATEGORY-T1485140987430
+        a         :COARSEFRAGCOVERCATEGORY ;
+        :comment  "50-90%" ;
+        :name     "Very; abundant" .
+
+com:SAMPLINGUNITTYPE-T1485138678354
+        a       :SAMPLINGUNITTYPE ;
+        :name   "Quadrat" .
+
+test:PHENOLOGYVALUE-D7226
+        a             :PHENOLOGYVALUE ;
+        :anchorname   "Plant Species" ;
+        :category     test:PHENOLOGY-T1485140987524 ;
+        :method       test:METHODEXECUTION-T1485141126863 ;
+        :temporality  test:TimeRangeValue-D7227 .
+
+test:TimeRangeValue-C6783
+        a                     :TimeRangeValue ;
+        :has_end              "2009-05-21T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_start            "2009-05-21T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_time_range_type  test:ObservedTimeRangeType ;
+        :is_end_sampled       true ;
+        :is_start_sampled     true .
+
+test:STUDYLOCATIONVISITVIEW-T1485141126286
+        a               :STUDYLOCATIONVISITVIEW ;
+        :category       "VISIT" ;
+        :observeditems  [ a       <http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag> ;
+                          <http://www.w3.org/1999/02/22-rdf-syntax-ns#_1>
+                                  test:DISTURBANCEEVIDENCE-T1485141126335 ;
+                          <http://www.w3.org/1999/02/22-rdf-syntax-ns#_2>
+                                  test:SPECIESORGANISMGROUP-T1485141126538 ;
+                          <http://www.w3.org/1999/02/22-rdf-syntax-ns#_3>
+                                  test:ORGANISMASSEMBLAGE-T1485141126809 ;
+                          <http://www.w3.org/1999/02/22-rdf-syntax-ns#_4>
+                                  test:SOIL-T1485141126337 ;
+                          <http://www.w3.org/1999/02/22-rdf-syntax-ns#_5>
+                                  test:SPECIESORGANISMGROUP-T1485141126490 ;
+                          <http://www.w3.org/1999/02/22-rdf-syntax-ns#_6>
+                                  test:SPECIESORGANISMGROUP-T1485141126500
+                        ] ;
+        :title          " - visited on 21-04-2007" ;
+        :visitnumber    "1"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+test:SOILTEXTUREVALUE-D7088
+        a            :SOILTEXTUREVALUE ;
+        :anchorname  "Surface Soil Texture" ;
+        :category    test:SOILTEXTURETYPE-T1485140987411 .
+
+test:COMPONENTAMOUNTVALUE-D7073
+        a            :COMPONENTAMOUNTVALUE ;
+        :anchorname  "Soil Chemical Analysis" ;
+        :method      test:METHODEXECUTION-T1485141126336 ;
+        :units       com:MEASUREMENTUNIT-T1485138678628 ;
+        :value       0.052 .
+
+com:COORDINATEREFERENCESYSTEM-T1485138678164
+        a       :COORDINATEREFERENCESYSTEM ;
+        :name   "Universal Transverse Mercator GDA94" .
+
+test:VEGETATIONCOVERVALUE-D7232
+        a            :VEGETATIONCOVERVALUE ;
+        :anchorname  "Plant Species" ;
+        :category    test:SURFACECOVERCATEGORY-T1485140987463 .
+
+test:SPATIALPOINT-D7205
+        a                   :SPATIALPOINT ;
+        :computedeasting    "249950"^^<http://www.w3.org/2001/XMLSchema#decimal> ;
+        :computedlatitude   -33.716314010394434 ;
+        :computedlongitude  120.30162653347247 ;
+        :computednorthing   "6266028"^^<http://www.w3.org/2001/XMLSchema#decimal> ;
+        :crs                com:COORDINATEREFERENCESYSTEM-T1485138678164 ;
+        :epsg               com:EPSGCODE-T1485138683954 ;
+        :x                  "249950"^^<http://www.w3.org/2001/XMLSchema#decimal> ;
+        :y                  "6266028"^^<http://www.w3.org/2001/XMLSchema#decimal> ;
+        :zone               "51"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+test:METHODTYPE-T1485140988819
+        a       :METHODTYPE ;
+        :name   "Surface Soil Assessment Method" .
+
+test:BOUNDSTYPE-T1485141126539
+        a       :BOUNDSTYPE ;
+        :name   "Inclusive" .
+
+com:MEASUREMENTUNIT-T1485138678610
+        a       :MEASUREMENTUNIT ;
+        :name   "metres" .
+
+test:DISTANCEVALUE-D7142
+        a       :DISTANCEVALUE ;
+        :units  com:MEASUREMENTUNIT-T1485138678610 ;
+        :value  "10"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+test:LOCATIONVALUE-B6600
+        a               :LOCATIONVALUE ;
+        :computedpoint  test:SPATIALPOINT-B6602 ;
+        :sampledpoint   test:SPATIALPOINT-B6601 ;
+        :spatialanchor  test:MARKER-T1485141126277 .
+
+test:TimeRangeValue-D7109
+        a                     :TimeRangeValue ;
+        :has_end              "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_start            "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_time_range_type  test:TimeBoundedTimeRangeType ;
+        :is_end_sampled       false ;
+        :is_start_sampled     false .
+
+test:SPECIESCONCEPTVALUE-D7225
+        a            :SPECIESCONCEPTVALUE ;
+        :anchorname  "Plant Species" ;
+        :commentary  "eutaxia cuneata" .
+
+test:COMPONENTAMOUNTVALUE-D7081
+        a            :COMPONENTAMOUNTVALUE ;
+        :anchorname  "Soil Chemical Analysis" ;
+        :method      test:METHODEXECUTION-T1485141126336 ;
+        :units       com:MEASUREMENTUNIT-T1485138678627 ;
+        :value       "130"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+test:SPECIESCONCEPTVALUE-C6761
+        a            :SPECIESCONCEPTVALUE ;
+        :anchorname  "Plant Species" ;
+        :commentary  "Dampiera lavandulacea" .
+
+test:LIFEFORMVALUE-D324
+        a            :LIFEFORMVALUE ;
+        :anchorname  "Plant Species" ;
+        :category    test:LIFEFORM-T1485140987510 .
+
+test:SPECIESCONCEPT-T1485140987603
+        a                       :SPECIESCONCEPT ;
+        :authorship             "R.S.Cowan & Maslin" ;
+        :formattedname          "<I>Acacia octonervia</I> R.S.Cowan & Maslin" ;
+        :genuspart              "Acacia" ;
+        :hybridtype             com:SPECIESCONCEPTHYBRIDTYPE-T1485138684157 ;
+        :namewithauthorship     "Acacia octonervia R.S.Cowan & Maslin" ;
+        :namewithoutauthorship  "Acacia octonervia" ;
+        :nslid                  "apni.name:120895" ;
+        :rank                   com:TAXONOMICRANK-T1485138684121 ;
+        :speciesconcepttype     com:SPECIESCONCEPTTYPE-T1485138684133 ;
+        :specificepithet        "octonervia" ;
+        :title                  "<I>Acacia octonervia</I> R.S.Cowan & Maslin" .
+
+test:DISTANCEVALUE-C6757
+        a       :DISTANCEVALUE ;
+        :units  com:MEASUREMENTUNIT-T1485138678610 ;
+        :value  "20"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+test:SPATIALPOINT-B6601
+        a                   :SPATIALPOINT ;
+        :computedeasting    "249950"^^<http://www.w3.org/2001/XMLSchema#decimal> ;
+        :computedlatitude   -33.716314010394434 ;
+        :computedlongitude  120.30162653347247 ;
+        :computednorthing   "6266028"^^<http://www.w3.org/2001/XMLSchema#decimal> ;
+        :crs                com:COORDINATEREFERENCESYSTEM-T1485138678164 ;
+        :x                  "249950"^^<http://www.w3.org/2001/XMLSchema#decimal> ;
+        :y                  "6266028"^^<http://www.w3.org/2001/XMLSchema#decimal> ;
+        :zone               "51"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+test:LIFEFORMVALUE-D7234
+        a            :LIFEFORMVALUE ;
+        :anchorname  "Plant Species" ;
+        :category    test:LIFEFORM-T1485140987510 .
+
+test:SPECIESCONCEPTVALUE-D320
+        a            :SPECIESCONCEPTVALUE ;
+        :anchorname  "Plant Species" ;
+        :species     test:SPECIESCONCEPT-T1485140987603 .
+
+test:TimeRangeValue-B6547
+        a                     :TimeRangeValue ;
+        :has_end              "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_start            "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_time_range_type  test:ObservedTimeRangeType ;
+        :is_end_sampled       true ;
+        :is_start_sampled     true .
+
+com:TAXONOMICRANK-T1485138684121
+        a       :TAXONOMICRANK ;
+        :name   "SPECIES" .
+
+test:DISTANCEVALUE-C6765
+        a            :DISTANCEVALUE ;
+        :anchorname  "Plant Species" ;
+        :units       com:MEASUREMENTUNIT-T1485138678610 ;
+        :value       0.2 .
+
+test:TimeRangeValue-B6597
+        a                     :TimeRangeValue ;
+        :has_end              "2007-09-29T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_start            "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_time_range_type  test:DefaultTimeRangeType ;
+        :is_end_sampled       false ;
+        :is_start_sampled     false .
+
+test:COMPONENTAMOUNTVALUE-D7076
+        a            :COMPONENTAMOUNTVALUE ;
+        :anchorname  "Soil Chemical Analysis" ;
+        :method      test:METHODEXECUTION-T1485141126336 ;
+        :units       com:MEASUREMENTUNIT-T1485138678627 ;
+        :value       "310"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+test:TOPOGRAPHICPOSITIONVALUE-C6785
+        a            :TOPOGRAPHICPOSITIONVALUE ;
+        :anchorname  "Landform Location" ;
+        :category    test:LANDFORMLOCATION-T1485140987497 .
+
+test:LITHOLOGYVALUE-C6774
+        a            :LITHOLOGYVALUE ;
+        :anchorname  "Surface Fragment Description" ;
+        :commentary  "Metamorphosed sedimentary" .
+
+test:TimeRangeValue-B6421
+        a                     :TimeRangeValue ;
+        :has_end              "2007-09-29T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_start            "2007-09-29T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_time_range_type  test:ObservedTimeRangeType ;
+        :is_end_sampled       true ;
+        :is_start_sampled     true .
+
+test:AREAVALUE-C6756  a  :AREAVALUE ;
+        :units  com:MEASUREMENTUNIT-T1485138678614 ;
+        :value  "400"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+test:LANDFORMELEMENT-T1485140987487
+        a       :LANDFORMELEMENT ;
+        :name   "Hill slope" .
+
+test:FRAGMENTSHAPEVALUE-C6780
+        a             :FRAGMENTSHAPEVALUE ;
+        :anchorname   "Surface Fragment Description" ;
+        :category     test:FRAGMENTSHAPE-T1485140987446 ;
+        :temporality  test:TimeRangeValue-C6781 .
+
+test:SPECIESCONCEPTVALUE-D7228
+        a            :SPECIESCONCEPTVALUE ;
+        :anchorname  "Plant Species" ;
+        :species     test:SPECIESCONCEPT-T1485140988025 .
+
+test:FRAGMENTSIZEVALUE-C6789
+        a             :FRAGMENTSIZEVALUE ;
+        :anchorname   "Surface Fragment Description" ;
+        :category     test:FRAGMENTSIZECATEGORY-T1485140987435 ;
+        :temporality  test:TimeRangeValue-C6790 .
+
+test:COMPONENTAMOUNTVALUE-D7084
+        a            :COMPONENTAMOUNTVALUE ;
+        :anchorname  "Soil Chemical Analysis" ;
+        :method      test:METHODEXECUTION-T1485141126336 ;
+        :units       com:MEASUREMENTUNIT-T1485138678627 ;
+        :value       "58"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+test:BOUNDSTYPE-T1485141126492
+        a       :BOUNDSTYPE ;
+        :name   "Inclusive" .
+
+test:TimeRangeValue-D7233
+        a                     :TimeRangeValue ;
+        :has_end              "2007-09-29T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_start            "2007-09-29T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_time_range_type  test:ObservedTimeRangeType ;
+        :is_end_sampled       true ;
+        :is_start_sampled     true .
+
+test:LANDSCAPE-T1485141126288
+        a                         :LANDSCAPE ;
+        <http://www.aekos.org.au/ontology/1.0.0#$importance>
+                "MEDIUM" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$orderkey>
+                "DESCENDING" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$role>
+                "Landscape Features" ;
+        :altitude                 test:ALTITUDEVALUE-C6788 ;
+        :aspect                   test:DIRECTIONVALUE-C6775 ;
+        :coarsefragmentcover      test:SURFACECOVERVALUE-C6779 ;
+        :coarsefragmentlithology  test:LITHOLOGYVALUE-C6774 ;
+        :coarsefragmentshape      [ a       <http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag> ;
+                                    <http://www.w3.org/1999/02/22-rdf-syntax-ns#_1>
+                                            test:FRAGMENTSHAPEVALUE-C6780
+                                  ] ;
+        :coarsefragmentsize       test:FRAGMENTSIZEVALUE-C6789 ;
+        :featureof                test:SAMPLEDAREA-T1485141126278 ;
+        :landformelement          test:LANDFORMELEMENTVALUE-C6782 ;
+        :location                 test:LOCATIONVALUE-C6787 ;
+        :method                   test:METHODEXECUTION-T1485141126287 ;
+        :rockoutcropcover         test:SURFACECOVERVALUE-C6777 ;
+        :rockoutcroplithology     test:LITHOLOGYVALUE-C6786 ;
+        :runoff                   test:RUNOFFVALUE-C6776 ;
+        :slope                    test:SLOPEVALUE-C6778 ;
+        :temporality              test:TimeRangeValue-C6783 ;
+        :topographicposition      [ a       <http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag> ;
+                                    <http://www.w3.org/1999/02/22-rdf-syntax-ns#_1>
+                                            test:TOPOGRAPHICPOSITIONVALUE-C6784 ;
+                                    <http://www.w3.org/1999/02/22-rdf-syntax-ns#_2>
+                                            test:TOPOGRAPHICPOSITIONVALUE-C6785
+                                  ] .
+
+test:DISTANCEVALUE-B6471
+        a            :DISTANCEVALUE ;
+        :anchorname  "Plant Species" ;
+        :units       com:MEASUREMENTUNIT-T1485138678610 ;
+        :value       0.4 .
+
+test:DISTURBANCETYPEVALUE-B6546
+        a            :DISTURBANCETYPEVALUE ;
+        :anchorname  "Disturbance" ;
+        :category    test:DISTURBANCERAVENSTHORPE-T1485140987466 .
+
+test:COORDINATES-T1485141126276
+        a       :COORDINATES ;
+        :point  test:SPATIALPOINT-C6771 .
+
+test:COMMUNITYVALUE-B6594
+        a            :COMMUNITYVALUE ;
+        :commentary  "Very tall Eucalyptus falcata subsp. falcata; E. phaenophylla very tall sparse mallee shrubland over Melaleuca hamata; Petrophile fastigiata; Melaleuca rigidiflia tall open shrubland over Baeckea corynophylla mid-high open shrubland over Lepidosperma aff. " .
+
+test:LIFEFORM-T1485140987510
+        a       :LIFEFORM ;
+        :name   "Shrub" .
+
+test:LOCATIONVALUE-C6759
+        a            :LOCATIONVALUE ;
+        :anchorname  "Site Description" ;
+        :commentary  "Ravensthorpe Range; survey site R054; 27.4 km SE of Ravensthorpe. Located approximately 200 m W of track that extends S of Hatfield Road to Jerdacuttup Road. Accessed using old E-W running gridline." .
+
+test:DISTURBANCERAVENSTHORPE-T1485140987466
+        a       :DISTURBANCERAVENSTHORPE ;
+        :name   "No effective disturbance" .
+
+test:SPECIESORGANISMGROUP-T1485141126873
+        a                            :SPECIESORGANISMGROUP ;
+        <http://www.aekos.org.au/ontology/1.0.0#$groupkey>
+                "2" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$importance>
+                "MEDIUM" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$orderkey>
+                "ASCENDING" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$role>
+                "Understorey Plot Species Organism Group" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$title>
+                " <I>Eutaxia cuneata</I> Meisn. with Isolated plants " ;
+        :averageheight               test:DISTANCEVALUE-D7231 ;
+        :cover                       test:VEGETATIONCOVERVALUE-D7232 ;
+        :determinedspeciesconcept    test:SPECIESCONCEPTVALUE-D7228 ;
+        :featureof                   test:SAMPLINGUNIT-T1485141126280 ;
+        :fieldspeciesconcept         test:SPECIESCONCEPTVALUE-D7225 ;
+        :lifeform                    test:LIFEFORMVALUE-D7234 ;
+        :method                      test:METHODEXECUTION-T1485141126863 ;
+        :phenology                   [ a       <http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag> ;
+                                       <http://www.w3.org/1999/02/22-rdf-syntax-ns#_1>
+                                               test:PHENOLOGYVALUE-D7226
+                                     ] ;
+        :quantitativeabundancevalue  test:QUANTITATIVEABUNDANCEVALUE-D7229 ;
+        :temporality                 test:TimeRangeValue-D7233 .
+
+test:TimeRangeValue-C6781
+        a                     :TimeRangeValue ;
+        :has_end              "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_start            "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_time_range_type  test:ObservedTimeRangeType ;
+        :is_end_sampled       true ;
+        :is_start_sampled     true .
+
+test:FRAGMENTSHAPE-T1485140987446
+        a       :FRAGMENTSHAPE ;
+        :name   "Subrounded platy" .
+
+test:COMPONENTAMOUNTVALUE-D7071
+        a            :COMPONENTAMOUNTVALUE ;
+        :anchorname  "Soil Chemical Analysis" ;
+        :method      test:METHODEXECUTION-T1485141126336 ;
+        :units       com:MEASUREMENTUNIT-T1485138678627 ;
+        :value       0.2 .
+
+test:PHENOLOGYVALUE-B6420
+        a             :PHENOLOGYVALUE ;
+        :anchorname   "Plant Species" ;
+        :category     test:PHENOLOGY-T1485140987524 ;
+        :method       test:METHODEXECUTION-T1485141126863 ;
+        :temporality  test:TimeRangeValue-B6421 .
+
+test:METHODEXECUTION-T1485141126883
+        a                :METHODEXECUTION ;
+        <http://www.aekos.org.au/ontology/1.0.0#$groupkey>
+                "1" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$importance>
+                "MEDIUM" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$orderkey>
+                "ASCENDING" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$role>
+                "Vegetation Assessment Method" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$title>
+                " Overstorey Vegetation Assessment Method, 30/09/2007 " ;
+        :duration        test:TimeRangeValue-B6465 ;
+        :method          test:METHODTYPE-T1485140988979 ;
+        :parentactivity  test:METHODEXECUTION-T1485141126274 .
+
+test:METHODEXECUTION-T1485141126336
+        a                :METHODEXECUTION ;
+        <http://www.aekos.org.au/ontology/1.0.0#$importance>
+                "MEDIUM" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$role>
+                "Soil Assessment Method" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$title>
+                " Soil Assessment Method, 21/04/2007 " ;
+        :duration        test:TimeRangeValue-D7111 ;
+        :method          test:METHODTYPE-T1485140988819 ;
+        :parentactivity  test:METHODEXECUTION-T1485141126274 .
+
+test:LOCATIONVALUE-C6817
+        a              :LOCATIONVALUE ;
+        :sampledpoint  test:SPATIALPOINT-C6818 .
+
+test:SAMPLINGUNIT-T1485141126279
+        a                  :SAMPLINGUNIT ;
+        <http://www.aekos.org.au/ontology/1.0.0#$importance>
+                "MEDIUM" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$role>
+                "Overstorey Vegetation Sampling Plot" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$title>
+                " Overstorey Vegetation Sampling Plot ID: R054 " ;
+        :area              test:AREAVALUE-C6756 ;
+        :comment           "plot bearing 1 = 180 degrees; plot bearing 2 = 270 degrees" ;
+        :issampleof        test:SAMPLEDAREA-T1485141126278 ;
+        :length            test:DISTANCEVALUE-C6755 ;
+        :location          test:LOCATIONVALUE-C6759 ;
+        :method            test:METHODEXECUTION-T1485141126274 ;
+        :samplingunittype  com:SAMPLINGUNITTYPE-T1485138678354 ;
+        :temporality       test:TimeRangeValue-C6758 ;
+        :width             test:DISTANCEVALUE-C6757 .
+
+test:VEGETATIONCOVERVALUE-C6766
+        a            :VEGETATIONCOVERVALUE ;
+        :anchorname  "Plant Species" ;
+        :category    test:SURFACECOVERCATEGORY-T1485140987463 .
+
+test:METHODTYPE-T1485140988767
+        a       :METHODTYPE ;
+        :name   "Landscape Assessment Method" .
+
+test:ObservedTimeRangeType
+        a       :ObservedTimeRangeType .
+
+test:COMPONENTAMOUNTVALUE-D7079
+        a            :COMPONENTAMOUNTVALUE ;
+        :anchorname  "Soil Chemical Analysis" ;
+        :method      test:METHODEXECUTION-T1485141126336 ;
+        :units       com:MEASUREMENTUNIT-T1485138678627 ;
+        :value       0.4 .
+
+test:LANDFORMLOCATION-T1485140987497
+        a       :LANDFORMLOCATION ;
+        :name   "Top third of the height of the landform element" .
+
+test:SPECIESCONCEPTVALUE-B6419
+        a            :SPECIESCONCEPTVALUE ;
+        :anchorname  "Plant Species" ;
+        :commentary  "Acacia octonervia 'longer leaf'" .
+
+test:NUMBERRANGE-B6470
+        a             :NUMBERRANGE ;
+        :lowerbounds  test:BOUNDSTYPE-T1485141126491 ;
+        :lowervalue   "0"^^<http://www.w3.org/2001/XMLSchema#decimal> ;
+        :upperbounds  test:BOUNDSTYPE-T1485141126492 ;
+        :uppervalue   "10"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+test:DISTANCEVALUE-C6755
+        a       :DISTANCEVALUE ;
+        :units  com:MEASUREMENTUNIT-T1485138678610 ;
+        :value  "20"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+test:TimeRangeValue-B6587
+        a                     :TimeRangeValue ;
+        :has_end              "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_start            "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_time_range_type  test:TimeBoundedTimeRangeType ;
+        :is_end_sampled       false ;
+        :is_start_sampled     false .
+
+test:COMPONENTAMOUNTVALUE-D7087
+        a            :COMPONENTAMOUNTVALUE ;
+        :anchorname  "Soil Chemical Analysis" ;
+        :method      test:METHODEXECUTION-T1485141126336 ;
+        :units       com:MEASUREMENTUNIT-T1485138678627 ;
+        :value       0.6 .
+
+com:SPECIESCONCEPTTYPE-T1485138684133
+        a       :SPECIESCONCEPTTYPE ;
+        :name   "PUBLISHED_SPECIFIC" .
+
+test:LIFEFORMVALUE-C6768
+        a            :LIFEFORMVALUE ;
+        :anchorname  "Plant Species" ;
+        :category    test:LIFEFORM-T1485140987519 .
+
+com:MARKERTYPE-T1485138678649
+        a       :MARKERTYPE ;
+        :name   "Star Dropper" .
+
+com:MEASUREMENTUNIT-T1485138678624
+        a       :MEASUREMENTUNIT ;
+        :name   "degrees" .
+
+test:ORGANISMASSEMBLAGE-T1485141126884
+        a             :ORGANISMASSEMBLAGE ;
+        <http://www.aekos.org.au/ontology/1.0.0#$role>
+                "Plot Vegetation Assemblage" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$title>
+                " Plot Vegetation Assemblage, 30/09/2007 " ;
+        :community    test:COMMUNITYVALUE-B6574 ;
+        :featureof    test:SAMPLINGUNIT-T1485141126279 ;
+        :method       test:METHODEXECUTION-T1485141126883 ;
+        :temporality  test:TimeRangeValue-B6575 .
+
+test:TimeRangeValue-B6595
+        a                     :TimeRangeValue ;
+        :has_end              "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_start            "2007-04-20T14:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        :has_time_range_type  test:ObservedTimeRangeType ;
+        :is_end_sampled       true ;
+        :is_start_sampled     true .
+
+test:SPECIESORGANISMGROUP-T1485141126500
+        a                          :SPECIESORGANISMGROUP ;
+        <http://www.aekos.org.au/ontology/1.0.0#$groupkey>
+                "2" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$importance>
+                "MEDIUM" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$orderkey>
+                "ASCENDING" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$role>
+                "Understorey Plot Species Organism Group" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$title>
+                " <I>Acacia octonervia</I> R.S.Cowan & Maslin with <10% cover " ;
+        :averageheight             test:DISTANCEVALUE-D321 ;
+        :cover                     test:VEGETATIONCOVERVALUE-D322 ;
+        :determinedspeciesconcept  test:SPECIESCONCEPTVALUE-D320 ;
+        :featureof                 test:SAMPLINGUNIT-T1485141126280 ;
+        :fieldspeciesconcept       test:SPECIESCONCEPTVALUE-D319 ;
+        :lifeform                  test:LIFEFORMVALUE-D324 ;
+        :method                    test:METHODEXECUTION-T1485141126489 ;
+        :temporality               test:TimeRangeValue-D323 .
+
+test:MARKER-T1485141126277
+        a             :MARKER ;
+        <http://www.aekos.org.au/ontology/1.0.0#$role>
+                "Study Location Marker" ;
+        :featureof    test:STUDYLOCATION-T1485141126275 ;
+        :id           [ a       <http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag> ;
+                        <http://www.w3.org/1999/02/22-rdf-syntax-ns#_1>
+                                "R054"
+                      ] ;
+        :location     test:LOCATIONVALUE-B6510 ;
+        :markertype   com:MARKERTYPE-T1485138678649 ;
+        :method       test:METHODEXECUTION-T1485141126274 ;
+        :temporality  test:TimeRangeValue-B6509 .
+
+test:COMPONENTAMOUNTVALUE-D7074
+        a            :COMPONENTAMOUNTVALUE ;
+        :anchorname  "Soil Chemical Analysis" ;
+        :method      test:METHODEXECUTION-T1485141126336 ;
+        :units       com:MEASUREMENTUNIT-T1485138678627 ;
+        :value       "2"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+test:STUDYLOCATION-T1485141126275
+        a                         :STUDYLOCATION ;
+        <http://www.aekos.org.au/ontology/1.0.0#$importance>
+                "HIGH" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$role>
+                "Study Location" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$title>
+                " Study Location patch ID: R054 " ;
+        :location                 test:LOCATIONVALUE-B6600 ;
+        :method                   test:METHODEXECUTION-T1485141126274 ;
+        :studylocationidentifier  "R054" ;
+        :temporalcoverage         test:TimeRangeValue-B6597 ;
+        :visitcount               "2"^^<http://www.w3.org/2001/XMLSchema#decimal> ;
+        :visitdate                [ a       <http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag> ;
+                                    <http://www.w3.org/1999/02/22-rdf-syntax-ns#_1>
+                                            test:TimeRangeValue-B6598 ;
+                                    <http://www.w3.org/1999/02/22-rdf-syntax-ns#_2>
+                                            test:TimeRangeValue-B6599
+                                  ] .
+
+test:BOUNDSTYPE-T1485141126540
+        a       :BOUNDSTYPE ;
+        :name   "Inclusive" .
+
+test:SPATIALLAYERIDENTIFIER-252500029
+        a       :SPATIALLAYERIDENTIFIER .
+
+test:BOUNDSTYPE-T1485141126874
+        a       :BOUNDSTYPE ;
+        :name   "Inclusive" .
+
+test:COMPONENTAMOUNTVALUE-D7082
+        a            :COMPONENTAMOUNTVALUE ;
+        :anchorname  "Soil Chemical Analysis" ;
+        :method      test:METHODEXECUTION-T1485141126336 ;
+        :units       com:MEASUREMENTUNIT-T1485138678627 ;
+        :value       "1"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+test:SPECIESCONCEPTVALUE-C6762
+        a            :SPECIESCONCEPTVALUE ;
+        :anchorname  "Plant Species" ;
+        :species     test:SPECIESCONCEPT-T1485140987862 .
+
+test:PHENOLOGY-T1485140987524
+        a       :PHENOLOGY ;
+        :name   "in flower" .
+
+test:SPECIESCONCEPTVALUE-B6422
+        a            :SPECIESCONCEPTVALUE ;
+        :anchorname  "Plant Species" ;
+        :species     test:SPECIESCONCEPT-T1485140987603 .
+
+test:METHODEXECUTION-T1485141126489
+        a                :METHODEXECUTION ;
+        <http://www.aekos.org.au/ontology/1.0.0#$groupkey>
+                "2" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$importance>
+                "MEDIUM" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$orderkey>
+                "ASCENDING" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$role>
+                "Vegetation Assessment Method" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$sortkey>
+                "20070421" ;
+        <http://www.aekos.org.au/ontology/1.0.0#$title>
+                " Understorey Vegetation Assessment Method, 21/04/2007 " ;
+        :duration        test:TimeRangeValue-B6591 ;
+        :method          test:METHODTYPE-T1485140988979 ;
+        :parentactivity  test:METHODEXECUTION-T1485141126274 .

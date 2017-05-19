@@ -1,6 +1,7 @@
 package au.org.aekos.api.producer.step.species;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
 import java.io.InputStream;
@@ -47,4 +48,64 @@ public class AekosSpeciesRdfReaderTest {
 		}
 	}
 
+	/**
+	 * Can we read five visit records from two visits?
+	 */
+	@Test
+	public void testRead02() throws Throwable {
+		AekosSpeciesRdfReader objectUnderTest = new AekosSpeciesRdfReader();
+		Dataset ds = DatasetFactory.create();
+		Model m = ds.getNamedModel("http://www.aekos.org.au/ontology/1.0.0/test_project#");
+		InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("au/org/aekos/api/producer/step/species/fiveSpeciesTwoVisits.ttl");
+		m.read(in, null, "TURTLE");
+		objectUnderTest.setDs(ds);
+		String speciesRecordsQuery = Utils.getResourceAsString("au/org/aekos/api/producer/sparql/species-records.rq");
+		objectUnderTest.setSpeciesRecordsQuery(speciesRecordsQuery);
+		{
+			InputSpeciesRecord nextResult = objectUnderTest.read();
+			assertThat(nextResult.getId().length(), is(36));
+			assertThat(nextResult.getLocationID(), is("aekos.org.au/collection/wa.gov.au/ravensthorpe/R054"));
+			assertThat(nextResult.getIndividualCount(), is(1));
+			assertThat(nextResult.getScientificName(), is("Acacia octonervia R.S.Cowan & Maslin"));
+			assertNull(nextResult.getTaxonRemarks());
+			assertThat(nextResult.getRdfGraph(), is("http://www.aekos.org.au/ontology/1.0.0/test_project#"));
+			assertThat(nextResult.getRdfSubject(), is("http://www.aekos.org.au/ontology/1.0.0/test#SPECIESORGANISMGROUP-T1485141126500"));
+		} {
+			InputSpeciesRecord nextResult = objectUnderTest.read();
+			assertThat(nextResult.getId().length(), is(36));
+			assertThat(nextResult.getLocationID(), is("aekos.org.au/collection/wa.gov.au/ravensthorpe/R054"));
+			assertThat(nextResult.getIndividualCount(), is(1));
+			assertThat(nextResult.getScientificName(), is("Eutaxia cuneata Meisn."));
+			assertNull(nextResult.getTaxonRemarks());
+			assertThat(nextResult.getRdfGraph(), is("http://www.aekos.org.au/ontology/1.0.0/test_project#"));
+			assertThat(nextResult.getRdfSubject(), is("http://www.aekos.org.au/ontology/1.0.0/test#SPECIESORGANISMGROUP-T1485141126873"));
+		} {
+			InputSpeciesRecord nextResult = objectUnderTest.read();
+			assertThat(nextResult.getId().length(), is(36));
+			assertThat(nextResult.getLocationID(), is("aekos.org.au/collection/wa.gov.au/ravensthorpe/R054"));
+			assertThat(nextResult.getIndividualCount(), is(1));
+			assertThat(nextResult.getScientificName(), is("Dampiera lavandulacea Lindl."));
+			assertNull(nextResult.getTaxonRemarks());
+			assertThat(nextResult.getRdfGraph(), is("http://www.aekos.org.au/ontology/1.0.0/test_project#"));
+			assertThat(nextResult.getRdfSubject(), is("http://www.aekos.org.au/ontology/1.0.0/test#SPECIESORGANISMGROUP-T1485141126538"));
+		} {
+			InputSpeciesRecord nextResult = objectUnderTest.read();
+			assertThat(nextResult.getId().length(), is(36));
+			assertThat(nextResult.getLocationID(), is("aekos.org.au/collection/wa.gov.au/ravensthorpe/R054"));
+			assertThat(nextResult.getIndividualCount(), is(1));
+			assertThat(nextResult.getScientificName(), is("Acacia octonervia R.S.Cowan & Maslin"));
+			assertNull(nextResult.getTaxonRemarks());
+			assertThat(nextResult.getRdfGraph(), is("http://www.aekos.org.au/ontology/1.0.0/test_project#"));
+			assertThat(nextResult.getRdfSubject(), is("http://www.aekos.org.au/ontology/1.0.0/test#SPECIESORGANISMGROUP-T1485141126864"));
+		} {
+			InputSpeciesRecord nextResult = objectUnderTest.read();
+			assertThat(nextResult.getId().length(), is(36));
+			assertThat(nextResult.getLocationID(), is("aekos.org.au/collection/wa.gov.au/ravensthorpe/R054"));
+			assertThat(nextResult.getIndividualCount(), is(1));
+			assertThat(nextResult.getScientificName(), is("Acacia ingrata Benth."));
+			assertNull(nextResult.getTaxonRemarks());
+			assertThat(nextResult.getRdfGraph(), is("http://www.aekos.org.au/ontology/1.0.0/test_project#"));
+			assertThat(nextResult.getRdfSubject(), is("http://www.aekos.org.au/ontology/1.0.0/test#SPECIESORGANISMGROUP-T1485141126490"));
+		}
+	}
 }
