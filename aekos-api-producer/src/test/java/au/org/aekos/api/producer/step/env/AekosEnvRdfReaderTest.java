@@ -42,6 +42,9 @@ public class AekosEnvRdfReaderTest {
 			assertThat(result.getDecimalLatitude(), is(-42.682963));
 			assertThat(result.getDecimalLongitude(), is(146.649282));
 			assertThat(result.getGeodeticDatum(), is("GDA94"));
+			assertThat(result.getEventDate(), is("1990-03-30"));
+			assertThat(result.getMonth(), is(3));
+			assertThat(result.getYear(), is(1990));
 			assertThat(result.getLocationID(), is("location1"));
 			assertThat(result.getLocationName(), is("locName1"));
 			assertThat(result.getSamplingProtocol(), is("sampling1"));
@@ -56,7 +59,7 @@ public class AekosEnvRdfReaderTest {
 		AekosEnvRdfReader objectUnderTest = new AekosEnvRdfReader();
 		Dataset ds = DatasetFactory.create();
 		Model m = ds.getNamedModel("http://www.aekos.org.au/ontology/1.0.0/test_project#");
-		InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("au/org/aekos/api/producer/step/env/SourceEnvData.ttl");
+		InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("au/org/aekos/api/producer/step/env/singleLocSingleVisit.ttl");
 		m.read(in, null, "TURTLE");
 		objectUnderTest.setDs(ds);
 		String environmentalVariableQuery = Utils.getResourceAsString("au/org/aekos/api/producer/sparql/environmental-variables.rq");
@@ -66,9 +69,14 @@ public class AekosEnvRdfReaderTest {
 		assertThat(result.getDecimalLatitude(), is(-23.5318398476576));
 		assertThat(result.getDecimalLongitude(), is(138.321378247854));
 		assertThat(result.getGeodeticDatum(), is("GDA94"));
+		assertThat(result.getEventDate(), is("1990-03-30"));
+		assertThat(result.getMonth(), is(3));
+		assertThat(result.getYear(), is(1990));
 		assertThat(result.getLocationName(), is("Main Camp"));
 		assertThat(result.getRdfGraph(), is("http://www.aekos.org.au/ontology/1.0.0/test_project#"));
-		assertThat(result.getRdfSubject(), is("http://www.aekos.org.au/ontology/1.0.0/test_project#STUDYLOCATIONSUBGRAPH-T1493794229549"));
+		assertThat(result.getRdfSubject(), is("http://www.aekos.org.au/ontology/1.0.0/test_project#STUDYLOCATIONVISITVIEW-T1493794229804"));
 		assertThat(result.getSamplingProtocol(), is("aekos.org.au/collection/sydney.edu.au/DERG"));
 	}
+	
+	// TODO test that having both options for location doesn't cause dupes
 }

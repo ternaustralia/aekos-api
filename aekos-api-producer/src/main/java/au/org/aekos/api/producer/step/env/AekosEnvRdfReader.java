@@ -20,7 +20,10 @@ public class AekosEnvRdfReader extends AbstractRdfReader<InputEnvRecord> {
 				e.get("locationName"),
 				e.get("samplingProtocol"),
 				e.getResourceUri("rdfSubject"),
-				e.getResourceUri("rdfGraph")
+				e.getResourceUri("rdfGraph"),
+				e.get("eventDate"),
+				e.getInt("month"),
+				e.getInt("year")
 			);
 	}
 	

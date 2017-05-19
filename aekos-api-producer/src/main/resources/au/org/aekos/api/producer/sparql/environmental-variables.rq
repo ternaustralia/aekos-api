@@ -2,39 +2,78 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX aekos: <http://www.aekos.org.au/ontology/1.0.0#>
 PREFIX api: <http://www.aekos.org.au/api/1.0#>
 
-# Gets the easy part of the environmental variable dataset (just the 1:1 bits)
-SELECT
+# Gets the easy part of the environmental variable dataset (just the 1:1 bits). Variables will come later
+SELECT DISTINCT
 	?decimalLongitude
 	?decimalLatitude
 	?geodeticDatum
+	?eventDate
+	?month
+	?year
 	?locationID
 	?locationName
 	?samplingProtocol
-	(?slsg as ?rdfSubject)
+	(?visitView as ?rdfSubject)
 	(?g as ?rdfGraph)
-WHERE {
-  GRAPH ?g {
-    ?slsg a aekos:STUDYLOCATIONSUBGRAPH .
-    # location ID
-    ?slsg aekos:aekoslocationidentifier ?locationID .
-    ?slsg aekos:studylocationidentifier ?locationName .
-    # sampling protocol
-    ?slsg aekos:aekossurveyidentifier ?samplingProtocol .
-    # location
-    OPTIONAL {
-      ?slsg aekos:studylocation/aekos:location/aekos:sampledpoint [
-        aekos:computedlongitude ?decimalLongitude1 ;
-        aekos:computedlatitude ?decimalLatitude1
-      ] .
-    }
-    OPTIONAL {
-      ?slsg aekos:centroidcoordinates [
-        aekos:computedlongitude ?decimalLongitude2 ;
-        aekos:computedlatitude ?decimalLatitude2
-      ] .
-    }
-    BIND(COALESCE(?decimalLongitude1, ?decimalLongitude2) AS ?decimalLongitude) .
-    BIND(COALESCE(?decimalLatitude1, ?decimalLatitude2) AS ?decimalLatitude) .
-    BIND('GDA94' as ?geodeticDatum) .
+WHERE { GRAPH ?g {
+  ?slsg a aekos:STUDYLOCATIONSUBGRAPH .
+  # location ID
+  ?slsg aekos:aekoslocationidentifier ?locationID .
+  # location Name
+  ?slsg aekos:studylocationidentifier ?locationName .
+  # sampling protocol
+  ?slsg aekos:aekossurveyidentifier ?samplingProtocol .
+  # visit view
+  ?slsg aekos:views/rdfs:member ?visitView .
+  # location
+  OPTIONAL {
+    ?slsg aekos:studylocation/aekos:location/aekos:sampledpoint [
+      aekos:computedlongitude ?decimalLongitude1 ;
+      aekos:computedlatitude ?decimalLatitude1
+    ] .
   }
-}
+  OPTIONAL {
+    ?slsg aekos:centroidcoordinates [
+      aekos:computedlongitude ?decimalLongitude2 ;
+      aekos:computedlatitude ?decimalLatitude2
+    ] .
+  }
+  BIND(COALESCE(?decimalLongitude1, ?decimalLongitude2) AS ?decimalLongitude) .
+  BIND(COALESCE(?decimalLatitude1, ?decimalLatitude2) AS ?decimalLatitude) .
+  BIND('GDA94' as ?geodeticDatum) .
+  # eventDate
+  OPTIONAL {
+    ?visitView aekos:observeditems/rdfs:member [
+      a aekos:SAMPLINGUNIT ;
+      aekos:temporality/aekos:has_start ?eventDateTemp1
+    ] .
+  }
+  OPTIONAL {
+    ?visitView aekos:observeditems/rdfs:member [
+      a aekos:SAMPLEDAREA ;
+      aekos:temporality/aekos:has_start ?eventDateTemp2
+    ] .
+  }
+  OPTIONAL {
+    ?visitView aekos:observeditems/rdfs:member ?oi .
+    ?oi a ?oiType .
+    VALUES ?oiType {
+      aekos:LANDSCAPE
+      aekos:LANDSCAPEVIS
+      aekos:SOIL
+      aekos:SOILVIS
+      aekos:SOILAP
+      aekos:FIREEVIDENCE
+      aekos:DISTURBANCEEVIDENCE
+      aekos:EROSIONEVIDENCE
+      aekos:SOILSAMPLE # work around for TERN_AUSPLOTS and TERN_TREND
+    }
+    ?oi aekos:temporality/aekos:has_start ?eventDateTemp3 .
+  }
+  BIND(COALESCE(?eventDateTemp1, ?eventDateTemp2, ?eventDateTemp3) AS ?eventDateTemp)
+  BIND (CONCAT(str(year(?eventDateTemp)),"-",str(month(?eventDateTemp)),"-",str(day(?eventDateTemp))) as ?eventDate) .
+  # month
+  BIND (month(?eventDateTemp) as ?month) .
+  # year
+  BIND (year(?eventDateTemp) as ?year) .
+}}

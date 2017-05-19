@@ -7,6 +7,9 @@ WHERE {
 		?rdfSubject :decimalLatitude	?decimalLatitude .
 		?rdfSubject :decimalLongitude	?decimalLongitude .
 		?rdfSubject :geodeticDatum		?geodeticDatum .
+		?rdfSubject :eventDate		    ?eventDate .
+		?rdfSubject :month		        ?month .
+		?rdfSubject :year		        ?year .
 		?rdfSubject :locationName		?locationName .
 		?rdfSubject :samplingProtocol	?samplingProtocol .
 	}

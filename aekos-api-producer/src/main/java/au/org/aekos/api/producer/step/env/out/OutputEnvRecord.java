@@ -5,15 +5,9 @@ import au.org.aekos.api.producer.step.env.in.InputEnvRecord;
 
 public class OutputEnvRecord {
 	private final InputEnvRecord coreRecord;
-	private final String eventDate;
-	private final int month;
-	private final int year;
 
-	public OutputEnvRecord(InputEnvRecord coreRecord, String eventDate, int month, int year) {
+	public OutputEnvRecord(InputEnvRecord coreRecord) {
 		this.coreRecord = coreRecord;
-		this.eventDate = eventDate;
-		this.month = month;
-		this.year = year;
 	}
 
 	public double getDecimalLatitude() {
@@ -37,15 +31,15 @@ public class OutputEnvRecord {
 	}
 
 	public String getEventDate() {
-		return Utils.quote(eventDate);
+		return Utils.quote(coreRecord.getEventDate());
 	}
 	
 	public int getMonth() {
-		return month;
+		return coreRecord.getMonth();
 	}
 
 	public int getYear() {
-		return year;
+		return coreRecord.getYear();
 	}
 	
 	public String getSamplingProtocol() {

@@ -5,5 +5,8 @@
 	:decimalLatitude	-42.682963 ;
 	:decimalLongitude	146.649282 ;
 	:geodeticDatum		"GDA94" ;
+	:eventDate			"1990-03-30" ;
+	:month				3 ;
+	:year				1990 ;
 	:locationName		"locName1" ;
 	:samplingProtocol	"sampling1" .

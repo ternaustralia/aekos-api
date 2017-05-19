@@ -24,11 +24,7 @@ public class EnvItemProcessor extends AbstractItemProcessor<BagAttributeExtracto
 	
 	@Override
 	public OutputEnvWrapper process(InputEnvRecord item) throws Exception {
-		// TODO get temporal information
-		String eventDate = "FIXME";
-		int month = 1;
-		int year = 1;
-		OutputEnvRecord envRecord = new OutputEnvRecord(item, eventDate, month, year);
+		OutputEnvRecord envRecord = new OutputEnvRecord(item);
 		Model model = getNamedModel(item.getRdfGraph());
 		Resource subject = model.getResource(item.getRdfSubject());
 		List<AttributeRecord> variables = new LinkedList<>();

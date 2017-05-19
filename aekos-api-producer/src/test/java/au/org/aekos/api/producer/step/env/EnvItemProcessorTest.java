@@ -45,7 +45,7 @@ public class EnvItemProcessorTest {
 		objectUnderTest.setDataset(ds);
 		objectUnderTest.setHelper(helper);
 		InputEnvRecord item = new InputEnvRecord("aekos.org.au/collection/adelaide.edu.au/TAF/TCFTNS0002", 0, 0, "GDA94",
-				"Null island", "not/important", dataFromRdf.get(ENV_RECORD_RDF_SUBJECT), dataFromRdf.get(ENV_RECORD_RDF_GRAPH));
+				"Null island", "not/important", dataFromRdf.get(ENV_RECORD_RDF_SUBJECT), dataFromRdf.get(ENV_RECORD_RDF_GRAPH), "2012-09-26", 9, 2012);
 		OutputEnvWrapper result = objectUnderTest.process(item);
 		List<AttributeRecord> variables = result.getEnvVarRecords();
 		assertThat(variables.size(), is(1));
@@ -66,7 +66,7 @@ public class EnvItemProcessorTest {
 		objectUnderTest.setDataset(ds);
 		objectUnderTest.setHelper(helper);
 		InputEnvRecord item = new InputEnvRecord("aekos.org.au/collection/adelaide.edu.au/TAF/TCFTNS0002", 0, 0, "GDA94",
-				"Null island", "not/important", dataFromRdf.get(ENV_RECORD_RDF_SUBJECT), dataFromRdf.get(ENV_RECORD_RDF_GRAPH));
+				"Null island", "not/important", dataFromRdf.get(ENV_RECORD_RDF_SUBJECT), dataFromRdf.get(ENV_RECORD_RDF_GRAPH), "2012-09-26", 9, 2012);
 		OutputEnvWrapper result = objectUnderTest.process(item);
 		List<AttributeRecord> variables = result.getEnvVarRecords();
 		assertThat(variables.size(), is(2));
