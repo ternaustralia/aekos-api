@@ -1,1 +1,1 @@
-- the env.samplingProtocol is 1, not the url
+- make a nicer error reporting process that writes offending items to a file
