@@ -13,15 +13,15 @@ CREATE TABLE citations (
 
 CREATE TABLE env (
 	locationID VARCHAR(100) NOT NULL,
+	eventDate CHAR(10) NOT NULL,
+	month INT,
+	year INT,
 	decimalLatitude DOUBLE,
 	decimalLongitude DOUBLE,
 	geodeticDatum VARCHAR(5),
 	locationName VARCHAR(50),
 	samplingProtocol VARCHAR(100),
-	eventDate CHAR(10),
-	month INT,
-	year INT,
-	PRIMARY KEY (locationID)
+	PRIMARY KEY (locationID, eventDate)
 );
 
 CREATE TABLE envvars (
@@ -33,13 +33,14 @@ CREATE TABLE envvars (
 );
 
 CREATE TABLE species (
-	id CHAR(37) NOT NULL,
-	individualCount INT,
+	id CHAR(36) NOT NULL,
 	locationID VARCHAR(100) NOT NULL,
+	eventDate CHAR(10) NOT NULL,
+	individualCount INT,
 	scientificName VARCHAR(100),
 	taxonRemarks VARCHAR(100),
 	PRIMARY KEY (id),
-	FOREIGN KEY (locationID) REFERENCES env(locationID)
+	FOREIGN KEY (locationID, eventDate) REFERENCES env(locationID, eventDate)
 );
 
 CREATE TABLE traits (

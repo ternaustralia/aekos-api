@@ -35,6 +35,6 @@ public class OutputSpeciesRecord {
 	}
 
 	public static String[] getCsvFields() {
-		return new String[] {"id", "individualCount", "locationID", "eventDate", "scientificName", "taxonRemarks"};
+		return new String[] {"id", "locationID", "eventDate", "individualCount", "scientificName", "taxonRemarks"};
 	}
 }

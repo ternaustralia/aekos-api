@@ -47,7 +47,7 @@ public class OutputEnvRecord {
 	}
 
 	public static String[] getCsvFields() {
-		return new String[] {"locationID", "decimalLatitude", "decimalLongitude", "geodeticDatum", "eventDate",
-				"month", "year", "locationName", "samplingProtocol"};
+		return new String[] {"locationID", "eventDate", "month", "year", "decimalLatitude", "decimalLongitude",
+				"geodeticDatum", "locationName", "samplingProtocol"};
 	}
 }
