@@ -4,13 +4,14 @@ public class InputSpeciesRecord {
 	private final String id;
 	private final String rdfSubject;
 	private final String rdfGraph;
+	private final String eventDate;
 	private final int individualCount;
 	private final String locationID;
 	private final String scientificName;
 	private final String taxonRemarks;
 
 	public InputSpeciesRecord(String id, String rdfSubject, String rdfGraph, int individualCount, String locationID,
-			String scientificName, String taxonRemarks) {
+			String scientificName, String taxonRemarks, String eventDate) {
 		this.id = id;
 		this.rdfSubject = rdfSubject;
 		this.rdfGraph = rdfGraph;
@@ -18,6 +19,7 @@ public class InputSpeciesRecord {
 		this.locationID = locationID;
 		this.scientificName = scientificName;
 		this.taxonRemarks = taxonRemarks;
+		this.eventDate = eventDate;
 		if (scientificName == null && taxonRemarks == null) {
 			String template = "Data problem: record with id '%s' is missing BOTH scientificName and taxonRemarks";
 			throw new IllegalStateException(String.format(template, id));
@@ -50,5 +52,9 @@ public class InputSpeciesRecord {
 
 	public String getTaxonRemarks() {
 		return taxonRemarks;
+	}
+
+	public String getEventDate() {
+		return eventDate;
 	}
 }

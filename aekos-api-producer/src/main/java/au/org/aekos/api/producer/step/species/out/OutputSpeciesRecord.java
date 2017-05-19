@@ -30,7 +30,11 @@ public class OutputSpeciesRecord {
 		return Utils.quote(coreRecord.getTaxonRemarks());
 	}
 
+	public String getEventDate() {
+		return Utils.quote(coreRecord.getEventDate());
+	}
+
 	public static String[] getCsvFields() {
-		return new String[] {"id", "individualCount", "locationID", "scientificName", "taxonRemarks"};
+		return new String[] {"id", "individualCount", "locationID", "eventDate", "scientificName", "taxonRemarks"};
 	}
 }

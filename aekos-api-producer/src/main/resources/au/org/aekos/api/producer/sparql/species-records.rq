@@ -11,6 +11,7 @@ SELECT
 	?scientificName
 	?taxonRemarks
 	?individualCount
+	?eventDate
 WHERE { GRAPH ?g {
    ?og a ?ogType .
    VALUES ?ogType {
@@ -52,6 +53,15 @@ WHERE { GRAPH ?g {
   # individualCount
   OPTIONAL {?og aekos:absoluteabundance/aekos:value ?absoluteAbundance . }
   BIND (COALESCE(?absoluteAbundance, 1) as ?individualCount) .
+  # eventDate
+  OPTIONAL {
+    ?og aekos:temporality/aekos:has_start ?eventDateTemp1 .
+  }
+  OPTIONAL {
+    ?og aekos:method/aekos:duration/aekos:has_start ?eventDateTemp2 .
+  }
+  BIND(COALESCE(?eventDateTemp1, ?eventDateTemp2) AS ?eventDateTemp)
+  BIND (CONCAT(str(year(?eventDateTemp)),"-",str(month(?eventDateTemp)),"-",str(day(?eventDateTemp))) as ?eventDate) .
   # make an ID for this record
   BIND (STRUUID() as ?id) .
 }}

@@ -42,6 +42,7 @@ public class AekosSpeciesRdfReaderTest {
 			assertThat(result.getRdfGraph(), is("urn:someGraph"));
 			assertThat(result.getRdfSubject(), is("urn:record1"));
 			assertThat(result.getIndividualCount(), is(1));
+			assertThat(result.getEventDate(), is("2007-09-29"));
 			assertThat(result.getLocationID(), is("location1"));
 			assertThat(result.getScientificName(), is("name1"));
 			assertThat(result.getTaxonRemarks(), is("remarks1"));
@@ -66,6 +67,7 @@ public class AekosSpeciesRdfReaderTest {
 			assertThat(nextResult.getId().length(), is(36));
 			assertThat(nextResult.getLocationID(), is("aekos.org.au/collection/wa.gov.au/ravensthorpe/R054"));
 			assertThat(nextResult.getIndividualCount(), is(1));
+			assertThat(nextResult.getEventDate(), is("2007-04-20"));
 			assertThat(nextResult.getScientificName(), is("Acacia octonervia R.S.Cowan & Maslin"));
 			assertNull(nextResult.getTaxonRemarks());
 			assertThat(nextResult.getRdfGraph(), is("http://www.aekos.org.au/ontology/1.0.0/test_project#"));
@@ -75,6 +77,7 @@ public class AekosSpeciesRdfReaderTest {
 			assertThat(nextResult.getId().length(), is(36));
 			assertThat(nextResult.getLocationID(), is("aekos.org.au/collection/wa.gov.au/ravensthorpe/R054"));
 			assertThat(nextResult.getIndividualCount(), is(1));
+			assertThat(nextResult.getEventDate(), is("2007-09-29"));
 			assertThat(nextResult.getScientificName(), is("Eutaxia cuneata Meisn."));
 			assertNull(nextResult.getTaxonRemarks());
 			assertThat(nextResult.getRdfGraph(), is("http://www.aekos.org.au/ontology/1.0.0/test_project#"));
@@ -84,6 +87,7 @@ public class AekosSpeciesRdfReaderTest {
 			assertThat(nextResult.getId().length(), is(36));
 			assertThat(nextResult.getLocationID(), is("aekos.org.au/collection/wa.gov.au/ravensthorpe/R054"));
 			assertThat(nextResult.getIndividualCount(), is(1));
+			assertThat(nextResult.getEventDate(), is("2007-04-20"));
 			assertThat(nextResult.getScientificName(), is("Dampiera lavandulacea Lindl."));
 			assertNull(nextResult.getTaxonRemarks());
 			assertThat(nextResult.getRdfGraph(), is("http://www.aekos.org.au/ontology/1.0.0/test_project#"));
@@ -93,6 +97,7 @@ public class AekosSpeciesRdfReaderTest {
 			assertThat(nextResult.getId().length(), is(36));
 			assertThat(nextResult.getLocationID(), is("aekos.org.au/collection/wa.gov.au/ravensthorpe/R054"));
 			assertThat(nextResult.getIndividualCount(), is(1));
+			assertThat(nextResult.getEventDate(), is("2007-09-29"));
 			assertThat(nextResult.getScientificName(), is("Acacia octonervia R.S.Cowan & Maslin"));
 			assertNull(nextResult.getTaxonRemarks());
 			assertThat(nextResult.getRdfGraph(), is("http://www.aekos.org.au/ontology/1.0.0/test_project#"));
@@ -102,10 +107,12 @@ public class AekosSpeciesRdfReaderTest {
 			assertThat(nextResult.getId().length(), is(36));
 			assertThat(nextResult.getLocationID(), is("aekos.org.au/collection/wa.gov.au/ravensthorpe/R054"));
 			assertThat(nextResult.getIndividualCount(), is(1));
+			assertThat(nextResult.getEventDate(), is("2007-04-20"));
 			assertThat(nextResult.getScientificName(), is("Acacia ingrata Benth."));
 			assertNull(nextResult.getTaxonRemarks());
 			assertThat(nextResult.getRdfGraph(), is("http://www.aekos.org.au/ontology/1.0.0/test_project#"));
 			assertThat(nextResult.getRdfSubject(), is("http://www.aekos.org.au/ontology/1.0.0/test#SPECIESORGANISMGROUP-T1485141126490"));
 		}
+		assertNull("Should send null as a poison pill when no more records left", objectUnderTest.read());
 	}
 }

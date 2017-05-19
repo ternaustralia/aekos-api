@@ -3,6 +3,7 @@
 :record1
 	:id					"id1" ;
 	:individualCount	1 ;
+	:eventDate          "2007-09-29" ;
 	:locationID			"location1" ;
 	:scientificName		"name1" ;
 	:taxonRemarks		"remarks1" .

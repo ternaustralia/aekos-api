@@ -42,7 +42,8 @@ public class SpeciesItemProcessorTest {
 		objectUnderTest.setExtractors(Arrays.asList(unitExtractor("height", ds.getNamedModel(dataFromRdf.get(COMMON_GRAPH)))));
 		objectUnderTest.setDataset(ds);
 		InputSpeciesRecord item = new InputSpeciesRecord("dab27d3c-5884-4de2-bf74-9dc73f874496", dataFromRdf.get(SPECIES_RECORD_RDF_SUBJECT), 
-				dataFromRdf.get(SPECIES_RECORD_RDF_GRAPH), 1, "aekos.org.au/collection/adelaide.edu.au/TAF/TCFTNS0002", "Eucalyptus obliqua", null);
+				dataFromRdf.get(SPECIES_RECORD_RDF_GRAPH), 1, "aekos.org.au/collection/adelaide.edu.au/TAF/TCFTNS0002", "Eucalyptus obliqua",
+				null, "2007-09-29");
 		OutputSpeciesWrapper result = objectUnderTest.process(item);
 		List<AttributeRecord> traits = result.getTraitRecords();
 		assertThat(traits.size(), is(1));

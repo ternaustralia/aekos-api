@@ -19,7 +19,8 @@ public class AekosSpeciesRdfReader extends AbstractRdfReader<InputSpeciesRecord>
 				e.getInt("individualCount"),
 				e.get("locationID"),
 				e.getOptional("scientificName"),
-				e.getOptional("taxonRemarks")
+				e.getOptional("taxonRemarks"),
+				e.get("eventDate")
 			);
 	}
 	

@@ -6,6 +6,7 @@ WHERE {
 		?rdfSubject :id ?id .
 		?rdfSubject :individualCount ?individualCount .
 		?rdfSubject :locationID ?locationID .
+		?rdfSubject :eventDate ?eventDate .
 		?rdfSubject :scientificName ?scientificName .
 		?rdfSubject :taxonRemarks ?taxonRemarks .
 	}
