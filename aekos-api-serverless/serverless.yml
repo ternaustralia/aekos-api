@@ -16,6 +16,7 @@ provider:
       - "${file(secrets.yml):${self:custom.stage}.subnet1Id}"
       - "${file(secrets.yml):${self:custom.stage}.subnet2Id}"
   environment:
+    # FIXME get these encrypted
     # DBURL: "${self:custom.secrets.DBURL}"
     DBURL: "${file(secrets.yml):${self:custom.stage}.DBURL}"
     # DBPORT: "${self:custom.secrets.DBPORT}"
@@ -44,5 +45,12 @@ functions:
     events:
       - http:
           path: v1/getEnvironmentalVariableVocab.json
+          method: get
+          cors: true
+  v10-speciesAutocomplete-json:
+    handler: v10-speciesAutocomplete-json.handler
+    events:
+      - http:
+          path: v1/speciesAutocomplete.json
           method: get
           cors: true
