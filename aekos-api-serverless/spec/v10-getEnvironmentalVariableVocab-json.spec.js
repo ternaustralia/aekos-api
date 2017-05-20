@@ -1,14 +1,23 @@
 'use strict'
 
-var objectUnderTest = require('../v10-getEnvironmentalVariableVocab-json')
+let objectUnderTest = require('../v10-getEnvironmentalVariableVocab-json')
 
 describe('v10-getEnvironmentalVariableVocab-json', function () {
-  // FIXME update when target function has DB stuff extracted
-  it('should call the callback', function () {
-    var isCallbackCalled = false
-    objectUnderTest.handler(null, null, () => {
-      isCallbackCalled = true
-    })
-    expect(isCallbackCalled).toBeTruthy()
+  // TODO add a test to assert callback is called
+
+  it('should map to the code field', function () {
+    let queryResult = [
+      {
+        traitName: 'traitOne',
+        count: 123
+      }
+    ]
+    let result = objectUnderTest.mapQueryResult(queryResult)
+    expect(result.length).toBe(1)
+    let first = result[0]
+    expect(first.code).toBe('traitOne')
+    expect(first.traitName).toBeUndefined()
+    expect(first.label).toBe('FIXME')
+    expect(first.count).toBe(123)
   })
 })
