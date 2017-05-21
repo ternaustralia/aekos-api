@@ -3,6 +3,7 @@ let r = require('./response-helper')
 let db = require('./db-helper')
 const codeField = 'traitName'
 const countField = 'recordsHeld'
+const startsWithChar = '%'
 
 let mapQueryResult = (queryResult) => {
   queryResult.forEach(function(element) {
@@ -16,12 +17,14 @@ module.exports.mapQueryResult = mapQueryResult
 
 module.exports.handler = (event, context, callback) => {
   // TODO add taxonRemarks to the search
-  let partialName = event.queryStringParameters.q // FIXME remove SQL injection risk
+  // FIXME return message when no q is provided or let framework handle by making param mandatory
+  let partialName = event.queryStringParameters.q
+  let escapedPartialName = db.escape(partialName + startsWithChar)
   let offset = 0 // FIXME add param for this
   let pageSize = 20 // FIXME add param for this
   const sql = `SELECT scientificName, count(*) AS ${countField} 
     FROM species 
-    WHERE scientificName LIKE '${partialName}%' 
+    WHERE scientificName LIKE ${escapedPartialName} 
     GROUP BY 1 
     ORDER BY 1
     LIMIT ${pageSize} OFFSET ${offset};`

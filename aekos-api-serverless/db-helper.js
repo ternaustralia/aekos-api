@@ -18,3 +18,7 @@ module.exports.execSelect = (selectSql, callback) => {
   })
   connection.end()
 }
+
+module.exports.escape = (unescapedValue) => {
+  return mysql.escape(unescapedValue)
+}
