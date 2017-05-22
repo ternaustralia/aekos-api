@@ -11,6 +11,18 @@ function do200(theCallback, theBody) {
   theCallback(null, response);
 }
 
+function do400(theCallback, theBody) {
+  const response = {
+    statusCode: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*', // Required for CORS support to work
+    },
+    body: JSON.stringify(theBody)
+  }
+  theCallback(null, response);
+}
+
 module.exports = {
-  ok: do200
+  ok: do200,
+  badRequest: do400
 }

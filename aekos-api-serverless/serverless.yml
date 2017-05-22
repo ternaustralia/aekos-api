@@ -54,3 +54,10 @@ functions:
           path: v1/speciesAutocomplete.json
           method: get
           cors: true
+  v10-speciesSummary-json:
+    handler: v10-speciesSummary-json.handler
+    events:
+      - http:
+          path: v1/speciesSummary.json
+          method: get
+          cors: true
