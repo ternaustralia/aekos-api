@@ -21,11 +21,11 @@ public class PropertyPathNoUnitsBagAttributeExtractor implements BagAttributeExt
 	private List<String> valuePropertyPath;
 
 	@Override
-	public AttributeRecord doExtractOn(Resource subject, String parentId) {
+	public AttributeRecord doExtractOn(Resource subject) {
 		try {
 			String value = followPath(subject, valuePropertyPath);
 			String units = getUnits(subject);
-			return new AttributeRecord(parentId, finalName, value, units);
+			return new AttributeRecord(finalName, value, units);
 		} catch (MissingDataException e) {
 			String template = "Data problem: failed to find value for '%s' trait with path '%s' on '%s'";
 			throw new MissingDataException(String.format(template, finalName, valuePropertyPath.toString(), subject.getURI()), e);

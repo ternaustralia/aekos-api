@@ -13,12 +13,12 @@ public class SingleBagElementNoUnitsAttributeExtractor implements AttributeExtra
 	private String nestedPropertyName;
 
 	@Override
-	public AttributeRecord doExtractOn(Resource subject, String parentId) {
+	public AttributeRecord doExtractOn(Resource subject) {
 		String name = referencingPropertyName;
 		Resource bag = helper.getResource(subject, referencingPropertyName);
 		Resource firstElement = bag.as(Bag.class).iterator().next().asResource();
 		String value = helper.getLiteral(firstElement, nestedPropertyName);
-		return new AttributeRecord(parentId, name, value, NO_UNITS);
+		return new AttributeRecord(name, value, NO_UNITS);
 	}
 	
 	@Override

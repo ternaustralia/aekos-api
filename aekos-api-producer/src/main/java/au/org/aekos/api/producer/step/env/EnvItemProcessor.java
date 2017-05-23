@@ -16,6 +16,7 @@ import au.org.aekos.api.producer.step.AbstractItemProcessor;
 import au.org.aekos.api.producer.step.AttributeRecord;
 import au.org.aekos.api.producer.step.BagAttributeExtractor;
 import au.org.aekos.api.producer.step.env.in.InputEnvRecord;
+import au.org.aekos.api.producer.step.env.out.EnvVarRecord;
 import au.org.aekos.api.producer.step.env.out.OutputEnvRecord;
 import au.org.aekos.api.producer.step.env.out.OutputEnvWrapper;
 
@@ -28,14 +29,14 @@ public class EnvItemProcessor extends AbstractItemProcessor<BagAttributeExtracto
 		OutputEnvRecord envRecord = new OutputEnvRecord(item);
 		Model model = getNamedModel(item.getRdfGraph());
 		Resource subject = model.getResource(item.getRdfSubject());
-		List<AttributeRecord> variables = new LinkedList<>();
+		List<EnvVarRecord> variables = new LinkedList<>();
 		processObservedItems(subject, observedItem -> {
 			doExtractorLoop(currExtractor -> {
 				if (!currExtractor.canHandle(observedItem)) {
 					return;
 				}
-				AttributeRecord variable = currExtractor.doExtractOn(observedItem, item.getLocationID());
-				variables.add(variable);
+				AttributeRecord variable = currExtractor.doExtractOn(observedItem);
+				variables.add(new EnvVarRecord(item.getLocationID(), item.getEventDate(), variable.getName(), variable.getValue(), variable.getUnits()));
 			});
 		});
 		return new OutputEnvWrapper(envRecord, variables);

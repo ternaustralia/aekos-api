@@ -16,11 +16,11 @@ import org.junit.Test;
 
 import au.org.aekos.api.producer.ExtractionHelper;
 import au.org.aekos.api.producer.TestHelper;
-import au.org.aekos.api.producer.step.AttributeRecord;
 import au.org.aekos.api.producer.step.BagAttributeExtractor;
 import au.org.aekos.api.producer.step.PropertyPathNoUnitsBagAttributeExtractor;
 import au.org.aekos.api.producer.step.PropertyPathWithUnitsBagAttributeExtractor;
 import au.org.aekos.api.producer.step.env.in.InputEnvRecord;
+import au.org.aekos.api.producer.step.env.out.EnvVarRecord;
 import au.org.aekos.api.producer.step.env.out.OutputEnvWrapper;
 
 public class EnvItemProcessorTest {
@@ -47,8 +47,10 @@ public class EnvItemProcessorTest {
 		InputEnvRecord item = new InputEnvRecord("aekos.org.au/collection/adelaide.edu.au/TAF/TCFTNS0002", 0, 0, "GDA94",
 				"Null island", "not/important", dataFromRdf.get(ENV_RECORD_RDF_SUBJECT), dataFromRdf.get(ENV_RECORD_RDF_GRAPH), "2012-09-26", 9, 2012);
 		OutputEnvWrapper result = objectUnderTest.process(item);
-		List<AttributeRecord> variables = result.getEnvVarRecords();
+		List<EnvVarRecord> variables = result.getEnvVarRecords();
 		assertThat(variables.size(), is(1));
+		assertThat(variables.get(0).getLocationID(), is("\"aekos.org.au/collection/adelaide.edu.au/TAF/TCFTNS0002\""));
+		assertThat(variables.get(0).getEventDate(), is("\"2012-09-26\""));
 		assertThat(variables.get(0).getName(), is("\"disturbanceEvidence\""));
 		assertThat(variables.get(0).getValue(), is("\"the value!\""));
 	}
@@ -68,13 +70,13 @@ public class EnvItemProcessorTest {
 		InputEnvRecord item = new InputEnvRecord("aekos.org.au/collection/adelaide.edu.au/TAF/TCFTNS0002", 0, 0, "GDA94",
 				"Null island", "not/important", dataFromRdf.get(ENV_RECORD_RDF_SUBJECT), dataFromRdf.get(ENV_RECORD_RDF_GRAPH), "2012-09-26", 9, 2012);
 		OutputEnvWrapper result = objectUnderTest.process(item);
-		List<AttributeRecord> variables = result.getEnvVarRecords();
+		List<EnvVarRecord> variables = result.getEnvVarRecords();
 		assertThat(variables.size(), is(2));
-		AttributeRecord first = variables.get(0);
+		EnvVarRecord first = variables.get(0);
 		assertThat(first.getName(), is("\"aspect\""));
 		assertThat(first.getValue(), is("\"250\""));
 		assertThat(first.getUnits(), is("\"degrees\""));
-		AttributeRecord second = variables.get(1);
+		EnvVarRecord second = variables.get(1);
 		assertThat(second.getName(), is("\"slope\""));
 		assertThat(second.getValue(), is("\"4\""));
 		assertThat(second.getUnits(), is("\"degrees\""));

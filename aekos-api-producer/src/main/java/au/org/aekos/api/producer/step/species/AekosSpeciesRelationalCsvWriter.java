@@ -6,15 +6,15 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.support.AbstractItemStreamItemWriter;
 import org.springframework.stereotype.Component;
 
-import au.org.aekos.api.producer.step.AttributeRecord;
 import au.org.aekos.api.producer.step.species.out.OutputSpeciesRecord;
 import au.org.aekos.api.producer.step.species.out.OutputSpeciesWrapper;
+import au.org.aekos.api.producer.step.species.out.SpeciesTraitRecord;
 
 @Component
 public class AekosSpeciesRelationalCsvWriter extends AbstractItemStreamItemWriter<OutputSpeciesWrapper> {
 
 	private AbstractItemStreamItemWriter<OutputSpeciesRecord> speciesWriter;
-	private AbstractItemStreamItemWriter<AttributeRecord> traitWriter;
+	private AbstractItemStreamItemWriter<SpeciesTraitRecord> traitWriter;
 
 	@Override
 	public void write(List<? extends OutputSpeciesWrapper> items) throws Exception {
@@ -42,7 +42,7 @@ public class AekosSpeciesRelationalCsvWriter extends AbstractItemStreamItemWrite
 		this.speciesWriter = speciesWriter;
 	}
 
-	public void setTraitWriter(AbstractItemStreamItemWriter<AttributeRecord> traitWriter) {
+	public void setTraitWriter(AbstractItemStreamItemWriter<SpeciesTraitRecord> traitWriter) {
 		this.traitWriter = traitWriter;
 	}
 }

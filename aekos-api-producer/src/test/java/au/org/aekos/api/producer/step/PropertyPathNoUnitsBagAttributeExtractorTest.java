@@ -78,11 +78,10 @@ public class PropertyPathNoUnitsBagAttributeExtractorTest {
 		h.addResource(subject, "disturbancetype", r -> {
 			h.addLiteral(r, "commentary", "none");
 		});
-		AttributeRecord result = objectUnderTest.doExtractOn(subject, "parent123");
-		assertThat(result.getParentId(), is("\"parent123\""));
-		assertThat(result.getName(), is("\"disturbanceEvidence\""));
-		assertThat(result.getValue(), is("\"none\""));
-		assertThat(result.getUnits(), is("\"\""));
+		AttributeRecord result = objectUnderTest.doExtractOn(subject);
+		assertThat(result.getName(), is("disturbanceEvidence"));
+		assertThat(result.getValue(), is("none"));
+		assertThat(result.getUnits(), is(""));
 	}
 	
 	/**
@@ -102,7 +101,7 @@ public class PropertyPathNoUnitsBagAttributeExtractorTest {
 			});
 		});
 		try {
-			objectUnderTest.doExtractOn(subject, "parent123");
+			objectUnderTest.doExtractOn(subject);
 			fail();
 		} catch (MissingDataException e) {
 			// success

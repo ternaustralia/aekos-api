@@ -20,6 +20,15 @@ private OutputSpeciesRecord objectUnderTest;
 	}
 	
 	/**
+	 * Is the id quoted?
+	 */
+	@Test
+	public void testGetId01() {
+		String result = objectUnderTest.getId();
+		assertEquals("\"abc-123\"", result);
+	}
+	
+	/**
 	 * Is the scientific name quoted?
 	 */
 	@Test

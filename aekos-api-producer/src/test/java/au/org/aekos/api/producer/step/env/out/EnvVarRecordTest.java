@@ -5,7 +5,7 @@ import static org.junit.Assert.fail;
 import org.junit.Test;
 import org.springframework.util.StringUtils;
 
-public class OutputEnvRecordTest {
+public class EnvVarRecordTest {
 
 	// TODO test all fields are quoted
 	
@@ -14,11 +14,11 @@ public class OutputEnvRecordTest {
 	 */
 	@Test
 	public void testGetCsvFields01() {
-		String[] fields = OutputEnvRecord.getCsvFields();
+		String[] fields = EnvVarRecord.getCsvFields();
 		for (String curr : fields) {
 			String methodName = "get" + StringUtils.capitalize(curr);
 			try {
-				OutputEnvRecord.class.getMethod(methodName);
+				EnvVarRecord.class.getMethod(methodName);
 				// success
 			} catch (NoSuchMethodException e) {
 				fail("Expected method to exist: " + methodName);

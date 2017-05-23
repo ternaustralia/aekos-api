@@ -34,10 +34,9 @@ public class SingleBagElementNoUnitsAttributeExtractorTest {
 				h.addLiteral(e, "commentary", "Mature Phase");
 			});
 		});
-		AttributeRecord result = objectUnderTest.doExtractOn(subject, "someParentId123");
-		assertThat(result.getParentId(), is("\"someParentId123\""));
-		assertThat(result.getName(), is("\"lifestage\""));
-		assertThat(result.getValue(), is("\"Mature Phase\""));
-		assertThat(result.getUnits(), is("\"\""));
+		AttributeRecord result = objectUnderTest.doExtractOn(subject);
+		assertThat(result.getName(), is("lifestage"));
+		assertThat(result.getValue(), is("Mature Phase"));
+		assertThat(result.getUnits(), is(""));
 	}
 }

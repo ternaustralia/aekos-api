@@ -3,13 +3,11 @@ package au.org.aekos.api.producer.step.env.out;
 import java.util.Collections;
 import java.util.List;
 
-import au.org.aekos.api.producer.step.AttributeRecord;
-
 public class OutputEnvWrapper {
 	private final OutputEnvRecord envRecord;
-	private final List<AttributeRecord> envVarRecords;
+	private final List<EnvVarRecord> envVarRecords;
 
-	public OutputEnvWrapper(OutputEnvRecord envRecord, List<AttributeRecord> AttributeRecords) {
+	public OutputEnvWrapper(OutputEnvRecord envRecord, List<EnvVarRecord> AttributeRecords) {
 		this.envRecord = envRecord;
 		this.envVarRecords = AttributeRecords;
 	}
@@ -18,7 +16,7 @@ public class OutputEnvWrapper {
 		return Collections.singletonList(envRecord);
 	}
 
-	public List<AttributeRecord> getEnvVarRecords() {
+	public List<EnvVarRecord> getEnvVarRecords() {
 		return Collections.unmodifiableList(envVarRecords);
 	}
 }

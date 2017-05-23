@@ -34,7 +34,6 @@ import org.springframework.core.task.TaskExecutor;
 
 import au.org.aekos.api.producer.rdf.CoreDataAekosJenaModelFactory;
 import au.org.aekos.api.producer.step.AttributeExtractor;
-import au.org.aekos.api.producer.step.AttributeRecord;
 import au.org.aekos.api.producer.step.BagAttributeExtractor;
 import au.org.aekos.api.producer.step.MissingDataException;
 import au.org.aekos.api.producer.step.PropertyPathNoUnitsBagAttributeExtractor;
@@ -47,6 +46,7 @@ import au.org.aekos.api.producer.step.env.AekosEnvRdfReader;
 import au.org.aekos.api.producer.step.env.AekosEnvRelationalCsvWriter;
 import au.org.aekos.api.producer.step.env.EnvItemProcessor;
 import au.org.aekos.api.producer.step.env.in.InputEnvRecord;
+import au.org.aekos.api.producer.step.env.out.EnvVarRecord;
 import au.org.aekos.api.producer.step.env.out.OutputEnvRecord;
 import au.org.aekos.api.producer.step.env.out.OutputEnvWrapper;
 import au.org.aekos.api.producer.step.species.AekosSpeciesRdfReader;
@@ -55,6 +55,7 @@ import au.org.aekos.api.producer.step.species.SpeciesItemProcessor;
 import au.org.aekos.api.producer.step.species.in.InputSpeciesRecord;
 import au.org.aekos.api.producer.step.species.out.OutputSpeciesRecord;
 import au.org.aekos.api.producer.step.species.out.OutputSpeciesWrapper;
+import au.org.aekos.api.producer.step.species.out.SpeciesTraitRecord;
 
 @Configuration
 @EnableBatchProcessing
@@ -134,7 +135,7 @@ public class BatchConfiguration {
     }
 
     @Bean
-    public ItemWriter<OutputSpeciesWrapper> writerSpeciesWrapper(FlatFileItemWriter<OutputSpeciesRecord> writerSpecies, FlatFileItemWriter<AttributeRecord> writerTraitRecord) {
+    public ItemWriter<OutputSpeciesWrapper> writerSpeciesWrapper(FlatFileItemWriter<OutputSpeciesRecord> writerSpecies, FlatFileItemWriter<SpeciesTraitRecord> writerTraitRecord) {
     	AekosSpeciesRelationalCsvWriter result = new AekosSpeciesRelationalCsvWriter();
     	result.setSpeciesWriter(writerSpecies);
     	result.setTraitWriter(writerTraitRecord);
@@ -147,8 +148,8 @@ public class BatchConfiguration {
     }
 
     @Bean
-    public FlatFileItemWriter<AttributeRecord> writerTraitRecord() throws Throwable {
-    	return csvWriter(AttributeRecord.class, "traits", AttributeRecord.getCsvFields());
+    public FlatFileItemWriter<SpeciesTraitRecord> writerTraitRecord() throws Throwable {
+    	return csvWriter(SpeciesTraitRecord.class, "traits", SpeciesTraitRecord.getCsvFields());
     }
     // [end species config]
 
@@ -209,7 +210,7 @@ public class BatchConfiguration {
     }
 
     @Bean
-    public ItemWriter<OutputEnvWrapper> writerEnvWrapper(FlatFileItemWriter<OutputEnvRecord> writerEnv, FlatFileItemWriter<AttributeRecord> writerAttributeRecord) {
+    public ItemWriter<OutputEnvWrapper> writerEnvWrapper(FlatFileItemWriter<OutputEnvRecord> writerEnv, FlatFileItemWriter<EnvVarRecord> writerAttributeRecord) {
     	AekosEnvRelationalCsvWriter result = new AekosEnvRelationalCsvWriter();
     	result.setEnvWriter(writerEnv);
     	result.setVariableWriter(writerAttributeRecord);
@@ -222,8 +223,8 @@ public class BatchConfiguration {
     }
 
     @Bean
-    public FlatFileItemWriter<AttributeRecord> writerAttributeRecord() throws Throwable {
-    	return csvWriter(AttributeRecord.class, "envvars", AttributeRecord.getCsvFields());
+    public FlatFileItemWriter<EnvVarRecord> writerAttributeRecord() throws Throwable {
+    	return csvWriter(EnvVarRecord.class, "envvars", EnvVarRecord.getCsvFields());
     }
     // [env env config]
     
@@ -237,7 +238,9 @@ public class BatchConfiguration {
     @Bean
     public TaskExecutor taskExecutor() {
     	if (isAsync) {
-    		return new SimpleAsyncTaskExecutor("apiData"); // Consider changing to ThreadPoolTaskExecutor
+    		SimpleAsyncTaskExecutor result = new SimpleAsyncTaskExecutor("apiData");
+    		result.setConcurrencyLimit(4);
+			return result; // Consider changing to ThreadPoolTaskExecutor
     	}
     	return new SyncTaskExecutor();
     }

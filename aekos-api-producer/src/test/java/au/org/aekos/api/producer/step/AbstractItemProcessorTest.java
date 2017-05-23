@@ -13,7 +13,7 @@ public class AbstractItemProcessorTest {
 		ConcreteItemProcessor objectUnderTest = new ConcreteItemProcessor();
 		AttributeExtractor extractor = new AttributeExtractor() {
 			@Override public String getId() { return "textExtractor1"; }
-			@Override public AttributeRecord doExtractOn(Resource subject, String parentId) { return null; }
+			@Override public AttributeRecord doExtractOn(Resource subject) { return null; }
 		};
 		objectUnderTest.logErrorFor(extractor);
 		objectUnderTest.logErrorFor(extractor);

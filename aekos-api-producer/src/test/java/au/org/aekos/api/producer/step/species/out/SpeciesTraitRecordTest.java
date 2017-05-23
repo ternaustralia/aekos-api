@@ -1,11 +1,11 @@
-package au.org.aekos.api.producer.step.env.out;
+package au.org.aekos.api.producer.step.species.out;
 
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
 import org.springframework.util.StringUtils;
 
-public class OutputEnvRecordTest {
+public class SpeciesTraitRecordTest {
 
 	// TODO test all fields are quoted
 	
@@ -14,11 +14,11 @@ public class OutputEnvRecordTest {
 	 */
 	@Test
 	public void testGetCsvFields01() {
-		String[] fields = OutputEnvRecord.getCsvFields();
+		String[] fields = SpeciesTraitRecord.getCsvFields();
 		for (String curr : fields) {
 			String methodName = "get" + StringUtils.capitalize(curr);
 			try {
-				OutputEnvRecord.class.getMethod(methodName);
+				SpeciesTraitRecord.class.getMethod(methodName);
 				// success
 			} catch (NoSuchMethodException e) {
 				fail("Expected method to exist: " + methodName);

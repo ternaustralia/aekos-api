@@ -36,10 +36,9 @@ public class PropertyPathWithUnitsBagAttributeExtractorTest {
 				h.addLiteral(r2, "name", "degrees");
 			});
 		});
-		AttributeRecord result = objectUnderTest.doExtractOn(subject, "parent123");
-		assertThat(result.getParentId(), is("\"parent123\""));
-		assertThat(result.getName(), is("\"slope\""));
-		assertThat(result.getValue(), is("\"4\""));
-		assertThat(result.getUnits(), is("\"degrees\""));
+		AttributeRecord result = objectUnderTest.doExtractOn(subject);
+		assertThat(result.getName(), is("slope"));
+		assertThat(result.getValue(), is("4"));
+		assertThat(result.getUnits(), is("degrees"));
 	}
 }

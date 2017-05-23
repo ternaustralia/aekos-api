@@ -17,10 +17,10 @@ import org.junit.Test;
 import au.org.aekos.api.producer.ExtractionHelper;
 import au.org.aekos.api.producer.TestHelper;
 import au.org.aekos.api.producer.step.AttributeExtractor;
-import au.org.aekos.api.producer.step.AttributeRecord;
 import au.org.aekos.api.producer.step.UnitsBasedAttributeExtractor;
 import au.org.aekos.api.producer.step.species.in.InputSpeciesRecord;
 import au.org.aekos.api.producer.step.species.out.OutputSpeciesWrapper;
+import au.org.aekos.api.producer.step.species.out.SpeciesTraitRecord;
 
 public class SpeciesItemProcessorTest {
 
@@ -41,12 +41,13 @@ public class SpeciesItemProcessorTest {
 		Map<String, String> dataFromRdf = testProcess01_populate(ds);
 		objectUnderTest.setExtractors(Arrays.asList(unitExtractor("height", ds.getNamedModel(dataFromRdf.get(COMMON_GRAPH)))));
 		objectUnderTest.setDataset(ds);
-		InputSpeciesRecord item = new InputSpeciesRecord("dab27d3c-5884-4de2-bf74-9dc73f874496", dataFromRdf.get(SPECIES_RECORD_RDF_SUBJECT), 
+		InputSpeciesRecord item = new InputSpeciesRecord("dab27d3c-5884-4de2-bf74-9dc73f874496", dataFromRdf.get(SPECIES_RECORD_RDF_SUBJECT),
 				dataFromRdf.get(SPECIES_RECORD_RDF_GRAPH), 1, "aekos.org.au/collection/adelaide.edu.au/TAF/TCFTNS0002", "Eucalyptus obliqua",
 				null, "2007-09-29");
 		OutputSpeciesWrapper result = objectUnderTest.process(item);
-		List<AttributeRecord> traits = result.getTraitRecords();
+		List<SpeciesTraitRecord> traits = result.getTraitRecords();
 		assertThat(traits.size(), is(1));
+		assertThat(traits.get(0).getParentId(), is("\"dab27d3c-5884-4de2-bf74-9dc73f874496\""));
 		assertThat(traits.get(0).getName(), is("\"height\""));
 	}
 

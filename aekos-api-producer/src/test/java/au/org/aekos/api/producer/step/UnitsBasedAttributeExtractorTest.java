@@ -10,8 +10,6 @@ import org.junit.Test;
 
 import au.org.aekos.api.producer.ExtractionHelper;
 import au.org.aekos.api.producer.TestHelper;
-import au.org.aekos.api.producer.step.AttributeRecord;
-import au.org.aekos.api.producer.step.UnitsBasedAttributeExtractor;
 
 public class UnitsBasedAttributeExtractorTest {
 
@@ -34,10 +32,9 @@ public class UnitsBasedAttributeExtractorTest {
 				h.addLiteral(r1, "name", "metres");
 			});
 		});
-		AttributeRecord result = objectUnderTest.doExtractOn(subject, "someParentId123");
-		assertThat(result.getParentId(), is("\"someParentId123\""));
-		assertThat(result.getName(), is("\"height\""));
-		assertThat(result.getValue(), is("\"2.3\""));
-		assertThat(result.getUnits(), is("\"metres\""));
+		AttributeRecord result = objectUnderTest.doExtractOn(subject);
+		assertThat(result.getName(), is("height"));
+		assertThat(result.getValue(), is("2.3"));
+		assertThat(result.getUnits(), is("metres"));
 	}
 }

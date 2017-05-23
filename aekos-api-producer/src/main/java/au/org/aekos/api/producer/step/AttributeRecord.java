@@ -1,40 +1,28 @@
 package au.org.aekos.api.producer.step;
 
-import au.org.aekos.api.producer.Utils;
-
 /**
- * Attribute could be a Trait or an Environmental Variable
+ * Attribute could be details of a Species Trait or an Environmental Variable
  */
 public class AttributeRecord {
-	private final String parentId;
 	private final String name;
 	private final String value;
 	private final String units;
 	
-	public AttributeRecord(String parentId, String name, String value, String units) {
-		this.parentId = parentId;
+	public AttributeRecord(String name, String value, String units) {
 		this.name = name;
 		this.value = value;
 		this.units = units;
 	}
 
-	public String getParentId() {
-		return Utils.quote(parentId);
-	}
-
 	public String getName() {
-		return Utils.quote(name);
+		return name;
 	}
 
 	public String getValue() {
-		return Utils.quote(value);
+		return value;
 	}
 
 	public String getUnits() {
-		return Utils.quote(units);
-	}
-
-	public static String[] getCsvFields() {
-		return new String[] {"parentId", "name", "value", "units"};
+		return units;
 	}
 }

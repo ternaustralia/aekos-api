@@ -25,11 +25,12 @@ CREATE TABLE env (
 );
 
 CREATE TABLE envvars (
-	parentId VARCHAR(100) NOT NULL,
-	traitName varchar(30),
-	traitValue varchar(100),
-	traitUnit varchar(30),
-	FOREIGN KEY (parentId) REFERENCES env(locationID)
+	locationID VARCHAR(100) NOT NULL,
+	eventDate CHAR(10) NOT NULL,
+	varName varchar(30),
+	varValue varchar(100),
+	varUnit varchar(30),
+	FOREIGN KEY (locationID, eventDate) REFERENCES env(locationID, eventDate)
 );
 
 CREATE TABLE species (
@@ -42,6 +43,8 @@ CREATE TABLE species (
 	PRIMARY KEY (id),
 	FOREIGN KEY (locationID, eventDate) REFERENCES env(locationID, eventDate)
 );
+CREATE INDEX idx_species_scientificName ON species(scientificName);
+CREATE INDEX idx_species_taxonRemarks ON species(taxonRemarks);
 
 CREATE TABLE traits (
 	parentId CHAR(37) NOT NULL,

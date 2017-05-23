@@ -10,13 +10,13 @@ public class UnitsBasedAttributeExtractor implements AttributeExtractor {
 	private String referencingPropertyName;
 
 	@Override
-	public AttributeRecord doExtractOn(Resource subject, String parentId) {
+	public AttributeRecord doExtractOn(Resource subject) {
 		String name = referencingPropertyName;
 		Resource traitSubject = helper.getResource(subject, referencingPropertyName);
 		String value = helper.getLiteral(traitSubject, "value");
 		Resource unitsSubject = helper.getResource(traitSubject, "units");
 		String units = helper.getLiteral(unitsSubject, "name");;
-		return new AttributeRecord(parentId, name, value, units);
+		return new AttributeRecord(name, value, units);
 	}
 	
 	@Override
