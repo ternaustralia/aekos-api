@@ -9,6 +9,7 @@ module.exports.handler = (event, context, callback) => {
     r.badRequest(callback, `the '${speciesNameParam}' query string parameter must be supplied`)
     return
   }
+  // FIXME handle escaping a list when we can get multiple names
   let speciesName = event.queryStringParameters[speciesNameParam]
   let escapedSpeciesName = db.escape(speciesName)
   const sql = `
@@ -17,10 +18,12 @@ module.exports.handler = (event, context, callback) => {
       SELECT scientificName AS speciesName, count(*) AS recordsHeld
       FROM species
       WHERE scientificName in (${escapedSpeciesName})
+      GROUP BY 1
       UNION
       SELECT taxonRemarks AS speciesName, count(*) AS recordsHeld
       FROM species
       WHERE taxonRemarks in (${escapedSpeciesName})
+      GROUP BY 1
     ) AS a
     WHERE a.speciesName IS NOT NULL
     GROUP BY 1

@@ -44,6 +44,27 @@ custom:
           <li>Find what species have that trait or what traits/environmental variables are available for that species</li>
           <li>Use your traits/species/environmental variables to retrieve the data with the retrieval services</li>
         </ul>
+    models:
+      -
+        name: "SpeciesSummaryList"
+        contentType: "application/json"
+        schema:
+          type: array
+          items:
+            -
+              # id: "/items"
+              properties:
+                id:
+                  # id: "/properties/id"
+                  type: string
+                recordsHeld:
+                  # id: "/properties/recordsHeld"
+                  type: integer
+                  format: int32
+                speciesName:
+                  # id: "/properties/speciesName"
+                  type: string
+              type: "object"
 
 plugins:
   - serverless-aws-documentation
@@ -72,7 +93,9 @@ functions:
           cors: true
           documentation:
             summary: "Autocomplete partial species names"
-            description: "Performs an autocomplete on the partial species name supplied. Results starting with the supplied fragmentwill be returned ordered by most relevant."
+            description: |
+              Performs an autocomplete on the partial species name supplied. Results starting with the supplied
+              fragment will be returned ordered by most relevant.
             queryParams:
               -
                 name: "q"
@@ -84,3 +107,18 @@ functions:
           path: v1/speciesSummary.json
           method: get
           cors: true
+          documentation:
+            summary: "Get a summary of the specified species names"
+            description: |
+              A summary of the information that the system holds on the supplied species name(s) including a count
+              of records. If the system doesn't have any data on a species name, no record for the species name will
+              be in the result.
+            queryParams:
+              -
+                name: "speciesNames"
+                description: "list of species names"
+            methodResponses:
+              -
+                statusCode: 200
+                responseModels:
+                  "application/json": "SpeciesSummaryList"
