@@ -8,4 +8,5 @@ if [ -z "$FUNC" ]; then
   echo "   eg: $0 v10-getTraitVocab-json"
   exit 1
 fi
-serverless deploy function --function=$1 --stage=dev --region=us-west-1
+FUNC=`bash -c "echo $FUNC | sed 's/\.js$//'"`
+serverless deploy function --function=$FUNC --stage=dev --region=us-west-1

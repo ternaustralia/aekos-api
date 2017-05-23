@@ -20,6 +20,8 @@ module.exports.handler = (event, context, callback) => {
   // FIXME handle escaping a list when we can get multiple names
   let speciesName = event.queryStringParameters[speciesNameParam]
   let escapedSpeciesName = db.escape(speciesName)
+  let pageSize = 50 // FIXME make into a param
+  let offset = 0 // FIXME make into a param
   const sql = `
     SELECT v.varName AS code, count(*) AS recordsHeld
     FROM species AS s
@@ -34,7 +36,8 @@ module.exports.handler = (event, context, callback) => {
     ON e.locationID = v.locationID
     AND e.eventDate = v.eventDate
     GROUP BY 1
-    ORDER BY 1;`
+    ORDER BY 1
+    LIMIT ${pageSize} OFFSET ${offset};`
   db.execSelect(sql, (queryResult) => {
     let mappedResults = mapResults(queryResult)
     r.ok(callback, mappedResults)
