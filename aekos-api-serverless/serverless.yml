@@ -77,3 +77,10 @@ functions:
               -
                 name: "q"
                 description: "partial species name"
+  v10-speciesSummary-json:
+    handler: v10-speciesSummary-json.handler
+    events:
+      - http:
+          path: v1/speciesSummary.json
+          method: get
+          cors: true
