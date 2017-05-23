@@ -116,6 +116,29 @@ functions:
               -
                 name: "pageSize"
                 description: "records per page"
+  v10-getSpeciesByTrait-json:
+    handler: v10-getSpeciesByTrait-json.handler
+    events:
+      - http:
+          path: v1/getSpeciesByTrait.json
+          method: get
+          cors: true
+          documentation:
+            summary: "Get all available species for specified traits"
+            description: |
+              Finds the species names that the supplied trait(s). Note that the result only shows that the supplied
+              traits have species records present in the system. To get the values, you need to use the Data
+              Retrieval services.
+            queryParams:
+              -
+                name: "traitName"
+                description: "list of trait names"
+              -
+                name: "pageNum"
+                description: "1-indexed page number"
+              -
+                name: "pageSize"
+                description: "records per page"
   v10-getTraitVocab-json:
     handler: v10-getTraitVocab-json.handler
     events:
@@ -123,6 +146,12 @@ functions:
           path: v1/getTraitVocab.json
           method: get
           cors: true
+          documentation:
+            summary: "Get trait vocabulary"
+            description: |
+              Gets a distinct list of all the traits that appear in the system. The code and label are supplied for
+              each trait. The codes are required to use as parameters for other resources and the label information
+              is useful for creating UIs.
   v10-getEnvironmentalVariableVocab-json:
     handler: v10-getEnvironmentalVariableVocab-json.handler
     events:
@@ -130,6 +159,12 @@ functions:
           path: v1/getEnvironmentalVariableVocab.json
           method: get
           cors: true
+          documentation:
+            summary: "Get environmental variable vocabulary"
+            description: |
+              Gets a distinct list of all the environmental variables that appear in the system. The code and label are supplied for
+              each trait. The codes are required to use as parameters for other resources and the label information
+              is useful for creating UIs.
   v10-speciesAutocomplete-json:
     handler: v10-speciesAutocomplete-json.handler
     events:
