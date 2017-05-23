@@ -109,6 +109,10 @@ block-stream@*:
   dependencies:
     inherits "~2.0.0"
 
+bluebird@^3.4.6:
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.5.0.tgz#791420d7f551eea2897453a8a77653f96606d67c"
+
 boom@2.x.x:
   version "2.10.1"
   resolved "https://registry.yarnpkg.com/boom/-/boom-2.10.1.tgz#39c8918ceff5799f83f9492a848f625add0c766f"
@@ -787,7 +791,7 @@ ms@0.7.3:
   version "0.7.3"
   resolved "https://registry.yarnpkg.com/ms/-/ms-0.7.3.tgz#708155a5e44e33f5fd0fc53e81d0d40a91be1fff"
 
-mysql@^2.13.0:
+mysql@^2.13.0, mysql@^2.9.0:
   version "2.13.0"
   resolved "https://registry.yarnpkg.com/mysql/-/mysql-2.13.0.tgz#998f1f8ca46e2e3dd7149ce982413653986aae47"
   dependencies:
@@ -967,6 +971,13 @@ preserve@^0.2.0:
 process-nextick-args@~1.0.6:
   version "1.0.7"
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-1.0.7.tgz#150e20b756590ad3f91093f25a4f2ad8bff30ba3"
+
+promise-mysql@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/promise-mysql/-/promise-mysql-3.0.1.tgz#51a87303fa676494d93141c3e7d8757080dc8b63"
+  dependencies:
+    bluebird "^3.4.6"
+    mysql "^2.9.0"
 
 ps-tree@^1.0.1:
   version "1.1.0"

@@ -13,6 +13,7 @@
     "serverless-aws-documentation": "^0.7.0"
   },
   "dependencies": {
-    "mysql": "^2.13.0"
+    "mysql": "^2.13.0",
+    "promise-mysql": "^3.0.1"
   }
 }
