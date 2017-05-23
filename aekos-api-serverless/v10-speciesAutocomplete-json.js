@@ -4,6 +4,7 @@ let db = require('./db-helper')
 const codeField = 'traitName'
 const countField = 'recordsHeld'
 const startsWithChar = '%'
+const qParam = 'q'
 
 let mapQueryResult = (queryResult) => {
   queryResult.forEach(function(element) {
@@ -17,8 +18,11 @@ module.exports.mapQueryResult = mapQueryResult
 
 module.exports.handler = (event, context, callback) => {
   // TODO add taxonRemarks to the search
-  // FIXME return message when no q is provided or let framework handle by making param mandatory
-  let partialName = event.queryStringParameters.q
+  if (!r.isQueryStringParamPresent(event, qParam)) {
+    r.badRequest(callback, `the '${qParam}' query string parameter must be supplied`)
+    return
+  }
+  let partialName = event.queryStringParameters[qParam]
   let escapedPartialName = db.escape(partialName + startsWithChar)
   let offset = 0 // FIXME add param for this
   let pageSize = 20 // FIXME add param for this

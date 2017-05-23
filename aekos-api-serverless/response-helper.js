@@ -1,28 +1,37 @@
 'use strict'
 
-function do200(theCallback, theBody) {
-  const response = {
-    statusCode: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*', // Required for CORS support to work
-    },
-    body: JSON.stringify(theBody)
-  }
-  theCallback(null, response);
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*', // Required for CORS support to work
+  'Access-Control-Allow-Credentials' : true // Required for cookies, authorization headers with HTTPS
 }
 
-function do400(theCallback, theBody) {
+function doResponse (theCallback, theBody, statusCode) {
   const response = {
-    statusCode: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*', // Required for CORS support to work
-    },
+    statusCode: statusCode,
+    headers: corsHeaders,
     body: JSON.stringify(theBody)
   }
-  theCallback(null, response);
+  theCallback(null, response)
+}
+
+function do200 (theCallback, theBody) {
+  doResponse(theCallback, theBody, 200)
+}
+
+function do400 (theCallback, theMessage) {
+  doResponse(theCallback, theMessage, 400)
+}
+
+function isQueryStringParamPresent (event, paramName) {
+  let queryStringParams = event.queryStringParameters
+  if (!queryStringParams || typeof(queryStringParams[paramName]) === 'undefined') {
+    return false
+  }
+  return true
 }
 
 module.exports = {
   ok: do200,
-  badRequest: do400
+  badRequest: do400,
+  isQueryStringParamPresent: isQueryStringParamPresent
 }
