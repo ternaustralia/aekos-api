@@ -878,6 +878,10 @@ object-assign@^4.0.1, object-assign@^4.1.0:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/object-assign/-/object-assign-4.1.1.tgz#2109adc7965887cfc05cbbd442cac8bfbb360863"
 
+object-hash@^1.1.7:
+  version "1.1.8"
+  resolved "https://registry.yarnpkg.com/object-hash/-/object-hash-1.1.8.tgz#28a659cf987d96a4dabe7860289f3b5326c4a03c"
+
 object.omit@^2.0.0:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/object.omit/-/object.omit-2.0.1.tgz#1a9c744829f39dbb858c76ca3579ae2a54ebd1fa"
@@ -1108,6 +1112,12 @@ semver-diff@^2.0.0:
 semver@^5.0.3, semver@^5.3.0:
   version "5.3.0"
   resolved "https://registry.yarnpkg.com/semver/-/semver-5.3.0.tgz#9b2ce5d3de02d17c6012ad326aa6b4d0cf54f94f"
+
+serverless-aws-documentation@^0.7.0:
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/serverless-aws-documentation/-/serverless-aws-documentation-0.7.0.tgz#224b17aaaef192def5002200492b74573fd422b3"
+  dependencies:
+    object-hash "^1.1.7"
 
 set-blocking@~2.0.0:
   version "2.0.0"

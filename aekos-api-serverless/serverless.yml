@@ -31,6 +31,22 @@ provider:
 custom:
   stage: ${opt:stage, self:provider.stage}
   secrets: ${file(secrets.yml):$self:custom.stage} # FIXME get this working
+  documentation:
+    # FIXME doesn't write to the format that AWS expects: {info: {description: "", version: "", title: "", contact: {name: "", email: ""}}}
+    api:
+      version: '1'
+      summary: 'AEKOS API'
+      description: |
+        The AEKOS API is used for Machine2Machine (M2M) REST access to AEKOS ecological data.
+        <h1>High level workflow</h1>
+        <ul>
+          <li>Start with a trait or species</li>
+          <li>Find what species have that trait or what traits/environmental variables are available for that species</li>
+          <li>Use your traits/species/environmental variables to retrieve the data with the retrieval services</li>
+        </ul>
+
+plugins:
+  - serverless-aws-documentation
 
 functions:
   v10-getTraitVocab-json:
@@ -54,3 +70,10 @@ functions:
           path: v1/speciesAutocomplete.json
           method: get
           cors: true
+          documentation:
+            summary: "Autocomplete partial species names"
+            description: "Performs an autocomplete on the partial species name supplied. Results starting with the supplied fragmentwill be returned ordered by most relevant."
+            queryParams:
+              -
+                name: "q"
+                description: "partial species name"
