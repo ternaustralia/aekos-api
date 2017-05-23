@@ -6,7 +6,7 @@ STAGE=dev
 FILE_TYPE=json
 REGION=us-west-1
 OUTPUT=swagger-aekos-api-$STAGE.$FILE_TYPE
-printf "Downloading Swagger definition to $OUTPUT
+printf "Downloading Swagger definition to ./$OUTPUT
   API ID: $API_ID
    Stage: $STAGE
   Accept: $FILE_TYPE
