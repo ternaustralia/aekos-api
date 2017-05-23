@@ -70,6 +70,23 @@ plugins:
   - serverless-aws-documentation
 
 functions:
+  v10-getEnvironmentBySpecies-json:
+    handler: v10-getEnvironmentBySpecies-json.handler
+    events:
+      - http:
+          path: v1/getEnvironmentBySpecies.json
+          method: get
+          cors: true
+          documentation:
+            summary: "Get all available environment variable names for specified species"
+            description: |
+              Finds the environmental variables that the supplied species have. Note that the result doesn't
+              include the valueof the environmental variables, it only shows that the supplied species have
+              values for those variable. To get the values, you need to use the Data Retrieval services.
+            queryParams:
+              -
+                name: "speciesNames"
+                description: "list of species names"
   v10-getTraitVocab-json:
     handler: v10-getTraitVocab-json.handler
     events:
