@@ -20,6 +20,21 @@ private OutputSpeciesRecord objectUnderTest;
 	}
 	
 	/**
+	 * Is the expected exception thrown when we don't supply a scientificName or taxonRemarks?
+	 */
+	@Test
+	public void testConstructor01() {
+		String scientificName = null;
+		String taxonRemarks = null;
+		try {
+			new InputSpeciesRecord(null, null, null, 0, null, scientificName, taxonRemarks, null);
+			fail();
+		} catch (IllegalStateException e) {
+			// success!
+		}
+	}
+	
+	/**
 	 * Is the id quoted?
 	 */
 	@Test
@@ -35,6 +50,24 @@ private OutputSpeciesRecord objectUnderTest;
 	public void testGetScientificName01() {
 		String result = objectUnderTest.getScientificName();
 		assertEquals("\"macropus rufus\"", result);
+	}
+	
+	/**
+	 * Is the taxon remarks quoted?
+	 */
+	@Test
+	public void testGetTaxonRemarks01() {
+		String result = objectUnderTest.getTaxonRemarks();
+		assertEquals("\"buffalo grass\"", result);
+	}
+	
+	/**
+	 * Is the taxon remarks replace with the null placeholder when the value is null?
+	 */
+	@Test
+	public void testGetTaxonRemarks02() {
+		String result = new OutputSpeciesRecord(isrWithNullTaxonRemarks()).getTaxonRemarks();
+		assertEquals("\\N", result);
 	}
 	
 	// TODO test all other fields
@@ -54,5 +87,9 @@ private OutputSpeciesRecord objectUnderTest;
 				fail("Expected method to exist: " + methodName);
 			}
 		}
+	}
+	
+	private InputSpeciesRecord isrWithNullTaxonRemarks() {
+		return new InputSpeciesRecord(null, null, null, 0, null, "some to stop validation failures in constructor", null, null);
 	}
 }

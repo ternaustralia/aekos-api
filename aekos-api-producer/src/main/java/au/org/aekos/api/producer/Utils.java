@@ -9,9 +9,14 @@ import org.springframework.util.StreamUtils;
 
 public class Utils {
 
+	private static final String MYSQL_NULL = "\\N";
+	
 	private Utils() {}
 	
 	public static String quote(String value) {
+		if (value == null) {
+			return MYSQL_NULL;
+		}
 		return "\"" + value + "\"";
 	}
 	
