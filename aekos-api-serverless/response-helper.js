@@ -30,8 +30,29 @@ function isQueryStringParamPresent (event, paramName) {
   return true
 }
 
+function getOptionalParam(event, paramName, defaultValue) {
+  if (!isQueryStringParamPresent(event, paramName)) {
+    return defaultValue
+  }
+  return event.queryStringParameters[paramName]
+}
+
+function calculateOffset (pageNum, pageSize) {
+  return (pageNum - 1) * pageSize
+}
+
+function assertNumber (val) {
+  if (typeof(val) === 'number') {
+    return true
+  }
+  return false
+}
+
 module.exports = {
   ok: do200,
   badRequest: do400,
-  isQueryStringParamPresent: isQueryStringParamPresent
+  isQueryStringParamPresent: isQueryStringParamPresent,
+  assertNumber: assertNumber,
+  getOptionalParam: getOptionalParam,
+  calculateOffset: calculateOffset
 }

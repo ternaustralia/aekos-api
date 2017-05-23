@@ -52,4 +52,77 @@ describe('response-helper', function () {
       expect(result).toBeFalsy()
     })
   })
+
+  describe('assertNumber', function () {
+    it('can tell when we do have a number', function () {
+      let val = 1
+      let result = objectUnderTest.assertNumber(val)
+      expect(result).toBeTruthy()
+    })
+
+    it('can tell when we DO NOT have a number (a number string is not a number)', function () {
+      let val = '1'
+      let result = objectUnderTest.assertNumber(val)
+      expect(result).toBeFalsy()
+    })
+
+    it('can tell when we DO NOT have a number', function () {
+      let val = 'blah'
+      let result = objectUnderTest.assertNumber(val)
+      expect(result).toBeFalsy()
+    })
+  })
+
+  describe('getOptionalValue', function () {
+    it('can get the value when it is present', function () {
+      let event = {
+        queryStringParameters: {
+          pageSize: 10
+        }
+      }
+      let result = objectUnderTest.getOptionalParam(event, 'pageSize', 20)
+      expect(result).toBe(10)
+    })
+
+    it('can get the default when the value is NOT present', function () {
+      let event = {
+        queryStringParameters: {
+          somethingElse: 'foo'
+        }
+      }
+      let result = objectUnderTest.getOptionalParam(event, 'pageSize', 20)
+      expect(result).toBe(20)
+    })
+
+    it('can get the default when no params are present', function () {
+      let event = {
+        queryStringParameters: null
+      }
+      let result = objectUnderTest.getOptionalParam(event, 'pageSize', 20)
+      expect(result).toBe(20)
+    })
+  })
+
+  describe('calculateOffset', function () {
+    it('returns 0 offset for the first page', function () {
+      let pageNum = 1
+      let pageSize = 20
+      let result = objectUnderTest.calculateOffset(pageNum, pageSize)
+      expect(result).toBe(0)
+    })
+
+    it('returns 0 offset for the first page with a different page size', function () {
+      let pageNum = 1
+      let pageSize = 100
+      let result = objectUnderTest.calculateOffset(pageNum, pageSize)
+      expect(result).toBe(0)
+    })
+
+    it('returns the correct offset for the second page', function () {
+      let pageNum = 2
+      let pageSize = 20
+      let result = objectUnderTest.calculateOffset(pageNum, pageSize)
+      expect(result).toBe(20)
+    })
+  })
 })

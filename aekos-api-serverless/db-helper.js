@@ -12,7 +12,7 @@ module.exports.execSelect = (selectSql, callback) => {
   connection.connect()
   connection.query(selectSql, function (error, results, fields) {
     if (error) {
-      throw new Error()
+      throw new Error(`Failed to execute query '${selectSql}' with error '${JSON.stringify(error)}'`)
     }
     callback(results)
   })

@@ -81,12 +81,41 @@ functions:
             summary: "Get all available environment variable names for specified species"
             description: |
               Finds the environmental variables that the supplied species have. Note that the result doesn't
-              include the valueof the environmental variables, it only shows that the supplied species have
+              include the value of the environmental variables, it only shows that the supplied species have
               values for those variable. To get the values, you need to use the Data Retrieval services.
             queryParams:
               -
                 name: "speciesNames"
                 description: "list of species names"
+              -
+                name: "pageNum"
+                description: "1-indexed page number"
+              -
+                name: "pageSize"
+                description: "records per page"
+  v10-getTraitsBySpecies-json:
+    handler: v10-getTraitsBySpecies-json.handler
+    events:
+      - http:
+          path: v1/getTraitsBySpecies.json
+          method: get
+          cors: true
+          documentation:
+            summary: "Get all available traits for specified species"
+            description: |
+              Finds the traits that the supplied species have. Note that the result doesn't include the value
+              of the traits, it only shows that the supplied species have values for those traits. To get
+              the values, you need to use the Data Retrieval services.
+            queryParams:
+              -
+                name: "speciesNames"
+                description: "list of species names"
+              -
+                name: "pageNum"
+                description: "1-indexed page number"
+              -
+                name: "pageSize"
+                description: "records per page"
   v10-getTraitVocab-json:
     handler: v10-getTraitVocab-json.handler
     events:
