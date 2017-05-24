@@ -82,6 +82,23 @@ custom:
                 numFound:
                   type: integer
                 # FIXME add the rest
+      -
+        name: "TraitDataJsonResponse"
+        contentType: "application/json"
+        schema:
+          type: object
+          properties:
+            response:
+              type: array
+              # FIXME define the object
+            responseHeader:
+              type: object
+              properties:
+                elapsedTime:
+                  type: integer
+                numFound:
+                  type: integer
+                # FIXME add the rest
 
 plugins:
   - serverless-aws-documentation
@@ -247,3 +264,33 @@ functions:
                 statusCode: 200
                 responseModels:
                   "application/json": "SpeciesDataResponse"
+  v10-traitData-json:
+    handler: v10-traitData-json.handler
+    events:
+      - http:
+          path: v1/traitData.json
+          method: get
+          cors: true
+          documentation:
+            summary: "Get trait data in JSON format"
+            description: |
+              Gets Darwin Core records with added trait information in JSON format. If you supply trait names then the result
+              records will have the traits filtered down to only the traits you've asked for, otherwise all traits are returned.
+            queryParams:
+              -
+                name: "speciesName"
+                description: "list of species names"
+              -
+                name: "traitName"
+                description: "list of trait names"
+              -
+                name: "start"
+                description: "0-indexed result start index"
+              -
+                name: "rows"
+                description: "records per page"
+            methodResponses:
+              -
+                statusCode: 200
+                responseModels:
+                  "application/json": "TraitDataJsonResponse"

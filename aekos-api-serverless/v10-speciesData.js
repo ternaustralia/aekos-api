@@ -17,12 +17,59 @@ module.exports.handler = (event, context, callback) => {
   let escapedSpeciesName = db.escape(speciesName)
   let start = r.getOptionalParam(event, 'start', 0)
   let rows = r.getOptionalParam(event, 'rows', 20)
-  doQuery(escapedSpeciesName, start, rows, processStart, callback)
+  doQuery(escapedSpeciesName, start, rows, processStart, false).then(successResult => {
+    r.ok(callback, successResult)
+  }).catch(error => {
+    r.internalServerError(callback, 'Sorry, something went wrong')
+  })
 }
 
-function doQuery (escapedSpeciesName, start, rows, processStart, callback) {
-  const recordsSql = `
+function doQuery (escapedSpeciesName, start, rows, processStart, includeSpeciesRecordId) {
+  return new Promise((resolve, reject) => {
+    const recordsSql = getRecordsSql(escapedSpeciesName, start, rows, includeSpeciesRecordId)
+    const countSql = getCountSql(escapedSpeciesName)
+    let pageNumber = -1 // TODO calc page number
+    let totalPages = -1 // TODO calc total pages
+    let recordsPromise = db.execSelectPromise(recordsSql)
+    let countPromise = db.execSelectPromise(countSql)
+    Promise.all([recordsPromise, countPromise]).then(values => {
+      let records = values[0]
+      let count = values[1]
+      if (count.length !== 1) {
+        throw new Error('SQL result problem: result from count query did not have exactly one row. Result=' + JSON.stringify(count))
+      }
+      let result = {
+        responseHeader: {
+          elapsedTime: now() - processStart,
+          numFound: count[0][recordsHeldField],
+          pageNumber: pageNumber,
+          params: {
+            rows: rows,
+            start: start
+          },
+          totalPages: totalPages
+        },
+        response: records
+      }
+      resolve(result)
+    })
+    .catch(error => {
+      let msg = 'Problem executing SQL: ' + error.message
+      console.error(msg)
+      reject(msg)
+    })
+  })
+}
+module.exports.doQuery = doQuery
+
+function getRecordsSql (escapedSpeciesName, start, rows, includeSpeciesRecordId) {
+  let speciesIdFragment = ''
+  if (includeSpeciesRecordId) {
+    speciesIdFragment = 's.id,'
+  }
+  return `
     SELECT
+    ${speciesIdFragment}
     s.scientificName,
     s.taxonRemarks,
     s.individualCount,
@@ -49,7 +96,10 @@ function doQuery (escapedSpeciesName, start, rows, processStart, callback) {
 	  )
     ORDER BY 1
     LIMIT ${rows} OFFSET ${start};`
-  const countSql = `
+}
+
+function getCountSql (escapedSpeciesName) {
+  return `
     SELECT count(*) AS ${recordsHeldField}
     FROM species AS s
     INNER JOIN env AS e
@@ -61,36 +111,6 @@ function doQuery (escapedSpeciesName, start, rows, processStart, callback) {
       s.scientificName IN (${escapedSpeciesName})
       OR s.taxonRemarks IN (${escapedSpeciesName})
 	  );`
-  let pageNumber = -1 // TODO calc page number
-  let totalPages = -1 // TODO calc total pages
-  let recordsPromise = db.execSelectPromise(recordsSql)
-  let countPromise = db.execSelectPromise(countSql)
-  Promise.all([recordsPromise, countPromise]).then(values => {
-    let records = values[0]
-    let count = values[1]
-    if (count.length !== 1) {
-      throw new Error('SQL result problem: result from count query did not have exactly one row. Result=' + JSON.stringify(count))
-    }
-    let result = {
-      responseHeader: {
-        elapsedTime: now() - processStart,
-        numFound: count[0][recordsHeldField],
-        pageNumber: pageNumber,
-        params: {
-          rows: rows,
-          start: start
-        },
-        totalPages: totalPages
-      },
-      response: records
-    }
-    r.ok(callback, result)
-  })
-  .catch(error => {
-    let msg = 'Problem executing SQL: ' + error.message
-    console.error(msg)
-    r.internalServerError(callback, 'Sorry, something went wrong')
-  })
 }
 
 function now () {
