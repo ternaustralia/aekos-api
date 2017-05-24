@@ -22,6 +22,10 @@ function do400 (theCallback, theMessage) {
   doResponse(theCallback, theMessage, 400)
 }
 
+function do500 (theCallback, theMessage) {
+  doResponse(theCallback, theMessage, 500)
+}
+
 function isQueryStringParamPresent (event, paramName) {
   let queryStringParams = event.queryStringParameters
   if (!queryStringParams || typeof(queryStringParams[paramName]) === 'undefined') {
@@ -51,6 +55,7 @@ function assertNumber (val) {
 module.exports = {
   ok: do200,
   badRequest: do400,
+  internalServerError: do500,
   isQueryStringParamPresent: isQueryStringParamPresent,
   assertNumber: assertNumber,
   getOptionalParam: getOptionalParam,

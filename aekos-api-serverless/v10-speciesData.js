@@ -4,10 +4,6 @@ let db = require('./db-helper')
 const speciesNameParam = 'speciesName'
 const recordsHeldField = 'recordsHeld'
 
-function now () {
-  return new Date().getTime()
-}
-
 module.exports.handler = (event, context, callback) => {
   let processStart = now()
   // FIXME need to do content negotiation and delegate to the appropriate handler
@@ -21,6 +17,10 @@ module.exports.handler = (event, context, callback) => {
   let escapedSpeciesName = db.escape(speciesName)
   let start = r.getOptionalParam(event, 'start', 0)
   let rows = r.getOptionalParam(event, 'rows', 20)
+  doQuery(escapedSpeciesName, start, rows, processStart, callback)
+}
+
+function doQuery (escapedSpeciesName, start, rows, processStart, callback) {
   const recordsSql = `
     SELECT
     s.scientificName,
@@ -68,10 +68,13 @@ module.exports.handler = (event, context, callback) => {
   Promise.all([recordsPromise, countPromise]).then(values => {
     let records = values[0]
     let count = values[1]
+    if (count.length !== 1) {
+      throw new Error('SQL result problem: result from count query did not have exactly one row. Result=' + JSON.stringify(count))
+    }
     let result = {
       responseHeader: {
         elapsedTime: now() - processStart,
-        numFound: JSON.stringify(count), // FIXME get count int
+        numFound: count[0][recordsHeldField],
         pageNumber: pageNumber,
         params: {
           rows: rows,
@@ -79,8 +82,17 @@ module.exports.handler = (event, context, callback) => {
         },
         totalPages: totalPages
       },
-      response: records // FIXME are records in correct format?
+      response: records
     }
-    r.ok(callback, result) // FIXME why can't we see r to resolve?
+    r.ok(callback, result)
   })
+  .catch(error => {
+    let msg = 'Problem executing SQL: ' + error.message
+    console.error(msg)
+    r.internalServerError(callback, 'Sorry, something went wrong')
+  })
+}
+
+function now () {
+  return new Date().getTime()
 }

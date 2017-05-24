@@ -28,12 +28,13 @@ module.exports.execSelectPromise = selectSql => {
     password: process.env.DBPASS,
     database: process.env.DBNAME
   }).then(function (conn) {
-    console.log('got connection, about to run query')
-    return conn.query(selectSql)
+    let result = conn.query(selectSql)
+    conn.end()
+    return result
   })
-  // .catch(function (error) {
-  //   throw new Error(`Failed to execute query '${selectSql}' with error '${JSON.stringify(error)}'`)
-  // })
+  .catch(function (error) {
+    throw new Error(`Failed to execute query '${selectSql}' with error '${JSON.stringify(error)}'`)
+  })
 }
 
 module.exports.escape = (unescapedValue) => {
