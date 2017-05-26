@@ -11,6 +11,11 @@ cat $CURR_DIR/create-schema.sql | mysql \
  --user=$THEUSER \
  --protocol=tcp \
  $DB_NAME
+SCHEMA_RC=$?
+if [ "$SCHEMA_RC" != "0" ]; then
+  echo "ERROR: failed to create schema"
+  exit $SCHEMA_RC
+fi
 echo "Loading data"
 for CURR in "citations" "env" "envvars" "species" "traits"; do
   echo "Loading $CURR.csv"
