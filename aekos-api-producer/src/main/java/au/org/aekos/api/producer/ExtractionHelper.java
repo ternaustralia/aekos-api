@@ -54,6 +54,10 @@ public class ExtractionHelper {
 		}
 		return possibleBag.as(Bag.class);
 	}
+	
+	public boolean hasProperty(Resource subject, String localPropertyName) {
+		return subject.hasProperty(prop(localPropertyName));
+	}
 
 	private RDFNode validateAndGetObject(Resource subject, Property p) {
 		if (subject == null) {
@@ -79,7 +83,7 @@ public class ExtractionHelper {
 		RDFNode object = statement.getObject();
 		return object;
 	}
-	
+
 	public void setCommonGraph(Model commonGraph) {
 		this.commonGraph = commonGraph;
 	}

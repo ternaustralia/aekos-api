@@ -1,7 +1,9 @@
 package au.org.aekos.api.producer;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.apache.jena.query.Dataset;
@@ -158,5 +160,33 @@ public class ExtractionHelperTest {
 		} catch (IllegalStateException e) {
 			// success
 		}
+	}
+	
+	/**
+	 * Can we tell when a property exists?
+	 * 
+	 */
+	@Test
+	public void testHasProperty01() {
+		ExtractionHelper objectUnderTest = new ExtractionHelper(PROPERTY_NAMESPACE);
+		Model model = ModelFactory.createDefaultModel();
+		Resource subject = model.createResource("urn:someSub1");
+		h.addLiteral(subject, "someProp", "value doesn't matter, just need a triple to exist");
+		boolean result = objectUnderTest.hasProperty(subject, "someProp");
+		assertTrue("Should be able to see the property exists", result);
+	}
+	
+	/**
+	 * Can we tell when a property DOES NOT exist?
+	 * 
+	 */
+	@Test
+	public void testHasProperty02() {
+		ExtractionHelper objectUnderTest = new ExtractionHelper(PROPERTY_NAMESPACE);
+		Model model = ModelFactory.createDefaultModel();
+		Resource subject = model.createResource("urn:someSub1");
+		h.addLiteral(subject, "someProp", "value doesn't matter, just need a triple to exist");
+		boolean result = objectUnderTest.hasProperty(subject, "propThatIsNotThere");
+		assertFalse("Should be able to see the property DOES NOT exist", result);
 	}
 }

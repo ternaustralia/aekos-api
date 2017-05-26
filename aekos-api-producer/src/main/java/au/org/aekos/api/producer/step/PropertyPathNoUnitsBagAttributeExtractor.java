@@ -70,10 +70,24 @@ public class PropertyPathNoUnitsBagAttributeExtractor implements BagAttributeExt
 		return value;
 	}
 
+	/**
+	 * Local name of the type this extractor is looking for. For example,
+	 * if you have an entity of type <code>aekos:SPECIESORGANISMGROUPFAUNA</code>
+	 * then the <code>targetTypeLocalName</code> is <code>"SPECIESORGANISMGROUPFAUNA"</code>.
+	 * 
+	 * This is a bag extractor so we have to go by type as there aren't any referring properties.
+	 * 
+	 * @param targetTypeLocalName	local name of entity type to perform extraction on
+	 */
 	public void setTargetTypeLocalName(String targetTypeLocalName) {
 		this.targetTypeLocalName = targetTypeLocalName;
 	}
 
+	/**
+	 * Name used for the output attribute record. e.g.: <code>height</code>
+	 * 
+	 * @param finalName	name used in output record
+	 */
 	public void setFinalName(String finalName) {
 		this.finalName = finalName;
 	}

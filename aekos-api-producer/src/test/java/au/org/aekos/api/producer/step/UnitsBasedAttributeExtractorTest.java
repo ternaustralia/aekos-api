@@ -1,7 +1,7 @@
 package au.org.aekos.api.producer.step;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -36,5 +36,35 @@ public class UnitsBasedAttributeExtractorTest {
 		assertThat(result.getName(), is("height"));
 		assertThat(result.getValue(), is("2.3"));
 		assertThat(result.getUnits(), is("metres"));
+	}
+	
+	/**
+	 * Can we tell that we can handle a subject because the property exists (we don't check deeper than that)?
+	 */
+	@Test
+	public void testCanHandle01() {
+		Model model = ModelFactory.createDefaultModel();
+		Resource subject = model.createResource("urn:someSub1");
+		h.addLiteral(subject, "height", "value doesn't matter, just need a triple to exist");
+		UnitsBasedAttributeExtractor objectUnderTest = new UnitsBasedAttributeExtractor();
+		objectUnderTest.setHelper(new ExtractionHelper(PROPERTY_NAMESPACE));
+		objectUnderTest.setReferencingPropertyName("height");
+		boolean result = objectUnderTest.canHandle(subject);
+		assertTrue("Should be able to handle it, the property exists", result);
+	}
+	
+	/**
+	 * Can we tell that we can NOT handle a subject because the property DOES NOT exist?
+	 */
+	@Test
+	public void testCanHandle02() {
+		Model model = ModelFactory.createDefaultModel();
+		Resource subject = model.createResource("urn:someSub1");
+		h.addLiteral(subject, "basalArea", "value doesn't matter, just need a triple to exist");
+		UnitsBasedAttributeExtractor objectUnderTest = new UnitsBasedAttributeExtractor();
+		objectUnderTest.setHelper(new ExtractionHelper(PROPERTY_NAMESPACE));
+		objectUnderTest.setReferencingPropertyName("height");
+		boolean result = objectUnderTest.canHandle(subject);
+		assertFalse("Should NOT be able to handle it, the property DOES NOT exist", result);
 	}
 }

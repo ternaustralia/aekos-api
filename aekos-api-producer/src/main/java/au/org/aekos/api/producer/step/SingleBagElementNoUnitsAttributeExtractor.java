@@ -25,6 +25,11 @@ public class SingleBagElementNoUnitsAttributeExtractor implements AttributeExtra
 	public String getId() {
 		return referencingPropertyName;
 	}
+	
+	@Override
+	public boolean canHandle(Resource subject) {
+		return helper.hasProperty(subject, referencingPropertyName);
+	}
 
 	public void setHelper(ExtractionHelper helper) {
 		this.helper = helper;

@@ -24,6 +24,9 @@ public class SpeciesItemProcessor extends AbstractItemProcessor<AttributeExtract
 		Model model = getNamedModel(item.getRdfGraph());
 		Resource subject = model.getResource(item.getRdfSubject());
 		doExtractorLoop(curr -> {
+			if (!curr.canHandle(subject)) {
+				return;
+			}
 			AttributeRecord trait = curr.doExtractOn(subject);
 			traitRecords.add(new SpeciesTraitRecord(item.getId(), trait.getName(), trait.getValue(), trait.getUnits()));
 		});

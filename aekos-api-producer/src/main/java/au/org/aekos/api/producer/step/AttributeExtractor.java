@@ -16,4 +16,12 @@ public interface AttributeExtractor {
 	 * Identifier of this type of TraitExtractor
 	 */
 	String getId();
+
+	/**
+	 * Check if this extractor can perform an extraction on the supplied subject.
+	 * 
+	 * @param subject	subject to check
+	 * @return			<code>true</code> if an extraction can be performed, <code>false</code> otherwise
+	 */
+	boolean canHandle(Resource subject);
 }

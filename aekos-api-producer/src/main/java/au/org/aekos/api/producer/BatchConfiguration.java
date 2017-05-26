@@ -38,8 +38,6 @@ import au.org.aekos.api.producer.step.BagAttributeExtractor;
 import au.org.aekos.api.producer.step.MissingDataException;
 import au.org.aekos.api.producer.step.PropertyPathNoUnitsBagAttributeExtractor;
 import au.org.aekos.api.producer.step.PropertyPathWithUnitsBagAttributeExtractor;
-import au.org.aekos.api.producer.step.SingleBagElementNoUnitsAttributeExtractor;
-import au.org.aekos.api.producer.step.UnitsBasedAttributeExtractor;
 import au.org.aekos.api.producer.step.citation.AekosCitationRdfReader;
 import au.org.aekos.api.producer.step.citation.in.InputCitationRecord;
 import au.org.aekos.api.producer.step.env.AekosEnvRdfReader;
@@ -105,25 +103,7 @@ public class BatchConfiguration {
     
     @Bean
     public List<AttributeExtractor> speciesTraitExtractors(ExtractionHelper extractionHelper) {
-		List<AttributeExtractor> result = new LinkedList<>();
-		{
-			UnitsBasedAttributeExtractor heightExtractor = new UnitsBasedAttributeExtractor();
-			heightExtractor.setHelper(extractionHelper);
-			heightExtractor.setReferencingPropertyName("height");
-			result.add(heightExtractor);
-		} {
-			UnitsBasedAttributeExtractor biomassExtractor = new UnitsBasedAttributeExtractor();
-			biomassExtractor.setHelper(extractionHelper);
-			biomassExtractor.setReferencingPropertyName("biomass");
-			result.add(biomassExtractor);
-		} {
-			SingleBagElementNoUnitsAttributeExtractor lifeStageExtractor = new SingleBagElementNoUnitsAttributeExtractor();
-			lifeStageExtractor.setHelper(extractionHelper);
-			lifeStageExtractor.setReferencingPropertyName("lifestage");
-			lifeStageExtractor.setNestedPropertyName("commentary");
-			result.add(lifeStageExtractor);
-		}
-		return result;
+		return SpeciesTraitExtractorConfig.getExtractors(extractionHelper);
     }
     
     @Bean(destroyMethod="reportProblems")

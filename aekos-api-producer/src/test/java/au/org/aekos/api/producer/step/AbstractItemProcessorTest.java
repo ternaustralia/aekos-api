@@ -14,11 +14,13 @@ public class AbstractItemProcessorTest {
 		AttributeExtractor extractor = new AttributeExtractor() {
 			@Override public String getId() { return "textExtractor1"; }
 			@Override public AttributeRecord doExtractOn(Resource subject) { return null; }
+			@Override public boolean canHandle(Resource subject) { return false; }
 		};
 		objectUnderTest.logErrorFor(extractor);
 		objectUnderTest.logErrorFor(extractor);
 		objectUnderTest.logErrorFor(extractor);
 		objectUnderTest.reportProblems();
+		// logger output should mention 3 errors were found
 	}
 	
 	private static class ConcreteItemProcessor extends AbstractItemProcessor<AttributeExtractor> { }
