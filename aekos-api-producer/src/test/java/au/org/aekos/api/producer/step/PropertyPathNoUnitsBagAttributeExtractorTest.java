@@ -2,6 +2,7 @@ package au.org.aekos.api.producer.step;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -81,7 +82,7 @@ public class PropertyPathNoUnitsBagAttributeExtractorTest {
 		AttributeRecord result = objectUnderTest.doExtractOn(subject);
 		assertThat(result.getName(), is("disturbanceEvidence"));
 		assertThat(result.getValue(), is("none"));
-		assertThat(result.getUnits(), is(""));
+		assertNull(result.getUnits());
 	}
 	
 	/**

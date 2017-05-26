@@ -9,7 +9,7 @@ import org.springframework.util.StreamUtils;
 
 public class Utils {
 
-	private static final String MYSQL_NULL = "\\N";
+	public static final String MYSQL_NULL = "\\N";
 	
 	private Utils() {}
 	

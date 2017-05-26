@@ -1,7 +1,7 @@
 package au.org.aekos.api.producer;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -23,6 +23,7 @@ public class SpeciesTraitExtractorConfigTest {
 
 	private static final String NS = "http://www.aekos.org.au/ontology/1.0.0";
 	private static final String PROPERTY_NAMESPACE = NS + "#";
+	private static final String COMMON_GRAPH_NAME = NS + "common#";
 	private final TestHelper h = new TestHelper(PROPERTY_NAMESPACE);
 	
 	/**
@@ -30,69 +31,91 @@ public class SpeciesTraitExtractorConfigTest {
 	 */
 	@Test
 	public void testConfig01() throws Throwable {
-		OutputSpeciesWrapper result = populateDataAndRunExtractionLoop(subject -> {
+		OutputSpeciesWrapper result = populateDataAndRunExtractionLoop(data -> {
+			Resource subject = data.subject;
+			Resource metresUnit = data.commonGraph.createResource(COMMON_GRAPH_NAME + "theUnit");
+			h.addLiteral(metresUnit, "name", "metres");
 			h.addResource(subject, "averageHeight", r -> {
 				h.addLiteral(r, "value", "4");
-				h.addResource(r, "units", r2 -> {
-					h.addLiteral(r2, "name", "metres");
-				});
+				h.addResource(r, "units", metresUnit);
 			});
 		});
 		List<SpeciesTraitRecord> traits = result.getTraitRecords();
 		assertThat(traits.size(), is(1));
-		SpeciesTraitRecord firstTrait = traits.get(0);
-		assertThat(firstTrait.getName(), is("\"averageHeight\""));
-		assertThat(firstTrait.getValue(), is("\"4\""));
-		assertThat(firstTrait.getUnits(), is("\"metres\""));
+		SpeciesTraitRecord trait = traits.get(0);
+		assertThat(trait.getName(), is("\"averageHeight\""));
+		assertThat(trait.getValue(), is("\"4\""));
+		assertThat(trait.getUnits(), is("\"metres\""));
+	}
+	
+	// TODO test basalArea
+
+	/**
+	 * Is the 'basalAreaFactor' extractor configured correctly?
+	 */
+	@Test
+	public void testConfig02() throws Throwable {
+		OutputSpeciesWrapper result = populateDataAndRunExtractionLoop(data -> {
+			h.addResource(data.subject, "basalAreaFactor", r -> {
+				h.addLiteral(r, "value", "4");
+			});
+		});
+		List<SpeciesTraitRecord> traits = result.getTraitRecords();
+		assertThat(traits.size(), is(1));
+		SpeciesTraitRecord trait = traits.get(0);
+		assertThat(trait.getName(), is("\"basalAreaFactor\""));
+		assertThat(trait.getValue(), is("\"4\""));
+		assertThat(trait.getUnits(), is(Utils.MYSQL_NULL));
 	}
 	
 	/**
 	 * Is the 'biomass' extractor configured correctly?
 	 */
 	@Test
-	public void testConfig02() throws Throwable {
-		OutputSpeciesWrapper result = populateDataAndRunExtractionLoop(subject -> {
+	public void testConfig03() throws Throwable {
+		OutputSpeciesWrapper result = populateDataAndRunExtractionLoop(data -> {
+			Resource subject = data.subject;
+			Resource percentUnit = data.commonGraph.createResource(COMMON_GRAPH_NAME + "theUnit");
+			h.addLiteral(percentUnit, "name", "percent");
 			h.addResource(subject, "biomass", r -> {
 				h.addLiteral(r, "value", "90");
-				h.addResource(r, "units", r2 -> {
-					h.addLiteral(r2, "name", "percent");
-				});
+				h.addResource(r, "units", percentUnit);
 			});
 		});
 		List<SpeciesTraitRecord> traits = result.getTraitRecords();
 		assertThat(traits.size(), is(1));
-		SpeciesTraitRecord firstTrait = traits.get(0);
-		assertThat(firstTrait.getName(), is("\"biomass\""));
-		assertThat(firstTrait.getValue(), is("\"90\""));
-		assertThat(firstTrait.getUnits(), is("\"percent\""));
+		SpeciesTraitRecord trait = traits.get(0);
+		assertThat(trait.getName(), is("\"biomass\""));
+		assertThat(trait.getValue(), is("\"90\""));
+		assertThat(trait.getUnits(), is("\"percent\""));
 	}
 	
 	/**
 	 * Is the 'height' extractor configured correctly?
 	 */
 	@Test
-	public void testConfig03() throws Throwable {
-		OutputSpeciesWrapper result = populateDataAndRunExtractionLoop(subject -> {
+	public void testConfig04() throws Throwable {
+		OutputSpeciesWrapper result = populateDataAndRunExtractionLoop(data -> {
+			Resource subject = data.subject;
+			Resource metresUnit = data.commonGraph.createResource(COMMON_GRAPH_NAME + "theUnit");
+			h.addLiteral(metresUnit, "name", "metres");
 			h.addResource(subject, "height", r -> {
 				h.addLiteral(r, "value", "4");
-				h.addResource(r, "units", r2 -> {
-					h.addLiteral(r2, "name", "metres");
-				});
+				h.addResource(r, "units", metresUnit);
 			});
 		});
 		List<SpeciesTraitRecord> traits = result.getTraitRecords();
 		assertThat(traits.size(), is(1));
-		SpeciesTraitRecord firstTrait = traits.get(0);
-		assertThat(firstTrait.getName(), is("\"height\""));
-		assertThat(firstTrait.getValue(), is("\"4\""));
-		assertThat(firstTrait.getUnits(), is("\"metres\""));
+		SpeciesTraitRecord trait = traits.get(0);
+		assertThat(trait.getName(), is("\"height\""));
+		assertThat(trait.getValue(), is("\"4\""));
+		assertThat(trait.getUnits(), is("\"metres\""));
 	}
 
-	private OutputSpeciesWrapper populateDataAndRunExtractionLoop(Consumer<Resource> subjectCallback) throws Exception {
+	private OutputSpeciesWrapper populateDataAndRunExtractionLoop(Consumer<Data> subjectCallback) throws Exception {
 		Dataset ds = DatasetFactory.create();
-		String commonGraphName = NS + "common#";
 		Model commonGraph = ModelFactory.createDefaultModel();
-		ds.addNamedModel(commonGraphName, commonGraph);
+		ds.addNamedModel(COMMON_GRAPH_NAME, commonGraph);
 		ExtractionHelper extractionHelper = new ExtractionHelper(PROPERTY_NAMESPACE);
 		extractionHelper.setCommonGraph(commonGraph);
 		List<AttributeExtractor> objectUnderTest = SpeciesTraitExtractorConfig.getExtractors(extractionHelper);
@@ -102,11 +125,20 @@ public class SpeciesTraitExtractorConfigTest {
 		String projectGraphName = NS + "project#";
 		Model projectGraph = ModelFactory.createDefaultModel();
 		Resource subject = projectGraph.createResource(projectGraphName + "someSubject1");
-		subjectCallback.accept(subject);
+		subjectCallback.accept(new Data(subject, commonGraph));
 		ds.addNamedModel(projectGraphName, projectGraph);
 		InputSpeciesRecord item = new InputSpeciesRecord("some-id-1234", subject.getURI(), projectGraphName,
 				1, "not important", "not important", "not important", "not important");
 		OutputSpeciesWrapper result = sip.process(item);
 		return result;
+	}
+	
+	private class Data {
+		private final Resource subject;
+		private final Model commonGraph;
+		public Data(Resource subject, Model commonGraph) {
+			this.subject = subject;
+			this.commonGraph = commonGraph;
+		}
 	}
 }

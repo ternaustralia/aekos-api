@@ -8,23 +8,21 @@ import org.apache.jena.rdf.model.Resource;
 import au.org.aekos.api.producer.ExtractionHelper;
 
 /**
- * Used to extract an attribute record that includes units. You need to have a reference
+ * Used to extract an attribute record that does not include units. You need to have a reference
  * to the parent subject (urn:parent) and know the target property (urn:referencingPropertyName).
  */
-public class UnitsBasedAttributeExtractor implements AttributeExtractor {
+public class NoUnitsAttributeExtractor implements AttributeExtractor {
 
 	private ExtractionHelper helper;
 	private String referencingPropertyName;
 	private List<String> valuePropertyPath;
-	private List<String> unitsPropertyPath;
 
 	@Override
 	public AttributeRecord doExtractOn(Resource subject) {
-		PropertyPathWithUnitsBagAttributeExtractor r = new PropertyPathWithUnitsBagAttributeExtractor();
+		PropertyPathNoUnitsBagAttributeExtractor r = new PropertyPathNoUnitsBagAttributeExtractor();
 		r.setHelper(helper);
 		r.setFinalName(referencingPropertyName);
 		r.setValuePropertyPath(valuePropertyPath);
-		r.setUnitsPropertyPath(unitsPropertyPath);
 		Resource traitSubject = helper.getResource(subject, referencingPropertyName);
 		return r.doExtractOn(traitSubject);
 	}
@@ -49,9 +47,5 @@ public class UnitsBasedAttributeExtractor implements AttributeExtractor {
 
 	public void setValuePropertyPath(String...pathFragments) {
 		this.valuePropertyPath = Arrays.asList(pathFragments);
-	}
-
-	public void setUnitsPropertyPath(String...pathFragments) {
-		this.unitsPropertyPath = Arrays.asList(pathFragments);
 	}
 }

@@ -14,7 +14,7 @@ import au.org.aekos.api.producer.ExtractionHelper;
 public class PropertyPathNoUnitsBagAttributeExtractor implements BagAttributeExtractor {
 
 	private static final Logger logger = LoggerFactory.getLogger(PropertyPathNoUnitsBagAttributeExtractor.class);
-	private static final String NO_UNITS = "";
+	private static final String NO_UNITS = null;
 	private String targetTypeLocalName;
 	private ExtractionHelper helper;
 	private String finalName;

@@ -57,6 +57,8 @@ public class SpeciesItemProcessorTest {
 		helper.setCommonGraph(commonGraph);
 		result.setHelper(helper);
 		result.setReferencingPropertyName(referencingPropertyName);
+		result.setValuePropertyPath("value");
+		result.setUnitsPropertyPath("units", "name");
 		return result;
 	}
 
