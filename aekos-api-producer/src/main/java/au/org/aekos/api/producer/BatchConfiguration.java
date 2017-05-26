@@ -76,6 +76,9 @@ public class BatchConfiguration {
 
     @Value("${aekos-api.common-graph-name}")
 	private String commonGraphName;
+    
+    @Value("${aekos-api.morphometrics-type.local-name}")
+	private String morphometricsLocalTypeName;
 
     // [start citation config]
     @Bean
@@ -102,8 +105,8 @@ public class BatchConfiguration {
     }
     
     @Bean
-    public List<AttributeExtractor> speciesTraitExtractors(ExtractionHelper extractionHelper) {
-		return SpeciesTraitExtractorConfig.getExtractors(extractionHelper);
+    public List<AttributeExtractor> speciesTraitExtractors(ExtractionHelper extractionHelper, Dataset ds) {
+		return SpeciesTraitExtractorConfig.getExtractors(extractionHelper, propertyNamespace, ds, morphometricsLocalTypeName);
     }
     
     @Bean(destroyMethod="reportProblems")

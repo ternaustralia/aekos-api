@@ -21,9 +21,11 @@ import au.org.aekos.api.producer.step.species.out.SpeciesTraitRecord;
 
 public class SpeciesTraitExtractorConfigTest {
 
+	private static final String MORPHOMETRICS_LOCAL_TYPE_NAME = "MORPHOMETRICS";
 	private static final String NS = "http://www.aekos.org.au/ontology/1.0.0";
 	private static final String PROPERTY_NAMESPACE = NS + "#";
 	private static final String COMMON_GRAPH_NAME = NS + "common#";
+	private static final String PROJECT_GRAPH_NAME = NS + "project#";
 	private final TestHelper h = new TestHelper(PROPERTY_NAMESPACE);
 	
 	/**
@@ -191,7 +193,32 @@ public class SpeciesTraitExtractorConfigTest {
 		assertThat(trait.getUnits(), is("\"metres\""));
 	}
 	
-	// TODO add billLength
+	/**
+	 * Is the 'billLength' extractor configured correctly?
+	 */
+	@Test
+	public void testConfig09() throws Throwable {
+		OutputSpeciesWrapper result = populateDataAndRunExtractionLoop(data -> {
+			Resource subject = data.subject;
+			h.addType(subject, "INDIVIDUALORGANISM");
+			Resource morphometrics = data.projectGraph.createResource(PROJECT_GRAPH_NAME + MORPHOMETRICS_LOCAL_TYPE_NAME + "-T1493794184418");
+			h.addType(morphometrics, MORPHOMETRICS_LOCAL_TYPE_NAME);
+			Resource mmUnit = data.commonGraph.createResource(COMMON_GRAPH_NAME + "theUnit");
+			h.addLiteral(mmUnit, "name", "millimetres");
+			h.addResource(morphometrics, "featureof", subject);
+			h.addResource(morphometrics, "billlength", r -> {
+				h.addLiteral(r, "value", "82");
+				h.addResource(r, "units", mmUnit);
+			});
+		});
+		List<SpeciesTraitRecord> traits = result.getTraitRecords();
+		assertThat(traits.size(), is(1));
+		SpeciesTraitRecord trait = traits.get(0);
+		assertThat(trait.getName(), is("\"billLength\""));
+		assertThat(trait.getValue(), is("\"82\""));
+		assertThat(trait.getUnits(), is("\"millimetres\""));
+	}
+	
 	// TODO add billLengthShield
 	// TODO add billWidth
 	// TODO add totalLength
@@ -200,19 +227,19 @@ public class SpeciesTraitExtractorConfigTest {
 	private OutputSpeciesWrapper populateDataAndRunExtractionLoop(Consumer<Data> subjectCallback) throws Exception {
 		Dataset ds = DatasetFactory.create();
 		Model commonGraph = ModelFactory.createDefaultModel();
-		ds.addNamedModel(COMMON_GRAPH_NAME, commonGraph);
 		ExtractionHelper extractionHelper = new ExtractionHelper(PROPERTY_NAMESPACE);
 		extractionHelper.setCommonGraph(commonGraph);
-		List<AttributeExtractor> objectUnderTest = SpeciesTraitExtractorConfig.getExtractors(extractionHelper);
+		Model projectGraph = ModelFactory.createDefaultModel();
+		Resource subject = projectGraph.createResource(PROJECT_GRAPH_NAME + "someSubject1");
+		subjectCallback.accept(new Data(subject, commonGraph, projectGraph));
+		ds.addNamedModel(COMMON_GRAPH_NAME, commonGraph);
+		ds.addNamedModel(PROJECT_GRAPH_NAME, projectGraph);
+		List<AttributeExtractor> objectUnderTest = SpeciesTraitExtractorConfig.getExtractors(extractionHelper, PROPERTY_NAMESPACE,
+				ds, MORPHOMETRICS_LOCAL_TYPE_NAME);
 		SpeciesItemProcessor sip = new SpeciesItemProcessor();
 		sip.setExtractors(objectUnderTest);
 		sip.setDataset(ds);
-		String projectGraphName = NS + "project#";
-		Model projectGraph = ModelFactory.createDefaultModel();
-		Resource subject = projectGraph.createResource(projectGraphName + "someSubject1");
-		subjectCallback.accept(new Data(subject, commonGraph));
-		ds.addNamedModel(projectGraphName, projectGraph);
-		InputSpeciesRecord item = new InputSpeciesRecord("some-id-1234", subject.getURI(), projectGraphName,
+		InputSpeciesRecord item = new InputSpeciesRecord("some-id-1234", subject.getURI(), PROJECT_GRAPH_NAME,
 				1, "not important", "not important", "not important", "not important");
 		OutputSpeciesWrapper result = sip.process(item);
 		return result;
@@ -221,9 +248,12 @@ public class SpeciesTraitExtractorConfigTest {
 	private class Data {
 		private final Resource subject;
 		private final Model commonGraph;
-		public Data(Resource subject, Model commonGraph) {
+		private final Model projectGraph;
+		
+		public Data(Resource subject, Model commonGraph, Model projectGraph) {
 			this.subject = subject;
 			this.commonGraph = commonGraph;
+			this.projectGraph = projectGraph;
 		}
 	}
 }

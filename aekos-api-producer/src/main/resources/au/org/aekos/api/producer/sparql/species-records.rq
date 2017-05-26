@@ -18,6 +18,7 @@ WHERE { GRAPH ?g {
 #      aekos:ORGANISMGROUP # Left out on purpose (as instructed by Matt)
     aekos:INDIVIDUALORGANISM
     aekos:SPECIESORGANISMGROUP
+    aekos:INDIVIDUALORGANISMFAUNA
   }
   # scientificName
   OPTIONAL {?og aekos:determinedspeciesconcept/aekos:species/aekos:name ?determinedSpeciesNameValue . } #OFF4dewnr_bdbsa

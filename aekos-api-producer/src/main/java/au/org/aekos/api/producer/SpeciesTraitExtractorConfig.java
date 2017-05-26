@@ -3,8 +3,11 @@ package au.org.aekos.api.producer;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.jena.query.Dataset;
+
 import au.org.aekos.api.producer.step.AttributeExtractor;
 import au.org.aekos.api.producer.step.HardCodedUnitsAttributeExtractor;
+import au.org.aekos.api.producer.step.InversePropertyDecoratedAttributeExtractor;
 import au.org.aekos.api.producer.step.NoUnitsAttributeExtractor;
 import au.org.aekos.api.producer.step.UnitsBasedAttributeExtractor;
 
@@ -12,7 +15,8 @@ public class SpeciesTraitExtractorConfig {
 
 	private SpeciesTraitExtractorConfig() {}
 	
-	public static List<AttributeExtractor> getExtractors(ExtractionHelper extractionHelper) {
+	public static List<AttributeExtractor> getExtractors(ExtractionHelper extractionHelper, String propertyAndTypeNamespace,
+			Dataset ds, String morphometricsLocalTypeName) {
 		List<AttributeExtractor> result = new LinkedList<>();
 		result.add(standardUnitBasedExtractor("averageHeight", extractionHelper));
 		{
@@ -29,6 +33,15 @@ public class SpeciesTraitExtractorConfig {
 		result.add(standardUnitBasedExtractor("cover", extractionHelper));
 		result.add(standardUnitBasedExtractor("height", extractionHelper));
 		result.add(standardUnitBasedExtractor("biomass", extractionHelper));
+		{
+			InversePropertyDecoratedAttributeExtractor e = new InversePropertyDecoratedAttributeExtractor();
+			e.setDelegate(standardUnitBasedExtractor("billLength", extractionHelper));
+			e.setDs(ds);
+			e.setPropertyAndTypeNamespace(propertyAndTypeNamespace);
+			e.setInversePropertyLocalName("featureof");
+			e.setTargetResourceTypeLocalName(morphometricsLocalTypeName);
+			result.add(e);
+		}
 		return result;
 	}
 
