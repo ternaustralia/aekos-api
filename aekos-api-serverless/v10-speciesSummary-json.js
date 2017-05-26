@@ -1,7 +1,8 @@
 'use strict'
 let r = require('./response-helper')
 let db = require('./db-helper')
-const speciesNameParam = 'speciesName'
+let yaml = require('yamljs')
+const speciesNameParam = yaml.load('./constants.yml').paramNames.SINGLE_SPECIES_NAME
 
 module.exports.handler = (event, context, callback) => {
   // FIXME get repeated query string params mapping correctly rather than just the last one

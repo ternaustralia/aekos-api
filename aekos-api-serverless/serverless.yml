@@ -31,6 +31,33 @@ provider:
 custom:
   stage: ${opt:stage, self:provider.stage}
   secrets: ${file(secrets.yml):$self:custom.stage} # FIXME get this working
+  commonModelSchemaFragments:
+    SpeciesSummary:
+      type: object
+      properties:
+        id:
+          type: string
+        recordsHeld:
+          type: integer
+        speciesName:
+          type: string
+    ResponseHeader:
+      type: object
+      properties:
+        elapsedTime:
+          type: number
+        numFound:
+          type: number
+        pageNumber:
+          type: number
+        params:
+          type: object
+          properties:
+            rows:
+              type: number
+            start:
+              type: number
+            # TODO add other params on a per function basis probably, not sure how that'll work
   documentation:
     # FIXME doesn't write to the format that AWS expects: {info: {description: "", version: "", title: "", contact: {name: "", email: ""}}}
     api:
@@ -50,21 +77,7 @@ custom:
         contentType: "application/json"
         schema:
           type: array
-          items:
-            -
-              # id: "/items"
-              properties:
-                id:
-                  # id: "/properties/id"
-                  type: string
-                recordsHeld:
-                  # id: "/properties/recordsHeld"
-                  type: integer
-                  format: int32
-                speciesName:
-                  # id: "/properties/speciesName"
-                  type: string
-              type: "object"
+          items: ${self:custom.commonModelSchemaFragments.SpeciesSummary}
       -
         name: "SpeciesDataResponse"
         contentType: "application/json"
@@ -74,14 +87,7 @@ custom:
             response:
               type: array
               # FIXME define the object
-            responseHeader:
-              type: object
-              properties:
-                elapsedTime:
-                  type: integer
-                numFound:
-                  type: integer
-                # FIXME add the rest
+            responseHeader: ${self:custom.commonModelSchemaFragments.ResponseHeader}
       -
         name: "TraitDataJsonResponse"
         contentType: "application/json"
@@ -91,14 +97,7 @@ custom:
             response:
               type: array
               # FIXME define the object
-            responseHeader:
-              type: object
-              properties:
-                elapsedTime:
-                  type: integer
-                numFound:
-                  type: integer
-                # FIXME add the rest
+            responseHeader: ${self:custom.commonModelSchemaFragments.ResponseHeader}
 
 plugins:
   - serverless-aws-documentation
@@ -230,7 +229,7 @@ functions:
               be in the result.
             queryParams:
               -
-                name: "speciesNames"
+                name: "${file(./constants.yml):paramNames.SINGLE_SPECIES_NAME}"
                 description: "list of species names"
             methodResponses:
               -
@@ -294,3 +293,28 @@ functions:
                 statusCode: 200
                 responseModels:
                   "application/json": "TraitDataJsonResponse"
+  v10-traitData-csv:
+    handler: v10-traitData-csv.handler
+    events:
+      - http:
+          path: v1/traitData.csv
+          method: get
+          cors: true
+          documentation:
+            summary: "Get trait data in CSV format"
+            description: |
+              Gets Darwin Core records with added trait information in CSV format. If you supply trait names then the result
+              records will have the traits filtered down to only the traits you've asked for, otherwise all traits are returned.
+            queryParams:
+              -
+                name: "speciesName"
+                description: "list of species names"
+              -
+                name: "traitName"
+                description: "list of trait names"
+              -
+                name: "start"
+                description: "0-indexed result start index"
+              -
+                name: "rows"
+                description: "records per page"
