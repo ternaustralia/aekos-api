@@ -30,7 +30,7 @@ public class NoUnitsAttributeExtractorTest {
 		objectUnderTest.setValuePropertyPath("value");
 		Model m = ModelFactory.createDefaultModel();
 		Resource subject = m.createResource();
-		h.addResource(subject, "basalAreaCount", r -> {
+		h.addResource(subject, "basalareacount", r -> {
 			h.addLiteral(r, "value", "42");
 		});
 		AttributeRecord result = objectUnderTest.doExtractOn(subject);
@@ -46,7 +46,7 @@ public class NoUnitsAttributeExtractorTest {
 	public void testCanHandle01() {
 		Model model = ModelFactory.createDefaultModel();
 		Resource subject = model.createResource("urn:someSub1");
-		h.addLiteral(subject, "basalAreaCount", "value doesn't matter, just need a triple to exist");
+		h.addLiteral(subject, "basalareacount" /*Note the lower case name, this is what we expect*/, "value doesn't matter, just need a triple to exist");
 		NoUnitsAttributeExtractor objectUnderTest = new NoUnitsAttributeExtractor();
 		objectUnderTest.setHelper(new ExtractionHelper(PROPERTY_NAMESPACE));
 		objectUnderTest.setReferencingPropertyName("basalAreaCount");

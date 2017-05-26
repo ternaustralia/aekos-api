@@ -23,7 +23,7 @@ public class NoUnitsAttributeExtractor implements AttributeExtractor {
 		r.setHelper(helper);
 		r.setFinalName(referencingPropertyName);
 		r.setValuePropertyPath(valuePropertyPath);
-		Resource traitSubject = helper.getResource(subject, referencingPropertyName);
+		Resource traitSubject = helper.getResource(subject, getLowerCaseLocalReferencingPropertyName());
 		return r.doExtractOn(traitSubject);
 	}
 	
@@ -34,7 +34,11 @@ public class NoUnitsAttributeExtractor implements AttributeExtractor {
 	
 	@Override
 	public boolean canHandle(Resource subject) {
-		return helper.hasProperty(subject, referencingPropertyName);
+		return helper.hasProperty(subject, getLowerCaseLocalReferencingPropertyName());
+	}
+	
+	private String getLowerCaseLocalReferencingPropertyName() {
+		return referencingPropertyName.toLowerCase();
 	}
 
 	public void setHelper(ExtractionHelper helper) {

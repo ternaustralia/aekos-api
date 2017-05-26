@@ -35,7 +35,7 @@ public class SpeciesTraitExtractorConfigTest {
 			Resource subject = data.subject;
 			Resource metresUnit = data.commonGraph.createResource(COMMON_GRAPH_NAME + "theUnit");
 			h.addLiteral(metresUnit, "name", "metres");
-			h.addResource(subject, "averageHeight", r -> {
+			h.addResource(subject, "averageheight", r -> {
 				h.addLiteral(r, "value", "4");
 				h.addResource(r, "units", metresUnit);
 			});
@@ -56,7 +56,7 @@ public class SpeciesTraitExtractorConfigTest {
 	@Test
 	public void testConfig02() throws Throwable {
 		OutputSpeciesWrapper result = populateDataAndRunExtractionLoop(data -> {
-			h.addResource(data.subject, "basalAreaFactor", r -> {
+			h.addResource(data.subject, "basalareafactor", r -> {
 				h.addLiteral(r, "value", "4");
 			});
 		});
@@ -74,7 +74,7 @@ public class SpeciesTraitExtractorConfigTest {
 	@Test
 	public void testConfig03() throws Throwable {
 		OutputSpeciesWrapper result = populateDataAndRunExtractionLoop(data -> {
-			h.addResource(data.subject, "basalAreaCount", r -> {
+			h.addResource(data.subject, "basalareacount", r -> {
 				h.addLiteral(r, "value", "4");
 			});
 		});
