@@ -69,10 +69,28 @@ public class SpeciesTraitExtractorConfigTest {
 	}
 	
 	/**
-	 * Is the 'biomass' extractor configured correctly?
+	 * Is the 'basalAreaCount' extractor configured correctly?
 	 */
 	@Test
 	public void testConfig03() throws Throwable {
+		OutputSpeciesWrapper result = populateDataAndRunExtractionLoop(data -> {
+			h.addResource(data.subject, "basalAreaCount", r -> {
+				h.addLiteral(r, "value", "4");
+			});
+		});
+		List<SpeciesTraitRecord> traits = result.getTraitRecords();
+		assertThat(traits.size(), is(1));
+		SpeciesTraitRecord trait = traits.get(0);
+		assertThat(trait.getName(), is("\"basalAreaCount\""));
+		assertThat(trait.getValue(), is("\"4\""));
+		assertThat(trait.getUnits(), is(Utils.MYSQL_NULL));
+	}
+	
+	/**
+	 * Is the 'biomass' extractor configured correctly?
+	 */
+	@Test
+	public void testConfig04() throws Throwable {
 		OutputSpeciesWrapper result = populateDataAndRunExtractionLoop(data -> {
 			Resource subject = data.subject;
 			Resource percentUnit = data.commonGraph.createResource(COMMON_GRAPH_NAME + "theUnit");
@@ -90,11 +108,15 @@ public class SpeciesTraitExtractorConfigTest {
 		assertThat(trait.getUnits(), is("\"percent\""));
 	}
 	
+	// TODO add canopyCover (has optional value path)
+	
+	// TODO add cover (has optional values in both cases, could be with/without units)
+	
 	/**
 	 * Is the 'height' extractor configured correctly?
 	 */
 	@Test
-	public void testConfig04() throws Throwable {
+	public void testConfig07() throws Throwable {
 		OutputSpeciesWrapper result = populateDataAndRunExtractionLoop(data -> {
 			Resource subject = data.subject;
 			Resource metresUnit = data.commonGraph.createResource(COMMON_GRAPH_NAME + "theUnit");
@@ -111,6 +133,12 @@ public class SpeciesTraitExtractorConfigTest {
 		assertThat(trait.getValue(), is("\"4\""));
 		assertThat(trait.getUnits(), is("\"metres\""));
 	}
+	
+	// TODO add billLength
+	// TODO add billLengthShield
+	// TODO add billWidth
+	// TODO add totalLength
+	// TODO add weight
 
 	private OutputSpeciesWrapper populateDataAndRunExtractionLoop(Consumer<Data> subjectCallback) throws Exception {
 		Dataset ds = DatasetFactory.create();

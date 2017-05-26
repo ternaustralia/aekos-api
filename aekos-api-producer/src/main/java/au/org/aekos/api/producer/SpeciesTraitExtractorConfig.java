@@ -15,15 +15,18 @@ public class SpeciesTraitExtractorConfig {
 		List<AttributeExtractor> result = new LinkedList<>();
 		result.add(standardUnitBasedExtractor("averageHeight", extractionHelper));
 		// FIXME check if 'basalArea' still doesn't have units in RDF. Create a hardcoded unit extractor for it
-		{
-			NoUnitsAttributeExtractor e = new NoUnitsAttributeExtractor();
-			e.setHelper(extractionHelper);
-			e.setReferencingPropertyName("basalAreaFactor");
-			e.setValuePropertyPath("value");
-			result.add(e);
-		}
+		result.add(simpleNoUnitsExtractor("basalAreaFactor", extractionHelper));
+		result.add(simpleNoUnitsExtractor("basalAreaCount", extractionHelper));
 		result.add(standardUnitBasedExtractor("height", extractionHelper));
 		result.add(standardUnitBasedExtractor("biomass", extractionHelper));
+		return result;
+	}
+
+	private static AttributeExtractor simpleNoUnitsExtractor(String referencingPropertyName, ExtractionHelper extractionHelper) {
+		NoUnitsAttributeExtractor result = new NoUnitsAttributeExtractor();
+		result.setHelper(extractionHelper);
+		result.setReferencingPropertyName(referencingPropertyName);
+		result.setValuePropertyPath("value");
 		return result;
 	}
 
