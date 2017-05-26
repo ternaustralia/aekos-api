@@ -48,13 +48,30 @@ public class SpeciesTraitExtractorConfigTest {
 		assertThat(trait.getUnits(), is("\"metres\""));
 	}
 	
-	// TODO test basalArea
+	/**
+	 * Is the 'basalArea' extractor configured correctly?
+	 */
+	@Test
+	public void testConfig02() throws Throwable {
+		OutputSpeciesWrapper result = populateDataAndRunExtractionLoop(data -> {
+			Resource subject = data.subject;
+			h.addResource(subject, "basalarea", r -> {
+				h.addLiteral(r, "value", "0.1");
+			});
+		});
+		List<SpeciesTraitRecord> traits = result.getTraitRecords();
+		assertThat(traits.size(), is(1));
+		SpeciesTraitRecord trait = traits.get(0);
+		assertThat(trait.getName(), is("\"basalArea\""));
+		assertThat(trait.getValue(), is("\"0.1\""));
+		assertThat(trait.getUnits(), is("\"square metres per hectare\""));
+	}
 
 	/**
 	 * Is the 'basalAreaFactor' extractor configured correctly?
 	 */
 	@Test
-	public void testConfig02() throws Throwable {
+	public void testConfig03() throws Throwable {
 		OutputSpeciesWrapper result = populateDataAndRunExtractionLoop(data -> {
 			h.addResource(data.subject, "basalareafactor", r -> {
 				h.addLiteral(r, "value", "4");
@@ -72,7 +89,7 @@ public class SpeciesTraitExtractorConfigTest {
 	 * Is the 'basalAreaCount' extractor configured correctly?
 	 */
 	@Test
-	public void testConfig03() throws Throwable {
+	public void testConfig04() throws Throwable {
 		OutputSpeciesWrapper result = populateDataAndRunExtractionLoop(data -> {
 			h.addResource(data.subject, "basalareacount", r -> {
 				h.addLiteral(r, "value", "4");
@@ -90,7 +107,7 @@ public class SpeciesTraitExtractorConfigTest {
 	 * Is the 'biomass' extractor configured correctly?
 	 */
 	@Test
-	public void testConfig04() throws Throwable {
+	public void testConfig05() throws Throwable {
 		OutputSpeciesWrapper result = populateDataAndRunExtractionLoop(data -> {
 			Resource subject = data.subject;
 			Resource percentUnit = data.commonGraph.createResource(COMMON_GRAPH_NAME + "theUnit");
@@ -108,15 +125,55 @@ public class SpeciesTraitExtractorConfigTest {
 		assertThat(trait.getUnits(), is("\"percent\""));
 	}
 	
-	// TODO add canopyCover (has optional value path)
+	/**
+	 * Is the 'canopyCover' extractor configured correctly?
+	 */
+	@Test
+	public void testConfig06() throws Throwable {
+		OutputSpeciesWrapper result = populateDataAndRunExtractionLoop(data -> {
+			Resource subject = data.subject;
+			Resource percentUnit = data.commonGraph.createResource(COMMON_GRAPH_NAME + "theUnit");
+			h.addLiteral(percentUnit, "name", "percent");
+			h.addResource(subject, "canopycover", r -> {
+				h.addLiteral(r, "value", "90");
+				h.addResource(r, "units", percentUnit);
+			});
+		});
+		List<SpeciesTraitRecord> traits = result.getTraitRecords();
+		assertThat(traits.size(), is(1));
+		SpeciesTraitRecord trait = traits.get(0);
+		assertThat(trait.getName(), is("\"canopyCover\""));
+		assertThat(trait.getValue(), is("\"90\""));
+		assertThat(trait.getUnits(), is("\"percent\""));
+	}
 	
-	// TODO add cover (has optional values in both cases, could be with/without units)
+	/**
+	 * Is the 'cover' extractor configured correctly?
+	 */
+	@Test
+	public void testConfig07() throws Throwable {
+		OutputSpeciesWrapper result = populateDataAndRunExtractionLoop(data -> {
+			Resource subject = data.subject;
+			Resource percentUnit = data.commonGraph.createResource(COMMON_GRAPH_NAME + "theUnit");
+			h.addLiteral(percentUnit, "name", "percent");
+			h.addResource(subject, "cover", r -> {
+				h.addLiteral(r, "value", "90");
+				h.addResource(r, "units", percentUnit);
+			});
+		});
+		List<SpeciesTraitRecord> traits = result.getTraitRecords();
+		assertThat(traits.size(), is(1));
+		SpeciesTraitRecord trait = traits.get(0);
+		assertThat(trait.getName(), is("\"cover\""));
+		assertThat(trait.getValue(), is("\"90\""));
+		assertThat(trait.getUnits(), is("\"percent\""));
+	}
 	
 	/**
 	 * Is the 'height' extractor configured correctly?
 	 */
 	@Test
-	public void testConfig07() throws Throwable {
+	public void testConfig08() throws Throwable {
 		OutputSpeciesWrapper result = populateDataAndRunExtractionLoop(data -> {
 			Resource subject = data.subject;
 			Resource metresUnit = data.commonGraph.createResource(COMMON_GRAPH_NAME + "theUnit");
