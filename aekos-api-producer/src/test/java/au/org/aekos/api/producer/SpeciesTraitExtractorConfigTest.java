@@ -219,10 +219,109 @@ public class SpeciesTraitExtractorConfigTest {
 		assertThat(trait.getUnits(), is("\"millimetres\""));
 	}
 	
-	// TODO add billLengthShield
-	// TODO add billWidth
-	// TODO add totalLength
-	// TODO add weight
+	/**
+	 * Is the 'billLengthShield' extractor configured correctly?
+	 */
+	@Test
+	public void testConfig10() throws Throwable {
+		OutputSpeciesWrapper result = populateDataAndRunExtractionLoop(data -> {
+			Resource subject = data.subject;
+			h.addType(subject, "INDIVIDUALORGANISM");
+			Resource morphometrics = data.projectGraph.createResource(PROJECT_GRAPH_NAME + MORPHOMETRICS_LOCAL_TYPE_NAME + "-T1493794184418");
+			h.addType(morphometrics, MORPHOMETRICS_LOCAL_TYPE_NAME);
+			Resource mmUnit = data.commonGraph.createResource(COMMON_GRAPH_NAME + "theUnit");
+			h.addLiteral(mmUnit, "name", "millimetres");
+			h.addResource(morphometrics, "featureof", subject);
+			h.addResource(morphometrics, "billlengthshield", r -> {
+				h.addLiteral(r, "value", "11");
+				h.addResource(r, "units", mmUnit);
+			});
+		});
+		List<SpeciesTraitRecord> traits = result.getTraitRecords();
+		assertThat(traits.size(), is(1));
+		SpeciesTraitRecord trait = traits.get(0);
+		assertThat(trait.getName(), is("\"billLengthShield\""));
+		assertThat(trait.getValue(), is("\"11\""));
+		assertThat(trait.getUnits(), is("\"millimetres\""));
+	}
+	
+	/**
+	 * Is the 'billWidth' extractor configured correctly?
+	 */
+	@Test
+	public void testConfig11() throws Throwable {
+		OutputSpeciesWrapper result = populateDataAndRunExtractionLoop(data -> {
+			Resource subject = data.subject;
+			h.addType(subject, "INDIVIDUALORGANISM");
+			Resource morphometrics = data.projectGraph.createResource(PROJECT_GRAPH_NAME + MORPHOMETRICS_LOCAL_TYPE_NAME + "-T1493794184418");
+			h.addType(morphometrics, MORPHOMETRICS_LOCAL_TYPE_NAME);
+			Resource mmUnit = data.commonGraph.createResource(COMMON_GRAPH_NAME + "theUnit");
+			h.addLiteral(mmUnit, "name", "millimetres");
+			h.addResource(morphometrics, "featureof", subject);
+			h.addResource(morphometrics, "billwidth", r -> {
+				h.addLiteral(r, "value", "55");
+				h.addResource(r, "units", mmUnit);
+			});
+		});
+		List<SpeciesTraitRecord> traits = result.getTraitRecords();
+		assertThat(traits.size(), is(1));
+		SpeciesTraitRecord trait = traits.get(0);
+		assertThat(trait.getName(), is("\"billWidth\""));
+		assertThat(trait.getValue(), is("\"55\""));
+		assertThat(trait.getUnits(), is("\"millimetres\""));
+	}
+	
+	/**
+	 * Is the 'totalLength' extractor configured correctly?
+	 */
+	@Test
+	public void testConfig12() throws Throwable {
+		OutputSpeciesWrapper result = populateDataAndRunExtractionLoop(data -> {
+			Resource subject = data.subject;
+			h.addType(subject, "INDIVIDUALORGANISM");
+			Resource morphometrics = data.projectGraph.createResource(PROJECT_GRAPH_NAME + MORPHOMETRICS_LOCAL_TYPE_NAME + "-T1493794184418");
+			h.addType(morphometrics, MORPHOMETRICS_LOCAL_TYPE_NAME);
+			Resource mmUnit = data.commonGraph.createResource(COMMON_GRAPH_NAME + "theUnit");
+			h.addLiteral(mmUnit, "name", "millimetres");
+			h.addResource(morphometrics, "featureof", subject);
+			h.addResource(morphometrics, "totallength", r -> {
+				h.addLiteral(r, "value", "430");
+				h.addResource(r, "units", mmUnit);
+			});
+		});
+		List<SpeciesTraitRecord> traits = result.getTraitRecords();
+		assertThat(traits.size(), is(1));
+		SpeciesTraitRecord trait = traits.get(0);
+		assertThat(trait.getName(), is("\"totalLength\""));
+		assertThat(trait.getValue(), is("\"430\""));
+		assertThat(trait.getUnits(), is("\"millimetres\""));
+	}
+	
+	/**
+	 * Is the 'weight' extractor configured correctly?
+	 */
+	@Test
+	public void testConfig13() throws Throwable {
+		OutputSpeciesWrapper result = populateDataAndRunExtractionLoop(data -> {
+			Resource subject = data.subject;
+			h.addType(subject, "INDIVIDUALORGANISM");
+			Resource morphometrics = data.projectGraph.createResource(PROJECT_GRAPH_NAME + MORPHOMETRICS_LOCAL_TYPE_NAME + "-T1493794184418");
+			h.addType(morphometrics, MORPHOMETRICS_LOCAL_TYPE_NAME);
+			Resource mmUnit = data.commonGraph.createResource(COMMON_GRAPH_NAME + "theUnit");
+			h.addLiteral(mmUnit, "name", "grams");
+			h.addResource(morphometrics, "featureof", subject);
+			h.addResource(morphometrics, "weight", r -> {
+				h.addLiteral(r, "value", "1930");
+				h.addResource(r, "units", mmUnit);
+			});
+		});
+		List<SpeciesTraitRecord> traits = result.getTraitRecords();
+		assertThat(traits.size(), is(1));
+		SpeciesTraitRecord trait = traits.get(0);
+		assertThat(trait.getName(), is("\"weight\""));
+		assertThat(trait.getValue(), is("\"1930\""));
+		assertThat(trait.getUnits(), is("\"grams\""));
+	}
 
 	private OutputSpeciesWrapper populateDataAndRunExtractionLoop(Consumer<Data> subjectCallback) throws Exception {
 		Dataset ds = DatasetFactory.create();

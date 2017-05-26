@@ -33,16 +33,23 @@ public class SpeciesTraitExtractorConfig {
 		result.add(standardUnitBasedExtractor("cover", extractionHelper));
 		result.add(standardUnitBasedExtractor("height", extractionHelper));
 		result.add(standardUnitBasedExtractor("biomass", extractionHelper));
-		{
-			InversePropertyDecoratedAttributeExtractor e = new InversePropertyDecoratedAttributeExtractor();
-			e.setDelegate(standardUnitBasedExtractor("billLength", extractionHelper));
-			e.setDs(ds);
-			e.setPropertyAndTypeNamespace(propertyAndTypeNamespace);
-			e.setInversePropertyLocalName("featureof");
-			e.setTargetResourceTypeLocalName(morphometricsLocalTypeName);
-			result.add(e);
-		}
+		result.add(morphometricsExtractor("billLength", extractionHelper, propertyAndTypeNamespace, ds, morphometricsLocalTypeName));
+		result.add(morphometricsExtractor("billLengthShield", extractionHelper, propertyAndTypeNamespace, ds, morphometricsLocalTypeName));
+		result.add(morphometricsExtractor("billWidth", extractionHelper, propertyAndTypeNamespace, ds, morphometricsLocalTypeName));
+		result.add(morphometricsExtractor("totalLength", extractionHelper, propertyAndTypeNamespace, ds, morphometricsLocalTypeName));
+		result.add(morphometricsExtractor("weight", extractionHelper, propertyAndTypeNamespace, ds, morphometricsLocalTypeName));
 		return result;
+	}
+
+	private static InversePropertyDecoratedAttributeExtractor morphometricsExtractor(String propertyName, ExtractionHelper extractionHelper,
+			String propertyAndTypeNamespace, Dataset ds, String morphometricsLocalTypeName) {
+		InversePropertyDecoratedAttributeExtractor e = new InversePropertyDecoratedAttributeExtractor();
+		e.setDelegate(standardUnitBasedExtractor(propertyName, extractionHelper));
+		e.setDs(ds);
+		e.setPropertyAndTypeNamespace(propertyAndTypeNamespace);
+		e.setInversePropertyLocalName("featureof");
+		e.setTargetResourceTypeLocalName(morphometricsLocalTypeName);
+		return e;
 	}
 
 	private static AttributeExtractor simpleNoUnitsExtractor(String referencingPropertyName, ExtractionHelper extractionHelper) {
