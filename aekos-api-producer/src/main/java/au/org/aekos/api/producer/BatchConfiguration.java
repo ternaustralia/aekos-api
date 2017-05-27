@@ -219,6 +219,9 @@ public class BatchConfiguration {
     		TaskExecutor taskExecutor) {
         return stepBuilderFactory.get("step2_species")
                 .<InputSpeciesRecord, OutputSpeciesWrapper> chunk(1)
+                .faultTolerant()
+                .skip(MissingDataException.class) // FIXME might be redundant with skipPolicy()
+                .skipPolicy(new AlwaysSkipItemSkipPolicy())
                 .listener(readListener)
                 .listener(processListener)
                 .reader(readerSpecies)
@@ -235,7 +238,7 @@ public class BatchConfiguration {
         return stepBuilderFactory.get("step3_env")
                 .<InputEnvRecord, OutputEnvWrapper> chunk(1)
                 .faultTolerant()
-                .skip(MissingDataException.class)
+                .skip(MissingDataException.class) // FIXME might be redundant with skipPolicy()
                 .skipPolicy(new AlwaysSkipItemSkipPolicy())
                 .listener(readListener)
                 .listener(processListener)
