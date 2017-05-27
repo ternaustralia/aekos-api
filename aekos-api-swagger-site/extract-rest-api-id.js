@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+'use strict'
 let stdin = process.stdin,
   stdout = process.stdout,
   inputChunks = []
