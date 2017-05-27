@@ -53,7 +53,7 @@ public class EnvironmentVariableExtractorConfig {
 		result.setFinalName(finalName);
 		result.setHelper(extractionHelper);
 		result.setTargetTypeLocalName(targetTypeLocalName);
-		result.setValuePropertyPath(targetTypeLocalName.toLowerCase(), "category", "name");
+		result.setValuePropertyPath(referencingPropertyName.toLowerCase(), "category", "name");
 		return result;
 	}
 
