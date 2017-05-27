@@ -3,23 +3,38 @@
 let objectUnderTest = require('../response-helper')
 
 describe('response-helper', function () {
-  describe('ok', function () {
-    it('should call the supplied callback', function () {
-      let isCalled = false
-      let callback = function () {
-        isCalled = true
-      }
-      objectUnderTest.ok(callback, 'some value')
-      expect(isCalled).toBeTruthy()
-    })
+  describe('json', function () {
+    describe('ok', function () {
+      it('should call the supplied callback', function () {
+        let isCalled = false
+        let callback = function () {
+          isCalled = true
+        }
+        objectUnderTest.json.ok(callback, 'some value')
+        expect(isCalled).toBeTruthy()
+      })
 
-    it('should send the supplied body to the callback', function () {
-      let suppliedArg = null
-      let callback = function (first, second) {
-        suppliedArg = second
-      }
-      objectUnderTest.ok(callback, 'some value')
-      expect(suppliedArg.body).toBe('"some value"')
+      it('should send the supplied body to the callback', function () {
+        let suppliedArg = null
+        let callback = function (first, second) {
+          suppliedArg = second
+        }
+        objectUnderTest.json.ok(callback, 'some value')
+        expect(suppliedArg.body).toBe('"some value"')
+      })
+    })
+  })
+
+  describe('csv', function () {
+    describe('ok', function () {
+      it('should send the supplied body to the callback without JSON.stringify-ing it', function () {
+        let suppliedArg = null
+        let callback = function (first, second) {
+          suppliedArg = second
+        }
+        objectUnderTest.csv.ok(callback, '1,"some value",123\n2,"other value",456')
+        expect(suppliedArg.body).toBe('1,"some value",123\n2,"other value",456')
+      })
     })
   })
 

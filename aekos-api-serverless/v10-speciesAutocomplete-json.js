@@ -32,6 +32,6 @@ module.exports.handler = (event, context, callback) => {
     ORDER BY 1
     LIMIT ${pageSize} OFFSET ${offset};`
   db.execSelect(sql, (queryResult) => {
-    r.ok(callback, queryResult)
+    r.json.ok(callback, queryResult)
   })
 }

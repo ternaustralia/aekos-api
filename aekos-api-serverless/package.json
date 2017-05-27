@@ -10,7 +10,8 @@
     "jasmine": "^2.6.0",
     "jasmine-core": "^2.6.1",
     "nodemon": "^1.11.0",
-    "serverless-aws-documentation": "^0.7.0"
+    "serverless-aws-documentation": "^0.7.0",
+    "standard": "^10.0.2"
   },
   "dependencies": {
     "latches": "^1.0.9",

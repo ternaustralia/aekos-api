@@ -41,6 +41,6 @@ module.exports.handler = (event, context, callback) => {
     LIMIT ${pageSize} OFFSET ${offset};`
   db.execSelect(sql, (queryResult) => {
     let mappedResults = mapResults(queryResult)
-    r.ok(callback, mappedResults)
+    r.json.ok(callback, mappedResults)
   })
 }

@@ -4,49 +4,49 @@ let db = require('./db-helper')
 let speciesData = require('./v10-speciesData')
 let latches = require('latches')
 const speciesNameParam = 'speciesName'
-const recordsHeldField = 'recordsHeld'
 
 module.exports.handler = (event, context, callback) => {
-  let processStart = now()
+  let processStart = r.now()
   // FIXME need to do content negotiation and delegate to the appropriate handler
   // FIXME get repeated query string params mapping correctly rather than just the last one
   if (!r.isQueryStringParamPresent(event, speciesNameParam)) {
     r.badRequest(callback, `the '${speciesNameParam}' query string parameter must be supplied`)
     return
   }
-  // FIXME handle escaping a list when we can get multiple names
-  let speciesName = event.queryStringParameters[speciesNameParam]
-  let escapedSpeciesName = db.escape(speciesName)
-  // FIXME get optional traitName(s)
-  let traitNames = []
-  let start = r.getOptionalParam(event, 'start', 0)
-  let rows = r.getOptionalParam(event, 'rows', 20)
-  let speciesDataResult = speciesData.doQuery(escapedSpeciesName, start, rows, processStart, true).then(successResult => {
-    enrichWithTraitData(successResult.response, traitNames).then(() => {
-      successResult.responseHeader.elapsedTime = now() - processStart
-      r.ok(callback, successResult)
-    }).catch(error => {
-      r.internalServerError(callback, 'Sorry, something went wrong')
-    })
+  let params = extractParams(event)
+  getTratiData(params, processStart).then(successResult => {
+    r.json.ok(callback, successResult)
   }).catch(error => {
+    console.error('Failed while building result', error)
     r.internalServerError(callback, 'Sorry, something went wrong')
   })
 }
 
-function enrichWithTraitData (speciesRecords, traitNames) {
+module.exports.getTratiData = getTratiData
+function getTratiData (params, processStart) {
+  return speciesData.doQuery(params.speciesName, params.start, params.rows, processStart, true).then(successResult => {
+    return enrichWithTraitData(successResult, params.traitNames)
+  }).then((successResultWithTraits) => {
+    successResultWithTraits.responseHeader.elapsedTime = r.now() - processStart
+    return successResultWithTraits
+  })
+}
+
+function enrichWithTraitData (successResult, traitNames) {
+  let speciesRecords = successResult.response
   return new Promise((resolve, reject) => {
     let cdl = new latches.CountDownLatch(speciesRecords.length)
     cdl.wait(function () {
-      resolve()
+      resolve(successResult)
     })
     speciesRecords.forEach(curr => {
       const traitSql = getTraitSql(curr.id, traitNames)
       db.execSelectPromise(traitSql).then(traitRecords => {
         curr.traits = traitRecords
-        delete(curr.id)
+        delete (curr.id)
         cdl.hit()
       }).catch(error => {
-        reject(`DB problem: failed while adding traits to species.id='${curr.id}' with error=${JSON.stringify(error)}`)
+        reject(new Error(`DB problem: failed while adding traits to species.id='${curr.id}' with error=${JSON.stringify(error)}`))
       })
     })
   })
@@ -63,6 +63,15 @@ function getTraitSql (parentId, traitNames) {
     WHERE parentId = '${parentId}';`
 }
 
-function now () {
-  return new Date().getTime()
+module.exports.extractParams = extractParams
+function extractParams (event) {
+  // FIXME handle escaping a list when we can get multiple names
+  let speciesName = event.queryStringParameters[speciesNameParam]
+  let escapedSpeciesName = db.escape(speciesName)
+  return {
+    speciesName: escapedSpeciesName, // FIXME change to multiple names
+    traitNames: [], // FIXME get optional traitName(s)
+    start: r.getOptionalParam(event, 'start', 0),
+    rows: r.getOptionalParam(event, 'rows', 20)
+  }
 }

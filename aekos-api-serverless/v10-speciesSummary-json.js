@@ -30,6 +30,6 @@ module.exports.handler = (event, context, callback) => {
     GROUP BY 1
     ORDER BY 1;`
   db.execSelect(sql, (queryResult) => {
-    r.ok(callback, queryResult)
+    r.json.ok(callback, queryResult)
   })
 }

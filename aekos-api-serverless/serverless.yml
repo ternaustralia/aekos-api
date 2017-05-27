@@ -98,6 +98,11 @@ custom:
               type: array
               # FIXME define the object
             responseHeader: ${self:custom.commonModelSchemaFragments.ResponseHeader}
+      -
+        name: "CsvResponse"
+        contentType: "text/csv"
+        schema:
+          type: string
 
 plugins:
   - serverless-aws-documentation
@@ -309,6 +314,7 @@ functions:
               -
                 name: "speciesName"
                 description: "list of species names"
+                required: true
               -
                 name: "traitName"
                 description: "list of trait names"
@@ -318,3 +324,10 @@ functions:
               -
                 name: "rows"
                 description: "records per page"
+            methodResponses:
+              -
+                statusCode: 200
+                responseBody:
+                  description: "CSV file"
+                responseModels:
+                  "text/csv": "CsvResponse"

@@ -5,7 +5,7 @@ const speciesNameParam = 'speciesName'
 const recordsHeldField = 'recordsHeld'
 
 module.exports.handler = (event, context, callback) => {
-  let processStart = now()
+  let processStart = r.now()
   // FIXME need to do content negotiation and delegate to the appropriate handler
   // FIXME get repeated query string params mapping correctly rather than just the last one
   if (!r.isQueryStringParamPresent(event, speciesNameParam)) {
@@ -18,8 +18,9 @@ module.exports.handler = (event, context, callback) => {
   let start = r.getOptionalParam(event, 'start', 0)
   let rows = r.getOptionalParam(event, 'rows', 20)
   doQuery(escapedSpeciesName, start, rows, processStart, false).then(successResult => {
-    r.ok(callback, successResult)
+    r.json.ok(callback, successResult)
   }).catch(error => {
+    console.error('Failed to get speciesData', error)
     r.internalServerError(callback, 'Sorry, something went wrong')
   })
 }
@@ -40,7 +41,7 @@ function doQuery (escapedSpeciesName, start, rows, processStart, includeSpeciesR
       }
       let result = {
         responseHeader: {
-          elapsedTime: now() - processStart,
+          elapsedTime: r.now() - processStart,
           numFound: count[0][recordsHeldField],
           pageNumber: pageNumber,
           params: {
@@ -93,7 +94,7 @@ function getRecordsSql (escapedSpeciesName, start, rows, includeSpeciesRecordId)
     WHERE (
       s.scientificName IN (${escapedSpeciesName})
       OR s.taxonRemarks IN (${escapedSpeciesName})
-	  )
+    )
     ORDER BY 1
     LIMIT ${rows} OFFSET ${start};`
 }
@@ -110,9 +111,5 @@ function getCountSql (escapedSpeciesName) {
     WHERE (
       s.scientificName IN (${escapedSpeciesName})
       OR s.taxonRemarks IN (${escapedSpeciesName})
-	  );`
-}
-
-function now () {
-  return new Date().getTime()
+    );`
 }
