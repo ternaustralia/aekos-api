@@ -40,7 +40,7 @@ public class AekosEnvRdfReaderTest {
 			QuerySolution solution = queryResults.next();
 			InputEnvRecord result = objectUnderTest.mapSolution(solution);
 			assertThat(result.getRdfGraph(), is("urn:someGraph"));
-			assertThat(result.getRdfSubject(), is("urn:record1"));
+			assertThat(result.getRdfSubject(), is("urn:test#record1"));
 			assertThat(result.getDecimalLatitude(), is(-42.682963));
 			assertThat(result.getDecimalLongitude(), is(146.649282));
 			assertThat(result.getGeodeticDatum(), is("GDA94"));

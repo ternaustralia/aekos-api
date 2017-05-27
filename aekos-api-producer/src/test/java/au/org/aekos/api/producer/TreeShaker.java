@@ -115,7 +115,6 @@ public class TreeShaker {
 		assertThat(it.next().asLiteral().getString(), is("four"));
 		assertThat(it.next().asLiteral().getString(), is("one"));
 		assertFalse(it.hasNext());
-		m.write(System.out, "TURTLE");
 	}
 	
 	/**

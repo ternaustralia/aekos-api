@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/base.xml" />
+    <logger name="au.org.aekos.api.producer" level="DEBUG" />
+    <logger name="org.apache.jena" level="DEBUG" />
+    <logger name="org.apache.jena.arq.info" level="INFO" />
+    <logger name="org.apache.jena.arq.exec" level="INFO" />
+</configuration>

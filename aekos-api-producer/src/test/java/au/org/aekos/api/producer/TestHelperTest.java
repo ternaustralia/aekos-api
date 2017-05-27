@@ -29,7 +29,6 @@ public class TestHelperTest {
 			});
 		});
 		Bag result = subject.getProperty(m.createProperty("urn:theBag")).getBag();
-		m.write(System.out, "TURTLE");
 		assertThat(result.size(), is(2));
 		StmtIterator it = result.listProperties();
 		assertThat(it.next().getResource().getProperty(m.createProperty("urn:position")).getString(), is("second"));

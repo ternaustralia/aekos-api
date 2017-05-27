@@ -1,4 +1,4 @@
-@prefix :	<urn:>
+@prefix :	<urn:test#>
 
 :record1
 	:id					"id1" ;

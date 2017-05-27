@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <include resource="org/springframework/boot/logging/logback/base.xml" />
-    <logger name="au.org.aekos.api" level="WARN" />
     <logger name="au.org.aekos.api.producer" level="INFO" />
+<!--     <logger name="org.springframework.test" level="DEBUG" /> -->
     <root level="WARN" />
 </configuration>

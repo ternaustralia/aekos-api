@@ -1,4 +1,4 @@
-PREFIX : <urn:>
+PREFIX : <urn:test#>
 
 SELECT *
 WHERE {

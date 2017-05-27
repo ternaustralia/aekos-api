@@ -40,7 +40,7 @@ public class AekosSpeciesRdfReaderTest {
 			InputSpeciesRecord result = objectUnderTest.mapSolution(solution);
 			assertThat(result.getId(), is("id1"));
 			assertThat(result.getRdfGraph(), is("urn:someGraph"));
-			assertThat(result.getRdfSubject(), is("urn:record1"));
+			assertThat(result.getRdfSubject(), is("urn:test#record1"));
 			assertThat(result.getIndividualCount(), is(1));
 			assertThat(result.getEventDate(), is("2007-09-29"));
 			assertThat(result.getLocationID(), is("location1"));
