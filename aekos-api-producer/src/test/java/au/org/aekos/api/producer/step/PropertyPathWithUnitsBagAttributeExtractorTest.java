@@ -3,8 +3,6 @@ package au.org.aekos.api.producer.step;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-import java.util.Arrays;
-
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
@@ -27,8 +25,8 @@ public class PropertyPathWithUnitsBagAttributeExtractorTest {
 		PropertyPathWithUnitsBagAttributeExtractor objectUnderTest = new PropertyPathWithUnitsBagAttributeExtractor();
 		objectUnderTest.setFinalName("slope");
 		objectUnderTest.setHelper(new ExtractionHelper("urn:"));
-		objectUnderTest.setValuePropertyPath(Arrays.asList("slope", "value"));
-		objectUnderTest.setUnitsPropertyPath(Arrays.asList("slope", "units", "name"));
+		objectUnderTest.setValuePropertyPath("slope", "value");
+		objectUnderTest.setUnitsPropertyPath("slope", "units", "name");
 		Resource subject = m.createResource("urn:someSub1");
 		h.addResource(subject, "slope", r -> {
 			h.addLiteral(r, "value", "4");

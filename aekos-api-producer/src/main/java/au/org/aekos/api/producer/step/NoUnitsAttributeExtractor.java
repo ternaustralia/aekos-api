@@ -1,8 +1,5 @@
 package au.org.aekos.api.producer.step;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.apache.jena.rdf.model.Resource;
 
 import au.org.aekos.api.producer.ExtractionHelper;
@@ -15,14 +12,14 @@ public class NoUnitsAttributeExtractor implements AttributeExtractor {
 
 	private ExtractionHelper helper;
 	private String referencingPropertyName;
-	private List<String> valuePropertyPath;
+	private String[] valuePathFragments;
 
 	@Override
 	public AttributeRecord doExtractOn(Resource subject) {
 		PropertyPathNoUnitsBagAttributeExtractor r = new PropertyPathNoUnitsBagAttributeExtractor();
 		r.setHelper(helper);
 		r.setFinalName(referencingPropertyName);
-		r.setValuePropertyPath(valuePropertyPath);
+		r.setValuePropertyPath(valuePathFragments);
 		Resource traitSubject = helper.getResource(subject, getLowerCaseLocalReferencingPropertyName());
 		return r.doExtractOn(traitSubject);
 	}
@@ -50,6 +47,6 @@ public class NoUnitsAttributeExtractor implements AttributeExtractor {
 	}
 
 	public void setValuePropertyPath(String...pathFragments) {
-		this.valuePropertyPath = Arrays.asList(pathFragments);
+		this.valuePathFragments = pathFragments;
 	}
 }

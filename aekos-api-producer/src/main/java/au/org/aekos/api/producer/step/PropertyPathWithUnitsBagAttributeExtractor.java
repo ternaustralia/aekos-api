@@ -1,5 +1,6 @@
 package au.org.aekos.api.producer.step;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.jena.rdf.model.Resource;
@@ -13,7 +14,7 @@ public class PropertyPathWithUnitsBagAttributeExtractor extends PropertyPathNoUn
 		return followPath(startingResource, unitsPropertyPath);
 	}
 
-	public void setUnitsPropertyPath(List<String> unitsPropertyPath) {
-		this.unitsPropertyPath = unitsPropertyPath;
+	public void setUnitsPropertyPath(String...pathFragments) {
+		this.unitsPropertyPath = Arrays.asList(pathFragments);
 	}
 }

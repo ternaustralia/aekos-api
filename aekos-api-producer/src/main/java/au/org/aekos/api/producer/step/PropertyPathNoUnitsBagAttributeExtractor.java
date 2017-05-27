@@ -1,5 +1,6 @@
 package au.org.aekos.api.producer.step;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -92,8 +93,8 @@ public class PropertyPathNoUnitsBagAttributeExtractor implements BagAttributeExt
 		this.finalName = finalName;
 	}
 
-	public void setValuePropertyPath(List<String> valuePropertyPath) {
-		this.valuePropertyPath = valuePropertyPath;
+	public void setValuePropertyPath(String...pathFragments) {
+		this.valuePropertyPath = Arrays.asList(pathFragments);
 	}
 
 	public void setHelper(ExtractionHelper helper) {

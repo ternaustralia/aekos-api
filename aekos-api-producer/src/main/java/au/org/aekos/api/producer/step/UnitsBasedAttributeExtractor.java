@@ -1,8 +1,5 @@
 package au.org.aekos.api.producer.step;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.apache.jena.rdf.model.Resource;
 
 import au.org.aekos.api.producer.ExtractionHelper;
@@ -15,16 +12,16 @@ public class UnitsBasedAttributeExtractor implements AttributeExtractor {
 
 	private ExtractionHelper helper;
 	private String referencingPropertyName;
-	private List<String> valuePropertyPath;
-	private List<String> unitsPropertyPath;
+	private String[] valuePathFragments;
+	private String[] unitsPathFragments;
 
 	@Override
 	public AttributeRecord doExtractOn(Resource subject) {
 		PropertyPathWithUnitsBagAttributeExtractor r = new PropertyPathWithUnitsBagAttributeExtractor();
 		r.setHelper(helper);
 		r.setFinalName(referencingPropertyName);
-		r.setValuePropertyPath(valuePropertyPath);
-		r.setUnitsPropertyPath(unitsPropertyPath);
+		r.setValuePropertyPath(valuePathFragments);
+		r.setUnitsPropertyPath(unitsPathFragments);
 		Resource traitSubject = helper.getResource(subject, getLowerCaseLocalReferencingPropertyName());
 		return r.doExtractOn(traitSubject);
 	}
@@ -52,10 +49,10 @@ public class UnitsBasedAttributeExtractor implements AttributeExtractor {
 	}
 
 	public void setValuePropertyPath(String...pathFragments) {
-		this.valuePropertyPath = Arrays.asList(pathFragments);
+		this.valuePathFragments = pathFragments;
 	}
 
 	public void setUnitsPropertyPath(String...pathFragments) {
-		this.unitsPropertyPath = Arrays.asList(pathFragments);
+		this.unitsPathFragments = pathFragments;
 	}
 }

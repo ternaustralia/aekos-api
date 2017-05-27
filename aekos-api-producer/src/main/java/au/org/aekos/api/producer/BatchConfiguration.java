@@ -2,8 +2,6 @@ package au.org.aekos.api.producer;
 
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.jena.query.Dataset;
@@ -36,8 +34,6 @@ import au.org.aekos.api.producer.rdf.CoreDataAekosJenaModelFactory;
 import au.org.aekos.api.producer.step.AttributeExtractor;
 import au.org.aekos.api.producer.step.BagAttributeExtractor;
 import au.org.aekos.api.producer.step.MissingDataException;
-import au.org.aekos.api.producer.step.PropertyPathNoUnitsBagAttributeExtractor;
-import au.org.aekos.api.producer.step.PropertyPathWithUnitsBagAttributeExtractor;
 import au.org.aekos.api.producer.step.citation.AekosCitationRdfReader;
 import au.org.aekos.api.producer.step.citation.in.InputCitationRecord;
 import au.org.aekos.api.producer.step.env.AekosEnvRdfReader;
@@ -147,39 +143,7 @@ public class BatchConfiguration {
     
     @Bean
     public List<BagAttributeExtractor> envVariableExtractors(ExtractionHelper extractionHelper) {
-		List<BagAttributeExtractor> result = new LinkedList<>();
-		{
-			PropertyPathNoUnitsBagAttributeExtractor disturbanceTypeExtractor = new PropertyPathNoUnitsBagAttributeExtractor();
-			disturbanceTypeExtractor.setFinalName("disturbanceType");
-			disturbanceTypeExtractor.setHelper(extractionHelper);
-			disturbanceTypeExtractor.setTargetTypeLocalName("DISTURBANCEEVIDENCE");
-			disturbanceTypeExtractor.setValuePropertyPath(Arrays.asList("disturbancetype", "commentary")); // FIXME need to handle other path
-			result.add(disturbanceTypeExtractor);
-		} {
-			PropertyPathNoUnitsBagAttributeExtractor fireEvidenceExtractor = new PropertyPathNoUnitsBagAttributeExtractor();
-			fireEvidenceExtractor.setFinalName("visibleFireEvidence");
-			fireEvidenceExtractor.setHelper(extractionHelper);
-			fireEvidenceExtractor.setTargetTypeLocalName("FIREEVIDENCE");
-			fireEvidenceExtractor.setValuePropertyPath(Arrays.asList("visiblefireevidence"));
-			result.add(fireEvidenceExtractor);
-		} {
-			PropertyPathWithUnitsBagAttributeExtractor aspectExtractor = new PropertyPathWithUnitsBagAttributeExtractor();
-			aspectExtractor.setFinalName("aspect");
-			aspectExtractor.setHelper(extractionHelper);
-			aspectExtractor.setTargetTypeLocalName("LANDSCAPE");
-			aspectExtractor.setValuePropertyPath(Arrays.asList("aspect", "value"));
-			aspectExtractor.setUnitsPropertyPath(Arrays.asList("aspect", "units", "name"));
-			result.add(aspectExtractor);
-		} {
-			PropertyPathWithUnitsBagAttributeExtractor slopeExtractor = new PropertyPathWithUnitsBagAttributeExtractor();
-			slopeExtractor.setFinalName("slope");
-			slopeExtractor.setHelper(extractionHelper);
-			slopeExtractor.setTargetTypeLocalName("LANDSCAPE");
-			slopeExtractor.setValuePropertyPath(Arrays.asList("slope", "value"));
-			slopeExtractor.setUnitsPropertyPath(Arrays.asList("slope", "units", "name"));
-			result.add(slopeExtractor);
-		}
-		return result;
+		return EnvironmentVariableExtractorConfig.getExtractors(extractionHelper);
     }
     
     @Bean(destroyMethod="reportProblems")

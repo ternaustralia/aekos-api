@@ -1,8 +1,5 @@
 package au.org.aekos.api.producer.step;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.apache.jena.rdf.model.Resource;
 
 import au.org.aekos.api.producer.ExtractionHelper;
@@ -15,7 +12,7 @@ public class HardCodedUnitsAttributeExtractor implements AttributeExtractor {
 
 	private ExtractionHelper helper;
 	private String referencingPropertyName;
-	private List<String> valuePropertyPath;
+	private String[] valuePathFragments;
 	private String hardCodedUnits;
 
 	@Override
@@ -28,7 +25,7 @@ public class HardCodedUnitsAttributeExtractor implements AttributeExtractor {
 		};
 		r.setHelper(helper);
 		r.setFinalName(referencingPropertyName);
-		r.setValuePropertyPath(valuePropertyPath);
+		r.setValuePropertyPath(valuePathFragments);
 		Resource traitSubject = helper.getResource(subject, getLowerCaseLocalReferencingPropertyName());
 		return r.doExtractOn(traitSubject);
 	}
@@ -56,7 +53,7 @@ public class HardCodedUnitsAttributeExtractor implements AttributeExtractor {
 	}
 
 	public void setValuePropertyPath(String...pathFragments) {
-		this.valuePropertyPath = Arrays.asList(pathFragments);
+		this.valuePathFragments = pathFragments;
 	}
 
 	public void setHardCodedUnits(String hardCodedUnits) {

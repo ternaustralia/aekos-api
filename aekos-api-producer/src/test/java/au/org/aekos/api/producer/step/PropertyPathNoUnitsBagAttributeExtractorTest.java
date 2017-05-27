@@ -7,8 +7,6 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.Arrays;
-
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
@@ -16,8 +14,6 @@ import org.junit.Test;
 
 import au.org.aekos.api.producer.ExtractionHelper;
 import au.org.aekos.api.producer.TestHelper;
-import au.org.aekos.api.producer.step.AttributeRecord;
-import au.org.aekos.api.producer.step.MissingDataException;
 
 public class PropertyPathNoUnitsBagAttributeExtractorTest {
 
@@ -74,7 +70,7 @@ public class PropertyPathNoUnitsBagAttributeExtractorTest {
 		PropertyPathNoUnitsBagAttributeExtractor objectUnderTest = new PropertyPathNoUnitsBagAttributeExtractor();
 		objectUnderTest.setFinalName("disturbanceEvidence");
 		objectUnderTest.setHelper(new ExtractionHelper("urn:"));
-		objectUnderTest.setValuePropertyPath(Arrays.asList("disturbancetype", "commentary"));
+		objectUnderTest.setValuePropertyPath("disturbancetype", "commentary");
 		Resource subject = m.createResource("urn:someSub1");
 		h.addResource(subject, "disturbancetype", r -> {
 			h.addLiteral(r, "commentary", "none");
@@ -94,7 +90,7 @@ public class PropertyPathNoUnitsBagAttributeExtractorTest {
 		PropertyPathNoUnitsBagAttributeExtractor objectUnderTest = new PropertyPathNoUnitsBagAttributeExtractor();
 		objectUnderTest.setFinalName("disturbanceEvidence");
 		objectUnderTest.setHelper(new ExtractionHelper("urn:"));
-		objectUnderTest.setValuePropertyPath(Arrays.asList("disturbancetype", "commentary"));
+		objectUnderTest.setValuePropertyPath("disturbancetype", "commentary");
 		Resource subject = m.createResource("urn:someSub1");
 		h.addResource(subject, "disturbancetype", r -> {
 			h.addResource(r, "secondLevel", r2 -> {

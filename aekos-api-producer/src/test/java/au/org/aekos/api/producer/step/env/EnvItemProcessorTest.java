@@ -87,7 +87,7 @@ public class EnvItemProcessorTest {
 		result.setHelper(helper);
 		result.setFinalName("disturbanceEvidence");
 		result.setTargetTypeLocalName("DISTURBANCEEVIDENCE");
-		result.setValuePropertyPath(Arrays.asList("disturbancetype", "commentary"));
+		result.setValuePropertyPath("disturbancetype", "commentary");
 		return result;
 	}
 	
@@ -96,8 +96,8 @@ public class EnvItemProcessorTest {
 		result.setHelper(helper);
 		result.setFinalName("aspect");
 		result.setTargetTypeLocalName("LANDSCAPE");
-		result.setValuePropertyPath(Arrays.asList("aspect", "value"));
-		result.setUnitsPropertyPath(Arrays.asList("aspect", "units", "name"));
+		result.setValuePropertyPath("aspect", "value");
+		result.setUnitsPropertyPath("aspect", "units", "name");
 		return result;
 	}
 	
@@ -106,8 +106,8 @@ public class EnvItemProcessorTest {
 		result.setHelper(helper);
 		result.setFinalName("slope");
 		result.setTargetTypeLocalName("LANDSCAPE");
-		result.setValuePropertyPath(Arrays.asList("slope", "value"));
-		result.setUnitsPropertyPath(Arrays.asList("slope", "units", "name"));
+		result.setValuePropertyPath("slope", "value");
+		result.setUnitsPropertyPath("slope", "units", "name");
 		return result;
 	}
 
