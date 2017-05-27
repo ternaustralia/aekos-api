@@ -58,6 +58,9 @@ custom:
             start:
               type: number
             # TODO add other params on a per function basis probably, not sure how that'll work
+    AcceptHeaderDoco:
+      name: "accept"
+      description: "content-type mime that you want as a response e.g.: 'application/json' or 'text/csv'"
   documentation:
     # FIXME doesn't write to the format that AWS expects: {info: {description: "", version: "", title: "", contact: {name: "", email: ""}}}
     api:
@@ -100,6 +103,11 @@ custom:
             responseHeader: ${self:custom.commonModelSchemaFragments.ResponseHeader}
       -
         name: "CsvResponse"
+        contentType: "text/csv"
+        schema:
+          type: string
+      -
+        name: "400JsonResponse"
         contentType: "text/csv"
         schema:
           type: string
@@ -268,6 +276,47 @@ functions:
                 statusCode: 200
                 responseModels:
                   "application/json": "SpeciesDataResponse"
+  v10-traitData:
+    handler: v10-traitData.handler
+    events:
+      - http:
+          path: v1/traitData
+          method: get
+          cors: true
+          documentation:
+            summary: "Get trait data"
+            description: |
+              Gets Darwin Core records with added trait information for the supplied species name(s) using content negotation to
+              determine the response type. If you supply trait names then the result records will have the traits filtered down
+              to only the traits you've asked for, otherwise all traits are returned. This resource honours Accept headers
+              represented by any of the /traitData.* resources.
+            queryParams:
+              -
+                name: "speciesName"
+                description: "list of species names"
+                required: true
+              -
+                name: "traitName"
+                description: "list of trait names"
+              -
+                name: "start"
+                description: "0-indexed result start index (default 0)"
+              -
+                name: "rows"
+                description: "records per page"
+            requestHeaders:
+               # TODO not sure if it's worth putting this here, the Swagger UI already has an input for it
+              - ${self:custom.commonModelSchemaFragments.AcceptHeaderDoco}
+            methodResponses:
+              -
+                statusCode: 200
+                responseModels:
+                  "text/csv": "CsvResponse"
+                  "application/json": "TraitDataJsonResponse"
+              -
+                statusCode: 400
+                responseModels:
+                  "application/json": "400JsonResponse"
   v10-traitData-json:
     handler: v10-traitData-json.handler
     events:
@@ -327,7 +376,5 @@ functions:
             methodResponses:
               -
                 statusCode: 200
-                responseBody:
-                  description: "CSV file"
                 responseModels:
                   "text/csv": "CsvResponse"
