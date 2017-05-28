@@ -14,7 +14,7 @@ module.exports.handler = (event, context, callback) => {
     return
   }
   let params = extractParams(event)
-  getTratiData(params, processStart).then(successResult => {
+  getTraitData(params, processStart).then(successResult => {
     r.json.ok(callback, successResult)
   }).catch(error => {
     console.error('Failed while building result', error)
@@ -22,8 +22,8 @@ module.exports.handler = (event, context, callback) => {
   })
 }
 
-module.exports.getTratiData = getTratiData
-function getTratiData (params, processStart) {
+module.exports.getTratiData = getTraitData
+function getTraitData (params, processStart) {
   return speciesData.doQuery(params.speciesName, params.start, params.rows, processStart, true).then(successResult => {
     return enrichWithTraitData(successResult, params.traitNames)
   }).then((successResultWithTraits) => {

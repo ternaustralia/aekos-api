@@ -33,7 +33,7 @@ WHERE (
   OR taxonRemarks IN ('Pomaderris apetala')
 );
 
--- traits for the four visitKeys we found
+-- variables for the four visitKeys we found
 SELECT
 CONCAT(locationID, '#', eventDate) AS visitKey, -- delete me during processing
 varName,
