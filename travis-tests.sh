@@ -6,4 +6,4 @@ mvn clean test
 popd
 cd aekos-api-serverless
 npm install # Java VM in Travis doesn't have yarn
-npm test
+npm --harmony test
