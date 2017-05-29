@@ -21,4 +21,6 @@ aws s3 cp \
   --region=$AWS_REGION \
   --acl public-read \
   $SWAGGER_DEF s3://$BUCKET/
+S3_WEBSITE_REGION=ap-southeast-2
+echo "URL: ${BUCKET}.s3-website-${S3_WEBSITE_REGION}.amazonaws.com"
 
