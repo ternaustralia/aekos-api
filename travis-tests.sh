@@ -5,4 +5,5 @@ pushd aekos-api-producer
 mvn clean test
 popd
 cd aekos-api-serverless
+yarn
 npm test
