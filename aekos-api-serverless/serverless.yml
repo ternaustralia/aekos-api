@@ -119,6 +119,16 @@ custom:
               # FIXME define the object
             responseHeader: ${self:custom.commonModelSchemaFragments.ResponseHeader}
       -
+        name: "EnvDataResponse"
+        contentType: "application/json"
+        schema:
+          type: object
+          properties:
+            response:
+              type: array
+              # FIXME define the object
+            responseHeader: ${self:custom.commonModelSchemaFragments.ResponseHeader}
+      -
         name: "CsvResponse"
         contentType: "text/csv"
         schema:
@@ -406,4 +416,29 @@ functions:
                 statusCode: 200
                 responseModels:
                   "text/csv": "CsvResponse"
+              - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+  v10-environmentData-json:
+    handler: v10-environmentData-json.handler
+    events:
+      - http:
+          path: v1/environmentData.json
+          method: get
+          cors: true
+          documentation:
+            summary: "Get environmental variable data in JSON format"
+            description: |
+              "Gets environmental variable data records for the site/study location/plot visits that the supplied species name(s)
+              appear at in JSON format. If you supply environmental variable names then the result will have the environmental
+              variables filtered down to only the environmental variables you've asked for, otherwise all environmental
+              variables are returned. Note: not all sites have environmental variables available."
+            queryParams:
+              - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
+              # TODO add variable param
+              - ${self:custom.commonModelSchemaFragments.StartQueryParam}
+              - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
+            methodResponses:
+              -
+                statusCode: 200
+                responseModels:
+                  "application/json": "EnvDataResponse"
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}

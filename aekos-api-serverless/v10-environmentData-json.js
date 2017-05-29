@@ -8,7 +8,7 @@ module.exports.handler = (event, context, callback) => {
   let processStart = r.now()
   // FIXME get repeated query string params mapping correctly rather than just the last one
   if (!r.isQueryStringParamPresent(event, speciesNameParam)) {
-    r.badRequest(callback, `the '${speciesNameParam}' query string parameter must be supplied`)
+    r.json.badRequest(callback, `the '${speciesNameParam}' query string parameter must be supplied`)
     return
   }
   // FIXME handle escaping a list when we can get multiple names
@@ -20,7 +20,7 @@ module.exports.handler = (event, context, callback) => {
     r.json.ok(callback, successResult)
   }).catch(error => {
     console.error('Failed to get environmentData', error)
-    r.internalServerError(callback, 'Sorry, something went wrong')
+    r.json.internalServerError(callback, 'Sorry, something went wrong')
   })
 }
 
@@ -55,9 +55,38 @@ function doQuery (escapedSpeciesName, start, rows, processStart, includeSpeciesR
     return result
   }).then(result => {
     // TODO get visitKeys
-    // TODO get all vars for visit keys
-    // TODO get all scientificNames and taxonRemarks for visitKeys
-    return result
+    let visitKeys = result.response.map(e => {
+      return e.visitKey
+    })
+    let visitKeyClauses = getVisitKeyClauses(visitKeys)
+    let passResultDownChainPromise = new Promise((resolve) => {
+      resolve(result)
+    })
+    let varsSql = getVarsSql(visitKeyClauses)
+    let varsPromise = db.execSelectPromise(varsSql)
+    let speciesNamesClauses = escapedSpeciesName // FIXME change to list of escaped names
+    let speciesNamesSql = getSpeciesNamesSql(visitKeyClauses, speciesNamesClauses)
+    let speciesNamesPromise = db.execSelectPromise(speciesNamesSql)
+    return Promise.all([passResultDownChainPromise, varsPromise, speciesNamesPromise])
+  }).then(data => {
+    let result = data[0]
+    // FIXME do the mapping for var and species into the result
+    let varsRecords = data[1]
+    let varsDict = varsRecords.reduce((prev, curr) => {
+      let visitKey = curr.visitKey
+      delete (curr.visitKey)
+      if (typeof prev[visitKey] === 'undefined') {
+        prev[visitKey] = []
+      }
+      prev[visitKey].push(curr)
+      return prev
+    }, {})
+    let speciesNamesRecords = data[2]
+    return {
+      theResult: result,
+      varsRecords: varsDict,
+      speciesNamesRecords: speciesNamesRecords
+    }
   })
 }
 
@@ -95,7 +124,47 @@ function getCountSql (escapedSpeciesName) {
     SELECT count(DISTINCT locationID, eventDate) as ${recordsHeldField}
     FROM species
     WHERE (
-      s.scientificName IN (${escapedSpeciesName})
-      OR s.taxonRemarks IN (${escapedSpeciesName})
+      scientificName IN (${escapedSpeciesName})
+      OR taxonRemarks IN (${escapedSpeciesName})
     );`
+}
+
+function getVarsSql (visitKeyClauses) {
+  return `
+    SELECT
+    CONCAT(locationID, '#', eventDate) AS visitKey,
+    varName,
+    varValue,
+    varUnit
+    FROM envvars
+    WHERE (locationID, eventDate) in (${visitKeyClauses})
+    ORDER BY 1;`
+}
+
+function getSpeciesNamesSql (visitKeyClauses, speciesNamesClauses) {
+  return `
+    SELECT DISTINCT
+    CONCAT(locationID, '#', eventDate) AS visitKey,
+    scientificName,
+    taxonRemarks
+    FROM species
+    WHERE (
+      scientificName IN (${speciesNamesClauses})
+      OR taxonRemarks IN (${speciesNamesClauses})
+    )
+    AND (locationID, eventDate) in (${visitKeyClauses})
+    ORDER BY 1;`
+}
+
+function getVisitKeyClauses (visitKeys) {
+  return visitKeys.reduce((prev, curr) => {
+    let parts = curr.split('#')
+    let locationID = parts[0]
+    let eventDate = parts[1]
+    let fragment = `('${locationID}','${eventDate}')`
+    if (prev === '') {
+      return fragment
+    }
+    return prev + '\n,' + fragment
+  }, '')
 }

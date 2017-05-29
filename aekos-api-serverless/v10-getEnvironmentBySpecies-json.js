@@ -14,7 +14,7 @@ module.exports.mapResults = mapResults
 module.exports.handler = (event, context, callback) => {
   // FIXME get repeated query string params mapping correctly rather than just the last one
   if (!r.isQueryStringParamPresent(event, speciesNameParam)) {
-    r.badRequest(callback, `the '${speciesNameParam}' query string parameter must be supplied`)
+    r.json.badRequest(callback, `the '${speciesNameParam}' query string parameter must be supplied`)
     return
   }
   // FIXME handle escaping a list when we can get multiple names

@@ -8,7 +8,7 @@ module.exports.handler = (event, context, callback) => {
   let processStart = r.now()
   // FIXME get repeated query string params mapping correctly rather than just the last one
   if (!r.isQueryStringParamPresent(event, speciesNameParam)) {
-    r.badRequest(callback, `the '${speciesNameParam}' query string parameter must be supplied`)
+    r.json.badRequest(callback, `the '${speciesNameParam}' query string parameter must be supplied`)
     return
   }
   // FIXME handle escaping a list when we can get multiple names
@@ -20,7 +20,7 @@ module.exports.handler = (event, context, callback) => {
     r.json.ok(callback, successResult)
   }).catch(error => {
     console.error('Failed to get speciesData', error)
-    r.internalServerError(callback, 'Sorry, something went wrong')
+    r.json.internalServerError(callback, 'Sorry, something went wrong')
   })
 }
 

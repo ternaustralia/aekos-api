@@ -7,7 +7,7 @@ const qParam = 'q'
 module.exports.handler = (event, context, callback) => {
   // TODO add taxonRemarks to the search
   if (!r.isQueryStringParamPresent(event, qParam)) {
-    r.badRequest(callback, `the '${qParam}' query string parameter must be supplied`)
+    r.json.badRequest(callback, `the '${qParam}' query string parameter must be supplied`)
     return
   }
   let partialName = event.queryStringParameters[qParam]

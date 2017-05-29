@@ -10,7 +10,7 @@ module.exports.handler = (event, context, callback) => {
   // FIXME need to do content negotiation and delegate to the appropriate handler
   // FIXME get repeated query string params mapping correctly rather than just the last one
   if (!r.isQueryStringParamPresent(event, speciesNameParam)) {
-    r.badRequest(callback, `the '${speciesNameParam}' query string parameter must be supplied`)
+    r.json.badRequest(callback, `the '${speciesNameParam}' query string parameter must be supplied`)
     return
   }
   let params = extractParams(event)
@@ -18,7 +18,7 @@ module.exports.handler = (event, context, callback) => {
     r.json.ok(callback, successResult)
   }).catch(error => {
     console.error('Failed while building result', error)
-    r.internalServerError(callback, 'Sorry, something went wrong')
+    r.json.internalServerError(callback, 'Sorry, something went wrong')
   })
 }
 

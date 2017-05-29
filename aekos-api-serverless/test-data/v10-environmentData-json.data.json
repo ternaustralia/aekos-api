@@ -1,10 +1,7 @@
 {
-  "event": {
-    "queryStringParameters": {
-      "speciesName": "Acacia dealbata"
-    }
-  },
-  "context": {
-
+  "queryStringParameters": {
+    "speciesName": "Acacia dealbata",
+    "start": "0",
+    "rows": "1"
   }
 }
