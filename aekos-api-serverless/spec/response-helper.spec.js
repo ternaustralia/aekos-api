@@ -140,4 +140,36 @@ describe('response-helper', function () {
       expect(result).toBe(20)
     })
   })
+
+  describe('getContentType', () => {
+    it('should determine that we want CSV', () => {
+      let event = {
+        headers: {
+          Accept: 'text/csv,application/xml;q=0.9,image/webp'
+        }
+      }
+      let result = objectUnderTest.getContentType(event)
+      expect(result).toBe(objectUnderTest.contentTypes.csv)
+    })
+
+    it('should determine that we want JSON', () => {
+      let event = {
+        headers: {
+          Accept: 'application/json;q=0.9,image/webp'
+        }
+      }
+      let result = objectUnderTest.getContentType(event)
+      expect(result).toBe(objectUnderTest.contentTypes.json)
+    })
+
+    it('should determine that we cannot handle the requested type', () => {
+      let event = {
+        headers: {
+          Accept: 'text/html;q=0.9,image/webp'
+        }
+      }
+      let result = objectUnderTest.getContentType(event)
+      expect(result).toBe(objectUnderTest.contentTypes.unhandled)
+    })
+  })
 })

@@ -1,4 +1,5 @@
 'use strict'
+let accepts = require('accepts')
 const jsonContentType = "'application/json'"
 const csvContentType = "'text/csv'"
 function getHeaders (contentType) {
@@ -45,6 +46,32 @@ function assertNumber (val) {
   return false
 }
 
+const contentTypes = {
+  json: 'json',
+  csv: 'csv',
+  unhandled: 'UNHANDLED'
+}
+
+function getContentType (event) {
+  let accept = accepts(castEventToFakeExpressReq(event))
+  switch (accept.type(['application/json', 'text/csv'])) {
+    case 'application/json':
+      return contentTypes.json
+    case 'text/csv':
+      return contentTypes.csv
+    default:
+      return contentTypes.unhandled
+  }
+}
+
+function castEventToFakeExpressReq (event) {
+  return {
+    headers: {
+      accept: event.headers.Accept
+    }
+  }
+}
+
 module.exports = {
   json: {
     ok: (theCallback, theBody) => {
@@ -62,11 +89,13 @@ module.exports = {
       doResponse(theCallback, theBody, 200, csvContentType)
     }
   },
+  getContentType: getContentType,
   isQueryStringParamPresent: isQueryStringParamPresent,
   assertNumber: assertNumber,
   getOptionalParam: getOptionalParam,
   calculateOffset: calculateOffset,
   now: () => {
     return new Date().getTime()
-  }
+  },
+  contentTypes: contentTypes
 }
