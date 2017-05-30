@@ -1,6 +1,7 @@
 'use strict'
 let r = require('./response-helper')
 let db = require('./db-helper')
+let Set = require('collections/set')
 const speciesNameParam = 'speciesName'
 const recordsHeldField = 'recordsHeld'
 
@@ -38,7 +39,7 @@ function doQuery (escapedSpeciesName, start, rows, processStart, includeSpeciesR
     if (count.length !== 1) {
       throw new Error('SQL result problem: result from count query did not have exactly one row. Result=' + JSON.stringify(count))
     }
-    let result = {
+    let partialResponseObj = {
       responseHeader: {
         elapsedTime: r.now() - processStart,
         numFound: count[0][recordsHeldField],
@@ -52,27 +53,37 @@ function doQuery (escapedSpeciesName, start, rows, processStart, includeSpeciesR
       },
       response: records
     }
-    return result
-  }).then(result => {
-    // TODO get visitKeys
-    let visitKeys = result.response.map(e => {
+    return partialResponseObj
+  }).then(partialResponseObj => {
+    let visitKeys = partialResponseObj.response.map(e => {
       return e.visitKey
     })
+    if (visitKeys.length === 0) {
+      let noRecordsSoShortCircuit = true
+      return [partialResponseObj, noRecordsSoShortCircuit]
+    }
     let visitKeyClauses = getVisitKeyClauses(visitKeys)
-    let passResultDownChainPromise = new Promise((resolve) => {
-      resolve(result)
+    let passPartialResponseObjDownChainPromise = new Promise(resolve => {
+      resolve(partialResponseObj)
     })
     let varsSql = getVarsSql(visitKeyClauses)
     let varsPromise = db.execSelectPromise(varsSql)
     let speciesNamesClauses = escapedSpeciesName // FIXME change to list of escaped names
     let speciesNamesSql = getSpeciesNamesSql(visitKeyClauses, speciesNamesClauses)
     let speciesNamesPromise = db.execSelectPromise(speciesNamesSql)
-    return Promise.all([passResultDownChainPromise, varsPromise, speciesNamesPromise])
-  }).then(data => {
-    let result = data[0]
-    // FIXME do the mapping for var and species into the result
-    let varsRecords = data[1]
-    let varsDict = varsRecords.reduce((prev, curr) => {
+    let continuePromiseChainProcessingPromise = new Promise(resolve => {
+      resolve(false)
+    })
+    return Promise.all([passPartialResponseObjDownChainPromise, continuePromiseChainProcessingPromise,
+      varsPromise, speciesNamesPromise])
+  }).then(dataWrapper => {
+    let partialResponseObj = dataWrapper[0]
+    let isShortCircuitPromiseChain = dataWrapper[1]
+    if (isShortCircuitPromiseChain) {
+      return partialResponseObj
+    }
+    let varsRecords = dataWrapper[2]
+    let varsLookup = varsRecords.reduce((prev, curr) => {
       let visitKey = curr.visitKey
       delete (curr.visitKey)
       if (typeof prev[visitKey] === 'undefined') {
@@ -81,12 +92,64 @@ function doQuery (escapedSpeciesName, start, rows, processStart, includeSpeciesR
       prev[visitKey].push(curr)
       return prev
     }, {})
-    let speciesNamesRecords = data[2]
-    return {
-      theResult: result,
-      varsRecords: varsDict,
-      speciesNamesRecords: speciesNamesRecords
+    appendVars(partialResponseObj.response, varsLookup)
+    let speciesNamesRecords = dataWrapper[3]
+    let speciesNamesLookup = speciesNamesRecords.reduce((prev, curr) => {
+      let visitKey = curr.visitKey
+      delete (curr.visitKey)
+      if (typeof prev[visitKey] === 'undefined') {
+        prev[visitKey] = {
+          scientificNames: new Set(),
+          taxonRemarks: new Set()
+        }
+      }
+      if (curr.scientificName) {
+        prev[visitKey].scientificNames.add(curr.scientificName)
+      }
+      if (curr.taxonRemarks) {
+        prev[visitKey].taxonRemarks.add(curr.taxonRemarks)
+      }
+      return prev
+    }, {})
+    appendSpeciesNames(partialResponseObj.response, speciesNamesLookup)
+    stripVisitKeys(partialResponseObj.response)
+    return partialResponseObj
+  })
+}
+
+module.exports._testonly = {
+  appendVars: appendVars,
+  appendSpeciesNames: appendSpeciesNames,
+  stripVisitKeys: stripVisitKeys
+}
+
+function appendVars (records, varsLookup) {
+  records.forEach(e => {
+    let visitKey = e.visitKey
+    if (!varsLookup[visitKey]) {
+      e.variables = []
+      return
     }
+    e.variables = varsLookup[visitKey]
+  })
+}
+
+function appendSpeciesNames (records, speciesNameLookup) {
+  records.forEach(e => {
+    let visitKey = e.visitKey
+    if (!speciesNameLookup[visitKey]) {
+      e.scientificNames = []
+      e.taxonRemarks = []
+      return
+    }
+    e.scientificNames = speciesNameLookup[visitKey].scientificNames.toArray()
+    e.taxonRemarks = speciesNameLookup[visitKey].taxonRemarks.toArray()
+  })
+}
+
+function stripVisitKeys (records) {
+  records.forEach(e => {
+    delete (e.visitKey)
   })
 }
 

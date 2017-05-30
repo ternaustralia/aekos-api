@@ -72,7 +72,7 @@ custom:
       responseModels:
         "application/json": "400JsonResponse"
     SingleSpeciesNameQueryParam:
-      name: "speciesName"
+      name: "${file(./constants.yml):paramNames.SINGLE_SPECIES_NAME}"
       description: "single species name"
       required: true
     SingleTraitNameQueryParam:
@@ -157,9 +157,7 @@ functions:
               include the value of the environmental variables, it only shows that the supplied species have
               values for those variable. To get the values, you need to use the Data Retrieval services.
             queryParams:
-              -
-                name: "speciesNames"
-                description: "list of species names"
+              - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
               -
                 name: "pageNum"
                 description: "1-indexed page number"
@@ -180,9 +178,7 @@ functions:
               of the traits, it only shows that the supplied species have values for those traits. To get
               the values, you need to use the Data Retrieval services.
             queryParams:
-              -
-                name: "speciesNames"
-                description: "list of species names"
+              - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
               -
                 name: "pageNum"
                 description: "1-indexed page number"
