@@ -1,2 +1,8 @@
 paramNames:
   SINGLE_SPECIES_NAME: "speciesName"
+  SINGLE_TRAIT_NAME: "traitName"
+  SINGLE_ENVVAR_NAME: "envVarName"
+  PAGE_NUM: "pageNum"
+  PAGE_SIZE: "pageSize"
+  ROWS: "rows"
+  START: "start"

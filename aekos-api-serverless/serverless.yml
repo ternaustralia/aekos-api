@@ -28,6 +28,17 @@ provider:
     # DBPASS: "${self:custom.secrets.DBPASS}"
     DBPASS: "${file(secrets.yml):${self:custom.stage}.DBPASS}"
 
+resources:
+  Resources:
+    pathmapping:
+      Type: AWS::ApiGateway::BasePathMapping
+      Properties:
+        BasePath: ""
+        DomainName: ${file(secrets.yml):${self:custom.stage}.domainName}
+        RestApiId: 
+          Ref: ApiGatewayRestApi
+        Stage: ${self:custom.stage}
+
 custom:
   stage: ${opt:stage, self:provider.stage}
   secrets: ${file(secrets.yml):$self:custom.stage} # FIXME get this working
@@ -61,23 +72,32 @@ custom:
     AcceptHeaderDoco:
       name: "accept"
       description: "content-type mime that you want as a response e.g.: 'application/json' or 'text/csv'"
-    StartQueryParam:
-      name: "start"
-      description: "0-indexed result start index"
-    RowsQueryParam:
-      name: "rows"
-      description: "records per page"
     MethodResponse400Json:
       statusCode: 400
       responseModels:
         "application/json": "400JsonResponse"
+    StartQueryParam:
+      name: "${file(./constants.yml):paramNames.START}"
+      description: "0-indexed result start index"
+    RowsQueryParam:
+      name: "${file(./constants.yml):paramNames.ROWS}"
+      description: "records per page"
     SingleSpeciesNameQueryParam:
       name: "${file(./constants.yml):paramNames.SINGLE_SPECIES_NAME}"
       description: "single species name"
       required: true
     SingleTraitNameQueryParam:
-      name: "traitName"
-      description: "list of trait names"
+      name: "${file(./constants.yml):paramNames.SINGLE_TRAIT_NAME}"
+      description: "single trait name"
+    SingleEnvVarNameQueryParam:
+      name: "${file(./constants.yml):paramNames.SINGLE_ENVVAR_NAME}"
+      description: "single environmental variable name"
+    PageNumQueryParam:
+      name: "${file(./constants.yml):paramNames.PAGE_NUM}"
+      description: "1-indexed page number"
+    PageSizeQueryParam:
+      name: "${file(./constants.yml):paramNames.PAGE_SIZE}"
+      description: "records per page"
   documentation:
     # FIXME doesn't write to the format that AWS expects: {info: {description: "", version: "", title: "", contact: {name: "", email: ""}}}
     api:
@@ -158,12 +178,8 @@ functions:
               values for those variable. To get the values, you need to use the Data Retrieval services.
             queryParams:
               - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
-              -
-                name: "pageNum"
-                description: "1-indexed page number"
-              -
-                name: "pageSize"
-                description: "records per page"
+              - ${self:custom.commonModelSchemaFragments.PageNumQueryParam}
+              - ${self:custom.commonModelSchemaFragments.PageSizeQueryParam}
   v10-getTraitsBySpecies-json:
     handler: v10-getTraitsBySpecies-json.handler
     events:
@@ -179,12 +195,8 @@ functions:
               the values, you need to use the Data Retrieval services.
             queryParams:
               - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
-              -
-                name: "pageNum"
-                description: "1-indexed page number"
-              -
-                name: "pageSize"
-                description: "records per page"
+              - ${self:custom.commonModelSchemaFragments.PageNumQueryParam}
+              - ${self:custom.commonModelSchemaFragments.PageSizeQueryParam}
   v10-getSpeciesByTrait-json:
     handler: v10-getSpeciesByTrait-json.handler
     events:
@@ -199,15 +211,9 @@ functions:
               traits have species records present in the system. To get the values, you need to use the Data
               Retrieval services.
             queryParams:
-              -
-                name: "traitName"
-                description: "list of trait names"
-              -
-                name: "pageNum"
-                description: "1-indexed page number"
-              -
-                name: "pageSize"
-                description: "records per page"
+              - ${self:custom.commonModelSchemaFragments.SingleTraitNameQueryParam}
+              - ${self:custom.commonModelSchemaFragments.PageNumQueryParam}
+              - ${self:custom.commonModelSchemaFragments.PageSizeQueryParam}
   v10-getTraitVocab-json:
     handler: v10-getTraitVocab-json.handler
     events:
@@ -264,9 +270,7 @@ functions:
               of records. If the system doesn't have any data on a species name, no record for the species name will
               be in the result.
             queryParams:
-              -
-                name: "${file(./constants.yml):paramNames.SINGLE_SPECIES_NAME}"
-                description: "list of species names"
+              - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
             methodResponses:
               -
                 statusCode: 200
@@ -413,6 +417,33 @@ functions:
                 responseModels:
                   "text/csv": "CsvResponse"
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+  v10-environmentData:
+    handler: v10-environmentData.handler
+    events:
+      - http:
+          path: v1/environmentData
+          method: get
+          cors: true
+          documentation:
+            summary: "Get environmental variable data"
+            description: |
+              "Gets environmental variable data records for the site/study location/plot visits that the supplied species name(s)
+              appear at using content negotation to determine the response type. If you supply environmental variable names then
+              the result will have the environmental variables filtered down to only the environmental variables you've asked for,
+              otherwise all environmental variables are returned. Note: not all sites have environmental variables available.
+              This resource honours Accept headers represented by any of the /environmentData.* resources."
+            queryParams:
+              - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
+              - ${self:custom.commonModelSchemaFragments.SingleEnvVarNameQueryParam}
+              - ${self:custom.commonModelSchemaFragments.StartQueryParam}
+              - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
+            methodResponses:
+              -
+                statusCode: 200
+                responseModels:
+                  "text/csv": "CsvResponse"
+                  "application/json": "EnvDataResponse"
+              - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
   v10-environmentData-json:
     handler: v10-environmentData-json.handler
     events:
@@ -429,7 +460,7 @@ functions:
               variables are returned. Note: not all sites have environmental variables available."
             queryParams:
               - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
-              # TODO add variable param
+              - ${self:custom.commonModelSchemaFragments.SingleEnvVarNameQueryParam}
               - ${self:custom.commonModelSchemaFragments.StartQueryParam}
               - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
             methodResponses:
@@ -437,4 +468,29 @@ functions:
                 statusCode: 200
                 responseModels:
                   "application/json": "EnvDataResponse"
+              - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+  v10-environmentData-csv:
+    handler: v10-environmentData-csv.handler
+    events:
+      - http:
+          path: v1/environmentData.csv
+          method: get
+          cors: true
+          documentation:
+            summary: "Get environmental variable data in CSV format"
+            description: |
+              "Gets environmental variable data records for the site/study location/plot visits that the supplied species name(s)
+              appear at in CSV format. If you supply environmental variable names then the result will have the environmental
+              variables filtered down to only the environmental variables you've asked for, otherwise all environmental
+              variables are returned. Note: not all sites have environmental variables available."
+            queryParams:
+              - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
+              - ${self:custom.commonModelSchemaFragments.SingleEnvVarNameQueryParam}
+              - ${self:custom.commonModelSchemaFragments.StartQueryParam}
+              - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
+            methodResponses:
+              -
+                statusCode: 200
+                responseModels:
+                  "text/csv": "CsvResponse"
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
