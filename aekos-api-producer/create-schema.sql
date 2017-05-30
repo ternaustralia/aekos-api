@@ -6,13 +6,13 @@ DROP TABLE IF EXISTS citations;
 
 CREATE TABLE citations (
 	samplingProtocol VARCHAR(100) NOT NULL,
-	bibliographicCitation VARCHAR(500),
-	datasetName VARCHAR(150),
-	PRIMARY KEY (samplingProtocol)
+	bibliographicCitation VARCHAR(1000),
+	datasetName VARCHAR(150)
+	,PRIMARY KEY (samplingProtocol) -- NOT_RAW
 );
 
 CREATE TABLE env (
-	locationID VARCHAR(100) NOT NULL,
+	locationID VARCHAR(200) NOT NULL,
 	eventDate CHAR(10) NOT NULL,
 	month INT,
 	year INT,
@@ -20,36 +20,37 @@ CREATE TABLE env (
 	decimalLongitude DOUBLE,
 	geodeticDatum VARCHAR(5),
 	locationName VARCHAR(50),
-	samplingProtocol VARCHAR(100),
-	PRIMARY KEY (locationID, eventDate)
+	samplingProtocol VARCHAR(100)
+	,PRIMARY KEY (locationID, eventDate) -- NOT_RAW
+	,FOREIGN KEY (samplingProtocol) REFERENCES citations(samplingProtocol) -- NOT_RAW
 );
 
 CREATE TABLE envvars (
-	locationID VARCHAR(100) NOT NULL,
+	locationID VARCHAR(200) NOT NULL,
 	eventDate CHAR(10) NOT NULL,
 	varName varchar(30),
 	varValue varchar(100),
-	varUnit varchar(30),
-	FOREIGN KEY (locationID, eventDate) REFERENCES env(locationID, eventDate)
+	varUnit varchar(30)
+	,FOREIGN KEY (locationID, eventDate) REFERENCES env(locationID, eventDate) -- NOT_RAW
 );
 
 CREATE TABLE species (
 	id CHAR(36) NOT NULL,
-	locationID VARCHAR(100) NOT NULL,
+	locationID VARCHAR(200) NOT NULL,
 	eventDate CHAR(10) NOT NULL,
 	individualCount INT,
 	scientificName VARCHAR(100),
-	taxonRemarks VARCHAR(100),
-	PRIMARY KEY (id),
-	FOREIGN KEY (locationID, eventDate) REFERENCES env(locationID, eventDate)
+	taxonRemarks VARCHAR(100)
+	,PRIMARY KEY (id) -- NOT_RAW
+	,FOREIGN KEY (locationID, eventDate) REFERENCES env(locationID, eventDate) -- NOT_RAW
 );
-CREATE INDEX idx_species_scientificName ON species(scientificName);
-CREATE INDEX idx_species_taxonRemarks ON species(taxonRemarks);
+CREATE INDEX idx_species_scientificName ON species(scientificName); -- NOT_RAW
+CREATE INDEX idx_species_taxonRemarks ON species(taxonRemarks); -- NOT_RAW
 
 CREATE TABLE traits (
 	parentId CHAR(37) NOT NULL,
 	traitName varchar(30),
 	traitValue varchar(100),
-	traitUnit varchar(30),
-	FOREIGN KEY (parentId) REFERENCES species(id)
+	traitUnit varchar(30)
+	,FOREIGN KEY (parentId) REFERENCES species(id) -- NOT_RAW
 );
