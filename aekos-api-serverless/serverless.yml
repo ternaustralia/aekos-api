@@ -27,6 +27,7 @@ provider:
     DBUSER: "${file(secrets.yml):${self:custom.stage}.DBUSER}"
     # DBPASS: "${self:custom.secrets.DBPASS}"
     DBPASS: "${file(secrets.yml):${self:custom.stage}.DBPASS}"
+    DOMAIN_NAME: "${file(secrets.yml):${self:custom.stage}.domainName}"
 
 resources:
   Resources:
@@ -103,14 +104,8 @@ custom:
     api:
       version: '1'
       summary: 'AEKOS API'
-      description: |
-        The AEKOS API is used for Machine2Machine (M2M) REST access to AEKOS ecological data.
-        <h1>High level workflow</h1>
-        <ul>
-          <li>Start with a trait or species</li>
-          <li>Find what species have that trait or what traits/environmental variables are available for that species</li>
-          <li>Use your traits/species/environmental variables to retrieve the data with the retrieval services</li>
-        </ul>
+      # description doesn't work so we add it manually after we pull the Swagger from API Gateway
+      #    see: https://github.com/9cookies/serverless-aws-documentation/issues/37
     models:
       -
         name: "SpeciesSummaryList"
@@ -163,6 +158,12 @@ plugins:
   - serverless-aws-documentation
 
 functions:
+  redirectToSwaggerUI:
+    handler: redirectToSwaggerUI.handler
+    events:
+      - http:
+          path: /
+          method: get
   v10-getEnvironmentBySpecies-json:
     handler: v10-getEnvironmentBySpecies-json.handler
     events:

@@ -49,6 +49,7 @@ stdin.on('end', function () {
   tagResources(parsedData)
   addTagDescriptions(parsedData)
   addApiDescription(parsedData)
+  removeRootRedirectResource(parsedData)
   stdout.write(JSON.stringify(parsedData, null, 2))
   stdout.write('\n')
 })
@@ -105,6 +106,10 @@ function addApiDescription(parsedData) {
     name: 'Licensing and attributions',
     url: 'http://www.ecoinformatics.org.au/licensing_and_attributions'
   }
+}
+
+function removeRootRedirectResource (parsedData) {
+  delete (parsedData.paths['/'])
 }
 
 // Whitespace is important in this block
