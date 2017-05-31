@@ -6,6 +6,7 @@ STAGE=dev
 FILE_TYPE=json
 REGION=us-west-1
 OUTPUT=swagger-aekos-api-$STAGE.$FILE_TYPE
+TEMP_FILE=$OUTPUT.temp
 printf "Downloading Swagger definition to ./$OUTPUT
   API ID: $API_ID
    Stage: $STAGE
@@ -18,4 +19,7 @@ aws apigateway get-export \
   --export-type=swagger \
   --accept=application/$FILE_TYPE \
   --region=$REGION \
-  $OUTPUT
+  $TEMP_FILE
+
+cat $TEMP_FILE | node ammend-swagger.js > $OUTPUT
+rm -f $TEMP_FILE
