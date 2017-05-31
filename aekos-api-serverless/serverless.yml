@@ -236,7 +236,7 @@ functions:
               traits have species records present in the system. To get the values, you need to use the Data
               Retrieval services.
             queryParams:
-              - ${self:custom.commonModelSchemaFragments.SingleTraitNameQueryParam}
+              - ${self:custom.commonModelSchemaFragments.SingleTraitNameQueryParam} # FIXME need to mark as required
               - ${self:custom.commonModelSchemaFragments.PageNumQueryParam}
               - ${self:custom.commonModelSchemaFragments.PageSizeQueryParam}
             methodResponses:
