@@ -8,14 +8,18 @@ let mapQueryResult = (queryResult) => {
   queryResult.forEach(function (element) {
     element.code = element[codeField]
     delete (element[codeField])
-    element.label = 'FIXME' // FIXME need to get this
+    element.label = r.resolveVocabCode(element.code)
   })
   return queryResult
 }
 module.exports.mapQueryResult = mapQueryResult
 
 module.exports.handler = (event, context, callback) => {
-  const sql = `SELECT ${codeField}, count(*) AS ${countField} FROM traits GROUP BY 1 ORDER BY 1;`
+  const sql = `
+    SELECT ${codeField}, count(*) AS ${countField}
+    FROM traits
+    GROUP BY 1
+    ORDER BY 1;`
   db.execSelect(sql, (queryResult) => {
     let mappedResult = mapQueryResult(queryResult)
     r.json.ok(callback, mappedResult)

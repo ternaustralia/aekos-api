@@ -172,4 +172,18 @@ describe('response-helper', function () {
       expect(result).toBe(objectUnderTest.contentTypes.unhandled)
     })
   })
+
+  describe('resolveVocabCode', () => {
+    it('should be able to look up a code that exists', () => {
+      let code = 'weight'
+      let result = objectUnderTest.resolveVocabCode(code)
+      expect(result).toBe('Weight')
+    })
+
+    it('should be able to fallback to the code as the label for a non-existant code', () => {
+      let code = 'certainlyNotInTheVocab'
+      let result = objectUnderTest.resolveVocabCode(code)
+      expect(result).toBe(code)
+    })
+  })
 })

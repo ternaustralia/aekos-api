@@ -1,5 +1,6 @@
 'use strict'
 let accepts = require('accepts')
+let codeToLabelMapping = require('./ontology/code-to-label.json')
 const jsonContentType = "'application/json'"
 const csvContentType = "'text/csv'"
 function getHeaders (contentType) {
@@ -72,6 +73,15 @@ function castEventToFakeExpressReq (event) {
   }
 }
 
+function resolveVocabCode (code) {
+  let result = codeToLabelMapping[code]
+  if (typeof result === 'undefined') {
+    console.warn(`Data problem: no label defined for the code '${code}', reverting to the code`)
+    result = code
+  }
+  return result
+}
+
 module.exports = {
   json: {
     ok: (theCallback, theBody) => {
@@ -94,6 +104,7 @@ module.exports = {
   assertNumber: assertNumber,
   getOptionalParam: getOptionalParam,
   calculateOffset: calculateOffset,
+  resolveVocabCode: resolveVocabCode,
   now: () => {
     return new Date().getTime()
   },

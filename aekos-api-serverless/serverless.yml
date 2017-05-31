@@ -77,6 +77,10 @@ custom:
       statusCode: 400
       responseModels:
         "application/json": "400JsonResponse"
+    MethodResponse502Json:
+      statusCode: 502
+      responseModels:
+        "application/json": "502JsonResponse"
     StartQueryParam:
       name: "${file(./constants.yml):paramNames.START}"
       description: "0-indexed result start index"
@@ -153,6 +157,26 @@ custom:
         contentType: "text/csv"
         schema:
           type: string
+      -
+        name: "502JsonResponse"
+        contentType: "application/json"
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+      -
+        name: "EnvironmentalVariableVocabv1Response"
+        contentType: "application/json"
+        schema:
+          type: object
+          properties:
+            count:
+              type: number
+            code:
+              type: string
+            label:
+              type: string
 
 plugins:
   - serverless-aws-documentation
@@ -215,6 +239,8 @@ functions:
               - ${self:custom.commonModelSchemaFragments.SingleTraitNameQueryParam}
               - ${self:custom.commonModelSchemaFragments.PageNumQueryParam}
               - ${self:custom.commonModelSchemaFragments.PageSizeQueryParam}
+            methodResponses:
+              - ${self:custom.commonModelSchemaFragments.MethodResponse502Json}
   v10-getTraitVocab-json:
     handler: v10-getTraitVocab-json.handler
     events:
@@ -241,6 +267,12 @@ functions:
               Gets a distinct list of all the environmental variables that appear in the system. The code and label are supplied for
               each trait. The codes are required to use as parameters for other resources and the label information
               is useful for creating UIs.
+            methodResponses:
+              -
+                statusCode: 200
+                responseModels:
+                  "application/json": "EnvironmentalVariableVocabv1Response"
+              - ${self:custom.commonModelSchemaFragments.MethodResponse502Json}
   v10-speciesAutocomplete-json:
     handler: v10-speciesAutocomplete-json.handler
     events:

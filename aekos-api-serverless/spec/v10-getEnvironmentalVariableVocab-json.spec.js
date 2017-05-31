@@ -8,16 +8,16 @@ describe('v10-getEnvironmentalVariableVocab-json', function () {
   it('should map to the code field', function () {
     let queryResult = [
       {
-        traitName: 'traitOne',
+        varName: 'visibleFireEvidence',
         count: 123
       }
     ]
     let result = objectUnderTest.mapQueryResult(queryResult)
     expect(result.length).toBe(1)
     let first = result[0]
-    expect(first.code).toBe('traitOne')
+    expect(first.code).toBe('visibleFireEvidence')
     expect(first.traitName).toBeUndefined()
-    expect(first.label).toBe('FIXME')
+    expect(first.label).toBe('Visible Fire Evidence')
     expect(first.count).toBe(123)
   })
 })
