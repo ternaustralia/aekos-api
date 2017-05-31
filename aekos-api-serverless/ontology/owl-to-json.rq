@@ -1,0 +1,11 @@
+PREFIX skos:  <http://www.w3.org/2004/02/skos/core#>
+PREFIX owl:   <http://www.w3.org/2002/07/owl#>
+PREFIX aekos: <http://www.aekos.org.au/ontology/1.0.0#>
+
+
+SELECT ?code ?label
+WHERE {
+  ?s a owl:DatatypeProperty .
+  ?s aekos:code ?code .
+  ?s skos:prefLabel ?label .
+}
