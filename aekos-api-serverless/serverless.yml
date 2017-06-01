@@ -27,7 +27,6 @@ provider:
     DBUSER: "${file(secrets.yml):${self:custom.stage}.DBUSER}"
     # DBPASS: "${self:custom.secrets.DBPASS}"
     DBPASS: "${file(secrets.yml):${self:custom.stage}.DBPASS}"
-    DOMAIN_NAME: "${file(secrets.yml):${self:custom.stage}.domainName}"
 
 resources:
   Resources:
@@ -35,14 +34,47 @@ resources:
       Type: AWS::ApiGateway::BasePathMapping
       Properties:
         BasePath: ""
-        DomainName: ${file(secrets.yml):${self:custom.stage}.domainName}
+        DomainName: ${self:custom.domainName}
         RestApiId: 
           Ref: ApiGatewayRestApi
         Stage: ${self:custom.stage}
+    MockMethod:
+      Type: AWS::ApiGateway::Method
+      Properties:
+        AuthorizationType: None
+        HttpMethod: GET
+        ResourceId:
+          Fn::GetAtt:
+            - ApiGatewayRestApi # our default Rest API logical ID
+            - RootResourceId
+        RestApiId:
+          Ref: ApiGatewayRestApi
+        MethodResponses:
+          - ResponseModels:
+              text/html: Empty
+            ResponseParameters:
+              method.response.header.Location: true
+            StatusCode: 301
+        Integration:
+          RequestTemplates:
+            application/json: |
+              {"statusCode": 301}
+          Type: MOCK
+          IntegrationResponses:
+            - ResponseParameters:
+                method.response.header.Location: "'${self:custom.documentationUrl}'"
+              ResponseTemplates:
+                text/html: |
+                  <html><body>
+                    <p>Redirecting to documentation <a href="${self:custom.documentationUrl}">${self:custom.documentationUrl}</a>
+                  </body></html>
+              StatusCode: 301
 
 custom:
   stage: ${opt:stage, self:provider.stage}
   secrets: ${file(secrets.yml):$self:custom.stage} # FIXME get this working
+  domainName: ${file(secrets.yml):${self:custom.stage}.domainName}
+  documentationUrl: https://www.${self:custom.domainName}
   commonModelSchemaFragments:
     SpeciesSummary:
       type: object
@@ -182,14 +214,8 @@ plugins:
   - serverless-aws-documentation
 
 functions:
-  redirectToSwaggerUI:
-    handler: redirectToSwaggerUI.handler
-    events:
-      - http:
-          path: /
-          method: get
-  v10-getEnvironmentBySpecies-json:
-    handler: v10-getEnvironmentBySpecies-json.handler
+  v1-getEnvironmentBySpecies-json:
+    handler: v1-getEnvironmentBySpecies-json.handler
     events:
       - http:
           path: v1/getEnvironmentBySpecies.json
@@ -205,8 +231,8 @@ functions:
               - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
               - ${self:custom.commonModelSchemaFragments.PageNumQueryParam}
               - ${self:custom.commonModelSchemaFragments.PageSizeQueryParam}
-  v10-getTraitsBySpecies-json:
-    handler: v10-getTraitsBySpecies-json.handler
+  v1-getTraitsBySpecies-json:
+    handler: v1-getTraitsBySpecies-json.handler
     events:
       - http:
           path: v1/getTraitsBySpecies.json
@@ -222,8 +248,8 @@ functions:
               - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
               - ${self:custom.commonModelSchemaFragments.PageNumQueryParam}
               - ${self:custom.commonModelSchemaFragments.PageSizeQueryParam}
-  v10-getSpeciesByTrait-json:
-    handler: v10-getSpeciesByTrait-json.handler
+  v1-getSpeciesByTrait-json:
+    handler: v1-getSpeciesByTrait-json.handler
     events:
       - http:
           path: v1/getSpeciesByTrait.json
@@ -241,8 +267,8 @@ functions:
               - ${self:custom.commonModelSchemaFragments.PageSizeQueryParam}
             methodResponses:
               - ${self:custom.commonModelSchemaFragments.MethodResponse502Json}
-  v10-getTraitVocab-json:
-    handler: v10-getTraitVocab-json.handler
+  v1-getTraitVocab-json:
+    handler: v1-getTraitVocab-json.handler
     events:
       - http:
           path: v1/getTraitVocab.json
@@ -254,8 +280,8 @@ functions:
               Gets a distinct list of all the traits that appear in the system. The code and label are supplied for
               each trait. The codes are required to use as parameters for other resources and the label information
               is useful for creating UIs.
-  v10-getEnvironmentalVariableVocab-json:
-    handler: v10-getEnvironmentalVariableVocab-json.handler
+  v1-getEnvironmentalVariableVocab-json:
+    handler: v1-getEnvironmentalVariableVocab-json.handler
     events:
       - http:
           path: v1/getEnvironmentalVariableVocab.json
@@ -273,8 +299,8 @@ functions:
                 responseModels:
                   "application/json": "EnvironmentalVariableVocabv1Response"
               - ${self:custom.commonModelSchemaFragments.MethodResponse502Json}
-  v10-speciesAutocomplete-json:
-    handler: v10-speciesAutocomplete-json.handler
+  v1-speciesAutocomplete-json:
+    handler: v1-speciesAutocomplete-json.handler
     events:
       - http:
           path: v1/speciesAutocomplete.json
@@ -289,8 +315,8 @@ functions:
               -
                 name: "q"
                 description: "partial species name"
-  v10-speciesSummary-json:
-    handler: v10-speciesSummary-json.handler
+  v1-speciesSummary-json:
+    handler: v1-speciesSummary-json.handler
     events:
       - http:
           path: v1/speciesSummary.json
@@ -309,8 +335,8 @@ functions:
                 statusCode: 200
                 responseModels:
                   "application/json": "SpeciesSummaryList"
-  v10-speciesData:
-    handler: v10-speciesData.handler
+  v1-speciesData:
+    handler: v1-speciesData.handler
     events:
       - http:
           path: v1/speciesData
@@ -333,8 +359,8 @@ functions:
                   "application/json": "SpeciesDataResponse"
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
   # TODO change the v1.0 response to not include the new fields, add a v1.1 to have the fields
-  v10-speciesData-json:
-    handler: v10-speciesData-json.handler
+  v1-speciesData-json:
+    handler: v1-speciesData-json.handler
     events:
       - http:
           path: v1/speciesData.json
@@ -354,8 +380,8 @@ functions:
                 responseModels:
                   "application/json": "SpeciesDataResponse"
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
-  v10-speciesData-csv:
-    handler: v10-speciesData-csv.handler
+  v1-speciesData-csv:
+    handler: v1-speciesData-csv.handler
     events:
       - http:
           path: v1/speciesData.csv
@@ -375,8 +401,8 @@ functions:
                 responseModels:
                   "text/csv": "CsvResponse"
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
-  v10-traitData:
-    handler: v10-traitData.handler
+  v1-traitData:
+    handler: v1-traitData.handler
     events:
       - http:
           path: v1/traitData
@@ -404,8 +430,8 @@ functions:
                   "text/csv": "CsvResponse"
                   "application/json": "TraitDataJsonResponse"
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
-  v10-traitData-json:
-    handler: v10-traitData-json.handler
+  v1-traitData-json:
+    handler: v1-traitData-json.handler
     events:
       - http:
           path: v1/traitData.json
@@ -427,8 +453,8 @@ functions:
                 responseModels:
                   "application/json": "TraitDataJsonResponse"
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
-  v10-traitData-csv:
-    handler: v10-traitData-csv.handler
+  v1-traitData-csv:
+    handler: v1-traitData-csv.handler
     events:
       - http:
           path: v1/traitData.csv
@@ -450,8 +476,8 @@ functions:
                 responseModels:
                   "text/csv": "CsvResponse"
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
-  v10-environmentData:
-    handler: v10-environmentData.handler
+  v1-environmentData:
+    handler: v1-environmentData.handler
     events:
       - http:
           path: v1/environmentData
@@ -477,8 +503,8 @@ functions:
                   "text/csv": "CsvResponse"
                   "application/json": "EnvDataResponse"
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
-  v10-environmentData-json:
-    handler: v10-environmentData-json.handler
+  v1-environmentData-json:
+    handler: v1-environmentData-json.handler
     events:
       - http:
           path: v1/environmentData.json
@@ -502,8 +528,8 @@ functions:
                 responseModels:
                   "application/json": "EnvDataResponse"
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
-  v10-environmentData-csv:
-    handler: v10-environmentData-csv.handler
+  v1-environmentData-csv:
+    handler: v1-environmentData-csv.handler
     events:
       - http:
           path: v1/environmentData.csv

@@ -2,7 +2,7 @@
 let quoted = require('./FieldConfig').quoted
 let notQuoted = require('./FieldConfig').notQuoted
 let r = require('./response-helper')
-let traitDataJson = require('./v10-traitData-json')
+let traitDataJson = require('./v1-traitData-json')
 let csvHeaders = [
   notQuoted('decimalLatitude'),
   notQuoted('decimalLongitude'),

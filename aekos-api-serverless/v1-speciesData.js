@@ -1,7 +1,7 @@
 'use strict'
 let r = require('./response-helper')
-let speciesDataJson = require('./v10-speciesData-json')
-let speciesDataCsv = require('./v10-speciesData-csv')
+let speciesDataJson = require('./v1-speciesData-json')
+let speciesDataCsv = require('./v1-speciesData-csv')
 
 module.exports.handler = (event, context, callback) => {
   let contentTypeIndicator = r.getContentType(event)

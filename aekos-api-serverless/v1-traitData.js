@@ -1,8 +1,8 @@
 'use strict'
 let r = require('./response-helper')
 let accepts = require('accepts')
-let traitDataJson = require('./v10-traitData-json')
-let traitDataCsv = require('./v10-traitData-csv')
+let traitDataJson = require('./v1-traitData-json')
+let traitDataCsv = require('./v1-traitData-csv')
 
 module.exports.handler = (event, context, callback) => {
   let contentTypeIndicator = getContentType(event)

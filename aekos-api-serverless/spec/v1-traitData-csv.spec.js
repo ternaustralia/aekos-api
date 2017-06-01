@@ -1,8 +1,8 @@
 'use strict'
 
-var objectUnderTest = require('../v10-traitData-csv')
+var objectUnderTest = require('../v1-traitData-csv')
 
-describe('v10-traitData-csv', () => {
+describe('v1-traitData-csv', () => {
   describe('mapJsonToCsv', () => {
     it('should map the records to CSV when they are fully populated', () => {
       let records = [

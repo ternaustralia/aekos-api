@@ -1,7 +1,7 @@
 'use strict'
 let r = require('./response-helper')
-let environmentDataJson = require('./v10-environmentData-json')
-let environmentDataCsv = require('./v10-environmentData-csv')
+let environmentDataJson = require('./v1-environmentData-json')
+let environmentDataCsv = require('./v1-environmentData-csv')
 
 module.exports.handler = (event, context, callback) => {
   let contentTypeIndicator = r.getContentType(event)

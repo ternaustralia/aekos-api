@@ -1,8 +1,8 @@
 'use strict'
 let Set = require('collections/set')
-let objectUnderTest = require('../v10-environmentData-json')
+let objectUnderTest = require('../v1-environmentData-json')
 
-describe('v10-environmentData-json', () => {
+describe('v1-environmentData-json', () => {
   describe('appendVars', () => {
     it('should map variables to records', () => {
       let records = [

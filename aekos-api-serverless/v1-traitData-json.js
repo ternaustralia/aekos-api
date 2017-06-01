@@ -1,7 +1,7 @@
 'use strict'
 let r = require('./response-helper')
 let db = require('./db-helper')
-let speciesData = require('./v10-speciesData')
+let speciesData = require('./v1-speciesData')
 let latches = require('latches')
 const speciesNameParam = 'speciesName'
 

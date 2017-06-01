@@ -1,23 +1,21 @@
 'use strict'
 
-let objectUnderTest = require('../v10-getEnvironmentalVariableVocab-json')
+var objectUnderTest = require('../v1-getTraitVocab-json')
 
-describe('v10-getEnvironmentalVariableVocab-json', function () {
-  // TODO add a test to assert callback is called
-
+describe('v1-getTraitVocab-json', function () {
   it('should map to the code field', function () {
     let queryResult = [
       {
-        varName: 'visibleFireEvidence',
+        traitName: 'averageHeight',
         count: 123
       }
     ]
     let result = objectUnderTest.mapQueryResult(queryResult)
     expect(result.length).toBe(1)
     let first = result[0]
-    expect(first.code).toBe('visibleFireEvidence')
+    expect(first.code).toBe('averageHeight')
     expect(first.traitName).toBeUndefined()
-    expect(first.label).toBe('Visible Fire Evidence')
+    expect(first.label).toBe('Average Height')
     expect(first.count).toBe(123)
   })
 })
