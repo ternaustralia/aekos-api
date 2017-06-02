@@ -1,22 +1,18 @@
 'use strict'
 let r = require('./response-helper')
 let db = require('./db-helper')
-const speciesNameParam = 'speciesName'
+let yaml = require('yamljs')
+const speciesNameParam = yaml.load('./constants.yml').paramNames.SINGLE_SPECIES_NAME
 const recordsHeldField = 'recordsHeld'
 
 module.exports.handler = (event, context, callback) => {
   let processStart = r.now()
-  // FIXME get repeated query string params mapping correctly rather than just the last one
   if (!r.isQueryStringParamPresent(event, speciesNameParam)) {
     r.json.badRequest(callback, `the '${speciesNameParam}' query string parameter must be supplied`)
     return
   }
-  // FIXME handle escaping a list when we can get multiple names
-  let speciesName = event.queryStringParameters[speciesNameParam]
-  let escapedSpeciesName = db.escape(speciesName)
-  let start = r.getOptionalParam(event, 'start', 0)
-  let rows = r.getOptionalParam(event, 'rows', 20)
-  doQuery(escapedSpeciesName, start, rows, processStart, false).then(successResult => {
+  let params = extractParams(event)
+  doQuery(params.speciesName, params.start, params.rows, processStart, false).then(successResult => {
     r.json.ok(callback, successResult)
   }).catch(error => {
     console.error('Failed to get speciesData', error)
@@ -111,4 +107,17 @@ function getCountSql (escapedSpeciesName) {
       s.scientificName IN (${escapedSpeciesName})
       OR s.taxonRemarks IN (${escapedSpeciesName})
     );`
+}
+
+module.exports.extractParams = extractParams
+function extractParams (event) {
+  // FIXME handle escaping a list when we can get multiple names
+  let unescapedSpeciesName = event.queryStringParameters[speciesNameParam]
+  let escapedSpeciesName = db.escape(unescapedSpeciesName)
+  return {
+    speciesName: escapedSpeciesName, // FIXME change to multiple names
+    unescapedSpeciesName: unescapedSpeciesName,
+    start: r.getOptionalParam(event, 'start', 0),
+    rows: r.getOptionalParam(event, 'rows', 20)
+  }
 }

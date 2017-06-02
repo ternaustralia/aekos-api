@@ -109,6 +109,10 @@ custom:
       statusCode: 400
       responseModels:
         "application/json": "400JsonResponse"
+    MethodResponse500Json:
+      statusCode: 500
+      responseModels:
+        "application/json": "500JsonResponse"
     MethodResponse502Json:
       statusCode: 502
       responseModels:
@@ -189,6 +193,14 @@ custom:
         contentType: "text/csv"
         schema:
           type: string
+      -
+        name: "500JsonResponse"
+        contentType: "application/json"
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
       -
         name: "502JsonResponse"
         contentType: "application/json"
@@ -528,6 +540,7 @@ functions:
                 responseModels:
                   "application/json": "EnvDataResponse"
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   v1-environmentData-csv:
     handler: v1-environmentData-csv.handler
     events:

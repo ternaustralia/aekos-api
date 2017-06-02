@@ -1,28 +1,14 @@
 'use strict'
 let quoted = require('./FieldConfig').quoted
-let notQuoted = require('./FieldConfig').notQuoted
 let r = require('./response-helper')
 let traitDataJson = require('./v1-traitData-json')
-let csvHeaders = [
-  notQuoted('decimalLatitude'),
-  notQuoted('decimalLongitude'),
-  quoted('geodeticDatum'),
-  quoted('locationID'),
-  quoted('scientificName'),
-  quoted('taxonRemarks'),
-  notQuoted('individualCount'),
-  quoted('eventDate'),
-  notQuoted('year'),
-  notQuoted('month'),
-  quoted('bibliographicCitation'),
-  quoted('samplingProtocol')
-  // ,"traitNName", "traitNValue", "traitNUnits"...
-]
+let speciesDataCsv = require('./v1-speciesData-csv')
+let csvHeaders = speciesDataCsv.csvHeaders
 
 module.exports.handler = (event, context, callback) => {
   let processStart = r.now()
   let params = traitDataJson.extractParams(event)
-  traitDataJson.getTratiData(params, processStart).then(successResult => {
+  traitDataJson.getTraitData(params, processStart).then(successResult => {
     let result = mapJsonToCsv(successResult.response)
     r.csv.ok(callback, result)
   }).catch(error => {
@@ -47,22 +33,7 @@ function mapJsonToCsv (records) {
 
 module.exports.createCsvRow = createCsvRow
 function createCsvRow (record) {
-  let result = ''
-  for (let i = 0; i < csvHeaders.length; i++) {
-    let curr = csvHeaders[i]
-    if (result.length > 0) {
-      result += ','
-    }
-    if (curr.isQuoted) {
-      let value = record[curr.name]
-      if (value === null) {
-        continue
-      }
-      result += `"${value}"`
-      continue
-    }
-    result += record[curr.name]
-  }
+  let result = speciesDataCsv.createCsvRow(csvHeaders, record)
   for (let i = 0; i < record.traits.length; i++) {
     let curr = record.traits[i]
     result += `,"${curr.traitName}","${curr.traitValue}",`

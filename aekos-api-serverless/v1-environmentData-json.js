@@ -2,22 +2,20 @@
 let r = require('./response-helper')
 let db = require('./db-helper')
 let Set = require('collections/set')
-const speciesNameParam = 'speciesName'
+let speciesDataJson = require('./v1-speciesData-json')
+let yaml = require('yamljs')
+const speciesNameParam = yaml.load('./constants.yml').paramNames.SINGLE_SPECIES_NAME
 const recordsHeldField = 'recordsHeld'
+const visitKeySeparator = '#'
 
 module.exports.handler = (event, context, callback) => {
   let processStart = r.now()
-  // FIXME get repeated query string params mapping correctly rather than just the last one
   if (!r.isQueryStringParamPresent(event, speciesNameParam)) {
     r.json.badRequest(callback, `the '${speciesNameParam}' query string parameter must be supplied`)
     return
   }
-  // FIXME handle escaping a list when we can get multiple names
-  let speciesName = event.queryStringParameters[speciesNameParam]
-  let escapedSpeciesName = db.escape(speciesName)
-  let start = r.getOptionalParam(event, 'start', 0)
-  let rows = r.getOptionalParam(event, 'rows', 20)
-  doQuery(escapedSpeciesName, start, rows, processStart, false).then(successResult => {
+  let params = extractParams(event)
+  doQuery(params, processStart, false).then(successResult => {
     r.json.ok(callback, successResult)
   }).catch(error => {
     console.error('Failed to get environmentData', error)
@@ -26,9 +24,9 @@ module.exports.handler = (event, context, callback) => {
 }
 
 module.exports.doQuery = doQuery
-function doQuery (escapedSpeciesName, start, rows, processStart, includeSpeciesRecordId) {
-  const recordsSql = getRecordsSql(escapedSpeciesName, start, rows, includeSpeciesRecordId)
-  const countSql = getCountSql(escapedSpeciesName)
+function doQuery (params, processStart, includeSpeciesRecordId) {
+  const recordsSql = getRecordsSql(params.speciesName, params.start, params.rows, includeSpeciesRecordId)
+  const countSql = getCountSql(params.speciesName)
   let pageNumber = -1 // TODO calc page number
   let totalPages = -1 // TODO calc total pages
   let recordsPromise = db.execSelectPromise(recordsSql)
@@ -45,9 +43,10 @@ function doQuery (escapedSpeciesName, start, rows, processStart, includeSpeciesR
         numFound: count[0][recordsHeldField],
         pageNumber: pageNumber,
         params: {
-          rows: rows,
-          start: start
-          // TODO add params
+          rows: params.rows,
+          start: params.start,
+          [speciesNameParam]: params.unescapedSpeciesName
+          // TODO add varNames param
         },
         totalPages: totalPages
       },
@@ -68,7 +67,7 @@ function doQuery (escapedSpeciesName, start, rows, processStart, includeSpeciesR
     })
     let varsSql = getVarsSql(visitKeyClauses)
     let varsPromise = db.execSelectPromise(varsSql)
-    let speciesNamesClauses = escapedSpeciesName // FIXME change to list of escaped names
+    let speciesNamesClauses = params.speciesName // FIXME change to list of escaped names
     let speciesNamesSql = getSpeciesNamesSql(visitKeyClauses, speciesNamesClauses)
     let speciesNamesPromise = db.execSelectPromise(speciesNamesSql)
     let continuePromiseChainProcessingPromise = new Promise(resolve => {
@@ -120,7 +119,12 @@ function doQuery (escapedSpeciesName, start, rows, processStart, includeSpeciesR
 module.exports._testonly = {
   appendVars: appendVars,
   appendSpeciesNames: appendSpeciesNames,
-  stripVisitKeys: stripVisitKeys
+  stripVisitKeys: stripVisitKeys,
+  getRecordsSql: getRecordsSql,
+  getCountSql: getCountSql,
+  getVarsSql: getVarsSql,
+  getSpeciesNamesSql: getSpeciesNamesSql,
+  getVisitKeyClauses: getVisitKeyClauses
 }
 
 function appendVars (records, varsLookup) {
@@ -153,10 +157,17 @@ function stripVisitKeys (records) {
   })
 }
 
-function getRecordsSql (escapedSpeciesName, start, rows, includeSpeciesRecordId) {
+function assertIsSupplied (escapedSpeciesName) {
+  if (!escapedSpeciesName) {
+    throw new Error(`Programmer problem: no escaped species name was supplied='${escapedSpeciesName}'.`)
+  }
+}
+
+function getRecordsSql (escapedSpeciesName, start, rows) {
+  assertIsSupplied(escapedSpeciesName)
   return `
     SELECT DISTINCT
-    CONCAT(e.locationID, '#', e.eventDate) AS visitKey,
+    CONCAT(e.locationID, '${visitKeySeparator}', e.eventDate) AS visitKey,
     e.eventDate,
     e.\`month\`,
     e.\`year\`,
@@ -183,6 +194,7 @@ function getRecordsSql (escapedSpeciesName, start, rows, includeSpeciesRecordId)
 }
 
 function getCountSql (escapedSpeciesName) {
+  assertIsSupplied(escapedSpeciesName)
   return `
     SELECT count(DISTINCT locationID, eventDate) as ${recordsHeldField}
     FROM species
@@ -193,9 +205,10 @@ function getCountSql (escapedSpeciesName) {
 }
 
 function getVarsSql (visitKeyClauses) {
+  assertIsSupplied(visitKeyClauses)
   return `
     SELECT
-    CONCAT(locationID, '#', eventDate) AS visitKey,
+    CONCAT(locationID, '${visitKeySeparator}', eventDate) AS visitKey,
     varName,
     varValue,
     varUnit
@@ -205,9 +218,11 @@ function getVarsSql (visitKeyClauses) {
 }
 
 function getSpeciesNamesSql (visitKeyClauses, speciesNamesClauses) {
+  assertIsSupplied(visitKeyClauses)
+  assertIsSupplied(speciesNamesClauses)
   return `
     SELECT DISTINCT
-    CONCAT(locationID, '#', eventDate) AS visitKey,
+    CONCAT(locationID, '${visitKeySeparator}', eventDate) AS visitKey,
     scientificName,
     taxonRemarks
     FROM species
@@ -221,7 +236,7 @@ function getSpeciesNamesSql (visitKeyClauses, speciesNamesClauses) {
 
 function getVisitKeyClauses (visitKeys) {
   return visitKeys.reduce((prev, curr) => {
-    let parts = curr.split('#')
+    let parts = curr.split(visitKeySeparator)
     let locationID = parts[0]
     let eventDate = parts[1]
     let fragment = `('${locationID}','${eventDate}')`
@@ -230,4 +245,11 @@ function getVisitKeyClauses (visitKeys) {
     }
     return prev + '\n,' + fragment
   }, '')
+}
+
+module.exports.extractParams = extractParams
+function extractParams (event) {
+  let result = speciesDataJson.extractParams(event)
+  result.varNames = [] // FIXME get optional varName(s)
+  return result
 }

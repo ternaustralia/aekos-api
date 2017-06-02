@@ -1,14 +1,13 @@
 'use strict'
 let r = require('./response-helper')
 let db = require('./db-helper')
-let speciesData = require('./v1-speciesData')
+let speciesDataJson = require('./v1-speciesData-json')
 let latches = require('latches')
-const speciesNameParam = 'speciesName'
+let yaml = require('yamljs')
+const speciesNameParam = yaml.load('./constants.yml').paramNames.SINGLE_SPECIES_NAME
 
 module.exports.handler = (event, context, callback) => {
   let processStart = r.now()
-  // FIXME need to do content negotiation and delegate to the appropriate handler
-  // FIXME get repeated query string params mapping correctly rather than just the last one
   if (!r.isQueryStringParamPresent(event, speciesNameParam)) {
     r.json.badRequest(callback, `the '${speciesNameParam}' query string parameter must be supplied`)
     return
@@ -22,9 +21,9 @@ module.exports.handler = (event, context, callback) => {
   })
 }
 
-module.exports.getTratiData = getTraitData
+module.exports.getTraitData = getTraitData
 function getTraitData (params, processStart) {
-  return speciesData.doQuery(params.speciesName, params.start, params.rows, processStart, true).then(successResult => {
+  return speciesDataJson.doQuery(params.speciesName, params.start, params.rows, processStart, true).then(successResult => {
     return enrichWithTraitData(successResult, params.traitNames)
   }).then((successResultWithTraits) => {
     successResultWithTraits.responseHeader.elapsedTime = r.now() - processStart
@@ -65,13 +64,7 @@ function getTraitSql (parentId, traitNames) {
 
 module.exports.extractParams = extractParams
 function extractParams (event) {
-  // FIXME handle escaping a list when we can get multiple names
-  let speciesName = event.queryStringParameters[speciesNameParam]
-  let escapedSpeciesName = db.escape(speciesName)
-  return {
-    speciesName: escapedSpeciesName, // FIXME change to multiple names
-    traitNames: [], // FIXME get optional traitName(s)
-    start: r.getOptionalParam(event, 'start', 0),
-    rows: r.getOptionalParam(event, 'rows', 20)
-  }
+  let result = speciesDataJson.extractParams(event)
+  result.traitNames = [] // FIXME get optional traitName(s)
+  return result
 }

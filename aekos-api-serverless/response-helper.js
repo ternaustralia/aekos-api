@@ -91,7 +91,7 @@ module.exports = {
       doResponse(theCallback, theMessage, 400, jsonContentType)
     },
     internalServerError: (theCallback, theMessage) => {
-      doResponse(theCallback, theMessage, 500, jsonContentType)
+      doResponse(theCallback, { message: theMessage }, 500, jsonContentType)
     }
   },
   csv: {
