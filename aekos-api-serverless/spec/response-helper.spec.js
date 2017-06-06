@@ -71,32 +71,94 @@ describe('response-helper', function () {
   describe('assertNumber', function () {
     it('can tell when we do have a number', function () {
       let val = 1
-      let result = objectUnderTest.assertNumber(val)
-      expect(result).toBeTruthy()
+      objectUnderTest.assertNumber(val)
     })
 
     it('can tell when we DO NOT have a number (a number string is not a number)', function () {
       let val = '1'
-      let result = objectUnderTest.assertNumber(val)
-      expect(result).toBeFalsy()
+      expect(() => {
+        objectUnderTest.assertNumber(val)
+      }).toThrow()
     })
 
     it('can tell when we DO NOT have a number', function () {
       let val = 'blah'
-      let result = objectUnderTest.assertNumber(val)
-      expect(result).toBeFalsy()
+      expect(() => {
+        objectUnderTest.assertNumber(val)
+      }).toThrow()
+    })
+
+    it('can tell when we DO NOT have a number', function () {
+      let val = {}
+      expect(() => {
+        objectUnderTest.assertNumber(val)
+      }).toThrow()
     })
   })
 
-  describe('getOptionalValue', function () {
+  describe('getOptionalStringParam', function () {
     it('can get the value when it is present', function () {
+      let event = {
+        queryStringParameters: {
+          someParam: 'blah'
+        }
+      }
+      let result = objectUnderTest.getOptionalStringParam(event, 'someParam', 'theDefault')
+      expect(result).toBe('blah')
+    })
+
+    it('can use the default when it is NOT present', function () {
+      let event = {
+        queryStringParameters: {
+          somethingElse: 'ignore me'
+        }
+      }
+      let result = objectUnderTest.getOptionalStringParam(event, 'someParam', 'theDefault')
+      expect(result).toBe('theDefault')
+    })
+
+    it('should throw when the value is not a string', function () {
+      let event = {
+        queryStringParameters: {
+          someParam: 123
+        }
+      }
+      expect(() => {
+        objectUnderTest.getOptionalStringParam(event, 'someParam', 'theDefault')
+      }).toThrow()
+    })
+
+    it('should throw when the value is not a string', function () {
+      let event = {
+        queryStringParameters: {
+          someParam: {}
+        }
+      }
+      expect(() => {
+        objectUnderTest.getOptionalStringParam(event, 'someParam', 'theDefault')
+      }).toThrow()
+    })
+  })
+
+  describe('getOptionalNumberParam', function () {
+    it('can get the value when it is present as a number', function () {
       let event = {
         queryStringParameters: {
           pageSize: 10
         }
       }
-      let result = objectUnderTest.getOptionalParam(event, 'pageSize', 20)
+      let result = objectUnderTest.getOptionalNumberParam(event, 'pageSize', 20)
       expect(result).toBe(10)
+    })
+
+    it('can get the value when it is present as a string', function () {
+      let event = {
+        queryStringParameters: {
+          pageSize: '42'
+        }
+      }
+      let result = objectUnderTest.getOptionalNumberParam(event, 'pageSize', 20)
+      expect(result).toBe(42)
     })
 
     it('can get the default when the value is NOT present', function () {
@@ -105,7 +167,7 @@ describe('response-helper', function () {
           somethingElse: 'foo'
         }
       }
-      let result = objectUnderTest.getOptionalParam(event, 'pageSize', 20)
+      let result = objectUnderTest.getOptionalNumberParam(event, 'pageSize', 20)
       expect(result).toBe(20)
     })
 
@@ -113,8 +175,19 @@ describe('response-helper', function () {
       let event = {
         queryStringParameters: null
       }
-      let result = objectUnderTest.getOptionalParam(event, 'pageSize', 20)
+      let result = objectUnderTest.getOptionalNumberParam(event, 'pageSize', 20)
       expect(result).toBe(20)
+    })
+
+    it('should throw when we pass a string that cannot be parsed to a number', function () {
+      let event = {
+        queryStringParameters: {
+          pageSize: 'blah'
+        }
+      }
+      expect(() => {
+        objectUnderTest.getOptionalNumberParam(event, 'pageSize', 20)
+      }).toThrow()
     })
   })
 
@@ -184,6 +257,111 @@ describe('response-helper', function () {
       let code = 'certainlyNotInTheVocab'
       let result = objectUnderTest.resolveVocabCode(code)
       expect(result).toBe(code)
+    })
+  })
+
+  describe('calculatePageNumber', () => {
+    it('should be able to tell when we are at the start of the first page with multiple pages', () => {
+      let start = 0
+      let numFound = 66
+      let totalPages = 7
+      let result = objectUnderTest.calculatePageNumber(start, numFound, totalPages)
+      expect(result).toBe(1)
+    })
+
+    it('should be able to tell when we are at the start of the first page with one page', () => {
+      let start = 0
+      let numFound = 9
+      let totalPages = 1
+      let result = objectUnderTest.calculatePageNumber(start, numFound, totalPages)
+      expect(result).toBe(1)
+    })
+
+    it('should be able to tell when we are at the start of the last page', () => {
+      let start = 90
+      let numFound = 99
+      let totalPages = 10
+      let result = objectUnderTest.calculatePageNumber(start, numFound, totalPages)
+      expect(result).toBe(10)
+    })
+
+    it('should be able to tell when we are on a middle page', () => {
+      let start = 50
+      let numFound = 99
+      let totalPages = 10
+      let result = objectUnderTest.calculatePageNumber(start, numFound, totalPages)
+      expect(result).toBe(6)
+    })
+
+    it('should be able to handle small page sizes', () => {
+      let start = 2
+      let numFound = 6
+      let totalPages = 3
+      let result = objectUnderTest.calculatePageNumber(start, numFound, totalPages)
+      expect(result).toBe(2)
+    })
+
+    it('should throw when we supply a non-number start', () => {
+      let start = '10'
+      expect(() => {
+        objectUnderTest.calculatePageNumber(start, 14, 2)
+      }).toThrow()
+    })
+
+    it('should throw when we supply a non-number numFound', () => {
+      let numFound = '10'
+      expect(() => {
+        objectUnderTest.calculatePageNumber(10, numFound, 2)
+      }).toThrow()
+    })
+
+    it('should throw when we supply a non-number totalPages', () => {
+      let totalPages = '10'
+      expect(() => {
+        objectUnderTest.calculatePageNumber(10, 14, totalPages)
+      }).toThrow()
+    })
+  })
+
+  describe('calculateTotalPages', () => {
+    it('should calculate the total page when it rounds nicely and there is more than one page', () => {
+      let rows = 10
+      let numFound = 100
+      let result = objectUnderTest.calculateTotalPages(rows, numFound)
+      expect(result).toBe(10)
+    })
+
+    it('should calculate the total page when it rounds nicely and there only one page', () => {
+      let rows = 10
+      let numFound = 10
+      let result = objectUnderTest.calculateTotalPages(rows, numFound)
+      expect(result).toBe(1)
+    })
+
+    it('should calculate the total page when it does not round nicely and there is only one page', () => {
+      let rows = 10
+      let numFound = 6
+      let result = objectUnderTest.calculateTotalPages(rows, numFound)
+      expect(result).toBe(1)
+    })
+
+    it('should calculate the total page when it does not round nicely and there is more than one page', () => {
+      let rows = 10
+      let numFound = 101
+      let result = objectUnderTest.calculateTotalPages(rows, numFound)
+      expect(result).toBe(11)
+    })
+  })
+
+  describe('assertIsSupplied', () => {
+    it('should do nothing when the value is supplied', () => {
+      objectUnderTest.assertIsSupplied('species one')
+    })
+
+    it('should throw when the value is NOT supplied', () => {
+      expect(() => {
+        objectUnderTest.assertIsSupplied(null)
+      }).toThrow()
     })
   })
 })

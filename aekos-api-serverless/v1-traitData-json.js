@@ -5,6 +5,7 @@ let speciesDataJson = require('./v1-speciesData-json')
 let latches = require('latches')
 let yaml = require('yamljs')
 const speciesNameParam = yaml.load('./constants.yml').paramNames.SINGLE_SPECIES_NAME
+const traitNameParam = yaml.load('./constants.yml').paramNames.SINGLE_TRAIT_NAME
 
 module.exports.handler = (event, context, callback) => {
   let processStart = r.now()
@@ -12,7 +13,7 @@ module.exports.handler = (event, context, callback) => {
     r.json.badRequest(callback, `the '${speciesNameParam}' query string parameter must be supplied`)
     return
   }
-  let params = extractParams(event)
+  let params = extractParams(event) // FIXME handle thrown Errors for invalid request
   getTraitData(params, processStart).then(successResult => {
     r.json.ok(callback, successResult)
   }).catch(error => {
@@ -23,15 +24,16 @@ module.exports.handler = (event, context, callback) => {
 
 module.exports.getTraitData = getTraitData
 function getTraitData (params, processStart) {
-  return speciesDataJson.doQuery(params.speciesName, params.start, params.rows, processStart, true).then(successResult => {
-    return enrichWithTraitData(successResult, params.traitNames)
+  return speciesDataJson.doQuery(params, processStart, true, db).then(successResult => {
+    return enrichWithTraitData(successResult, params.traitName)
   }).then((successResultWithTraits) => {
     successResultWithTraits.responseHeader.elapsedTime = r.now() - processStart
+    successResultWithTraits.responseHeader.params[traitNameParam] = params.unescapedTraitName // FIXME change to support array
     return successResultWithTraits
   })
 }
 
-function enrichWithTraitData (successResult, traitNames) {
+function enrichWithTraitData (successResult, traitName) {
   let speciesRecords = successResult.response
   return new Promise((resolve, reject) => {
     let cdl = new latches.CountDownLatch(speciesRecords.length)
@@ -39,7 +41,7 @@ function enrichWithTraitData (successResult, traitNames) {
       resolve(successResult)
     })
     speciesRecords.forEach(curr => {
-      const traitSql = getTraitSql(curr.id, traitNames)
+      const traitSql = getTraitSql(curr.id, traitName)
       db.execSelectPromise(traitSql).then(traitRecords => {
         curr.traits = traitRecords
         delete (curr.id)
@@ -51,20 +53,52 @@ function enrichWithTraitData (successResult, traitNames) {
   })
 }
 
-function getTraitSql (parentId, traitNames) {
-  // FIXME check if we need to filter by traitName
+module.exports._testonly = {
+  getTraitSql: getTraitSql
+}
+
+function getTraitSql (parentId, traitName) {
+  r.assertIsSupplied(parentId)
+  let traitFilterFragment = ''
+  if (traitName) {
+    traitFilterFragment = `AND traitName in (${traitName})`
+  }
   return `
     SELECT
     traitName,
     traitValue,
     traitUnit
     FROM traits
-    WHERE parentId = '${parentId}';`
+    WHERE parentId = '${parentId}'
+    ${traitFilterFragment};`
 }
 
 module.exports.extractParams = extractParams
 function extractParams (event) {
-  let result = speciesDataJson.extractParams(event)
-  result.traitNames = [] // FIXME get optional traitName(s)
-  return result
+  let speciesParams = speciesDataJson.extractParams(event, db)
+  let unescapedTraitName = r.getOptionalStringParam(event, traitNameParam, null)
+  let escapedTraitName = null
+  if (unescapedTraitName) {
+    escapedTraitName = db.escape(unescapedTraitName)
+  }
+  return new Params(speciesParams.speciesName, speciesParams.unescapedSpeciesName, speciesParams.start,
+    speciesParams.rows, escapedTraitName, unescapedTraitName)
+}
+
+class Params {
+  constructor (
+    speciesName,
+    unescapedSpeciesName,
+    start,
+    rows,
+    traitName,
+    unescapedTraitName
+  ) {
+    this.speciesName = speciesName
+    this.unescapedSpeciesName = unescapedSpeciesName
+    this.start = start
+    this.rows = rows
+    this.traitName = traitName
+    this.unescapedTraitName = unescapedTraitName
+  }
 }

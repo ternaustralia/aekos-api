@@ -1,5 +1,7 @@
 {
   "queryStringParameters": {
-    "speciesName": "Acacia dealbata"
+    "speciesName": "Acacia dealbata",
+    "start": 0,
+    "rows": 1
   }
 }

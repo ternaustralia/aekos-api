@@ -12,8 +12,8 @@ module.exports.handler = (event, context, callback) => {
   // FIXME handle escaping a list when we can get multiple names
   let traitName = event.queryStringParameters[traitNameParam]
   let escapedTraitName = db.escape(traitName)
-  let pageSize = r.getOptionalParam(event, 'pageSize', 50)
-  let pageNum = r.getOptionalParam(event, 'pageNum', 1)
+  let pageSize = r.getOptionalNumberParam(event, 'pageSize', 50)
+  let pageNum = r.getOptionalNumberParam(event, 'pageNum', 1)
   let offset = r.calculateOffset(pageNum, pageSize)
   const sql = `
     SELECT COALESCE(s.scientificName, s.taxonRemarks) AS name, count(*) AS recordsHeld, 'notusedanymore' AS id

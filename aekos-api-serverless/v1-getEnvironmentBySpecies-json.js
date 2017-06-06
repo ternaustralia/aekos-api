@@ -20,8 +20,8 @@ module.exports.handler = (event, context, callback) => {
   // FIXME handle escaping a list when we can get multiple names
   let speciesName = event.queryStringParameters[speciesNameParam]
   let escapedSpeciesName = db.escape(speciesName)
-  let pageSize = r.getOptionalParam(event, 'pageSize', 50)
-  let pageNum = r.getOptionalParam(event, 'pageNum', 1)
+  let pageSize = r.getOptionalNumberParam(event, 'pageSize', 50)
+  let pageNum = r.getOptionalNumberParam(event, 'pageNum', 1)
   let offset = r.calculateOffset(pageNum, pageSize)
   const sql = `
     SELECT v.varName AS code, count(*) AS recordsHeld

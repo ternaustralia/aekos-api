@@ -1,18 +1,25 @@
 'use strict'
 let r = require('./response-helper')
-let db = require('./db-helper')
 let yaml = require('yamljs')
 const speciesNameParam = yaml.load('./constants.yml').paramNames.SINGLE_SPECIES_NAME
 const recordsHeldField = 'recordsHeld'
 
 module.exports.handler = (event, context, callback) => {
+  let db = require('./db-helper')
+  function realElapsedTimeCalculator (startMs) {
+    return r.calculateElapsedTime(startMs)
+  }
+  doHandle(event, callback, db, realElapsedTimeCalculator)
+}
+
+function doHandle (event, callback, db, elapsedTimeCalculator) {
   let processStart = r.now()
   if (!r.isQueryStringParamPresent(event, speciesNameParam)) {
     r.json.badRequest(callback, `the '${speciesNameParam}' query string parameter must be supplied`)
     return
   }
-  let params = extractParams(event)
-  doQuery(params.speciesName, params.start, params.rows, processStart, false).then(successResult => {
+  let params = extractParams(event, db) // FIXME handle thrown Errors for invalid request
+  doQuery(params, processStart, false, db, elapsedTimeCalculator).then(successResult => {
     r.json.ok(callback, successResult)
   }).catch(error => {
     console.error('Failed to get speciesData', error)
@@ -20,45 +27,46 @@ module.exports.handler = (event, context, callback) => {
   })
 }
 
-function doQuery (escapedSpeciesName, start, rows, processStart, includeSpeciesRecordId) {
-  return new Promise((resolve, reject) => {
-    const recordsSql = getRecordsSql(escapedSpeciesName, start, rows, includeSpeciesRecordId)
-    const countSql = getCountSql(escapedSpeciesName)
-    let pageNumber = -1 // TODO calc page number
-    let totalPages = -1 // TODO calc total pages
-    let recordsPromise = db.execSelectPromise(recordsSql)
-    let countPromise = db.execSelectPromise(countSql)
-    Promise.all([recordsPromise, countPromise]).then(values => {
-      let records = values[0]
-      let count = values[1]
-      if (count.length !== 1) {
-        throw new Error('SQL result problem: result from count query did not have exactly one row. Result=' + JSON.stringify(count))
-      }
-      let result = {
-        responseHeader: {
-          elapsedTime: r.now() - processStart,
-          numFound: count[0][recordsHeldField],
-          pageNumber: pageNumber,
-          params: {
-            rows: rows,
-            start: start
-          },
-          totalPages: totalPages
+module.exports.doQuery = doQuery
+function doQuery (params, processStart, includeSpeciesRecordId, db, elapsedTimeCalculator) {
+  const recordsSql = getRecordsSql(params.speciesName, params.start, params.rows, includeSpeciesRecordId)
+  const countSql = getCountSql(params.speciesName)
+  let recordsPromise = db.execSelectPromise(recordsSql)
+  let countPromise = db.execSelectPromise(countSql)
+  return Promise.all([recordsPromise, countPromise]).then(values => {
+    let records = values[0]
+    let count = values[1]
+    if (count.length !== 1) {
+      throw new Error('SQL result problem: result from count query did not have exactly one row. Result=' + JSON.stringify(count))
+    }
+    let numFound = count[0][recordsHeldField]
+    let totalPages = r.calculateTotalPages(params.rows, numFound)
+    let pageNumber = r.calculatePageNumber(params.start, numFound, totalPages)
+    let result = {
+      responseHeader: {
+        elapsedTime: elapsedTimeCalculator(processStart),
+        numFound: numFound,
+        pageNumber: pageNumber,
+        params: {
+          rows: params.rows,
+          start: params.start,
+          [speciesNameParam]: params.unescapedSpeciesName
         },
-        response: records
-      }
-      resolve(result)
-    })
-    .catch(error => {
-      let msg = 'Problem executing SQL: ' + error.message
-      console.error(msg)
-      reject(msg)
-    })
+        totalPages: totalPages
+      },
+      response: records
+    }
+    return result
   })
 }
-module.exports.doQuery = doQuery
+
+module.exports._testonly = {
+  getRecordsSql: getRecordsSql,
+  doHandle: doHandle
+}
 
 function getRecordsSql (escapedSpeciesName, start, rows, includeSpeciesRecordId) {
+  r.assertIsSupplied(escapedSpeciesName)
   let speciesIdFragment = ''
   if (includeSpeciesRecordId) {
     speciesIdFragment = 's.id,'
@@ -110,14 +118,14 @@ function getCountSql (escapedSpeciesName) {
 }
 
 module.exports.extractParams = extractParams
-function extractParams (event) {
+function extractParams (event, db) {
   // FIXME handle escaping a list when we can get multiple names
   let unescapedSpeciesName = event.queryStringParameters[speciesNameParam]
   let escapedSpeciesName = db.escape(unescapedSpeciesName)
   return {
     speciesName: escapedSpeciesName, // FIXME change to multiple names
     unescapedSpeciesName: unescapedSpeciesName,
-    start: r.getOptionalParam(event, 'start', 0),
-    rows: r.getOptionalParam(event, 'rows', 20)
+    start: r.getOptionalNumberParam(event, 'start', 0),
+    rows: r.getOptionalNumberParam(event, 'rows', 20) // TODO validate > 0
   }
 }

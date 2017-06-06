@@ -5,6 +5,7 @@ let Set = require('collections/set')
 let speciesDataJson = require('./v1-speciesData-json')
 let yaml = require('yamljs')
 const speciesNameParam = yaml.load('./constants.yml').paramNames.SINGLE_SPECIES_NAME
+const varNameParam = yaml.load('./constants.yml').paramNames.SINGLE_VAR_NAME
 const recordsHeldField = 'recordsHeld'
 const visitKeySeparator = '#'
 
@@ -15,7 +16,7 @@ module.exports.handler = (event, context, callback) => {
     return
   }
   let params = extractParams(event)
-  doQuery(params, processStart, false).then(successResult => {
+  doQuery(params, processStart).then(successResult => {
     r.json.ok(callback, successResult)
   }).catch(error => {
     console.error('Failed to get environmentData', error)
@@ -24,11 +25,9 @@ module.exports.handler = (event, context, callback) => {
 }
 
 module.exports.doQuery = doQuery
-function doQuery (params, processStart, includeSpeciesRecordId) {
-  const recordsSql = getRecordsSql(params.speciesName, params.start, params.rows, includeSpeciesRecordId)
+function doQuery (params, processStart) {
+  const recordsSql = getRecordsSql(params.speciesName, params.start, params.rows)
   const countSql = getCountSql(params.speciesName)
-  let pageNumber = -1 // TODO calc page number
-  let totalPages = -1 // TODO calc total pages
   let recordsPromise = db.execSelectPromise(recordsSql)
   let countPromise = db.execSelectPromise(countSql)
   return Promise.all([recordsPromise, countPromise]).then(values => {
@@ -37,16 +36,19 @@ function doQuery (params, processStart, includeSpeciesRecordId) {
     if (count.length !== 1) {
       throw new Error('SQL result problem: result from count query did not have exactly one row. Result=' + JSON.stringify(count))
     }
+    let numFound = count[0][recordsHeldField]
+    let totalPages = r.calculateTotalPages(params.rows, numFound)
+    let pageNumber = r.calculatePageNumber(params.start, numFound, totalPages)
     let partialResponseObj = {
       responseHeader: {
         elapsedTime: r.now() - processStart,
-        numFound: count[0][recordsHeldField],
+        numFound: numFound,
         pageNumber: pageNumber,
         params: {
           rows: params.rows,
           start: params.start,
-          [speciesNameParam]: params.unescapedSpeciesName
-          // TODO add varNames param
+          [speciesNameParam]: params.unescapedSpeciesName,
+          [varNameParam]: params.unescapedVarName
         },
         totalPages: totalPages
       },
@@ -157,14 +159,8 @@ function stripVisitKeys (records) {
   })
 }
 
-function assertIsSupplied (escapedSpeciesName) {
-  if (!escapedSpeciesName) {
-    throw new Error(`Programmer problem: no escaped species name was supplied='${escapedSpeciesName}'.`)
-  }
-}
-
 function getRecordsSql (escapedSpeciesName, start, rows) {
-  assertIsSupplied(escapedSpeciesName)
+  r.assertIsSupplied(escapedSpeciesName)
   return `
     SELECT DISTINCT
     CONCAT(e.locationID, '${visitKeySeparator}', e.eventDate) AS visitKey,
@@ -194,7 +190,7 @@ function getRecordsSql (escapedSpeciesName, start, rows) {
 }
 
 function getCountSql (escapedSpeciesName) {
-  assertIsSupplied(escapedSpeciesName)
+  r.assertIsSupplied(escapedSpeciesName)
   return `
     SELECT count(DISTINCT locationID, eventDate) as ${recordsHeldField}
     FROM species
@@ -205,7 +201,7 @@ function getCountSql (escapedSpeciesName) {
 }
 
 function getVarsSql (visitKeyClauses) {
-  assertIsSupplied(visitKeyClauses)
+  r.assertIsSupplied(visitKeyClauses)
   return `
     SELECT
     CONCAT(locationID, '${visitKeySeparator}', eventDate) AS visitKey,
@@ -218,8 +214,8 @@ function getVarsSql (visitKeyClauses) {
 }
 
 function getSpeciesNamesSql (visitKeyClauses, speciesNamesClauses) {
-  assertIsSupplied(visitKeyClauses)
-  assertIsSupplied(speciesNamesClauses)
+  r.assertIsSupplied(visitKeyClauses)
+  r.assertIsSupplied(speciesNamesClauses)
   return `
     SELECT DISTINCT
     CONCAT(locationID, '${visitKeySeparator}', eventDate) AS visitKey,
@@ -249,7 +245,27 @@ function getVisitKeyClauses (visitKeys) {
 
 module.exports.extractParams = extractParams
 function extractParams (event) {
-  let result = speciesDataJson.extractParams(event)
-  result.varNames = [] // FIXME get optional varName(s)
-  return result
+  let speciesParams = speciesDataJson.extractParams(event, db)
+  let varName = null // FIXME get optional varName(s)
+  let unescapedVarName = null // FIXME do escaping
+  return new Params(speciesParams.speciesName, speciesParams.unescapedSpeciesName, speciesParams.start,
+    speciesParams.rows, varName, unescapedVarName)
+}
+
+class Params {
+  constructor (
+    speciesName,
+    unescapedSpeciesName,
+    start,
+    rows,
+    varName,
+    unescapedVarName
+  ) {
+    this.speciesName = speciesName
+    this.unescapedSpeciesName = unescapedSpeciesName
+    this.start = start
+    this.rows = rows
+    this.varName = varName
+    this.unescapedVarName = unescapedVarName
+  }
 }

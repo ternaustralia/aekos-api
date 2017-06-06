@@ -125,14 +125,14 @@ custom:
       description: "records per page"
     SingleSpeciesNameQueryParam:
       name: "${file(./constants.yml):paramNames.SINGLE_SPECIES_NAME}"
-      description: "single species name"
+      description: "single species name to search for"
       required: true
     SingleTraitNameQueryParam:
       name: "${file(./constants.yml):paramNames.SINGLE_TRAIT_NAME}"
-      description: "single trait name"
-    SingleEnvVarNameQueryParam:
-      name: "${file(./constants.yml):paramNames.SINGLE_ENVVAR_NAME}"
-      description: "single environmental variable name"
+      description: "single trait name filter (only values for this trait will be returned)"
+    SingleVarNameQueryParam:
+      name: "${file(./constants.yml):paramNames.SINGLE_VAR_NAME}"
+      description: "single environmental variable name filter (only values for this variable will be returned)"
     PageNumQueryParam:
       name: "${file(./constants.yml):paramNames.PAGE_NUM}"
       description: "1-indexed page number"
@@ -274,7 +274,10 @@ functions:
               traits have species records present in the system. To get the values, you need to use the Data
               Retrieval services.
             queryParams:
-              - ${self:custom.commonModelSchemaFragments.SingleTraitNameQueryParam} # FIXME need to mark as required
+              -
+                name: "${file(./constants.yml):paramNames.SINGLE_TRAIT_NAME}"
+                description: "single trait name to search for"
+                required: true
               - ${self:custom.commonModelSchemaFragments.PageNumQueryParam}
               - ${self:custom.commonModelSchemaFragments.PageSizeQueryParam}
             methodResponses:
@@ -505,7 +508,7 @@ functions:
               This resource honours Accept headers represented by any of the /environmentData.* resources."
             queryParams:
               - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
-              - ${self:custom.commonModelSchemaFragments.SingleEnvVarNameQueryParam}
+              - ${self:custom.commonModelSchemaFragments.SingleVarNameQueryParam}
               - ${self:custom.commonModelSchemaFragments.StartQueryParam}
               - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
             methodResponses:
@@ -531,7 +534,7 @@ functions:
               variables are returned. Note: not all sites have environmental variables available."
             queryParams:
               - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
-              - ${self:custom.commonModelSchemaFragments.SingleEnvVarNameQueryParam}
+              - ${self:custom.commonModelSchemaFragments.SingleVarNameQueryParam}
               - ${self:custom.commonModelSchemaFragments.StartQueryParam}
               - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
             methodResponses:
@@ -557,7 +560,7 @@ functions:
               variables are returned. Note: not all sites have environmental variables available."
             queryParams:
               - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
-              - ${self:custom.commonModelSchemaFragments.SingleEnvVarNameQueryParam}
+              - ${self:custom.commonModelSchemaFragments.SingleVarNameQueryParam}
               - ${self:custom.commonModelSchemaFragments.StartQueryParam}
               - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
             methodResponses:

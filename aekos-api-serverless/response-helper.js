@@ -29,11 +29,32 @@ function isQueryStringParamPresent (event, paramName) {
   return true
 }
 
-function getOptionalParam (event, paramName, defaultValue) {
+function getOptionalStringParam (event, paramName, defaultValue) {
   if (!isQueryStringParamPresent(event, paramName)) {
     return defaultValue
   }
-  return event.queryStringParameters[paramName]
+  let rawValue = event.queryStringParameters[paramName]
+  let valueType = typeof (rawValue)
+  if (valueType === 'string') {
+    return rawValue
+  }
+  throw new Error(`Data problem: supplied value '${rawValue}' of type '${valueType}' is not a string.`)
+}
+
+function getOptionalNumberParam (event, paramName, defaultValue) {
+  if (!isQueryStringParamPresent(event, paramName)) {
+    return defaultValue
+  }
+  let rawValue = event.queryStringParameters[paramName]
+  let valueType = typeof (rawValue)
+  if (valueType === 'number') {
+    return rawValue
+  }
+  let parsedValue = parseInt(rawValue)
+  if (isNaN(parsedValue)) {
+    throw new Error(`Data problem: supplied value '${rawValue}' of type '${valueType}' is not a number.`)
+  }
+  return parsedValue
 }
 
 function calculateOffset (pageNum, pageSize) {
@@ -41,10 +62,11 @@ function calculateOffset (pageNum, pageSize) {
 }
 
 function assertNumber (val) {
-  if (typeof (val) === 'number') {
-    return true
+  let valType = typeof (val)
+  if (valType === 'number') {
+    return
   }
-  return false
+  throw new Error(`Data problem: expected value '${val}' of type '${valType}' to be a number`)
 }
 
 const contentTypes = {
@@ -82,6 +104,39 @@ function resolveVocabCode (code) {
   return result
 }
 
+function calculatePageNumber (start, numFound, totalPages) {
+  assertNumber(start)
+  assertNumber(numFound)
+  assertNumber(totalPages)
+  if (numFound === 0) {
+    return 0
+  }
+  if (start === 0) {
+    return 1
+  }
+  let decimalProgress = (start + 1) / numFound
+  let decimalPageNumber = decimalProgress * totalPages
+  return Math.ceil(decimalPageNumber)
+}
+
+function calculateTotalPages (rows, numFound) {
+  return Math.ceil(numFound / rows)
+}
+
+function assertIsSupplied (escapedSpeciesName) {
+  if (!escapedSpeciesName) {
+    throw new Error(`Programmer problem: no escaped species name was supplied='${escapedSpeciesName}'.`)
+  }
+}
+
+function now () {
+  return new Date().getTime()
+}
+
+function calculateElapsedTime (startMs) {
+  return now() - startMs
+}
+
 module.exports = {
   json: {
     ok: (theCallback, theBody) => {
@@ -102,11 +157,14 @@ module.exports = {
   getContentType: getContentType,
   isQueryStringParamPresent: isQueryStringParamPresent,
   assertNumber: assertNumber,
-  getOptionalParam: getOptionalParam,
+  assertIsSupplied: assertIsSupplied,
+  getOptionalStringParam: getOptionalStringParam,
+  getOptionalNumberParam: getOptionalNumberParam,
   calculateOffset: calculateOffset,
   resolveVocabCode: resolveVocabCode,
-  now: () => {
-    return new Date().getTime()
-  },
-  contentTypes: contentTypes
+  now: now,
+  calculateElapsedTime: calculateElapsedTime,
+  contentTypes: contentTypes,
+  calculatePageNumber: calculatePageNumber,
+  calculateTotalPages: calculateTotalPages
 }
