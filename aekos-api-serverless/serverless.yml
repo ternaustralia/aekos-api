@@ -154,6 +154,16 @@ custom:
           type: array
           items: ${self:custom.commonModelSchemaFragments.SpeciesSummary}
       -
+        name: "AllSpeciesDataResponse"
+        contentType: "application/json"
+        schema:
+          type: object
+          properties:
+            response:
+              type: array
+              # FIXME define the object
+            responseHeader: ${self:custom.commonModelSchemaFragments.ResponseHeader}
+      -
         name: "SpeciesDataResponse"
         contentType: "application/json"
         schema:
@@ -568,4 +578,24 @@ functions:
                 statusCode: 200
                 responseModels:
                   "text/csv": "CsvResponse"
+              - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+  v1-allSpeciesData-json:
+    handler: v1-allSpeciesData-json.handler
+    events:
+      - http:
+          path: v1/allSpeciesData.json
+          method: get
+          cors: true
+          documentation:
+            summary: "Get all species data in JSON format"
+            description: |
+              Gets Darwin Core records in JSON format.
+            queryParams:
+              - ${self:custom.commonModelSchemaFragments.StartQueryParam}
+              - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
+            methodResponses:
+              -
+                statusCode: 200
+                responseModels:
+                  "application/json": "AllSpeciesDataResponse"
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}

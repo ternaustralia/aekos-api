@@ -1,0 +1,3 @@
+- add HATEOAS headers
+- add download option for CSVs
+- add .csv and content negotiation for allSpeciesData

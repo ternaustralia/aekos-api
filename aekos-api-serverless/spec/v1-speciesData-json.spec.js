@@ -149,11 +149,12 @@ describe('v1-speciesData-json', () => {
     c.bibliographicCitation,
     c.datasetName
     FROM species AS s
-    INNER JOIN env AS e
+    LEFT JOIN env AS e
     ON s.locationID = e.locationID
     AND s.eventDate = e.eventDate
-    INNER JOIN citations AS c
+    LEFT JOIN citations AS c
     ON e.samplingProtocol = c.samplingProtocol
+    
     WHERE (
       s.scientificName IN ('species one')
       OR s.taxonRemarks IN ('species one')

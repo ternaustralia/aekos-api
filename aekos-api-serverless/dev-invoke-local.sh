@@ -10,6 +10,11 @@ if [ -z "$FUNC" ]; then
   exit 1
 fi
 FUNC=`bash -c "echo $FUNC | sed 's/\.js$//'"`
+DATA=./test-data/${FUNC}.data.json
+if [ ! -f "$DATA" ]; then
+  echo "[ERROR] the data file $DATA doesn't exist"
+  exit 1
+fi
 serverless invoke local \
   --function=$FUNC \
-  --path=./test-data/${FUNC}.data.json
+  --path=$DATA
