@@ -135,4 +135,18 @@ We have used Darwin Core terms (version 2015-06-02) as field names for the resul
 There are two fields that are relevant to species names: \`scientificName\` and \`taxonRemarks\`. The former is, as the name
 suggests, for scientific species names and the latter is for records that have a common species name or a
 commentary about the organism e.g.: "Grass", "Absent" or "Clover". See http://rs.tdwg.org/dwc/terms/index.htm#scientificName
-and http://rs.tdwg.org/dwc/terms/index.htm#taxonRemarks for more information.`
+and http://rs.tdwg.org/dwc/terms/index.htm#taxonRemarks for more information.
+
+# A note about performance/response times
+This API is running on AWS Lambda and API Gateway. Each resource operates individually and they will go to sleep
+when they haven't been called for some time (something around 5-10 minutes seems to be the consensus). When the
+resource is warm (has recently been called) it should response within 1-2 seconds. However, when it's cold (gone
+to sleep) it will have to start up before it can respond so the total response time could be up to 10 seconds.
+
+To build a responsive UI on top of these functions, you can "pre-heat" the resources your users are likely to use
+as the page loads. A workflow like:
+ 1. user loads page
+ 1. as page loads, call the function with any params and disregard the result
+ 1. user spends a few seconds filling out form on page
+ 1. user submits request
+ 1. AEKOS API responds quickly because the resource is already warmed up`
