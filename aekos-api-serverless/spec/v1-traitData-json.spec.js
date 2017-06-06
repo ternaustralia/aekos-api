@@ -1,7 +1,93 @@
 'use strict'
 let objectUnderTest = require('../v1-traitData-json')
+let StubDB = require('./StubDB')
 
 describe('v1-traitData-json', () => {
+  describe('doHandle', () => {
+    it('should return a 200 response when we return all traits for a species', (done) => {
+      let stubDb = new StubDB()
+      stubDb.setExecSelectPromiseResponses([
+        [ {id: 'species1', scientificName: 'species one'} ],
+        [ {recordsHeld: 31} ],
+        [
+          { traitName: 'trait1', traitValue: 'value1', traitUnit: 'unit1' },
+          { traitName: 'trait2', traitValue: 'value2', traitUnit: 'unit2' }
+        ]
+      ])
+      let event = {
+        queryStringParameters: {
+          speciesName: 'species one',
+          // don't supply 'traitName'
+          rows: '15',
+          start: '0'
+        }
+      }
+      let callback = (error, result) => {
+        if (error) {
+          fail('Responded with error: ' + JSON.stringify(error))
+        }
+        expect(result.statusCode).toBe(200)
+        expect(result.headers).toEqual({
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Credentials': true,
+          'Content-Type': "'application/json'"
+        })
+        expect(JSON.parse(result.body)).toEqual({
+          responseHeader: {
+            elapsedTime: 42,
+            numFound: 31,
+            pageNumber: 1,
+            params: {
+              rows: 15,
+              start: 0,
+              speciesName: 'species one',
+              traitName: null
+            },
+            totalPages: 3
+          },
+          response: [
+            {
+              scientificName: 'species one',
+              traits: [
+                { traitName: 'trait1', traitValue: 'value1', traitUnit: 'unit1' },
+                { traitName: 'trait2', traitValue: 'value2', traitUnit: 'unit2' }
+              ]
+            }
+          ]
+        })
+        done()
+      }
+      objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 42 })
+    })
+
+    it('should echo the supplied trait name', (done) => {
+      let stubDb = new StubDB()
+      stubDb.setExecSelectPromiseResponses([
+        [ {id: 'species1', scientificName: 'species one'} ],
+        [ {recordsHeld: 31} ],
+        [ ]
+      ])
+      let event = {
+        queryStringParameters: {
+          speciesName: 'species one',
+          traitName: 'trait one',
+          rows: '15',
+          start: '0'
+        }
+      }
+      let callback = (error, result) => {
+        if (error) {
+          fail('Responded with error: ' + JSON.stringify(error))
+        }
+        expect(result.statusCode).toBe(200)
+        let responseHeader = JSON.parse(result.body).responseHeader
+        expect(responseHeader.params.traitName).toBe('trait one')
+        done()
+      }
+      objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 42 })
+    })
+  })
+
   describe('extractParams', () => {
     it('should extract the params when they are present', () => {
       let event = {
@@ -12,7 +98,7 @@ describe('v1-traitData-json', () => {
           start: '0'
         }
       }
-      let result = objectUnderTest.extractParams(event)
+      let result = objectUnderTest.extractParams(event, new StubDB())
       expect(result.speciesName).toBe("'species one'")
       expect(result.unescapedSpeciesName).toBe('species one')
       expect(result.traitName).toBe("'trait one'")
@@ -27,7 +113,7 @@ describe('v1-traitData-json', () => {
           speciesName: 'species two'
         }
       }
-      let result = objectUnderTest.extractParams(event)
+      let result = objectUnderTest.extractParams(event, new StubDB())
       expect(result.speciesName).toBe("'species two'")
       expect(result.unescapedSpeciesName).toBe('species two')
       expect(result.traitName).toBeNull()

@@ -1,6 +1,5 @@
 'use strict'
 let r = require('./response-helper')
-let db = require('./db-helper')
 let speciesDataJson = require('./v1-speciesData-json')
 let latches = require('latches')
 let yaml = require('yamljs')
@@ -8,13 +7,21 @@ const speciesNameParam = yaml.load('./constants.yml').paramNames.SINGLE_SPECIES_
 const traitNameParam = yaml.load('./constants.yml').paramNames.SINGLE_TRAIT_NAME
 
 module.exports.handler = (event, context, callback) => {
+  let db = require('./db-helper')
+  function realElapsedTimeCalculator (startMs) {
+    return r.calculateElapsedTime(startMs)
+  }
+  doHandle(event, callback, db, realElapsedTimeCalculator)
+}
+
+function doHandle (event, callback, db, elapsedTimeCalculator) {
   let processStart = r.now()
   if (!r.isQueryStringParamPresent(event, speciesNameParam)) {
     r.json.badRequest(callback, `the '${speciesNameParam}' query string parameter must be supplied`)
     return
   }
-  let params = extractParams(event) // FIXME handle thrown Errors for invalid request
-  getTraitData(params, processStart).then(successResult => {
+  let params = extractParams(event, db) // FIXME handle thrown Errors for invalid request
+  getTraitData(params, processStart, db, elapsedTimeCalculator).then(successResult => {
     r.json.ok(callback, successResult)
   }).catch(error => {
     console.error('Failed while building result', error)
@@ -23,17 +30,17 @@ module.exports.handler = (event, context, callback) => {
 }
 
 module.exports.getTraitData = getTraitData
-function getTraitData (params, processStart) {
-  return speciesDataJson.doQuery(params, processStart, true, db).then(successResult => {
-    return enrichWithTraitData(successResult, params.traitName)
+function getTraitData (params, processStart, db, elapsedTimeCalculator) {
+  return speciesDataJson.doQuery(params, processStart, true, db, elapsedTimeCalculator).then(successResult => {
+    return enrichWithTraitData(successResult, params.traitName, db)
   }).then((successResultWithTraits) => {
-    successResultWithTraits.responseHeader.elapsedTime = r.now() - processStart
+    successResultWithTraits.responseHeader.elapsedTime = elapsedTimeCalculator(processStart)
     successResultWithTraits.responseHeader.params[traitNameParam] = params.unescapedTraitName // FIXME change to support array
     return successResultWithTraits
   })
 }
 
-function enrichWithTraitData (successResult, traitName) {
+function enrichWithTraitData (successResult, traitName, db) {
   let speciesRecords = successResult.response
   return new Promise((resolve, reject) => {
     let cdl = new latches.CountDownLatch(speciesRecords.length)
@@ -54,7 +61,8 @@ function enrichWithTraitData (successResult, traitName) {
 }
 
 module.exports._testonly = {
-  getTraitSql: getTraitSql
+  getTraitSql: getTraitSql,
+  doHandle: doHandle
 }
 
 function getTraitSql (parentId, traitName) {
@@ -74,7 +82,7 @@ function getTraitSql (parentId, traitName) {
 }
 
 module.exports.extractParams = extractParams
-function extractParams (event) {
+function extractParams (event, db) {
   let speciesParams = speciesDataJson.extractParams(event, db)
   let unescapedTraitName = r.getOptionalStringParam(event, traitNameParam, null)
   let escapedTraitName = null

@@ -1,11 +1,11 @@
 'use strict'
 let objectUnderTest = require('../v1-speciesData-json')
-let StubDb = require('./StubDB')
+let StubDB = require('./StubDB')
 
 describe('v1-speciesData-json', () => {
   describe('doHandle', () => {
     it('should return a 200 response when all params are supplied', (done) => {
-      let stubDb = new StubDb()
+      let stubDb = new StubDB()
       stubDb.setExecSelectPromiseResponses([
         [ {recordNum: 1}, {recordNum: 2} ],
         [ {recordsHeld: 31} ]
@@ -50,7 +50,7 @@ describe('v1-speciesData-json', () => {
     })
 
     it('should calculate paging information when only start is provided', (done) => {
-      let stubDb = new StubDb()
+      let stubDb = new StubDB()
       stubDb.setExecSelectPromiseResponses([
         [ {recordNum: 1} ],
         [ {recordsHeld: 31} ]
@@ -75,7 +75,7 @@ describe('v1-speciesData-json', () => {
     })
 
     it('should behave weirdly when the user supplies wierd params', (done) => {
-      let stubDb = new StubDb()
+      let stubDb = new StubDB()
       stubDb.setExecSelectPromiseResponses([
         [ {recordNum: 1} ],
         [ {recordsHeld: 14} ]
@@ -102,9 +102,6 @@ describe('v1-speciesData-json', () => {
   })
 
   describe('extractParams', () => {
-    let stubDb = {
-      escape: require('../db-helper').escape
-    }
     it('should extract the params when they are present', () => {
       let event = {
         queryStringParameters: {
@@ -113,7 +110,7 @@ describe('v1-speciesData-json', () => {
           start: '0'
         }
       }
-      let result = objectUnderTest.extractParams(event, stubDb)
+      let result = objectUnderTest.extractParams(event, new StubDB())
       expect(result.speciesName).toBe("'species one'")
       expect(result.unescapedSpeciesName).toBe('species one')
       expect(result.rows).toBe(15)
@@ -126,7 +123,7 @@ describe('v1-speciesData-json', () => {
           speciesName: 'species two'
         }
       }
-      let result = objectUnderTest.extractParams(event, stubDb)
+      let result = objectUnderTest.extractParams(event, new StubDB())
       expect(result.speciesName).toBe("'species two'")
       expect(result.unescapedSpeciesName).toBe('species two')
       expect(result.rows).toBe(20)
