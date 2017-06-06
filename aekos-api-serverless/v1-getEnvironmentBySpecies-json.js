@@ -30,9 +30,9 @@ module.exports.handler = (event, context, callback) => {
     ON s.locationID = e.locationID
     AND s.eventDate = e.eventDate
     AND (
-	  s.scientificName IN (${escapedSpeciesName})
+      s.scientificName IN (${escapedSpeciesName})
       OR s.taxonRemarks IN (${escapedSpeciesName})
-	  )
+    )
     INNER JOIN envvars AS v
     ON v.locationID = e.locationID
     AND v.eventDate = e.eventDate

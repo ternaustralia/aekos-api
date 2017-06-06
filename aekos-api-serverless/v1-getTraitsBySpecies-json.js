@@ -29,9 +29,9 @@ module.exports.handler = (event, context, callback) => {
     INNER JOIN traits AS t
     ON t.parentId = s.id
     AND (
-	  s.scientificName IN (${escapedSpeciesName})
+      s.scientificName IN (${escapedSpeciesName})
       OR s.taxonRemarks IN (${escapedSpeciesName})
-	  )
+    )
     GROUP BY 1
     ORDER BY 1
     LIMIT ${pageSize} OFFSET ${offset};`
