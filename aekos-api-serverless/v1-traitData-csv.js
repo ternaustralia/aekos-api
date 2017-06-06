@@ -6,15 +6,24 @@ let speciesDataCsv = require('./v1-speciesData-csv')
 let csvHeaders = speciesDataCsv.csvHeaders
 
 module.exports.handler = (event, context, callback) => {
+  let db = require('./db-helper')
+  doHandle(event, callback, db, r.calculateElapsedTime)
+}
+
+function doHandle (event, callback, db, elapsedTimeCalculator) {
   let processStart = r.now()
-  let params = traitDataJson.extractParams(event)
-  traitDataJson.getTraitData(params, processStart).then(successResult => {
+  let params = traitDataJson.extractParams(event, db)
+  traitDataJson.getTraitData(params, processStart, db, elapsedTimeCalculator).then(successResult => {
     let result = mapJsonToCsv(successResult.response)
     r.csv.ok(callback, result)
   }).catch(error => {
     console.error('Failed while building result', error)
     r.json.internalServerError(callback, 'Sorry, something went wrong')
   })
+}
+
+module.exports._testonly = {
+  doHandle: doHandle
 }
 
 module.exports.mapJsonToCsv = mapJsonToCsv
@@ -37,7 +46,7 @@ function createCsvRow (record) {
   for (let i = 0; i < record.traits.length; i++) {
     let curr = record.traits[i]
     result += `,"${curr.traitName}","${curr.traitValue}",`
-    if (curr.traitUnit === null) { // FIXME are they null or undefined?
+    if (curr.traitUnit === null) {
       continue
     }
     result += `"${curr.traitUnit}"`

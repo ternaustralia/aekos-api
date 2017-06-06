@@ -20,9 +20,14 @@ let csvHeaders = [
 module.exports.csvHeaders = csvHeaders
 
 module.exports.handler = (event, context, callback) => {
+  let db = require('./db-helper')
+  doHandle(event, callback, db, r.calculateElapsedTime)
+}
+
+function doHandle (event, callback, db, elapsedTimeCalculator) {
   let processStart = r.now()
-  let params = speciesDataJson.extractParams(event)
-  speciesDataJson.getSpeciesData(params, processStart).then(successResult => {
+  let params = speciesDataJson.extractParams(event, db)
+  speciesDataJson.doQuery(params, processStart, false, db, elapsedTimeCalculator).then(successResult => {
     let result = mapJsonToCsv(successResult.response)
     r.csv.ok(callback, result)
   }).catch(error => {
@@ -31,13 +36,18 @@ module.exports.handler = (event, context, callback) => {
   })
 }
 
+module.exports._testonly = {
+  doHandle: doHandle,
+  mapJsonToCsv: mapJsonToCsv
+}
+
 function mapJsonToCsv (records) {
   let headerRow = getCsvHeaderRow()
   let dataRows = records.reduce((prev, curr) => {
     if (prev === '') {
-      return createCsvRow(curr)
+      return createCsvRow(csvHeaders, curr)
     }
-    return prev + '\n' + createCsvRow(curr)
+    return prev + '\n' + createCsvRow(csvHeaders, curr)
   }, '')
   return headerRow + '\n' + dataRows
 }
@@ -46,23 +56,16 @@ module.exports.createCsvRow = createCsvRow
 function createCsvRow (csvHeadersParam, record) {
   let result = ''
   for (let i = 0; i < csvHeadersParam.length; i++) {
-    let curr = csvHeadersParam[i]
+    let currHeaderDef = csvHeadersParam[i]
     if (result.length > 0) {
       result += ','
     }
-    if (curr.isQuoted) {
-      let value = record[curr.name]
-      if (value === null) {
-        continue
-      }
-      result += `"${value}"`
-      continue
-    }
-    result += record[curr.name]
+    result += currHeaderDef.getValue(record)
   }
   return result
 }
 
+module.exports.getCsvHeaderRow = getCsvHeaderRow
 function getCsvHeaderRow () {
   return csvHeaders.reduce((prev, curr) => {
     if (prev === '') {

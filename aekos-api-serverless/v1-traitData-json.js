@@ -8,10 +8,7 @@ const traitNameParam = yaml.load('./constants.yml').paramNames.SINGLE_TRAIT_NAME
 
 module.exports.handler = (event, context, callback) => {
   let db = require('./db-helper')
-  function realElapsedTimeCalculator (startMs) {
-    return r.calculateElapsedTime(startMs)
-  }
-  doHandle(event, callback, db, realElapsedTimeCalculator)
+  doHandle(event, callback, db, r.calculateElapsedTime)
 }
 
 function doHandle (event, callback, db, elapsedTimeCalculator) {
