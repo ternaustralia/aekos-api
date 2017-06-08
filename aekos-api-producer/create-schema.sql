@@ -28,11 +28,12 @@ CREATE TABLE env (
 CREATE TABLE envvars (
 	locationID VARCHAR(200) NOT NULL,
 	eventDate CHAR(10) NOT NULL,
-	varName varchar(30),
+	varName varchar(30) NOT NULL,
 	varValue varchar(100),
 	varUnit varchar(30)
 	,FOREIGN KEY (locationID, eventDate) REFERENCES env(locationID, eventDate) -- NOT_RAW
 );
+CREATE INDEX idx_envvars_varName ON envvars(varName); -- NOT_RAW
 
 CREATE TABLE species (
 	id CHAR(36) NOT NULL,
@@ -49,8 +50,9 @@ CREATE INDEX idx_species_taxonRemarks ON species(taxonRemarks); -- NOT_RAW
 
 CREATE TABLE traits (
 	parentId CHAR(37) NOT NULL,
-	traitName varchar(30),
+	traitName varchar(30) NOT NULL,
 	traitValue varchar(100),
 	traitUnit varchar(30)
 	,FOREIGN KEY (parentId) REFERENCES species(id) -- NOT_RAW
 );
+CREATE INDEX idx_traits_traitName ON traits(traitName); -- NOT_RAW
