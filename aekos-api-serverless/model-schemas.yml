@@ -1,0 +1,97 @@
+exports:
+  SpeciesSummary:
+    type: object
+    properties:
+      id:
+        type: string
+      recordsHeld:
+        type: integer
+      speciesName:
+        type: string
+  CommonResponseHeaderProperties: &CommonResponseHeaderProperties
+    elapsedTime:
+      type: number
+    numFound:
+      type: number
+    pageNumber:
+      type: number
+  CommonResponseHeaderParamProperties: &CommonResponseHeaderParamProperties
+    rows:
+      type: number
+    start:
+      type: number
+  SpeciesResponseHeaderParamProperties: &SpeciesResponseHeaderParamProperties
+    <<: *CommonResponseHeaderParamProperties
+    speciesName:
+      type: string
+  AllSpeciesResponseHeader:
+    type: object
+    properties:
+      <<: *CommonResponseHeaderProperties
+      params:
+        type: object
+        properties:
+          <<: *CommonResponseHeaderParamProperties
+  SpeciesResponseHeader:
+    type: object
+    properties:
+      <<: *CommonResponseHeaderProperties
+      params:
+        type: object
+        properties:
+          <<: *SpeciesResponseHeaderParamProperties
+  TraitResponseHeader:
+    type: object
+    properties:
+      <<: *CommonResponseHeaderProperties
+      params:
+        type: object
+        properties:
+          <<: *SpeciesResponseHeaderParamProperties
+          traitName:
+            type: string
+  EnvResponseHeader:
+    type: object
+    properties:
+      <<: *CommonResponseHeaderProperties
+      params:
+        type: object
+        properties:
+          <<: *SpeciesResponseHeaderParamProperties
+          varName:
+            type: string
+  v1AllSpeciesDataResponse:
+    type: object
+    properties: &v1AllSpeciesDataResponseProperties
+      scientificName:
+        type: string
+      taxonRemarks:
+        type: string
+      individualCount:
+        type: number
+      eventDate:
+        type: string
+      month:
+        type: number
+      year:
+        type: number
+      decimalLatitude:
+        type: number
+      decimalLongitude:
+        type: number
+      geodeticDatum:
+        type: string
+      locationID:
+        type: string
+      samplingProtocol:
+        type: string
+      bibliographicCitation:
+        type: string
+  v2AllSpeciesDataResponse: # FIXME define new function to use this
+    type: object
+    properties:
+      <<: *v1AllSpeciesDataResponseProperties
+      locationName:
+        type: string
+      datasetName:
+        type: string

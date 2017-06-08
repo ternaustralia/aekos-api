@@ -10,15 +10,20 @@ module.exports.handler = (event, context, callback) => {
 function doHandle (event, callback, db, elapsedTimeCalculator) {
   let processStart = r.now()
   let params = extractParams(event) // FIXME handle thrown Errors for invalid request
-  const noWhereFragmentForAllSpecies = ''
-  const recordsSql = getRecordsSql(params.start, params.rows, false, noWhereFragmentForAllSpecies)
-  const countSql = getCountSql(noWhereFragmentForAllSpecies)
-  doQuery(params, processStart, db, elapsedTimeCalculator, recordsSql, countSql).then(successResult => {
+  doAllSpeciesQuery(params, processStart, db, elapsedTimeCalculator).then(successResult => {
     r.json.ok(callback, successResult)
   }).catch(error => {
     console.error('Failed to get allSpeciesData', error)
     r.json.internalServerError(callback, 'Sorry, something went wrong')
   })
+}
+
+module.exports.doAllSpeciesQuery = doAllSpeciesQuery
+function doAllSpeciesQuery (params, processStart, db, elapsedTimeCalculator) {
+  const noWhereFragmentForAllSpecies = ''
+  const recordsSql = getRecordsSql(params.start, params.rows, false, noWhereFragmentForAllSpecies)
+  const countSql = getCountSql(noWhereFragmentForAllSpecies)
+  return doQuery(params, processStart, db, elapsedTimeCalculator, recordsSql, countSql)
 }
 
 module.exports.doQuery = doQuery

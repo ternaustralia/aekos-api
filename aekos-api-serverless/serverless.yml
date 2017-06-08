@@ -75,33 +75,8 @@ custom:
   secrets: ${file(secrets.yml):$self:custom.stage} # FIXME get this working
   domainName: ${file(secrets.yml):${self:custom.stage}.domainName}
   documentationUrl: https://www.${self:custom.domainName}
+  externalModelSchemaFragments: ${file(./model-schemas.yml):exports}
   commonModelSchemaFragments:
-    SpeciesSummary:
-      type: object
-      properties:
-        id:
-          type: string
-        recordsHeld:
-          type: integer
-        speciesName:
-          type: string
-    ResponseHeader:
-      type: object
-      properties:
-        elapsedTime:
-          type: number
-        numFound:
-          type: number
-        pageNumber:
-          type: number
-        params:
-          type: object
-          properties:
-            rows:
-              type: number
-            start:
-              type: number
-            # TODO add other params on a per function basis probably, not sure how that'll work
     AcceptHeaderDoco:
       name: "accept"
       description: "content-type mime that you want as a response e.g.: 'application/json' or 'text/csv'"
@@ -152,27 +127,23 @@ custom:
         contentType: "application/json"
         schema:
           type: array
-          items: ${self:custom.commonModelSchemaFragments.SpeciesSummary}
+          items: ${self:custom.externalModelSchemaFragments.SpeciesSummary}
       -
-        name: "AllSpeciesDataResponse"
+        name: "V1AllSpeciesDataResponse"
         contentType: "application/json"
         schema:
           type: object
           properties:
-            response:
-              type: array
-              # FIXME define the object
-            responseHeader: ${self:custom.commonModelSchemaFragments.ResponseHeader}
+            response: ${self:custom.externalModelSchemaFragments.v1AllSpeciesDataResponse}
+            responseHeader: ${self:custom.externalModelSchemaFragments.AllSpeciesResponseHeader}
       -
-        name: "SpeciesDataResponse"
+        name: "V1SpeciesDataResponse"
         contentType: "application/json"
         schema:
           type: object
           properties:
-            response:
-              type: array
-              # FIXME define the object
-            responseHeader: ${self:custom.commonModelSchemaFragments.ResponseHeader}
+            response: ${self:custom.externalModelSchemaFragments.v1AllSpeciesDataResponse}
+            responseHeader: ${self:custom.externalModelSchemaFragments.SpeciesResponseHeader}
       -
         name: "TraitDataJsonResponse"
         contentType: "application/json"
@@ -182,7 +153,7 @@ custom:
             response:
               type: array
               # FIXME define the object
-            responseHeader: ${self:custom.commonModelSchemaFragments.ResponseHeader}
+            responseHeader: ${self:custom.externalModelSchemaFragments.TraitResponseHeader}
       -
         name: "EnvDataResponse"
         contentType: "application/json"
@@ -192,7 +163,7 @@ custom:
             response:
               type: array
               # FIXME define the object
-            responseHeader: ${self:custom.commonModelSchemaFragments.ResponseHeader}
+            responseHeader: ${self:custom.externalModelSchemaFragments.EnvResponseHeader}
       -
         name: "CsvResponse"
         contentType: "text/csv"
@@ -381,7 +352,7 @@ functions:
                 statusCode: 200
                 responseModels:
                   "text/csv": "CsvResponse"
-                  "application/json": "SpeciesDataResponse"
+                  "application/json": "V1SpeciesDataResponse"
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
   # TODO change the v1.0 response to not include the new fields, add a v1.1 to have the fields
   v1-speciesData-json:
@@ -403,7 +374,7 @@ functions:
               -
                 statusCode: 200
                 responseModels:
-                  "application/json": "SpeciesDataResponse"
+                  "application/json": "V1SpeciesDataResponse"
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
   v1-speciesData-csv:
     handler: v1-speciesData-csv.handler
@@ -579,6 +550,28 @@ functions:
                 responseModels:
                   "text/csv": "CsvResponse"
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+  v1-allSpeciesData:
+    handler: v1-allSpeciesData.handler
+    events:
+      - http:
+          path: v1/allSpeciesData
+          method: get
+          cors: true
+          documentation:
+            summary: "Get all species data"
+            description: |
+              Gets all Darwin Core records using content negotation to determine the response type. This resource honours Accept
+              headers represented by any of the /allSpeciesData.* resources.
+            queryParams:
+              - ${self:custom.commonModelSchemaFragments.StartQueryParam}
+              - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
+            methodResponses:
+              -
+                statusCode: 200
+                responseModels:
+                  "text/csv": "CsvResponse"
+                  "application/json": "V1AllSpeciesDataResponse"
+              - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
   v1-allSpeciesData-json:
     handler: v1-allSpeciesData-json.handler
     events:
@@ -597,5 +590,25 @@ functions:
               -
                 statusCode: 200
                 responseModels:
-                  "application/json": "AllSpeciesDataResponse"
+                  "application/json": "V1AllSpeciesDataResponse"
+              - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+  v1-allSpeciesData-csv:
+    handler: v1-allSpeciesData-csv.handler
+    events:
+      - http:
+          path: v1/allSpeciesData.csv
+          method: get
+          cors: true
+          documentation:
+            summary: "Get all species occurrence data in CSV format"
+            description: |
+              "Gets all Darwin Core records in CSV format."
+            queryParams:
+              - ${self:custom.commonModelSchemaFragments.StartQueryParam}
+              - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
+            methodResponses:
+              -
+                statusCode: 200
+                responseModels:
+                  "text/csv": "CsvResponse"
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}

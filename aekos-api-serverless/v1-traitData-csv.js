@@ -2,8 +2,8 @@
 let quoted = require('./FieldConfig').quoted
 let r = require('./response-helper')
 let traitDataJson = require('./v1-traitData-json')
-let speciesDataCsv = require('./v1-speciesData-csv')
-let csvHeaders = speciesDataCsv.csvHeaders
+let allSpeciesDataCsv = require('./v1-allSpeciesData-csv')
+let csvHeaders = allSpeciesDataCsv.csvHeaders
 
 module.exports.handler = (event, context, callback) => {
   let db = require('./db-helper')
@@ -42,7 +42,7 @@ function mapJsonToCsv (records) {
 
 module.exports.createCsvRow = createCsvRow
 function createCsvRow (record) {
-  let result = speciesDataCsv.createCsvRow(csvHeaders, record)
+  let result = allSpeciesDataCsv.createCsvRow(csvHeaders, record)
   for (let i = 0; i < record.traits.length; i++) {
     let curr = record.traits[i]
     result += `,"${curr.traitName}","${curr.traitValue}",`

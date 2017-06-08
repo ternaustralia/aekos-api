@@ -364,4 +364,56 @@ describe('response-helper', function () {
       }).toThrow()
     })
   })
+
+  describe('newContentNegotiationHandler', () => {
+    function TrackCallsModule () {
+      let isCalled = false
+
+      return {
+        handler: () => {
+          isCalled = true
+        },
+        hasBeenCalled: () => {
+          return isCalled
+        }
+      }
+    }
+    it('should call the JSON handler when we have a JSON Accept header', () => {
+      let trackerModule = new TrackCallsModule()
+      let cnHandler = objectUnderTest.newContentNegotiationHandler(trackerModule, () => {})
+      let event = {
+        headers: {
+          Accept: 'application/json'
+        }
+      }
+      cnHandler(event, null, null)
+      expect(trackerModule.hasBeenCalled()).toBeTruthy()
+    })
+
+    it('should call the CSV handler when we have a CSV Accept header', () => {
+      let trackerModule = new TrackCallsModule()
+      let cnHandler = objectUnderTest.newContentNegotiationHandler(() => {}, trackerModule)
+      let event = {
+        headers: {
+          Accept: 'text/csv'
+        }
+      }
+      cnHandler(event, null, null)
+      expect(trackerModule.hasBeenCalled()).toBeTruthy()
+    })
+
+    it('should return a 400 when it cannot handle the Accept header', (done) => {
+      let trackerModule = new TrackCallsModule()
+      let cnHandler = objectUnderTest.newContentNegotiationHandler(() => {}, trackerModule)
+      let event = {
+        headers: {
+          Accept: 'something/weird'
+        }
+      }
+      cnHandler(event, null, (_, result) => {
+        expect(result.statusCode).toBe(400)
+        done()
+      })
+    })
+  })
 })

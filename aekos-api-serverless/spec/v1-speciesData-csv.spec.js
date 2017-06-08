@@ -20,10 +20,8 @@ describe('v1-speciesData-csv', () => {
             'decimalLongitude': 120.15956081537496,
             'geodeticDatum': 'GDA94',
             'locationID': 'aekos.org.au/collection/wa.gov.au/ravensthorpe/R181',
-            'locationName': 'R181',
             'samplingProtocol': 'aekos.org.au/collection/wa.gov.au/ravensthorpe',
-            'bibliographicCitation': 'Department of Par...',
-            'datasetName': 'Biological Survey of the Ravensthorpe Range (Phase 1)'
+            'bibliographicCitation': 'Department of Par...'
           }
         ],
         [ {recordsHeld: 31} ]
@@ -52,85 +50,6 @@ describe('v1-speciesData-csv', () => {
         done()
       }
       objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 42 })
-    })
-  })
-
-  describe('mapJsonToCsv', () => {
-    it('should map the records to CSV when they are fully populated', () => {
-      let records = [
-        {
-          scientificName: 'Acacia cincinnata',
-          taxonRemarks: null,
-          individualCount: 1,
-          eventDate: '2014-09-11',
-          month: 9,
-          year: 2014,
-          decimalLatitude: -17.841178,
-          decimalLongitude: 145.584496,
-          geodeticDatum: 'GDA94',
-          locationID: 'aekos.org.au/collection/adelaide.edu.au/TAF/QDFWET0004',
-          locationName: 'QDFWET0004',
-          samplingProtocol: 'aekos.org.au/collection/adelaide.edu.au/TAF',
-          bibliographicCitation: 'Wood SW, Bowman DMJS, Ste...',
-          datasetName: 'TERN AusPlots Forests Monitoring Network'
-        },
-        {
-          scientificName: 'Acacia cincinnata',
-          taxonRemarks: null,
-          individualCount: 1,
-          eventDate: '1991-01-22',
-          month: 1,
-          year: 1991,
-          decimalLatitude: -17.841178,
-          decimalLongitude: 145.584496,
-          geodeticDatum: 'GDA94',
-          locationID: 'aekos.org.au/collection/adelaide.edu.au/TAF/QDFWET0004',
-          locationName: 'QDFWET0004',
-          samplingProtocol: 'aekos.org.au/collection/adelaide.edu.au/TAF',
-          bibliographicCitation: 'Wood SW, Bowman DMJS, Ste...',
-          datasetName: 'TERN AusPlots Forests Monitoring Network'
-        }
-      ]
-      let result = objectUnderTest._testonly.mapJsonToCsv(records)
-      let resultLines = result.split('\n')
-      expect(resultLines.length).toBe(3)
-      expect(resultLines[0]).toBe('"decimalLatitude","decimalLongitude","geodeticDatum","locationID","scientificName","taxonRemarks",' +
-        '"individualCount","eventDate","year","month","bibliographicCitation","samplingProtocol"')
-      expect(resultLines[1]).toBe('-17.841178,145.584496,"GDA94","aekos.org.au/collection/adelaide.edu.au/TAF/QDFWET0004","Acacia cincinnata",,' +
-        '1,"2014-09-11",2014,9,"Wood SW, Bowman DMJS, Ste...","aekos.org.au/collection/adelaide.edu.au/TAF"')
-      expect(resultLines[2]).toBe('-17.841178,145.584496,"GDA94","aekos.org.au/collection/adelaide.edu.au/TAF/QDFWET0004","Acacia cincinnata",,' +
-        '1,"1991-01-22",1991,1,"Wood SW, Bowman DMJS, Ste...","aekos.org.au/collection/adelaide.edu.au/TAF"')
-    })
-  })
-
-  describe('getCsvHeaderRow', () => {
-    it('should return the expected row', () => {
-      let result = objectUnderTest.getCsvHeaderRow()
-      expect(result).toBe('"decimalLatitude","decimalLongitude","geodeticDatum","locationID","scientificName","taxonRemarks","individualCount","eventDate","year","month","bibliographicCitation","samplingProtocol"')
-    })
-  })
-
-  describe('createCsvRow', () => {
-    it('should map the record to CSV when all fields are populated', () => {
-      let record = {
-        scientificName: 'Acacia cincinnata',
-        taxonRemarks: null,
-        individualCount: 1,
-        eventDate: '1991-01-22',
-        month: 1,
-        year: 1991,
-        decimalLatitude: -17.841178,
-        decimalLongitude: 145.584496,
-        geodeticDatum: 'GDA94',
-        locationID: 'aekos.org.au/collection/adelaide.edu.au/TAF/QDFWET0004',
-        locationName: 'QDFWET0004',
-        samplingProtocol: 'aekos.org.au/collection/adelaide.edu.au/TAF',
-        bibliographicCitation: 'Wood SW, Bowman DMJS, Ste...',
-        datasetName: 'TERN AusPlots Forests Monitoring Network'
-      }
-      let result = objectUnderTest.createCsvRow(objectUnderTest.csvHeaders, record)
-      expect(result).toBe('-17.841178,145.584496,"GDA94","aekos.org.au/collection/adelaide.edu.au/TAF/QDFWET0004","Acacia cincinnata",,' +
-        '1,"1991-01-22",1991,1,"Wood SW, Bowman DMJS, Ste...","aekos.org.au/collection/adelaide.edu.au/TAF"')
     })
   })
 })

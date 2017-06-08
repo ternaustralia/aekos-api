@@ -137,18 +137,39 @@ function calculateElapsedTime (startMs) {
   return now() - startMs
 }
 
-module.exports = {
-  json: {
-    ok: (theCallback, theBody) => {
-      doResponse(theCallback, theBody, 200, jsonContentType)
-    },
-    badRequest: (theCallback, theMessage) => {
-      doResponse(theCallback, theMessage, 400, jsonContentType)
-    },
-    internalServerError: (theCallback, theMessage) => {
-      doResponse(theCallback, { message: theMessage }, 500, jsonContentType)
+function newContentNegotiationHandler (jsonHandler, csvHandler) {
+  return function (event, context, callback) {
+    let contentTypeIndicator = getContentType(event)
+    switch (contentTypeIndicator) {
+      case contentTypes.json:
+        jsonHandler.handler(event, context, callback)
+        break
+      case contentTypes.csv:
+        csvHandler.handler(event, context, callback)
+        break
+      case contentTypes.unhandled:
+        jsonResponseHelpers.badRequest(callback, `Cannot handle the specified Accept header '${event.headers.Accept}`)
+        break
+      default:
+        throw new Error(`Programmer error: unknown content type indicator returned '${contentTypeIndicator}'`)
     }
+  }
+}
+
+const jsonResponseHelpers = {
+  ok: (theCallback, theBody) => {
+    doResponse(theCallback, theBody, 200, jsonContentType)
   },
+  badRequest: (theCallback, theMessage) => {
+    doResponse(theCallback, theMessage, 400, jsonContentType)
+  },
+  internalServerError: (theCallback, theMessage) => {
+    doResponse(theCallback, { message: theMessage }, 500, jsonContentType)
+  }
+}
+
+module.exports = {
+  json: jsonResponseHelpers,
   csv: {
     ok: (theCallback, theBody) => {
       doResponse(theCallback, theBody, 200, csvContentType)
@@ -166,5 +187,6 @@ module.exports = {
   calculateElapsedTime: calculateElapsedTime,
   contentTypes: contentTypes,
   calculatePageNumber: calculatePageNumber,
-  calculateTotalPages: calculateTotalPages
+  calculateTotalPages: calculateTotalPages,
+  newContentNegotiationHandler: newContentNegotiationHandler
 }
