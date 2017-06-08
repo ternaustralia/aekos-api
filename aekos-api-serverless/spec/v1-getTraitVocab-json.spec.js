@@ -6,7 +6,7 @@ describe('v1-getTraitVocab-json', function () {
   it('should map to the code field', function () {
     let queryResult = [
       {
-        traitName: 'averageHeight',
+        code: 'averageHeight',
         count: 123
       }
     ]
@@ -14,7 +14,6 @@ describe('v1-getTraitVocab-json', function () {
     expect(result.length).toBe(1)
     let first = result[0]
     expect(first.code).toBe('averageHeight')
-    expect(first.traitName).toBeUndefined()
     expect(first.label).toBe('Average Height')
     expect(first.count).toBe(123)
   })

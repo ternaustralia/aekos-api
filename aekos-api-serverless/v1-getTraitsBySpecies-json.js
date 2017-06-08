@@ -5,7 +5,7 @@ const speciesNameParam = 'speciesName'
 
 function mapResults (queryResult) {
   queryResult.forEach(function (e) {
-    e.label = 'FIXME' // FIXME need to look this up
+    e.label = r.resolveVocabCode(e.code)
   })
   return queryResult
 }
