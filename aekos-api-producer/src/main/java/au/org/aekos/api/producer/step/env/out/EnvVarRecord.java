@@ -1,6 +1,6 @@
 package au.org.aekos.api.producer.step.env.out;
 
-import au.org.aekos.api.producer.Utils;
+import au.org.aekos.api.producer.CleanQuotedValue;
 
 /**
  * Attribute could be a Trait or an Environmental Variable
@@ -21,23 +21,23 @@ public class EnvVarRecord {
 	}
 
 	public String getLocationID() {
-		return Utils.quote(locationID);
+		return new CleanQuotedValue(locationID).getValue();
 	}
 	
 	public String getEventDate() {
-		return Utils.quote(eventDate);
+		return new CleanQuotedValue(eventDate).getValue();
 	}
 
 	public String getName() {
-		return Utils.quote(name);
+		return new CleanQuotedValue(name).getValue();
 	}
 
 	public String getValue() {
-		return Utils.quote(value);
+		return new CleanQuotedValue(value).getValue();
 	}
 
 	public String getUnits() {
-		return Utils.quote(units);
+		return new CleanQuotedValue(units).getValue();
 	}
 
 	public static String[] getCsvFields() {

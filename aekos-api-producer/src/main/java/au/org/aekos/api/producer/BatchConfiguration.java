@@ -270,7 +270,7 @@ public class BatchConfiguration {
     }
 
 	private String getSparqlQuery(String fileName) throws IOException {
-		return Utils.getResourceAsString("au/org/aekos/api/producer/sparql/" + fileName);
+		return new ResourceStringifier("au/org/aekos/api/producer/sparql/" + fileName).getValue();
 	}
     
     private <T> FlatFileItemWriter<T> csvWriter(Class<T> type, String outputTableName, String[] fields) {

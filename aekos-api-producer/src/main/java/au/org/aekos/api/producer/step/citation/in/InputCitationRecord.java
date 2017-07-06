@@ -1,6 +1,6 @@
 package au.org.aekos.api.producer.step.citation.in;
 
-import au.org.aekos.api.producer.Utils;
+import au.org.aekos.api.producer.CleanQuotedValue;
 
 public class InputCitationRecord {
 	private final String samplingProtocol;
@@ -14,15 +14,15 @@ public class InputCitationRecord {
 	}
 
 	public String getSamplingProtocol() {
-		return Utils.quote(samplingProtocol);
+		return new CleanQuotedValue(samplingProtocol).getValue();
 	}
 
 	public String getBibliographicCitation() {
-		return Utils.quote(bibliographicCitation);
+		return new CleanQuotedValue(bibliographicCitation).getValue();
 	}
 
 	public String getDatasetName() {
-		return Utils.quote(datasetName);
+		return new CleanQuotedValue(datasetName).getValue();
 	}
 
 	public static String[] getCsvFields() {

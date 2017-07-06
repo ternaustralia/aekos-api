@@ -1,6 +1,6 @@
 package au.org.aekos.api.producer.step.species.out;
 
-import au.org.aekos.api.producer.Utils;
+import au.org.aekos.api.producer.CleanQuotedValue;
 import au.org.aekos.api.producer.step.species.in.InputSpeciesRecord;
 
 public class OutputSpeciesRecord {
@@ -11,7 +11,7 @@ public class OutputSpeciesRecord {
 	}
 
 	public String getId() {
-		return Utils.quote(coreRecord.getId());
+		return new CleanQuotedValue(coreRecord.getId()).getValue();
 	}
 
 	public int getIndividualCount() {
@@ -19,19 +19,19 @@ public class OutputSpeciesRecord {
 	}
 
 	public String getLocationID() {
-		return Utils.quote(coreRecord.getLocationID());
+		return new CleanQuotedValue(coreRecord.getLocationID()).getValue();
 	}
 
 	public String getScientificName() {
-		return Utils.quote(coreRecord.getScientificName());
+		return new CleanQuotedValue(coreRecord.getScientificName()).getValue();
 	}
 
 	public String getTaxonRemarks() {
-		return Utils.quote(coreRecord.getTaxonRemarks());
+		return new CleanQuotedValue(coreRecord.getTaxonRemarks()).getValue();
 	}
 
 	public String getEventDate() {
-		return Utils.quote(coreRecord.getEventDate());
+		return new CleanQuotedValue(coreRecord.getEventDate()).getValue();
 	}
 
 	public static String[] getCsvFields() {

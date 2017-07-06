@@ -1,6 +1,6 @@
 package au.org.aekos.api.producer.step.env.out;
 
-import au.org.aekos.api.producer.Utils;
+import au.org.aekos.api.producer.CleanQuotedValue;
 import au.org.aekos.api.producer.step.env.in.InputEnvRecord;
 
 public class OutputEnvRecord {
@@ -19,19 +19,19 @@ public class OutputEnvRecord {
 	}
 
 	public String getGeodeticDatum() {
-		return Utils.quote(coreRecord.getGeodeticDatum());
+		return new CleanQuotedValue(coreRecord.getGeodeticDatum()).getValue();
 	}
 
 	public String getLocationID() {
-		return Utils.quote(coreRecord.getLocationID());
+		return new CleanQuotedValue(coreRecord.getLocationID()).getValue();
 	}
 
 	public String getLocationName() {
-		return Utils.quote(coreRecord.getLocationName());
+		return new CleanQuotedValue(coreRecord.getLocationName()).getValue();
 	}
 
 	public String getEventDate() {
-		return Utils.quote(coreRecord.getEventDate());
+		return new CleanQuotedValue(coreRecord.getEventDate()).getValue();
 	}
 	
 	public int getMonth() {
@@ -43,7 +43,7 @@ public class OutputEnvRecord {
 	}
 	
 	public String getSamplingProtocol() {
-		return Utils.quote(coreRecord.getSamplingProtocol());
+		return new CleanQuotedValue(coreRecord.getSamplingProtocol()).getValue();
 	}
 
 	public static String[] getCsvFields() {

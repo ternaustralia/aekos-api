@@ -7,24 +7,20 @@ import java.io.OutputStream;
 
 import org.springframework.util.StreamUtils;
 
-public class Utils {
+public class ResourceStringifier {
+	private final String classpathAndFileName;
 
-	public static final String MYSQL_NULL = "\\N";
-	
-	private Utils() {}
-	
-	public static String quote(String value) {
-		if (value == null) {
-			return MYSQL_NULL;
-		}
-		return "\"" + value + "\"";
+	/**
+	 * @param classpathAndFileName	something like "au/org/aekos/api/producer/sparql/" + fileName
+	 */
+	public ResourceStringifier(String classpathAndFileName) {
+		this.classpathAndFileName = classpathAndFileName;
 	}
 	
 	/**
-	 * @param classpathAndFileName	something like "au/org/aekos/api/producer/sparql/" + fileName
-	 * @return	contents of the file as a String
+	 * @return	contents of the resource (file) as a String
 	 */
-	public static String getResourceAsString(String classpathAndFileName) throws IOException {
+	public String getValue() throws IOException {
 		InputStream sparqlIS = Thread.currentThread().getContextClassLoader().getResourceAsStream(classpathAndFileName);
 		OutputStream out = new ByteArrayOutputStream();
 		StreamUtils.copy(sparqlIS, out);

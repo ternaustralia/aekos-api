@@ -50,7 +50,7 @@ public class EnvironmentVariableExtractorConfigTest {
 		EnvVarRecord var = vars.get(0);
 		assertThat(var.getName(), is("\"latestLandUse\""));
 		assertThat(var.getValue(), is("\"conservation\""));
-		assertThat(var.getUnits(), is(Utils.MYSQL_NULL));
+		assertThat(var.getUnits(), is(CleanQuotedValue.MYSQL_NULL));
 	}
 	
 	/**
@@ -103,12 +103,11 @@ public class EnvironmentVariableExtractorConfigTest {
 	private class Data {
 		private final Resource subject;
 		private final Model commonGraph;
-		private final Model projectGraph;
 		
 		public Data(Resource subject, Model commonGraph, Model projectGraph) {
 			this.subject = subject;
 			this.commonGraph = commonGraph;
-			this.projectGraph = projectGraph;
+			// don't need projectGraph
 		}
 	}
 }

@@ -84,7 +84,7 @@ public class SpeciesTraitExtractorConfigTest {
 		SpeciesTraitRecord trait = traits.get(0);
 		assertThat(trait.getName(), is("\"basalAreaFactor\""));
 		assertThat(trait.getValue(), is("\"4\""));
-		assertThat(trait.getUnits(), is(Utils.MYSQL_NULL));
+		assertThat(trait.getUnits(), is(CleanQuotedValue.MYSQL_NULL));
 	}
 	
 	/**
@@ -102,7 +102,7 @@ public class SpeciesTraitExtractorConfigTest {
 		SpeciesTraitRecord trait = traits.get(0);
 		assertThat(trait.getName(), is("\"basalAreaCount\""));
 		assertThat(trait.getValue(), is("\"4\""));
-		assertThat(trait.getUnits(), is(Utils.MYSQL_NULL));
+		assertThat(trait.getUnits(), is(CleanQuotedValue.MYSQL_NULL));
 	}
 	
 	/**

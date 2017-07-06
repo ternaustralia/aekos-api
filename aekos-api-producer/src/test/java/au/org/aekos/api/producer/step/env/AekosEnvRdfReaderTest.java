@@ -17,7 +17,7 @@ import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
 import org.junit.Test;
 
-import au.org.aekos.api.producer.Utils;
+import au.org.aekos.api.producer.ResourceStringifier;
 import au.org.aekos.api.producer.step.MissingDataException;
 import au.org.aekos.api.producer.step.env.in.InputEnvRecord;
 
@@ -33,7 +33,7 @@ public class AekosEnvRdfReaderTest {
 		Model m = ds.getNamedModel("urn:someGraph");
 		InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("au/org/aekos/api/producer/step/env/EnvRecord.ttl");
 		m.read(in, null, "TURTLE");
-		String sparql = Utils.getResourceAsString("au/org/aekos/api/producer/step/env/testMapSolution01.rq");
+		String sparql = new ResourceStringifier("au/org/aekos/api/producer/step/env/testMapSolution01.rq").getValue();
 		Query query = QueryFactory.create(sparql);
 		try (QueryExecution qexec = QueryExecutionFactory.create(query, ds)) {
 			ResultSet queryResults = qexec.execSelect();
@@ -64,7 +64,7 @@ public class AekosEnvRdfReaderTest {
 		InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("au/org/aekos/api/producer/step/env/singleLocSingleVisit.ttl");
 		m.read(in, null, "TURTLE");
 		objectUnderTest.setDs(ds);
-		String siteVisitRecordsQuery = Utils.getResourceAsString("au/org/aekos/api/producer/sparql/site-visit-records.rq");
+		String siteVisitRecordsQuery = new ResourceStringifier("au/org/aekos/api/producer/sparql/site-visit-records.rq").getValue();
 		objectUnderTest.setSiteVisitRecordsQuery(siteVisitRecordsQuery);
 		InputEnvRecord result = objectUnderTest.read();
 		assertThat(result.getLocationID(), is("aekos.org.au/collection/sydney.edu.au/DERG/Main Camp"));
@@ -91,7 +91,7 @@ public class AekosEnvRdfReaderTest {
 		InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("au/org/aekos/api/producer/step/env/singleLocSingleVisitNoObservedItems.ttl");
 		m.read(in, null, "TURTLE");
 		objectUnderTest.setDs(ds);
-		String siteVisitRecordsQuery = Utils.getResourceAsString("au/org/aekos/api/producer/sparql/site-visit-records.rq");
+		String siteVisitRecordsQuery = new ResourceStringifier("au/org/aekos/api/producer/sparql/site-visit-records.rq").getValue();
 		objectUnderTest.setSiteVisitRecordsQuery(siteVisitRecordsQuery);
 		try {
 			objectUnderTest.read();
@@ -112,7 +112,7 @@ public class AekosEnvRdfReaderTest {
 		InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("au/org/aekos/api/producer/step/env/singleLocTwoVisit.ttl");
 		m.read(in, null, "TURTLE");
 		objectUnderTest.setDs(ds);
-		String siteVisitRecordsQuery = Utils.getResourceAsString("au/org/aekos/api/producer/sparql/site-visit-records.rq");
+		String siteVisitRecordsQuery = new ResourceStringifier("au/org/aekos/api/producer/sparql/site-visit-records.rq").getValue();
 		objectUnderTest.setSiteVisitRecordsQuery(siteVisitRecordsQuery);
 		InputEnvRecord firstResult = objectUnderTest.read();
 		assertThat(firstResult.getLocationID(), is("aekos.org.au/collection/sydney.edu.au/DERG/Main Camp"));
@@ -151,7 +151,7 @@ public class AekosEnvRdfReaderTest {
 		InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("au/org/aekos/api/producer/step/env/twoLocSingleVisit.ttl");
 		m.read(in, null, "TURTLE");
 		objectUnderTest.setDs(ds);
-		String siteVisitRecordsQuery = Utils.getResourceAsString("au/org/aekos/api/producer/sparql/site-visit-records.rq");
+		String siteVisitRecordsQuery = new ResourceStringifier("au/org/aekos/api/producer/sparql/site-visit-records.rq").getValue();
 		objectUnderTest.setSiteVisitRecordsQuery(siteVisitRecordsQuery);
 		InputEnvRecord firstResult = objectUnderTest.read();
 		assertThat(firstResult.getLocationID(), is("aekos.org.au/collection/sydney.edu.au/DERG/Main Camp"));

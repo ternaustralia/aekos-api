@@ -17,7 +17,7 @@ import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
 import org.junit.Test;
 
-import au.org.aekos.api.producer.Utils;
+import au.org.aekos.api.producer.ResourceStringifier;
 import au.org.aekos.api.producer.step.species.in.InputSpeciesRecord;
 
 public class AekosSpeciesRdfReaderTest {
@@ -32,7 +32,7 @@ public class AekosSpeciesRdfReaderTest {
 		Model m = ds.getNamedModel("urn:someGraph");
 		InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("au/org/aekos/api/producer/step/species/SpeciesRecord.ttl");
 		m.read(in, null, "TURTLE");
-		String sparql = Utils.getResourceAsString("au/org/aekos/api/producer/step/species/testMapSolution01.rq");
+		String sparql = new ResourceStringifier("au/org/aekos/api/producer/step/species/testMapSolution01.rq").getValue();
 		Query query = QueryFactory.create(sparql);
 		try (QueryExecution qexec = QueryExecutionFactory.create(query, ds)) {
 			ResultSet queryResults = qexec.execSelect();
@@ -60,7 +60,7 @@ public class AekosSpeciesRdfReaderTest {
 		InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("au/org/aekos/api/producer/step/species/fiveSpeciesTwoVisits.ttl");
 		m.read(in, null, "TURTLE");
 		objectUnderTest.setDs(ds);
-		String speciesRecordsQuery = Utils.getResourceAsString("au/org/aekos/api/producer/sparql/species-records.rq");
+		String speciesRecordsQuery = new ResourceStringifier("au/org/aekos/api/producer/sparql/species-records.rq").getValue();
 		objectUnderTest.setSpeciesRecordsQuery(speciesRecordsQuery);
 		{
 			InputSpeciesRecord nextResult = objectUnderTest.read();

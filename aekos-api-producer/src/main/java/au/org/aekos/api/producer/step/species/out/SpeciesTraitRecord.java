@@ -1,6 +1,6 @@
 package au.org.aekos.api.producer.step.species.out;
 
-import au.org.aekos.api.producer.Utils;
+import au.org.aekos.api.producer.CleanQuotedValue;
 
 public class SpeciesTraitRecord {
 	private final String parentId;
@@ -16,19 +16,19 @@ public class SpeciesTraitRecord {
 	}
 
 	public String getParentId() {
-		return Utils.quote(parentId);
+		return new CleanQuotedValue(parentId).getValue();
 	}
 
 	public String getName() {
-		return Utils.quote(name);
+		return new CleanQuotedValue(name).getValue();
 	}
 
 	public String getValue() {
-		return Utils.quote(value);
+		return new CleanQuotedValue(value).getValue();
 	}
 
 	public String getUnits() {
-		return Utils.quote(units);
+		return new CleanQuotedValue(units).getValue();
 	}
 
 	public static String[] getCsvFields() {
