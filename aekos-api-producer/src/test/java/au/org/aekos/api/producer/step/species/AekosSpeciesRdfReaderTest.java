@@ -3,6 +3,7 @@ package au.org.aekos.api.producer.step.species;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.io.InputStream;
 
@@ -18,6 +19,7 @@ import org.apache.jena.rdf.model.Model;
 import org.junit.Test;
 
 import au.org.aekos.api.producer.ResourceStringifier;
+import au.org.aekos.api.producer.step.MissingDataException;
 import au.org.aekos.api.producer.step.species.in.InputSpeciesRecord;
 
 public class AekosSpeciesRdfReaderTest {
@@ -46,6 +48,28 @@ public class AekosSpeciesRdfReaderTest {
 			assertThat(result.getLocationID(), is("location1"));
 			assertThat(result.getScientificName(), is("name1"));
 			assertThat(result.getTaxonRemarks(), is("remarks1"));
+		}
+	}
+	
+	/**
+	 * Is the expected exception thrown when the eventDate is missing?
+	 */
+	@Test
+	public void testMapSolution02() throws Throwable {
+		AekosSpeciesRdfReader objectUnderTest = new AekosSpeciesRdfReader();
+		Dataset ds = DatasetFactory.create();
+		Model m = ds.getNamedModel("urn:someGraph");
+		InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("au/org/aekos/api/producer/step/species/SpeciesRecord-noEventDate.ttl");
+		m.read(in, null, "TURTLE");
+		String sparql = new ResourceStringifier("au/org/aekos/api/producer/step/species/testMapSolution02.rq").getValue();
+		Query query = QueryFactory.create(sparql);
+		try (QueryExecution qexec = QueryExecutionFactory.create(query, ds)) {
+			ResultSet queryResults = qexec.execSelect();
+			QuerySolution solution = queryResults.next();
+			objectUnderTest.mapSolution(solution);
+			fail();
+		} catch (MissingDataException e) {
+			// success
 		}
 	}
 

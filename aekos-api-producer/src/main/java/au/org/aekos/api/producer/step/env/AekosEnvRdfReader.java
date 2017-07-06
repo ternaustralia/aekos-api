@@ -3,6 +3,7 @@ package au.org.aekos.api.producer.step.env;
 import org.apache.jena.query.QuerySolution;
 
 import au.org.aekos.api.producer.step.AbstractRdfReader;
+import au.org.aekos.api.producer.step.SolutionVariableExtractor;
 import au.org.aekos.api.producer.step.env.in.InputEnvRecord;
 
 public class AekosEnvRdfReader extends AbstractRdfReader<InputEnvRecord> {
@@ -11,7 +12,7 @@ public class AekosEnvRdfReader extends AbstractRdfReader<InputEnvRecord> {
 
 	@Override
 	public InputEnvRecord mapSolution(QuerySolution solution) {
-		Extractor e = new Extractor(solution, "locationID");
+		SolutionVariableExtractor e = new SolutionVariableExtractor(solution, "locationID");
 		return new InputEnvRecord(
 				e.get("locationID"),
 				e.getDouble("decimalLatitude"),

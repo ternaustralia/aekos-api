@@ -3,6 +3,7 @@ package au.org.aekos.api.producer.step.species;
 import org.apache.jena.query.QuerySolution;
 
 import au.org.aekos.api.producer.step.AbstractRdfReader;
+import au.org.aekos.api.producer.step.SolutionVariableExtractor;
 import au.org.aekos.api.producer.step.species.in.InputSpeciesRecord;
 
 public class AekosSpeciesRdfReader extends AbstractRdfReader<InputSpeciesRecord> {
@@ -11,7 +12,7 @@ public class AekosSpeciesRdfReader extends AbstractRdfReader<InputSpeciesRecord>
 
 	@Override
 	public InputSpeciesRecord mapSolution(QuerySolution solution) {
-		Extractor e = new Extractor(solution, "rdfSubject");
+		SolutionVariableExtractor e = new SolutionVariableExtractor(solution, "rdfSubject");
 		return new InputSpeciesRecord(
 				e.get("id"),
 				e.getResourceUri("rdfSubject"),

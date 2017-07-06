@@ -12,7 +12,6 @@ import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
-import org.apache.jena.rdf.model.Literal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemReader;
@@ -62,51 +61,6 @@ public abstract class AbstractRdfReader<T> implements ItemReader<T> {
 	
 	public abstract String getSparqlQuery();
 
-	protected static class Extractor {
-		private QuerySolution solution;
-		private String idVariableName;
-
-		public Extractor(QuerySolution solution, String idVariableName) {
-			this.solution = solution;
-			this.idVariableName = idVariableName;
-		}
-		
-		public String get(String variableName) {
-			return getLiteral(variableName).getString();
-		}
-		
-		public String getResourceUri(String variableName) {
-			return solution.getResource(variableName).getURI();
-		}
-		
-		public String getOptional(String variableName) {
-			Literal literal = solution.getLiteral(variableName);
-			if (literal == null) {
-				return null;
-			}
-			return literal.getString();
-		}
-		
-		public double getDouble(String variableName) {
-			return getLiteral(variableName).getDouble();
-		}
-		
-		public int getInt(String variableName) {
-			return getLiteral(variableName).getInt();
-		}
-
-		private Literal getLiteral(String variableName) {
-			Literal literal = solution.getLiteral(variableName);
-			if (literal == null) {
-				Iterable<String> iterable = () -> solution.varNames();
-				Set<String> vars = StreamSupport.stream(iterable.spliterator(), false).collect(Collectors.toSet());
-				String template = "Data problem: in record ID '%s' couldn't find the variable '%s', only found the vars %s";
-				throw new MissingDataException(String.format(template, getOptional(idVariableName), variableName, vars));
-			}
-			return literal;
-		}
-	}
-	
 	private void close() {
 		qexec.close();
 	}

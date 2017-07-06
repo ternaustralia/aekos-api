@@ -3,6 +3,7 @@ package au.org.aekos.api.producer.step.citation;
 import org.apache.jena.query.QuerySolution;
 
 import au.org.aekos.api.producer.step.AbstractRdfReader;
+import au.org.aekos.api.producer.step.SolutionVariableExtractor;
 import au.org.aekos.api.producer.step.citation.in.InputCitationRecord;
 
 public class AekosCitationRdfReader extends AbstractRdfReader<InputCitationRecord> {
@@ -11,7 +12,7 @@ public class AekosCitationRdfReader extends AbstractRdfReader<InputCitationRecor
 
 	@Override
 	public InputCitationRecord mapSolution(QuerySolution solution) {
-		Extractor e = new Extractor(solution, "samplingProtocol");
+		SolutionVariableExtractor e = new SolutionVariableExtractor(solution, "samplingProtocol");
 		return new InputCitationRecord(
 				e.get("samplingProtocol"),
 				e.get("bibliographicCitation"),
