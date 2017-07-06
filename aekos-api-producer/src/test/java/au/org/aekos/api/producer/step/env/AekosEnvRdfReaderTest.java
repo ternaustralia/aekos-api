@@ -96,7 +96,10 @@ public class AekosEnvRdfReaderTest {
 		try {
 			objectUnderTest.read();
 			fail();
-		} catch (MissingDataException e) {
+		} catch (RuntimeException e) {
+			if (!e.getCause().getClass().equals(MissingDataException.class)) {
+				fail("Wrong exception thrown");
+			}
 			// success
 		}
 	}
