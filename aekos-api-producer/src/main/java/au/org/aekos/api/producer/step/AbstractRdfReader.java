@@ -48,10 +48,11 @@ public abstract class AbstractRdfReader<T> implements ItemReader<T> {
 		try {
 			processedRecords++;
 			return mapSolution(currSolution);
-		} catch (NullPointerException e) {
+		} catch (Throwable t) {
 			Iterable<String> iterable = () -> currSolution.varNames();
 			Set<String> vars = StreamSupport.stream(iterable.spliterator(), false).collect(Collectors.toSet());
-			throw new RuntimeException("Available vars: " + vars);
+			Set<String> pairs = vars.stream().map(currVar -> currVar + "=" + currSolution.get(currVar)).collect(Collectors.toSet());
+			throw new RuntimeException("Failed while processing a solution. Available values: " + pairs, t);
 		}
 	}
 
