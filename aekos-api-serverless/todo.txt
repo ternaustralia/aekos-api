@@ -1,4 +1,3 @@
 - add HATEOAS headers
 - add download option for CSVs
 - make getSpeciesByTrait perform and return the correct result
-  - change producer to escape double quotes in values like ""(""Epacrid ?"")""
