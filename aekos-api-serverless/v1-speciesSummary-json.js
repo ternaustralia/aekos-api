@@ -1,19 +1,33 @@
 'use strict'
 let r = require('./response-helper')
-let db = require('./db-helper')
 let yaml = require('yamljs')
-const speciesNameParam = yaml.load('./constants.yml').paramNames.SINGLE_SPECIES_NAME
+const speciesNameParam = yaml.load('./constants.yml').paramNames.speciesName.multiple
 
 module.exports.handler = (event, context, callback) => {
-  // FIXME get repeated query string params mapping correctly rather than just the last one
-  if (!r.isQueryStringParamPresent(event, speciesNameParam)) {
-    r.json.badRequest(callback, `the '${speciesNameParam}' query string parameter must be supplied`)
-    return
-  }
-  // FIXME handle escaping a list when we can get multiple names
-  let speciesName = event.queryStringParameters[speciesNameParam]
-  let escapedSpeciesName = db.escape(speciesName)
-  const sql = `
+  let db = require('./db-helper')
+  doHandle(event, callback, db)
+}
+
+module.exports._testonly = {
+  doHandle: doHandle,
+  getSql: getSql
+}
+function doHandle (event, callback, db) {
+  let requestBody = JSON.parse(event.body) // TODO extract to helper
+  // TODO validate property is present
+  let speciesNames = requestBody[speciesNameParam]
+  let sql = getSql(speciesNames, db)
+  db.execSelectPromise(sql).then(queryResult => {
+    r.json.ok(callback, queryResult)
+  }).catch(error => {
+    console.error('Failed to get species summaries', error)
+    r.json.internalServerError(callback, 'Sorry, something went wrong')
+  })
+}
+
+function getSql (speciesNames, db) {
+  let escapedSpeciesName = db.toSqlList(speciesNames)
+  return `
     SELECT speciesName, sum(recordsHeld) AS recordsHeld, 'notusedanymore' AS id
     FROM (
       SELECT scientificName AS speciesName, count(*) AS recordsHeld
@@ -29,7 +43,4 @@ module.exports.handler = (event, context, callback) => {
     WHERE a.speciesName IS NOT NULL
     GROUP BY 1
     ORDER BY 1;`
-  db.execSelect(sql, (queryResult) => {
-    r.json.ok(callback, queryResult)
-  })
 }

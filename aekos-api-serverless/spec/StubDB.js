@@ -2,7 +2,9 @@
 
 class StubDB {
   constructor () {
-    this.escape = require('../db-helper').escape
+    let realImpl = require('../db-helper')
+    this.escape = realImpl.escape
+    this.toSqlList = realImpl.toSqlList
     this._execSelectPromiseCallNum = 0
   }
 

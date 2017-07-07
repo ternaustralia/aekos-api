@@ -202,6 +202,16 @@ custom:
               type: string
             label:
               type: string
+      -
+        name: "SpeciesSummaryRequest"
+        contentType: "application/json"
+        schema:
+          type: object
+          properties:
+            speciesNames:
+              type: array
+              items:
+                type: string
 
 plugins:
   - serverless-aws-documentation
@@ -316,7 +326,7 @@ functions:
     events:
       - http:
           path: v1/speciesSummary.json
-          method: get
+          method: post
           cors: true
           documentation:
             summary: "Get a summary of the specified species names"
@@ -324,8 +334,8 @@ functions:
               A summary of the information that the system holds on the supplied species name(s) including a count
               of records. If the system doesn't have any data on a species name, no record for the species name will
               be in the result.
-            queryParams:
-              - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
+            requestModels:
+               "application/json": "SpeciesSummaryRequest"
             methodResponses:
               -
                 statusCode: 200

@@ -38,5 +38,24 @@ module.exports.execSelectPromise = selectSql => {
 }
 
 module.exports.escape = (unescapedValue) => {
-  return mysql.escape(unescapedValue)
+  if (unescapedValue.constructor === Array) {
+    return unescapedValue.map(e => {
+      return mysql.escape(e)
+    })
+  }
+  return mysql.escape(unescapedValue) // FIXME handle a list
+}
+
+module.exports.toSqlList = (unescapedValues) => {
+  if (unescapedValues.constructor !== Array) {
+    throw new Error('parameter must be an array')
+  }
+  return unescapedValues.map(e => {
+    return mysql.escape(e)
+  }).reduce((prev, curr) => {
+    if (prev) {
+      return prev + ',' + curr
+    }
+    return prev + curr
+  }, '')
 }
