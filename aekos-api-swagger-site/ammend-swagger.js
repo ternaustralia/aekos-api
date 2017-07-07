@@ -25,7 +25,7 @@ const tagMapping = {
   [get('/v1/getSpeciesByTrait.json')]: searchTag,
   [get('/v1/getTraitsBySpecies.json')]: searchTag,
   [get('/v1/speciesAutocomplete.json')]: searchTag,
-  [get('/v1/speciesSummary.json')]: searchTag,
+  [post('/v1/speciesSummary.json')]: searchTag,
   [get('/v1/allSpeciesData')]: everythingRetrievalTag,
   [get('/v1/allSpeciesData.json')]: everythingRetrievalTag,
   [get('/v1/allSpeciesData.csv')]: everythingRetrievalTag,
@@ -33,6 +33,10 @@ const tagMapping = {
 
 function get(path) {
   return tagMappingKey(path, 'get')
+}
+
+function post(path) {
+  return tagMappingKey(path, 'post')
 }
 
 function tagMappingKey(path, method) {
