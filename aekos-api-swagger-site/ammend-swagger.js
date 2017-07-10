@@ -150,10 +150,10 @@ when they haven't been called for some time (something around 5-10 minutes seems
 resource is warm (has recently been called) it should response within 1-2 seconds. However, when it's cold (gone
 to sleep) it will have to start up before it can respond so the total response time could be up to 10 seconds.
 
-To build a responsive UI on top of these functions, you can "pre-heat" the resources your users are likely to use
+To build a UI (typically calls are time sensitive) on top of these functions, you can "pre-heat" the resources your users are likely to use
 as the page loads. A workflow like:
  1. user loads page
- 1. as page loads, call the function with any params and disregard the result
+ 1. as page loads, call the function without any params and disregard the result
  1. user spends a few seconds filling out form on page
  1. user submits request
  1. AEKOS API responds quickly because the resource is already warmed up`
