@@ -1,3 +1,5 @@
 - add HATEOAS headers
 - add download option for CSVs
 - make getSpeciesByTrait perform and return the correct result
+- remove verbs from resources
+- make sure all resources are plural

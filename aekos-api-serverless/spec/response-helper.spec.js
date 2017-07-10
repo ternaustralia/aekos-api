@@ -38,6 +38,96 @@ describe('response-helper', function () {
     })
   })
 
+  describe('.handlePost()', () => {
+    const alwaysValidValidator = (body) => { return { isValid: true } }
+    const jsonAndCorsHeaders = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Credentials': true,
+      'Content-Type': "'application/json'"
+    }
+
+    it('should return a 400 when validation fails', (done) => {
+      let callback = (_, result) => {
+        expect(result.statusCode).toBe(400)
+        expect(result.headers).toEqual(jsonAndCorsHeaders)
+        done()
+      }
+      let validator = (body) => {
+        return { isValid: false, message: 'fail town' }
+      }
+      objectUnderTest.handlePost({ body: '{}' }, callback, null, validator,
+        function () { fail('Should not have been called') })
+    })
+
+    it('should call the responder when validation succeeds', (done) => {
+      let isResponderCalled = false
+      let callback = (_, result) => {
+        expect(isResponderCalled).toBeTruthy()
+        done()
+      }
+      let responder = (requestBody, db) => {
+        isResponderCalled = true
+        return new Promise(resolve => {
+          resolve()
+        })
+      }
+      objectUnderTest.handlePost({ body: '{}' }, callback, null, alwaysValidValidator, responder)
+    })
+
+    it('should return a 500 when the responder throws as error (outside a promise)', (done) => {
+      let callback = (_, result) => {
+        expect(result.statusCode).toBe(500)
+        done()
+      }
+      let responder = (requestBody, db) => {
+        throw new Error('ka-boom')
+      }
+      objectUnderTest.handlePost({ body: '{}' }, callback, null, alwaysValidValidator, responder)
+    })
+
+    it('should return a 500 when the responder throws as error (inside a promise)', (done) => {
+      let callback = (_, result) => {
+        expect(result.statusCode).toBe(500)
+        done()
+      }
+      let responder = (requestBody, db) => {
+        return new Promise((resolve, reject) => {
+          throw new Error('ka-boom')
+        })
+      }
+      objectUnderTest.handlePost({ body: '{}' }, callback, null, alwaysValidValidator, responder)
+    })
+
+    it('should return a 500 when the responder rejects the promise', (done) => {
+      let callback = (_, result) => {
+        expect(result.statusCode).toBe(500)
+        expect(result.headers).toEqual(jsonAndCorsHeaders)
+        done()
+      }
+      let responder = (requestBody, db) => {
+        return new Promise((resolve, reject) => {
+          reject(new Error('ka-boom'))
+        })
+      }
+      objectUnderTest.handlePost({ body: '{}' }, callback, null, alwaysValidValidator, responder)
+    })
+
+    it('should return the response body when all is successful', (done) => {
+      let callback = (_, result) => {
+        expect(result.statusCode).toBe(200)
+        expect(result.headers).toEqual(jsonAndCorsHeaders)
+        expect(result.body).toBe(JSON.stringify({ someField: 123 }))
+        done()
+      }
+      let responder = (requestBody, db) => {
+        return new Promise((resolve, reject) => {
+          resolve({ someField: 123 })
+        })
+      }
+      objectUnderTest.handlePost({ body: '{}' }, callback, null, alwaysValidValidator, responder)
+    })
+  })
+
   describe('isQueryStringParamPresent', function () {
     it('should be present', function () {
       let event = {

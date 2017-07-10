@@ -5,24 +5,39 @@ const speciesNameParam = yaml.load('./constants.yml').paramNames.speciesName.mul
 
 module.exports.handler = (event, context, callback) => {
   let db = require('./db-helper')
-  doHandle(event, callback, db)
+  r.handlePost(event, callback, db, validator, responder)
 }
 
 module.exports._testonly = {
-  doHandle: doHandle,
+  responder: responder,
+  validator: validator,
   getSql: getSql
 }
-function doHandle (event, callback, db) {
-  let requestBody = JSON.parse(event.body) // TODO extract to helper
-  // TODO validate property is present
+function validator (requestBody) {
+  let speciesNames = requestBody[speciesNameParam]
+  let isFieldNotSupplied = typeof speciesNames === 'undefined'
+  if (isFieldNotSupplied) {
+    return { isValid: false, message: 'No species names were supplied' }
+  }
+  let isFieldNotArray = speciesNames.constructor !== Array
+  if (isFieldNotArray) {
+    return { isValid: false, message: `The '${speciesNameParam}' field must be an array (of strings)` }
+  }
+  let isArrayEmpty = speciesNames.length < 1
+  if (isArrayEmpty) {
+    return { isValid: false, message: `The '${speciesNameParam}' field is mandatory and was not supplied` }
+  }
+  let isAnyElementNotStrings = speciesNames.some(element => { return typeof element !== 'string' })
+  if (isAnyElementNotStrings) {
+    return { isValid: false, message: `The '${speciesNameParam}' field must be an array of strings. You supplied a non-string element.` }
+  }
+  return { isValid: true }
+}
+
+function responder (requestBody, db) {
   let speciesNames = requestBody[speciesNameParam]
   let sql = getSql(speciesNames, db)
-  db.execSelectPromise(sql).then(queryResult => {
-    r.json.ok(callback, queryResult)
-  }).catch(error => {
-    console.error('Failed to get species summaries', error)
-    r.json.internalServerError(callback, 'Sorry, something went wrong')
-  })
+  return db.execSelectPromise(sql)
 }
 
 function getSql (speciesNames, db) {

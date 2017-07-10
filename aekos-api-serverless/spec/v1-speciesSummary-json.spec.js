@@ -3,33 +3,73 @@ var objectUnderTest = require('../v1-speciesSummary-json')
 let StubDB = require('./StubDB')
 
 describe('v1-speciesSummary-json', () => {
-  describe('.doHandle()', () => {
+  describe('.responder()', () => {
     it('should handle a single element', (done) => {
-      let request = {
-        body: JSON.stringify({ speciesNames: ['species one'] })
-      }
+      let postBody = { speciesNames: ['species one'] }
       let stubDb = new StubDB()
       stubDb.setExecSelectPromiseResponses([
         { speciesName: 'species one', recordsHeld: 123, id: 'notusedanymore' }
       ])
-      let callback = (error, result) => {
-        if (error) {
-          fail('Responded with error: ' + JSON.stringify(error))
-        }
-        expect(result.statusCode).toBe(200)
-        expect(result.headers).toEqual({
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Credentials': true,
-          'Content-Type': "'application/json'"
-        })
-        expect(JSON.parse(result.body)).toEqual(
+      let result = objectUnderTest._testonly.responder(postBody, stubDb)
+      result.then(responseBody => {
+        expect(responseBody).toEqual(
           { speciesName: 'species one', recordsHeld: 123, id: 'notusedanymore' }
         )
         done()
-      }
-      objectUnderTest._testonly.doHandle(request, callback, stubDb)
+      }).catch(error => {
+        fail('Responded with error: ' + JSON.stringify(error))
+      })
     })
   })
+
+  describe('.validator()', () => {
+    it('should validate with one species', () => {
+      let requestBody = {
+        speciesNames: ['species one']
+      }
+      let result = objectUnderTest._testonly.validator(requestBody)
+      expect(result.isValid).toBe(true)
+    })
+
+    it('should be invalid with no species', () => {
+      let requestBody = {
+        speciesNames: []
+      }
+      let result = objectUnderTest._testonly.validator(requestBody)
+      expect(result.isValid).toBe(false)
+    })
+
+    it('should be invalid when the body is not an object', () => {
+      let requestBody = 'a string'
+      let result = objectUnderTest._testonly.validator(requestBody)
+      expect(result.isValid).toBe(false)
+    })
+
+    it('should be invalid when the speciesNames field is not present', () => {
+      let requestBody = {
+        someOtherField: 123
+      }
+      let result = objectUnderTest._testonly.validator(requestBody)
+      expect(result.isValid).toBe(false)
+    })
+
+    it('should be invalid when the speciesNames field is the wrong type', () => {
+      let requestBody = {
+        speciesNames: 'not an array'
+      }
+      let result = objectUnderTest._testonly.validator(requestBody)
+      expect(result.isValid).toBe(false)
+    })
+
+    it('should be invalid when the speciesNames field is an array containing the wrong type elements', () => {
+      let requestBody = {
+        speciesNames: [1, 2, 3]
+      }
+      let result = objectUnderTest._testonly.validator(requestBody)
+      expect(result.isValid).toBe(false)
+    })
+  })
+
   describe('.getSql()', () => {
     const expectedSqlWithIndentingThatMatters1 = `
     SELECT speciesName, sum(recordsHeld) AS recordsHeld, 'notusedanymore' AS id

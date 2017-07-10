@@ -21,6 +21,28 @@ function doResponse (theCallback, theBody, statusCode, contentType) {
   theCallback(null, response)
 }
 
+function handlePost (event, callback, db,
+    validator/* (requestBody):{isValid:boolean, message:string} */,
+    responder/* (requestBody, databaseHelper):Promise<{}> */) {
+  let requestBody = JSON.parse(event.body)
+  let validationResult = validator(requestBody)
+  if (!validationResult.isValid) {
+    jsonResponseHelpers.badRequest(callback, validationResult.message)
+    return
+  }
+  let errorHandler = error => {
+    console.error('Failed to execute post handler', error)
+    jsonResponseHelpers.internalServerError(callback, 'Sorry, something went wrong')
+  }
+  try {
+    responder(requestBody, db).then(responseBody => {
+      jsonResponseHelpers.ok(callback, responseBody)
+    }).catch(errorHandler)
+  } catch (error) {
+    errorHandler(error)
+  }
+}
+
 function isQueryStringParamPresent (event, paramName) {
   let queryStringParams = event.queryStringParameters
   if (!queryStringParams || typeof (queryStringParams[paramName]) === 'undefined') {
@@ -188,5 +210,6 @@ module.exports = {
   contentTypes: contentTypes,
   calculatePageNumber: calculatePageNumber,
   calculateTotalPages: calculateTotalPages,
-  newContentNegotiationHandler: newContentNegotiationHandler
+  newContentNegotiationHandler: newContentNegotiationHandler,
+  handlePost: handlePost
 }
