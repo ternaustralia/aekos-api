@@ -192,7 +192,7 @@ custom:
             message:
               type: string
       -
-        name: "EnvironmentalVariableVocabv1Response"
+        name: V1EnvironmentalVariableVocabResponse
         contentType: "application/json"
         schema:
           type: object
@@ -317,7 +317,7 @@ functions:
               -
                 statusCode: 200
                 responseModels:
-                  "application/json": "EnvironmentalVariableVocabv1Response"
+                  "application/json": V1EnvironmentalVariableVocabResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse502Json}
   v1-speciesAutocomplete-json:
     handler: v1-speciesAutocomplete-json.handler
