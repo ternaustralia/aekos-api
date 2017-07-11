@@ -1,20 +1,41 @@
 'use strict'
 let r = require('./response-helper')
-let db = require('./db-helper')
 const startsWithChar = '%'
-const qParam = 'q'
+let yaml = require('yamljs')
+const qParam = yaml.load('./constants.yml').paramNames.PARTIAL_NAME
+const offsetParam = yaml.load('./constants.yml').paramNames.OFFSET
+const offsetDefault = yaml.load('./constants.yml').defaults.OFFSET
+const pageSizeParam = yaml.load('./constants.yml').paramNames.PAGE_SIZE
+const pageSizeDefault = yaml.load('./constants.yml').defaults.PAGE_SIZE
 
 module.exports.handler = (event, context, callback) => {
-  // TODO add taxonRemarks to the search
+  let db = require('./db-helper')
+  doHandle(event, callback, db)
+}
+
+function doHandle (event, callback, db) {
   if (!r.isQueryStringParamPresent(event, qParam)) {
     r.json.badRequest(callback, `the '${qParam}' query string parameter must be supplied`)
     return
   }
   let partialName = event.queryStringParameters[qParam]
+  let offset = r.getOptionalNumberParam(event, offsetParam, offsetDefault)
+  let pageSize = r.getOptionalNumberParam(event, pageSizeParam, pageSizeDefault)
+  const sql = getSql(partialName, pageSize, offset, db)
+  db.execSelectPromise(sql).then(queryResult => {
+    r.json.ok(callback, queryResult)
+  })
+  // FIXME catch errors
+}
+
+module.exports._testonly = {
+  getSql: getSql,
+  doHandle: doHandle
+}
+
+function getSql (partialName, pageSize, offset, db) {
   let escapedPartialName = db.escape(partialName + startsWithChar)
-  let offset = 0 // FIXME add param for this
-  let pageSize = 20 // FIXME add param for this
-  const sql = `
+  return `
     SELECT speciesName, sum(recordsHeld) AS recordsHeld, 'notusedanymore' AS id
     FROM (
       SELECT scientificName AS speciesName, count(*) AS recordsHeld
@@ -31,7 +52,4 @@ module.exports.handler = (event, context, callback) => {
     GROUP BY 1
     ORDER BY 1
     LIMIT ${pageSize} OFFSET ${offset};`
-  db.execSelect(sql, (queryResult) => {
-    r.json.ok(callback, queryResult)
-  })
 }

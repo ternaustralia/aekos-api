@@ -1,6 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Downloads the current Swagger definition from AWS API Gateway
 cd `dirname $0`
+set -e
 API_ID=`./get-rest-api-id.sh`
 STAGE=dev
 FILE_TYPE=json

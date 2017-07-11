@@ -76,6 +76,7 @@ custom:
   domainName: ${file(secrets.yml):${self:custom.stage}.domainName}
   documentationUrl: https://www.${self:custom.domainName}
   externalModelSchemaFragments: ${file(./model-schemas.yml):exports}
+  constants: ${file(./constants.yml)}
   commonModelSchemaFragments:
     AcceptHeaderDoco:
       name: "accept"
@@ -123,7 +124,7 @@ custom:
       #    see: https://github.com/9cookies/serverless-aws-documentation/issues/37
     models:
       -
-        name: "SpeciesSummaryList"
+        name: V1SpeciesSummaryList
         contentType: "application/json"
         schema:
           type: array
@@ -203,7 +204,7 @@ custom:
             label:
               type: string
       -
-        name: "SpeciesSummaryRequest"
+        name: V1SpeciesSummaryRequest
         contentType: "application/json"
         schema:
           type: object
@@ -212,7 +213,20 @@ custom:
               type: array
               items:
                 type: string
-
+      -
+        name: V1SpeciesAutocompleteResponse
+        contentType: "application/json"
+        schema:
+          type: array
+          items:
+            type: object
+            properties:
+              speciesName:
+                type: string
+              recordsHeld:
+                type: string
+              id:
+                type: string
 plugins:
   - serverless-aws-documentation
 
@@ -319,8 +333,20 @@ functions:
               fragment will be returned ordered by most relevant.
             queryParams:
               -
-                name: "q"
+                name: "${self:custom.constants.paramNames.PARTIAL_NAME}"
                 description: "partial species name"
+                required: true
+              -
+                name: "${self:custom.constants.paramNames.OFFSET}"
+                description: "0-indexed offset, default=${self:custom.constants.defaults.OFFSET}"
+              -
+                name: "${self:custom.constants.paramNames.PAGE_SIZE}"
+                description: "number of records per page, default=${self:custom.constants.defaults.PAGE_SIZE}"
+            methodResponses:
+              -
+                statusCode: 200
+                responseModels:
+                  "application/json": V1SpeciesAutocompleteResponse
   v1-speciesSummary-json:
     handler: v1-speciesSummary-json.handler
     events:
@@ -335,12 +361,12 @@ functions:
               of records. If the system doesn't have any data on a species name, no record for the species name will
               be in the result.
             requestModels:
-               "application/json": "SpeciesSummaryRequest"
+               "application/json": V1SpeciesSummaryRequest
             methodResponses:
               -
                 statusCode: 200
                 responseModels:
-                  "application/json": "SpeciesSummaryList"
+                  "application/json": V1SpeciesSummaryList
   v1-speciesData:
     handler: v1-speciesData.handler
     events:

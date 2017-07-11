@@ -8,7 +8,6 @@ const tagMappingKeySeparator = '#'
 const dataRetrievalTag = 'Data Retrieval by Species'
 const everythingRetrievalTag = 'Data Retrieval (everything)'
 const searchTag = 'Search'
-const corsTag = 'CORS Related'
 const tagMapping = {
   [get('/v1/environmentData')]: dataRetrievalTag,
   [get('/v1/environmentData.json')]: dataRetrievalTag,
@@ -68,7 +67,7 @@ function tagResources(parsedData) {
       let currMethod = currPath[currMethodKey]
       let isOptionsMethod = currMethodKey === 'options'
       if (isOptionsMethod) {
-        currMethod.tags = [corsTag]
+        delete currPath[currMethodKey]
         return
       }
       let key = tagMappingKey(currPathKey, currMethodKey)
@@ -156,4 +155,7 @@ as the page loads. A workflow like:
  1. as page loads, call the function without any params and disregard the result
  1. user spends a few seconds filling out form on page
  1. user submits request
- 1. AEKOS API responds quickly because the resource is already warmed up`
+ 1. AEKOS API responds quickly because the resource is already warmed up
+ 
+# CORS support
+All resources are CORS-enabled for any origin. In the interest of keeping this documentation clean, the \`OPTIONS\` methods have been omitted.`

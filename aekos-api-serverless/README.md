@@ -8,6 +8,7 @@ This is a NodeJS project that uses the [Serverless framework](https://serverless
  - NodeJS 6.10+
  - Serverless 1.x
  - [Yarn](https://yarnpkg.com/)
+ - AWS CLI [https://github.com/aws/aws-cli]()
  - API keys for an AWS account (so you can deploy)
 
 ## Getting started
@@ -26,3 +27,4 @@ We develop against a specific version of NodeJS (v6.10.3 at the time of writing)
 
     # TODO add step about creating AWS RDS instance
     ./dev-deploy.sh # deploy the code to AWS
+    # look at the ../aekos-api-swagger-site/ project for how to deploy the doco site

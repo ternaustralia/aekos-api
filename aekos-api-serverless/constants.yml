@@ -8,3 +8,8 @@ paramNames:
   PAGE_SIZE: "pageSize"
   ROWS: "rows"
   START: "start"
+  PARTIAL_NAME: "q"
+  OFFSET: "offset"
+defaults:
+  PAGE_SIZE: "20"
+  OFFSET: "0"
