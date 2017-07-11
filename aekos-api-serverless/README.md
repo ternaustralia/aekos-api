@@ -17,6 +17,11 @@ This is a NodeJS project that uses the [Serverless framework](https://serverless
     yarn # install all dependencies
     npm install --global serverless # install serverless globally
 
+## Installing NodeJS
+We develop against a specific version of NodeJS (v6.10.3 at the time of writing) because that's what AWS supports. The best way to get this specific version of NodeJS is to use [https://github.com/creationix/nvm#install-script](NVM). Once you've installed `nvm`, install the specific version of NodeJS with:
+
+    nvm install 6.10
+
 ## Deploying
 
     # TODO add step about creating AWS RDS instance
