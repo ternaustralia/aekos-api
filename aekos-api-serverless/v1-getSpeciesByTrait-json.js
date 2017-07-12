@@ -4,7 +4,6 @@ let db = require('./db-helper')
 const traitNameParam = 'traitName'
 
 module.exports.handler = (event, context, callback) => {
-  // FIXME get repeated query string params mapping correctly rather than just the last one
   if (!r.isQueryStringParamPresent(event, traitNameParam)) {
     r.json.badRequest(callback, `the '${traitNameParam}' query string parameter must be supplied`)
     return

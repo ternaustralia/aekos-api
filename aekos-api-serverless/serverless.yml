@@ -89,10 +89,6 @@ custom:
       statusCode: 500
       responseModels:
         "application/json": "500JsonResponse"
-    MethodResponse502Json:
-      statusCode: 502
-      responseModels:
-        "application/json": "502JsonResponse"
     StartQueryParam:
       name: "${file(./constants.yml):paramNames.START}"
       description: "0-indexed result start index"
@@ -172,11 +168,6 @@ custom:
           type: string
       -
         name: "400JsonResponse"
-        contentType: "text/csv"
-        schema:
-          type: string
-      -
-        name: "500JsonResponse"
         contentType: "application/json"
         schema:
           type: object
@@ -184,7 +175,7 @@ custom:
             message:
               type: string
       -
-        name: "502JsonResponse"
+        name: "500JsonResponse"
         contentType: "application/json"
         schema:
           type: object
@@ -286,7 +277,8 @@ functions:
               - ${self:custom.commonModelSchemaFragments.PageNumQueryParam}
               - ${self:custom.commonModelSchemaFragments.PageSizeQueryParam}
             methodResponses:
-              - ${self:custom.commonModelSchemaFragments.MethodResponse502Json}
+              - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   v1-getTraitVocab-json:
     handler: v1-getTraitVocab-json.handler
     events:
@@ -318,7 +310,8 @@ functions:
                 statusCode: 200
                 responseModels:
                   "application/json": V1EnvironmentalVariableVocabResponse
-              - ${self:custom.commonModelSchemaFragments.MethodResponse502Json}
+              - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   v1-speciesAutocomplete-json:
     handler: v1-speciesAutocomplete-json.handler
     events:

@@ -15,6 +15,13 @@ describe('v1-speciesData-json', () => {
           speciesName: 'species one',
           rows: '15',
           start: '0'
+        },
+        headers: {
+          Host: 'api.aekos.org.au',
+          'X-Forwarded-Proto': 'https'
+        },
+        requestContext: {
+          path: '/v1/speciesData.json'
         }
       }
       let callback = (error, result) => {
@@ -25,7 +32,9 @@ describe('v1-speciesData-json', () => {
         expect(result.headers).toEqual({
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Credentials': true,
-          'Content-Type': "'application/json'"
+          'Content-Type': "'application/json'",
+          link: '<https://api.aekos.org.au/v1/speciesData.json?speciesName=species%20one&rows=15&start=15>; rel="next", ' +
+                '<https://api.aekos.org.au/v1/speciesData.json?speciesName=species%20one&rows=15&start=30>; rel="last"'
         })
         expect(JSON.parse(result.body)).toEqual({
           responseHeader: {
@@ -59,6 +68,13 @@ describe('v1-speciesData-json', () => {
         queryStringParameters: {
           speciesName: 'species one',
           start: '0'
+        },
+        headers: {
+          Host: 'api.aekos.org.au',
+          'X-Forwarded-Proto': 'https'
+        },
+        requestContext: {
+          path: '/v1/speciesData.json'
         }
       }
       let callback = (error, result) => {
@@ -84,6 +100,13 @@ describe('v1-speciesData-json', () => {
         queryStringParameters: {
           speciesName: 'species one',
           start: '10' // start is less than the default rows value
+        },
+        headers: {
+          Host: 'api.aekos.org.au',
+          'X-Forwarded-Proto': 'https'
+        },
+        requestContext: {
+          path: '/v1/speciesData.json'
         }
       }
       let callback = (error, result) => {

@@ -1,5 +1,8 @@
 - add HATEOAS headers
+ - for CSV
+ - for JSON
+ - is it ok to use a POST (for species,traits,etc) with query string (for paging) so we can generate the <link>s? Should we store continutation tokens on the server (probably not)?
 - add download option for CSVs
 - make getSpeciesByTrait perform and return the correct result
 - remove verbs from resources
-- make sure all resources are plural
+- add 400 and 500 responses to all resources

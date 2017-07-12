@@ -17,7 +17,7 @@ function doHandle (event, callback, db, elapsedTimeCalculator) {
   }
   let params = extractParams(event, db) // FIXME handle thrown Errors for invalid request
   doQuery(params, processStart, false, db, elapsedTimeCalculator).then(successResult => {
-    r.json.ok(callback, successResult)
+    r.json.ok(callback, successResult, event)
   }).catch(error => {
     console.error('Failed to get speciesData', error)
     r.json.internalServerError(callback, 'Sorry, something went wrong')

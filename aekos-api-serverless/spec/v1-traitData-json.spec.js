@@ -20,6 +20,13 @@ describe('v1-traitData-json', () => {
           // don't supply 'traitName'
           rows: '15',
           start: '0'
+        },
+        headers: {
+          Host: 'api.aekos.org.au',
+          'X-Forwarded-Proto': 'https'
+        },
+        requestContext: {
+          path: '/v1/traitData.json'
         }
       }
       let callback = (error, result) => {
@@ -30,7 +37,9 @@ describe('v1-traitData-json', () => {
         expect(result.headers).toEqual({
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Credentials': true,
-          'Content-Type': "'application/json'"
+          'Content-Type': "'application/json'",
+          link: '<https://api.aekos.org.au/v1/traitData.json?speciesName=species%20one&rows=15&start=15>; rel="next", ' +
+                '<https://api.aekos.org.au/v1/traitData.json?speciesName=species%20one&rows=15&start=30>; rel="last"'
         })
         expect(JSON.parse(result.body)).toEqual({
           responseHeader: {
@@ -73,6 +82,13 @@ describe('v1-traitData-json', () => {
           traitName: 'trait one',
           rows: '15',
           start: '0'
+        },
+        headers: {
+          Host: 'api.aekos.org.au',
+          'X-Forwarded-Proto': 'https'
+        },
+        requestContext: {
+          path: '/v1/traitData.json'
         }
       }
       let callback = (error, result) => {

@@ -62,7 +62,7 @@ describe('v1-speciesAutocomplete-json', () => {
       let stubDb = new StubDB()
       stubDb.setExecSelectPromiseResponses([{ someField: 123 }])
       spyOn(stubDb, 'execSelectPromise').and.callThrough()
-      objectUnderTest._testonly.doHandle(event, null, stubDb)
+      objectUnderTest._testonly.doHandle(event, () => {}, stubDb)
       expect(stubDb.execSelectPromise).toHaveBeenCalledWith(expectedSql1)
     })
 

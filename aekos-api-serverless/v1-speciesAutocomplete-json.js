@@ -24,8 +24,11 @@ function doHandle (event, callback, db) {
   const sql = getSql(partialName, pageSize, offset, db)
   db.execSelectPromise(sql).then(queryResult => {
     r.json.ok(callback, queryResult)
+  }).catch(error => {
+    let msg = 'Failed to execute species autocomplete SQL'
+    console.log(msg, error)
+    r.json.internalServerError(callback, msg)
   })
-  // FIXME catch errors
 }
 
 module.exports._testonly = {

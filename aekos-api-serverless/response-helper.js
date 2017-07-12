@@ -1,6 +1,7 @@
 'use strict'
 let accepts = require('accepts')
 let codeToLabelMapping = require('./ontology/code-to-label.json')
+let querystring = require('querystring')
 const jsonContentType = "'application/json'"
 const csvContentType = "'text/csv'"
 function getHeaders (contentType) {
@@ -11,11 +12,15 @@ function getHeaders (contentType) {
   }
 }
 
-function doResponse (theCallback, theBody, statusCode, contentType) {
+function doResponse (theCallback, theBody, statusCode, contentType, extraHeadersCallback) {
   let body = contentType === csvContentType ? theBody : JSON.stringify(theBody)
+  let headers = getHeaders(contentType)
+  if (extraHeadersCallback && isHateoasable(theBody)) {
+    extraHeadersCallback(headers)
+  }
   const response = {
     statusCode: statusCode,
-    headers: getHeaders(contentType),
+    headers: headers,
     body: body
   }
   theCallback(null, response)
@@ -178,9 +183,90 @@ function newContentNegotiationHandler (jsonHandler, csvHandler) {
   }
 }
 
+function buildHateoasLinkHeader (event, responseHeader) {
+  function appendCommaIfNecessary (linkHeader) {
+    if (linkHeader.length > 0) {
+      return linkHeader + ', '
+    }
+    return linkHeader
+  }
+
+  function createLinkHeader (uri, rel) {
+    return '<' + uri + '>; rel="' + rel + '"'
+  }
+
+  function queryStringWithStart (newStart) {
+    let params = event.queryStringParameters
+    params.start = newStart
+    return querystring.stringify(params)
+  }
+  // FIXME should handle if expected values aren't available
+  let start = responseHeader.params.start
+  let rows = responseHeader.params.rows
+  let pageNumber = responseHeader.pageNumber
+  let totalPages = responseHeader.totalPages
+  let scheme = event.headers['X-Forwarded-Proto']
+  let host = event.headers.Host
+  let path = event.requestContext.path
+  let fromPath = `${scheme}://${host}${path}`
+  let result = ''
+  let hasNextPage = pageNumber < totalPages
+  if (hasNextPage) {
+    let startForNextPage = start + rows
+    let qs = queryStringWithStart(startForNextPage)
+    let uriForNextPage = `${fromPath}?${qs}`
+    result += createLinkHeader(uriForNextPage, 'next')
+  }
+  let hasPrevPage = pageNumber > 1
+  if (hasPrevPage) {
+    let startForPrevPage = start - rows
+    let qs = queryStringWithStart(startForPrevPage)
+    let uriForPrevPage = `${fromPath}?${qs}`
+    result = appendCommaIfNecessary(result)
+    result += createLinkHeader(uriForPrevPage, 'prev')
+  }
+  let hasFirstPage = pageNumber > 1
+  if (hasFirstPage) {
+    let qs = queryStringWithStart(0)
+    let uriForFirstPage = `${fromPath}?${qs}`
+    result = appendCommaIfNecessary(result)
+    result += createLinkHeader(uriForFirstPage, 'first')
+  }
+  let hasLastPage = pageNumber < totalPages
+  if (hasLastPage) {
+    let startForLastPage = (totalPages - 1) * rows
+    let qs = queryStringWithStart(startForLastPage)
+    let uriForLastPage = `${fromPath}?${qs}`
+    result = appendCommaIfNecessary(result)
+    result += createLinkHeader(uriForLastPage, 'last')
+  }
+  return result
+}
+
+function isHateoasable (response) {
+  if (typeof response !== 'object' || typeof response.responseHeader !== 'object') {
+    return false
+  }
+  let responseHeader = response.responseHeader
+  if (typeof responseHeader.pageNumber === 'number' &&
+      responseHeader.params &&
+      typeof responseHeader.params.rows === 'number' &&
+      typeof responseHeader.params.start === 'number' &&
+      typeof responseHeader.totalPages === 'number') {
+    return true
+  }
+  return false
+}
+
 const jsonResponseHelpers = {
-  ok: (theCallback, theBody) => {
-    doResponse(theCallback, theBody, 200, jsonContentType)
+  ok: (theCallback, theBody, event) => {
+    let extraHeadersCallback = function () {}
+    if (isHateoasable(theBody)) {
+      extraHeadersCallback = headers => {
+        headers.link = buildHateoasLinkHeader(event, theBody.responseHeader)
+      }
+    }
+    doResponse(theCallback, theBody, 200, jsonContentType, extraHeadersCallback)
   },
   badRequest: (theCallback, theMessage) => {
     doResponse(theCallback, theMessage, 400, jsonContentType)
@@ -211,5 +297,7 @@ module.exports = {
   calculatePageNumber: calculatePageNumber,
   calculateTotalPages: calculateTotalPages,
   newContentNegotiationHandler: newContentNegotiationHandler,
-  handlePost: handlePost
+  handlePost: handlePost,
+  buildHateoasLinkHeader: buildHateoasLinkHeader,
+  isHateoasable: isHateoasable
 }

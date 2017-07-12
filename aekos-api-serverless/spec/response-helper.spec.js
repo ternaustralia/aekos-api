@@ -4,23 +4,138 @@ let objectUnderTest = require('../response-helper')
 
 describe('response-helper', function () {
   describe('json', function () {
-    describe('ok', function () {
-      it('should call the supplied callback', function () {
-        let isCalled = false
-        let callback = function () {
-          isCalled = true
+    describe('.ok()', function () {
+      it('should send the supplied body to the callback', function () {
+        let response = null
+        let callback = function (_, result) {
+          response = result
         }
         objectUnderTest.json.ok(callback, 'some value')
-        expect(isCalled).toBeTruthy()
+        expect(response.body).toBe('"some value"')
       })
 
-      it('should send the supplied body to the callback', function () {
-        let suppliedArg = null
-        let callback = function (first, second) {
-          suppliedArg = second
+      it('should return a 200 status code', function () {
+        let response = null
+        let callback = function (_, result) {
+          response = result
         }
         objectUnderTest.json.ok(callback, 'some value')
-        expect(suppliedArg.body).toBe('"some value"')
+        expect(response.statusCode).toBe(200)
+      })
+
+      it('should send the expected headers', function () {
+        let response = null
+        let callback = function (_, result) {
+          response = result
+        }
+        objectUnderTest.json.ok(callback, 'some value')
+        expect(response.headers).toEqual({
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Credentials': true,
+          'Content-Type': "'application/json'"
+        })
+      })
+
+      it('should add hateoas headers when appropriate', function () {
+        let response = null
+        let callback = function (_, result) {
+          response = result
+        }
+        let params = {
+          rows: 15,
+          start: 0
+        }
+        let hateoasableResponse = {
+          responseHeader: {
+            pageNumber: 1,
+            params: params,
+            totalPages: 3
+          }
+        }
+        let event = {
+          headers: {
+            Host: 'api.aekos.org.au',
+            'X-Forwarded-Proto': 'https'
+          },
+          requestContext: {
+            path: '/v1/someResource.json'
+          },
+          queryStringParameters: params
+        }
+        objectUnderTest.json.ok(callback, hateoasableResponse, event)
+        expect(response.headers).toEqual({
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Credentials': true,
+          'Content-Type': "'application/json'",
+          link: '<https://api.aekos.org.au/v1/someResource.json?rows=15&start=15>; rel="next", ' +
+          '<https://api.aekos.org.au/v1/someResource.json?rows=15&start=30>; rel="last"'
+        })
+      })
+    })
+
+    describe('.badRequest()', function () {
+      it('should send the supplied body to the callback', function () {
+        let response = null
+        let callback = function (_, result) {
+          response = result
+        }
+        objectUnderTest.json.badRequest(callback, 'wrong input')
+        expect(response.body).toBe('"wrong input"')
+      })
+
+      it('should return a 400 status code', function () {
+        let response = null
+        let callback = function (_, result) {
+          response = result
+        }
+        objectUnderTest.json.badRequest(callback, 'wrong input')
+        expect(response.statusCode).toBe(400)
+      })
+
+      it('should send the expected headers', function () {
+        let response = null
+        let callback = function (_, result) {
+          response = result
+        }
+        objectUnderTest.json.badRequest(callback, 'wrong input')
+        expect(response.headers).toEqual({
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Credentials': true,
+          'Content-Type': "'application/json'"
+        })
+      })
+    })
+
+    describe('.internalServerError()', function () {
+      it('should send the supplied body to the callback', function () {
+        let response = null
+        let callback = function (_, result) {
+          response = result
+        }
+        objectUnderTest.json.internalServerError(callback, 'something failed')
+        expect(response.body).toBe(JSON.stringify({ message: 'something failed' }))
+      })
+
+      it('should return a 500 status code', function () {
+        let response = null
+        let callback = function (_, result) {
+          response = result
+        }
+        objectUnderTest.json.internalServerError(callback, 'something failed')
+        expect(response.statusCode).toBe(500)
+      })
+
+      it('should send the expected headers', function () {
+        let response = null
+        let callback = function (_, result) {
+          response = result
+        }
+        objectUnderTest.json.internalServerError(callback, 'something failed')
+        expect(response.headers).toEqual({
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Credentials': true,
+          'Content-Type': "'application/json'"
+        })
       })
     })
   })
@@ -29,12 +144,213 @@ describe('response-helper', function () {
     describe('ok', function () {
       it('should send the supplied body to the callback without JSON.stringify-ing it', function () {
         let suppliedArg = null
-        let callback = function (first, second) {
-          suppliedArg = second
+        let callback = function (_, result) {
+          suppliedArg = result
         }
         objectUnderTest.csv.ok(callback, '1,"some value",123\n2,"other value",456')
         expect(suppliedArg.body).toBe('1,"some value",123\n2,"other value",456')
       })
+    })
+  })
+
+  describe('.buildHateoasLinkHeader()', function () {
+    const reqHeaders = {
+      Host: 'api.aekos.org.au',
+      'X-Forwarded-Proto': 'https'
+    }
+    it('should build the HATEOAS header for the first page of a single-page response', function () {
+      let event = {
+        headers: reqHeaders,
+        queryStringParameters: {
+          rows: '20',
+          download: 'false',
+          start: '0'
+        },
+        requestContext: {
+          path: '/v1/speciesData.csv'
+        }
+      }
+      let responseHeader = {
+        pageNumber: 1,
+        totalPages: 1,
+        params: {
+          rows: 20,
+          start: 0
+        }
+      }
+      let result = objectUnderTest.buildHateoasLinkHeader(event, responseHeader)
+      expect(result).toBe('')
+    })
+
+    it('should build the HATEOAS header for the first page of a multi-page response', function () {
+      let event = {
+        headers: reqHeaders,
+        queryStringParameters: {
+          rows: '20',
+          download: 'false',
+          start: '0'
+        },
+        requestContext: {
+          path: '/v1/speciesData.csv'
+        }
+      }
+      let responseHeader = {
+        pageNumber: 1,
+        totalPages: 10,
+        params: {
+          rows: 20,
+          start: 0
+        }
+      }
+      let result = objectUnderTest.buildHateoasLinkHeader(event, responseHeader)
+      expect(result).toBe(
+        '<https://api.aekos.org.au/v1/speciesData.csv?rows=20&download=false&start=20>; rel="next", ' +
+        '<https://api.aekos.org.au/v1/speciesData.csv?rows=20&download=false&start=180>; rel="last"')
+    })
+
+    it('should build the HATEOAS header for the middle page of a multi-page (>2) response', function () {
+      let event = {
+        headers: reqHeaders,
+        queryStringParameters: {
+          rows: '20',
+          download: 'false',
+          start: '0'
+        },
+        requestContext: {
+          path: '/v1/speciesData.csv'
+        }
+      }
+      let responseHeader = {
+        pageNumber: 2,
+        totalPages: 10,
+        params: {
+          rows: 20,
+          start: 20
+        }
+      }
+      let result = objectUnderTest.buildHateoasLinkHeader(event, responseHeader)
+      expect(result).toBe(
+        '<https://api.aekos.org.au/v1/speciesData.csv?rows=20&download=false&start=40>; rel="next", ' +
+        '<https://api.aekos.org.au/v1/speciesData.csv?rows=20&download=false&start=0>; rel="prev", ' +
+        '<https://api.aekos.org.au/v1/speciesData.csv?rows=20&download=false&start=0>; rel="first", ' +
+        '<https://api.aekos.org.au/v1/speciesData.csv?rows=20&download=false&start=180>; rel="last"')
+    })
+
+    it('should build the HATEOAS header for the last page of a response', function () {
+      let event = {
+        headers: reqHeaders,
+        queryStringParameters: {
+          rows: '20',
+          download: 'false',
+          start: '0'
+        },
+        requestContext: {
+          path: '/v1/speciesData.csv'
+        }
+      }
+      let responseHeader = {
+        pageNumber: 3,
+        totalPages: 3,
+        params: {
+          rows: 20,
+          start: 40
+        }
+      }
+      let result = objectUnderTest.buildHateoasLinkHeader(event, responseHeader)
+      expect(result).toBe(
+        '<https://api.aekos.org.au/v1/speciesData.csv?rows=20&download=false&start=20>; rel="prev", ' +
+        '<https://api.aekos.org.au/v1/speciesData.csv?rows=20&download=false&start=0>; rel="first"')
+    })
+  })
+
+  describe('.isHateoasable()', () => {
+    it('should know when we can apply Hateoas headers because all fields are present', () => {
+      let response = {
+        responseHeader: {
+          pageNumber: 1,
+          params: {
+            rows: 15,
+            start: 0
+          },
+          totalPages: 3
+        }
+      }
+      let result = objectUnderTest.isHateoasable(response)
+      expect(result).toBe(true)
+    })
+
+    it('should know when we CANNOT apply Hateoas headers because pageNumber is missing', () => {
+      let response = {
+        responseHeader: {
+          // no pageNumber
+          params: {
+            rows: 15,
+            start: 0
+          },
+          totalPages: 3
+        }
+      }
+      let result = objectUnderTest.isHateoasable(response)
+      expect(result).toBe(false)
+    })
+
+    it('should know when we CANNOT apply Hateoas headers because rows is missing', () => {
+      let response = {
+        responseHeader: {
+          pageNumber: 1,
+          params: {
+            // no rows
+            start: 0
+          },
+          totalPages: 3
+        }
+      }
+      let result = objectUnderTest.isHateoasable(response)
+      expect(result).toBe(false)
+    })
+
+    it('should know when we CANNOT apply Hateoas headers because start is missing', () => {
+      let response = {
+        responseHeader: {
+          pageNumber: 1,
+          params: {
+            rows: 15
+            // no start
+          },
+          totalPages: 3
+        }
+      }
+      let result = objectUnderTest.isHateoasable(response)
+      expect(result).toBe(false)
+    })
+
+    it('should know when we CANNOT apply Hateoas headers because totalPages is missing', () => {
+      let response = {
+        responseHeader: {
+          pageNumber: 1,
+          params: {
+            rows: 15,
+            start: 0
+          }
+          // no totalPages
+        }
+      }
+      let result = objectUnderTest.isHateoasable(response)
+      expect(result).toBe(false)
+    })
+
+    it('should know when we CANNOT apply Hateoas headers because the response is not an object', () => {
+      let response = 'not an object'
+      let result = objectUnderTest.isHateoasable(response)
+      expect(result).toBe(false)
+    })
+
+    it('should know when we CANNOT apply Hateoas headers because the response has a header but it is not an object', () => {
+      let response = {
+        responseHeader: 'not an object'
+      }
+      let result = objectUnderTest.isHateoasable(response)
+      expect(result).toBe(false)
     })
   })
 
@@ -76,30 +392,35 @@ describe('response-helper', function () {
 
     it('should return a 500 when the responder throws as error (outside a promise)', (done) => {
       let callback = (_, result) => {
+        resetConsoleError()
         expect(result.statusCode).toBe(500)
         done()
       }
       let responder = (requestBody, db) => {
         throw new Error('ka-boom')
       }
+      silenceConsoleError()
       objectUnderTest.handlePost({ body: '{}' }, callback, null, alwaysValidValidator, responder)
     })
 
     it('should return a 500 when the responder throws as error (inside a promise)', (done) => {
       let callback = (_, result) => {
+        resetConsoleError()
         expect(result.statusCode).toBe(500)
         done()
       }
       let responder = (requestBody, db) => {
-        return new Promise((resolve, reject) => {
+        return new Promise(() => {
           throw new Error('ka-boom')
         })
       }
+      silenceConsoleError()
       objectUnderTest.handlePost({ body: '{}' }, callback, null, alwaysValidValidator, responder)
     })
 
     it('should return a 500 when the responder rejects the promise', (done) => {
       let callback = (_, result) => {
+        resetConsoleError()
         expect(result.statusCode).toBe(500)
         expect(result.headers).toEqual(jsonAndCorsHeaders)
         done()
@@ -109,6 +430,7 @@ describe('response-helper', function () {
           reject(new Error('ka-boom'))
         })
       }
+      silenceConsoleError()
       objectUnderTest.handlePost({ body: '{}' }, callback, null, alwaysValidValidator, responder)
     })
 
@@ -345,7 +667,9 @@ describe('response-helper', function () {
 
     it('should be able to fallback to the code as the label for a non-existant code', () => {
       let code = 'certainlyNotInTheVocab'
+      silenceConsoleWarn()
       let result = objectUnderTest.resolveVocabCode(code)
+      resetConsoleWarn()
       expect(result).toBe(code)
     })
   })
@@ -470,7 +794,7 @@ describe('response-helper', function () {
     }
     it('should call the JSON handler when we have a JSON Accept header', () => {
       let trackerModule = new TrackCallsModule()
-      let cnHandler = objectUnderTest.newContentNegotiationHandler(trackerModule, () => {})
+      let cnHandler = objectUnderTest.newContentNegotiationHandler(trackerModule, () => { })
       let event = {
         headers: {
           Accept: 'application/json'
@@ -482,7 +806,7 @@ describe('response-helper', function () {
 
     it('should call the CSV handler when we have a CSV Accept header', () => {
       let trackerModule = new TrackCallsModule()
-      let cnHandler = objectUnderTest.newContentNegotiationHandler(() => {}, trackerModule)
+      let cnHandler = objectUnderTest.newContentNegotiationHandler(() => { }, trackerModule)
       let event = {
         headers: {
           Accept: 'text/csv'
@@ -494,7 +818,7 @@ describe('response-helper', function () {
 
     it('should return a 400 when it cannot handle the Accept header', (done) => {
       let trackerModule = new TrackCallsModule()
-      let cnHandler = objectUnderTest.newContentNegotiationHandler(() => {}, trackerModule)
+      let cnHandler = objectUnderTest.newContentNegotiationHandler(() => { }, trackerModule)
       let event = {
         headers: {
           Accept: 'something/weird'
@@ -507,3 +831,20 @@ describe('response-helper', function () {
     })
   })
 })
+
+let origConsoleError = null
+function silenceConsoleError () {
+  origConsoleError = console.error
+  console.error = () => { }
+}
+function resetConsoleError () {
+  console.error = origConsoleError
+}
+let origConsoleWarn = null
+function silenceConsoleWarn () {
+  origConsoleWarn = console.warn
+  console.warn = () => { }
+}
+function resetConsoleWarn () {
+  console.warn = origConsoleWarn
+}
