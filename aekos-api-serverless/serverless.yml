@@ -30,14 +30,6 @@ provider:
 
 resources:
   Resources:
-    pathmapping:
-      Type: AWS::ApiGateway::BasePathMapping
-      Properties:
-        BasePath: ""
-        DomainName: ${self:custom.domainName}
-        RestApiId: 
-          Ref: ApiGatewayRestApi
-        Stage: ${self:custom.stage}
     MockMethod:
       Type: AWS::ApiGateway::Method
       Properties:
@@ -77,6 +69,10 @@ custom:
   documentationUrl: https://www.${self:custom.domainName}
   externalModelSchemaFragments: ${file(./model-schemas.yml):exports}
   constants: ${file(./constants.yml)}
+  customDomain:
+    basePath: ''
+    domainName: ${self:custom.domainName}
+    stage: ${self:custom.stage}
   commonModelSchemaFragments:
     AcceptHeaderDoco:
       name: "accept"
@@ -220,6 +216,7 @@ custom:
                 type: string
 plugins:
   - serverless-aws-documentation
+  - serverless-domain-manager
 
 functions:
   v1-getEnvironmentBySpecies-json:

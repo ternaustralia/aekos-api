@@ -6,3 +6,4 @@
 - make getSpeciesByTrait perform and return the correct result
 - remove verbs from resources
 - add 400 and 500 responses to all resources
+- return an appropriate HTTP status when a 'page out of bounds' occurs
