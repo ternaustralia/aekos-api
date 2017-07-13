@@ -80,7 +80,7 @@ describe('response-helper', function () {
           response = result
         }
         objectUnderTest.json.badRequest(callback, 'wrong input')
-        expect(response.body).toBe('"wrong input"')
+        expect(response.body).toBe(JSON.stringify({ message: 'wrong input' }))
       })
 
       it('should return a 400 status code', function () {
