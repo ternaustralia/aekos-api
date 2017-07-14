@@ -1,7 +1,7 @@
 'use strict'
 let r = require('./response-helper')
 const codeField = 'varName'
-const countField = 'count'
+const countField = 'recordsHeld'
 
 module.exports.handler = (event, context, callback) => {
   let db = require('./db-helper')
@@ -9,13 +9,12 @@ module.exports.handler = (event, context, callback) => {
 }
 
 module.exports._testonly = {
-  mapQueryResult: mapQueryResult,
   doHandle: doHandle
 }
 
 function doHandle (db, callback) {
   const sql = `
-    SELECT ${codeField}, count(*) AS ${countField}
+    SELECT ${codeField} as code, count(*) AS ${countField}
     FROM envvars
     GROUP BY 1
     ORDER BY 1;`
@@ -28,10 +27,9 @@ function doHandle (db, callback) {
   })
 }
 
+module.exports.mapQueryResult = mapQueryResult
 function mapQueryResult (queryResult) {
   queryResult.forEach(element => {
-    element.code = element[codeField]
-    delete (element[codeField])
     element.label = r.resolveVocabCode(element.code)
   })
   return queryResult

@@ -70,7 +70,7 @@ custom:
   externalModelSchemaFragments: ${file(./model-schemas.yml):exports}
   constants: ${file(./constants.yml)}
   customDomain:
-    basePath: ''
+    basePath: '(none)'
     domainName: ${self:custom.domainName}
     stage: ${self:custom.stage}
   commonModelSchemaFragments:
@@ -107,6 +107,15 @@ custom:
     PageSizeQueryParam:
       name: "${file(./constants.yml):paramNames.PAGE_SIZE}"
       description: "records per page"
+    VocabObjectSchema:
+      type: object
+      properties:
+        code:
+          type: string
+        label:
+          type: string
+        recorsHeld:
+          type: number
   documentation:
     # FIXME doesn't write to the format that AWS expects: {info: {description: "", version: "", title: "", contact: {name: "", email: ""}}}
     api:
@@ -179,17 +188,13 @@ custom:
             message:
               type: string
       -
+        name: V1EnvironmentBySpeciesResponse
+        contentType: "application/json"
+        schema: ${self:custom.commonModelSchemaFragments.VocabObjectSchema}
+      -
         name: V1EnvironmentalVariableVocabResponse
         contentType: "application/json"
-        schema:
-          type: object
-          properties:
-            count:
-              type: number
-            code:
-              type: string
-            label:
-              type: string
+        schema: ${self:custom.commonModelSchemaFragments.VocabObjectSchema}
       -
         name: V1SpeciesSummaryRequest
         contentType: "application/json"
@@ -236,6 +241,13 @@ functions:
               - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
               - ${self:custom.commonModelSchemaFragments.PageNumQueryParam}
               - ${self:custom.commonModelSchemaFragments.PageSizeQueryParam}
+            methodResponses:
+              -
+                statusCode: 200
+                responseModels:
+                  "application/json": V1EnvironmentBySpeciesResponse
+              - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   v1-getTraitsBySpecies-json:
     handler: v1-getTraitsBySpecies-json.handler
     events:

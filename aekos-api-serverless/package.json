@@ -19,6 +19,7 @@
     "latches": "^1.0.9",
     "mysql": "^2.13.0",
     "promise-mysql": "^3.0.1",
+    "serverless": "^1.17.0",
     "serverless-domain-manager": "^1.1.6",
     "yamljs": "^0.2.10"
   }

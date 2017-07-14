@@ -6,4 +6,6 @@
 - make getSpeciesByTrait perform and return the correct result
 - remove verbs from resources
 - add 400 and 500 responses to all resources
+- add status code to 4/500 response objects
 - return an appropriate HTTP status when a 'page out of bounds' occurs
+- figure out why the domain-manager doesn't add the base path mapping

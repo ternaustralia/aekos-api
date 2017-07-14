@@ -7,17 +7,18 @@ describe('v1-getEnvironmentalVariableVocab-json', function () {
     it('should map to the code field', function () {
       let queryResult = [
         {
-          varName: 'visibleFireEvidence',
-          count: 123
+          code: 'visibleFireEvidence',
+          recordsHeld: 123
         }
       ]
-      let result = objectUnderTest._testonly.mapQueryResult(queryResult)
+      let result = objectUnderTest.mapQueryResult(queryResult)
       expect(result.length).toBe(1)
       let first = result[0]
-      expect(first.code).toBe('visibleFireEvidence')
-      expect(first.traitName).toBeUndefined()
-      expect(first.label).toBe('Visible Fire Evidence')
-      expect(first.count).toBe(123)
+      expect(first).toEqual({
+        recordsHeld: 123,
+        code: 'visibleFireEvidence',
+        label: 'Visible Fire Evidence'
+      })
     })
   })
 
@@ -26,7 +27,7 @@ describe('v1-getEnvironmentalVariableVocab-json', function () {
     beforeEach(done => {
       let stubDb = new StubDB()
       stubDb.setExecSelectPromiseResponses([
-        [{ varName: 'height', count: 123 }]
+        [{ code: 'soil', recordsHeld: 123 }]
       ])
       let callback = (_, callbackResult) => {
         result = callbackResult
@@ -43,7 +44,7 @@ describe('v1-getEnvironmentalVariableVocab-json', function () {
         'Content-Type': "'application/json'"
       })
       expect(result.body).toBe(JSON.stringify(
-        [{ count: 123, code: 'height', label: 'Height' }]
+        [{ code: 'soil', recordsHeld: 123, label: 'Soil Feature' }]
       ))
     })
   })
