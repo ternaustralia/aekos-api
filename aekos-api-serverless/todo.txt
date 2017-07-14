@@ -4,10 +4,11 @@
  - is it ok to use a POST (for species,traits,etc) with query string (for paging) so we can generate the <link>s? Should we store continutation tokens on the server (probably not)?
 - add download option for CSVs
 - make getSpeciesByTrait perform and return the correct result
-- remove verbs from resources
+- remove verbs from resources (v2 change)
 - add 400 and 500 responses to all resources
 - add status code to 4/500 response objects
 - return an appropriate HTTP status when a 'page out of bounds' occurs
 - figure out why the domain-manager doesn't add the base path mapping
 - implement a consistent 500 message (and don't leak details)
 - move all model stuff out of serverless.yml into the model-schemas.yml file. Have two sections: fragments and models
+- move schemas into relevant handler function files, add tests to assert conformance

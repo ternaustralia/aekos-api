@@ -185,7 +185,7 @@ custom:
       -
         name: V1EnvironmentalVariableVocabResponse
         contentType: "application/json"
-        schema: ${self:custom.modelDetails.fragments.VocabObjectSchema}
+        schema: ${file(./v1-getEnvironmentalVariableVocab-json.js):responseSchema}
       -
         name: V1GetEnvironmentBySpeciesRequest
         contentType: "application/json"
