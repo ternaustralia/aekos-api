@@ -9,3 +9,5 @@
 - add status code to 4/500 response objects
 - return an appropriate HTTP status when a 'page out of bounds' occurs
 - figure out why the domain-manager doesn't add the base path mapping
+- implement a consistent 500 message (and don't leak details)
+- move all model stuff out of serverless.yml into the model-schemas.yml file. Have two sections: fragments and models

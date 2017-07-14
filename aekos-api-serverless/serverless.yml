@@ -67,7 +67,7 @@ custom:
   secrets: ${file(secrets.yml):$self:custom.stage} # FIXME get this working
   domainName: ${file(secrets.yml):${self:custom.stage}.domainName}
   documentationUrl: https://www.${self:custom.domainName}
-  externalModelSchemaFragments: ${file(./model-schemas.yml):exports}
+  modelDetails: ${file(./model-schemas.yml):exports}
   constants: ${file(./constants.yml)}
   customDomain:
     basePath: '(none)'
@@ -103,19 +103,10 @@ custom:
       description: "single environmental variable name filter (only values for this variable will be returned)"
     PageNumQueryParam:
       name: "${file(./constants.yml):paramNames.PAGE_NUM}"
-      description: "1-indexed page number"
+      description: "1-indexed page number, default=${self:custom.constants.defaults.PAGE_NUM}"
     PageSizeQueryParam:
       name: "${file(./constants.yml):paramNames.PAGE_SIZE}"
-      description: "records per page"
-    VocabObjectSchema:
-      type: object
-      properties:
-        code:
-          type: string
-        label:
-          type: string
-        recorsHeld:
-          type: number
+      description: "records per page, default=${self:custom.constants.defaults.PAGE_SIZE}"
   documentation:
     # FIXME doesn't write to the format that AWS expects: {info: {description: "", version: "", title: "", contact: {name: "", email: ""}}}
     api:
@@ -129,23 +120,23 @@ custom:
         contentType: "application/json"
         schema:
           type: array
-          items: ${self:custom.externalModelSchemaFragments.SpeciesSummary}
+          items: ${self:custom.modelDetails.SpeciesSummary}
       -
         name: "V1AllSpeciesDataResponse"
         contentType: "application/json"
         schema:
           type: object
           properties:
-            response: ${self:custom.externalModelSchemaFragments.v1AllSpeciesDataResponse}
-            responseHeader: ${self:custom.externalModelSchemaFragments.AllSpeciesResponseHeader}
+            response: ${self:custom.modelDetails.v1AllSpeciesDataResponse}
+            responseHeader: ${self:custom.modelDetails.AllSpeciesResponseHeader}
       -
         name: "V1SpeciesDataResponse"
         contentType: "application/json"
         schema:
           type: object
           properties:
-            response: ${self:custom.externalModelSchemaFragments.v1AllSpeciesDataResponse}
-            responseHeader: ${self:custom.externalModelSchemaFragments.SpeciesResponseHeader}
+            response: ${self:custom.modelDetails.v1AllSpeciesDataResponse}
+            responseHeader: ${self:custom.modelDetails.SpeciesResponseHeader}
       -
         name: "TraitDataJsonResponse"
         contentType: "application/json"
@@ -155,7 +146,7 @@ custom:
             response:
               type: array
               # FIXME define the object
-            responseHeader: ${self:custom.externalModelSchemaFragments.TraitResponseHeader}
+            responseHeader: ${self:custom.modelDetails.TraitResponseHeader}
       -
         name: "EnvDataResponse"
         contentType: "application/json"
@@ -165,7 +156,7 @@ custom:
             response:
               type: array
               # FIXME define the object
-            responseHeader: ${self:custom.externalModelSchemaFragments.EnvResponseHeader}
+            responseHeader: ${self:custom.modelDetails.EnvResponseHeader}
       -
         name: "CsvResponse"
         contentType: "text/csv"
@@ -190,21 +181,19 @@ custom:
       -
         name: V1EnvironmentBySpeciesResponse
         contentType: "application/json"
-        schema: ${self:custom.commonModelSchemaFragments.VocabObjectSchema}
+        schema: ${self:custom.modelDetails.fragments.VocabObjectSchema}
       -
         name: V1EnvironmentalVariableVocabResponse
         contentType: "application/json"
-        schema: ${self:custom.commonModelSchemaFragments.VocabObjectSchema}
+        schema: ${self:custom.modelDetails.fragments.VocabObjectSchema}
+      -
+        name: V1GetEnvironmentBySpeciesRequest
+        contentType: "application/json"
+        schema: ${self:custom.modelDetails.fragments.SpeciesNamesPostRequest}
       -
         name: V1SpeciesSummaryRequest
         contentType: "application/json"
-        schema:
-          type: object
-          properties:
-            speciesNames:
-              type: array
-              items:
-                type: string
+        schema: ${self:custom.modelDetails.fragments.SpeciesNamesPostRequest}
       -
         name: V1SpeciesAutocompleteResponse
         contentType: "application/json"
@@ -229,18 +218,19 @@ functions:
     events:
       - http:
           path: v1/getEnvironmentBySpecies.json
-          method: get
+          method: post
           cors: true
           documentation:
-            summary: "Get all available environment variable names for specified species"
+            summary: Get all available environment variable names for specified species
             description: |
               Finds the environmental variables that the supplied species have. Note that the result doesn't
               include the value of the environmental variables, it only shows that the supplied species have
               values for those variable. To get the values, you need to use the Data Retrieval services.
             queryParams:
-              - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
               - ${self:custom.commonModelSchemaFragments.PageNumQueryParam}
               - ${self:custom.commonModelSchemaFragments.PageSizeQueryParam}
+            requestModels:
+               "application/json": V1GetEnvironmentBySpeciesRequest
             methodResponses:
               -
                 statusCode: 200

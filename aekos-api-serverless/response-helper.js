@@ -1,5 +1,10 @@
 'use strict'
 let accepts = require('accepts')
+let yaml = require('yamljs')
+const speciesNameParam = yaml.load('./constants.yml').paramNames.speciesName.multiple
+const pageSizeParam = yaml.load('./constants.yml').paramNames.PAGE_SIZE
+const pageNumParam = yaml.load('./constants.yml').paramNames.PAGE_NUM
+const msg500 = yaml.load('./constants.yml').messages.public.internalServerError
 let codeToLabelMapping = require('./ontology/code-to-label.json')
 let querystring = require('querystring')
 const jsonContentType = "'application/json'"
@@ -29,18 +34,19 @@ function doResponse (theCallback, theBody, statusCode, contentType, extraHeaders
 function handlePost (event, callback, db,
     validator/* (requestBody):{isValid:boolean, message:string} */,
     responder/* (requestBody, databaseHelper):Promise<{}> */) {
-  let requestBody = JSON.parse(event.body)
-  let validationResult = validator(requestBody)
+  let requestBody = JSON.parse(event.body) // TODO consider making body non-mandatory (but why post then?)
+  let queryStringObj = event.queryStringParameters
+  let validationResult = validator(requestBody, queryStringObj)
   if (!validationResult.isValid) {
     jsonResponseHelpers.badRequest(callback, validationResult.message)
     return
   }
   let errorHandler = error => {
     console.error('Failed to execute post handler', error)
-    jsonResponseHelpers.internalServerError(callback, 'Sorry, something went wrong')
+    jsonResponseHelpers.internalServerError(callback, msg500)
   }
   try {
-    responder(requestBody, db).then(responseBody => {
+    responder(requestBody, db, queryStringObj).then(responseBody => {
       jsonResponseHelpers.ok(callback, responseBody)
     }).catch(errorHandler)
   } catch (error) {
@@ -249,18 +255,74 @@ function isHateoasable (response) {
   }
   let responseHeader = response.responseHeader
   if (typeof responseHeader.pageNumber === 'number' &&
-      responseHeader.params &&
-      typeof responseHeader.params.rows === 'number' &&
-      typeof responseHeader.params.start === 'number' &&
-      typeof responseHeader.totalPages === 'number') {
+    responseHeader.params &&
+    typeof responseHeader.params.rows === 'number' &&
+    typeof responseHeader.params.start === 'number' &&
+    typeof responseHeader.totalPages === 'number') {
     return true
   }
   return false
 }
 
+const validatorIsValid = { isValid: true }
+const validatorNotValid = message => {
+  return { isValid: false, message: message }
+}
+
+function speciesNamesValidator (requestBody, _) {
+  let speciesNames = requestBody[speciesNameParam]
+  let isFieldNotSupplied = typeof speciesNames === 'undefined'
+  if (isFieldNotSupplied) {
+    return validatorNotValid('No species names were supplied')
+  }
+  let isFieldNotArray = speciesNames.constructor !== Array
+  if (isFieldNotArray) {
+    return validatorNotValid(`The '${speciesNameParam}' field must be an array (of strings)`)
+  }
+  let isArrayEmpty = speciesNames.length < 1
+  if (isArrayEmpty) {
+    return validatorNotValid(`The '${speciesNameParam}' field is mandatory and was not supplied`)
+  }
+  let isAnyElementNotStrings = speciesNames.some(element => { return typeof element !== 'string' })
+  if (isAnyElementNotStrings) {
+    return validatorNotValid(`The '${speciesNameParam}' field must be an array of strings. You supplied a non-string element.`)
+  }
+  return validatorIsValid
+}
+
+function compositeValidator (validatorArray) {
+  return (requestBody, queryStringObj) => {
+    for (let i = 0; i < validatorArray.length; i++) {
+      let currValidator = validatorArray[i]
+      let currResult = currValidator(requestBody, queryStringObj)
+      if (!currResult.isValid) {
+        return currResult
+      }
+    }
+    return validatorIsValid
+  }
+}
+
+function queryStringParamIsNumberIfPresentValidator (paramName) {
+  return (_, queryStringObj) => {
+    if (queryStringObj === null) {
+      return validatorIsValid
+    }
+    let value = queryStringObj[paramName]
+    if (typeof value === 'undefined') {
+      return validatorIsValid
+    }
+    let parsedValue = parseInt(value)
+    if (isNaN(parsedValue)) {
+      return validatorNotValid(`The '${paramName}' must be a number when supplied. Supplied value = '${value}'`)
+    }
+    return validatorIsValid
+  }
+}
+
 const jsonResponseHelpers = {
   ok: (theCallback, theBody, event) => {
-    let extraHeadersCallback = function () {}
+    let extraHeadersCallback = function () { }
     if (isHateoasable(theBody)) {
       extraHeadersCallback = headers => {
         headers.link = buildHateoasLinkHeader(event, theBody.responseHeader)
@@ -299,5 +361,10 @@ module.exports = {
   newContentNegotiationHandler: newContentNegotiationHandler,
   handlePost: handlePost,
   buildHateoasLinkHeader: buildHateoasLinkHeader,
-  isHateoasable: isHateoasable
+  isHateoasable: isHateoasable,
+  speciesNamesValidator: speciesNamesValidator,
+  compositeValidator: compositeValidator,
+  queryStringParamIsNumberIfPresentValidator: queryStringParamIsNumberIfPresentValidator,
+  pageSizeValidator: queryStringParamIsNumberIfPresentValidator(pageSizeParam),
+  pageNumValidator: queryStringParamIsNumberIfPresentValidator(pageNumParam)
 }

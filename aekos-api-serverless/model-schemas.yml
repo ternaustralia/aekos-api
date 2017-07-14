@@ -1,4 +1,23 @@
 exports:
+  fragments:
+    VocabObjectSchema:
+      type: array
+      items:
+        type: object
+        properties:
+          code:
+            type: string
+          label:
+            type: string
+          recorsHeld:
+            type: number
+    SpeciesNamesPostRequest:
+      type: object
+      properties:
+        speciesNames:
+          type: array
+          items:
+            type: string
   SpeciesSummary:
     type: object
     properties:

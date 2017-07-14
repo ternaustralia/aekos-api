@@ -20,7 +20,7 @@ const tagMapping = {
   [get('/v1/traitData.csv')]: dataRetrievalTag,
   [get('/v1/getEnvironmentalVariableVocab.json')]: searchTag,
   [get('/v1/getTraitVocab.json')]: searchTag,
-  [get('/v1/getEnvironmentBySpecies.json')]: searchTag,
+  [post('/v1/getEnvironmentBySpecies.json')]: searchTag,
   [get('/v1/getSpeciesByTrait.json')]: searchTag,
   [get('/v1/getTraitsBySpecies.json')]: searchTag,
   [get('/v1/speciesAutocomplete.json')]: searchTag,

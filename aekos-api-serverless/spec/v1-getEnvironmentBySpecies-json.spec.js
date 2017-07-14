@@ -3,35 +3,49 @@ let objectUnderTest = require('../v1-getEnvironmentBySpecies-json')
 let StubDB = require('./StubDB')
 
 describe('v1-getEnvironmentBySpecies-json', function () {
-  describe('.doHandle()', () => {
-    let result = null
-    beforeEach(done => {
+  describe('.responder()', () => {
+    it('should return the expected result', () => {
       let stubDb = new StubDB()
       stubDb.setExecSelectPromiseResponses([
         [{ code: 'clay', recordsHeld: 123 }]
       ])
-      let event = {
-        queryStringParameters: {
-          speciesName: 'species one'
-        }
+      let queryStringObj = {}
+      let requestBody = {
+        speciesNames: ['species one']
       }
-      let callback = (_, callbackResult) => {
-        result = callbackResult
-        done()
+      objectUnderTest._testonly.responder(requestBody, stubDb, queryStringObj).then(result => {
+        expect(result).toEqual([{ code: 'clay', recordsHeld: 123, label: 'Clay Content' }])
+      }).catch(fail)
+    })
+  })
+
+  describe('validator', () => {
+    it('should validate with a single species name', () => {
+      let requestBody = {
+        speciesNames: ['species one']
       }
-      objectUnderTest._testonly.doHandle(stubDb, event, callback)
+      let result = objectUnderTest._testonly.validator(requestBody, {})
+      expect(result.isValid).toBe(true)
     })
 
-    it('should return the expected result', () => {
-      expect(result.statusCode).toBe(200)
-      expect(result.headers).toEqual({
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Credentials': true,
-        'Content-Type': "'application/json'"
-      })
-      expect(result.body).toBe(JSON.stringify(
-        [{ code: 'clay', recordsHeld: 123, label: 'Clay Content' }]
-      ))
+    it('should fail validation with no species names', () => {
+      let requestBody = {
+        // no 'speciesNames'
+      }
+      let result = objectUnderTest._testonly.validator(requestBody, {})
+      expect(result.isValid).toBe(false)
+    })
+
+    it('should validate with a single species name and paging params', () => {
+      let requestBody = {
+        speciesNames: ['species one']
+      }
+      let queryString = {
+        pageSize: '33',
+        pageNum: '3'
+      }
+      let result = objectUnderTest._testonly.validator(requestBody, queryString)
+      expect(result.isValid).toBe(true)
     })
   })
 })

@@ -13,6 +13,7 @@ paramNames:
 defaults:
   PAGE_SIZE: "20"
   OFFSET: "0"
+  PAGE_NUM: "1"
 messages:
   public:
     internalServerError: Sorry about that, something has gone wrong

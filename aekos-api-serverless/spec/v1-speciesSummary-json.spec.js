@@ -22,54 +22,6 @@ describe('v1-speciesSummary-json', () => {
     })
   })
 
-  describe('.validator()', () => {
-    it('should validate with one species', () => {
-      let requestBody = {
-        speciesNames: ['species one']
-      }
-      let result = objectUnderTest._testonly.validator(requestBody)
-      expect(result.isValid).toBe(true)
-    })
-
-    it('should be invalid with no species', () => {
-      let requestBody = {
-        speciesNames: []
-      }
-      let result = objectUnderTest._testonly.validator(requestBody)
-      expect(result.isValid).toBe(false)
-    })
-
-    it('should be invalid when the body is not an object', () => {
-      let requestBody = 'a string'
-      let result = objectUnderTest._testonly.validator(requestBody)
-      expect(result.isValid).toBe(false)
-    })
-
-    it('should be invalid when the speciesNames field is not present', () => {
-      let requestBody = {
-        someOtherField: 123
-      }
-      let result = objectUnderTest._testonly.validator(requestBody)
-      expect(result.isValid).toBe(false)
-    })
-
-    it('should be invalid when the speciesNames field is the wrong type', () => {
-      let requestBody = {
-        speciesNames: 'not an array'
-      }
-      let result = objectUnderTest._testonly.validator(requestBody)
-      expect(result.isValid).toBe(false)
-    })
-
-    it('should be invalid when the speciesNames field is an array containing the wrong type elements', () => {
-      let requestBody = {
-        speciesNames: [1, 2, 3]
-      }
-      let result = objectUnderTest._testonly.validator(requestBody)
-      expect(result.isValid).toBe(false)
-    })
-  })
-
   describe('.getSql()', () => {
     const expectedSqlWithIndentingThatMatters1 = `
     SELECT speciesName, sum(recordsHeld) AS recordsHeld, 'notusedanymore' AS id
