@@ -14,6 +14,20 @@
         "node_modules/jasmine/bin/jasmine.js"
       ],
       "port": 5858
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug sls deploy dev",
+      "runtimeArgs": [
+        "--debug-brk",
+        "--no-lazy",
+        "node_modules/serverless/bin/serverless",
+        "deploy",
+        "--stage=dev",
+        "--region=us-west-1"
+      ],
+      "port": 5858
     }
   ]
 }
