@@ -70,7 +70,7 @@ function getOptionalStringParam (event, paramName, defaultValue) {
 
 function getOptionalNumberParam (event, paramName, defaultValue) {
   if (!isQueryStringParamPresent(event, paramName)) {
-    return defaultValue
+    return parseInt(defaultValue)
   }
   let rawValue = event.queryStringParameters[paramName]
   let valueType = typeof (rawValue)

@@ -591,6 +591,14 @@ describe('response-helper', function () {
       expect(result).toBe(20)
     })
 
+    it('can get the default when the default is a numeric string', function () {
+      let event = {
+        queryStringParameters: null
+      }
+      let result = objectUnderTest.getOptionalNumberParam(event, 'pageSize', '20')
+      expect(result).toBe(20)
+    })
+
     it('should throw when we pass a string that cannot be parsed to a number', function () {
       let event = {
         queryStringParameters: {
