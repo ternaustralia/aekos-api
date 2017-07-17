@@ -1,0 +1,15 @@
+diff --git a/aekos-api-swagger-site/swagger-ui-dist/index.html b/aekos-api-swagger-site/swagger-ui-dist/index.html
+--- a/aekos-api-swagger-site/swagger-ui-dist/index.html
++++ b/aekos-api-swagger-site/swagger-ui-dist/index.html
+@@ -25,6 +25,10 @@
+     body {
+       margin:0;
+       background: #fafafa;
++      line-height: 1.42857143;
++      font-size: 14px;
++      font-family: Open Sans,sans-serif;
++      color: #3b4151;
+     }
+   </style>
+ </head>
+
