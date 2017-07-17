@@ -10,6 +10,7 @@ paramNames:
   START: "start"
   PARTIAL_NAME: "q"
   OFFSET: "offset"
+  DOWNLOAD: "download"
 defaults:
   OFFSET: "0"
   PAGE_SIZE: "20"

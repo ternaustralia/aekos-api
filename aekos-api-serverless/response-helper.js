@@ -20,7 +20,7 @@ function getHeaders (contentType) {
 function doResponse (theCallback, theBody, statusCode, contentType, extraHeadersCallback) {
   let body = contentType === csvContentType ? theBody : JSON.stringify(theBody)
   let headers = getHeaders(contentType)
-  if (extraHeadersCallback && isHateoasable(theBody)) {
+  if (extraHeadersCallback) {
     extraHeadersCallback(headers)
   }
   const response = {
@@ -341,8 +341,14 @@ const jsonResponseHelpers = {
 module.exports = {
   json: jsonResponseHelpers,
   csv: {
-    ok: (theCallback, theBody) => {
-      doResponse(theCallback, theBody, 200, csvContentType)
+    ok: (theCallback, theBody, downloadFileName) => {
+      let extraHeadersCallback = function () { }
+      if (typeof downloadFileName !== 'undefined' && downloadFileName !== null) {
+        extraHeadersCallback = headers => {
+          headers['Content-Disposition'] = `attachment;filename=${downloadFileName}`
+        }
+      }
+      doResponse(theCallback, theBody, 200, csvContentType, extraHeadersCallback)
     }
   },
   getContentType: getContentType,

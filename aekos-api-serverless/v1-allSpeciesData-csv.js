@@ -17,6 +17,8 @@ let csvHeaders = [
   quoted('bibliographicCitation'),
   quoted('samplingProtocol')
 ]
+let yaml = require('yamljs')
+const downloadParam = yaml.load('./constants.yml').paramNames.DOWNLOAD
 module.exports.csvHeaders = csvHeaders
 
 module.exports.handler = (event, context, callback) => {
@@ -29,7 +31,8 @@ function doHandle (event, callback, db, elapsedTimeCalculator) {
   let params = allSpeciesDataJson.extractParams(event, db)
   allSpeciesDataJson.doAllSpeciesQuery(params, processStart, db, elapsedTimeCalculator).then(successResult => {
     let result = mapJsonToCsv(successResult.response)
-    r.csv.ok(callback, result)
+    let downloadFileName = getCsvDownloadFileName(event)
+    r.csv.ok(callback, result, downloadFileName)
   }).catch(error => {
     console.error('Failed while building result', error)
     r.json.internalServerError(callback)
@@ -37,7 +40,23 @@ function doHandle (event, callback, db, elapsedTimeCalculator) {
 }
 
 module.exports._testonly = {
-  doHandle: doHandle
+  doHandle: doHandle,
+  getCsvDownloadFileName: getCsvDownloadFileName
+}
+
+function getCsvDownloadFileName (event) {
+  let params = event.queryStringParameters
+  if (params === null) {
+    return null
+  }
+  let downloadParamValue = params[downloadParam]
+  if (typeof downloadParamValue === 'undefined') {
+    return null
+  }
+  if (downloadParamValue === 'true') {
+    return 'aekosSpeciesData.csv'
+  }
+  return null
 }
 
 module.exports.mapJsonToCsv = mapJsonToCsv

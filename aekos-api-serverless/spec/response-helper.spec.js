@@ -150,6 +150,16 @@ describe('response-helper', function () {
         objectUnderTest.csv.ok(callback, '1,"some value",123\n2,"other value",456')
         expect(suppliedArg.body).toBe('1,"some value",123\n2,"other value",456')
       })
+
+      it('should respond with the content-disposition header when we supply a filename', function () {
+        let suppliedArg = null
+        let callback = function (_, result) {
+          suppliedArg = result
+        }
+        let downloadFileName = 'someDownloadFile.csv'
+        objectUnderTest.csv.ok(callback, '1,"some value",123\n2,"other value",456', downloadFileName)
+        expect(suppliedArg.headers['Content-Disposition']).toBe('attachment;filename=someDownloadFile.csv')
+      })
     })
   })
 

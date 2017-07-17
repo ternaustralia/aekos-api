@@ -107,6 +107,9 @@ custom:
     PageSizeQueryParam:
       name: "${file(./constants.yml):paramNames.PAGE_SIZE}"
       description: "records per page, default=${self:custom.constants.defaults.PAGE_SIZE}"
+    DownloadQueryParam:
+      name: "${file(./constants.yml):paramNames.DOWNLOAD}"
+      description: "'true' to trigger a browser download of the result, default=false"
   documentation:
     # FIXME doesn't write to the format that AWS expects: {info: {description: "", version: "", title: "", contact: {name: "", email: ""}}}
     api:
@@ -634,6 +637,7 @@ functions:
             queryParams:
               - ${self:custom.commonModelSchemaFragments.StartQueryParam}
               - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
+              - ${self:custom.commonModelSchemaFragments.DownloadQueryParam}
             methodResponses:
               -
                 statusCode: 200
