@@ -56,6 +56,7 @@ stdin.on('end', function () {
   addTagDescriptions(parsedData)
   addApiDescription(parsedData)
   removeRootRedirectResource(parsedData)
+  updateParameterTypes(parsedData)
   stdout.write(JSON.stringify(parsedData, null, 2))
   stdout.write('\n')
 })
@@ -77,6 +78,46 @@ function tagResources(parsedData) {
         return
       }
       currMethod.tags = [tag]
+    })
+  })
+}
+
+function updateParameterTypes (parsedData) {
+  const strategies = {
+    download: e => {
+      e.type = 'boolean'
+    },
+    rows: e => {
+      e.type = 'integer'
+    },
+    start: e => {
+      e.type = 'integer'
+    },
+    pageNum: e => {
+      e.type = 'integer'
+    },
+    pageSize: e => {
+      e.type = 'integer'
+    },
+    offset: e => {
+      e.type = 'integer'
+    }
+  }
+  Object.keys(parsedData.paths).forEach(currPathKey => {
+    let currPath = parsedData.paths[currPathKey]
+    Object.keys(currPath).forEach(currMethodKey => {
+      let currMethod = currPath[currMethodKey]
+      let params = currMethod.parameters
+      if (typeof params === 'undefined') {
+        return
+      }
+      params.forEach(e => {
+        let strat = strategies[e.name]
+        if (typeof strat === 'undefined') {
+          return
+        }
+        strat(e)
+      })
     })
   })
 }

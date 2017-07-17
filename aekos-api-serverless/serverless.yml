@@ -109,7 +109,7 @@ custom:
       description: "records per page, default=${self:custom.constants.defaults.PAGE_SIZE}"
     DownloadQueryParam:
       name: "${file(./constants.yml):paramNames.DOWNLOAD}"
-      description: "'true' to trigger a browser download of the result, default=false"
+      description: "true to trigger a browser download of the result, default=false"
   documentation:
     # FIXME doesn't write to the format that AWS expects: {info: {description: "", version: "", title: "", contact: {name: "", email: ""}}}
     api:
