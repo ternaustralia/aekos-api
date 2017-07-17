@@ -1,6 +1,9 @@
 'use strict'
 let r = require('./response-helper')
 const recordsHeldField = 'recordsHeld'
+let yaml = require('yamljs')
+const defaultStart = yaml.load('./constants.yml').defaults.START
+const defaultRows = yaml.load('./constants.yml').defaults.ROWS
 
 module.exports.handler = (event, context, callback) => {
   let db = require('./db-helper')
@@ -110,7 +113,7 @@ function getCountSql (whereFragment) {
 module.exports.extractParams = extractParams
 function extractParams (event) {
   return {
-    start: r.getOptionalNumberParam(event, 'start', 0),
-    rows: r.getOptionalNumberParam(event, 'rows', 20) // TODO validate > 0
+    start: r.getOptionalNumberParam(event, 'start', defaultStart),
+    rows: r.getOptionalNumberParam(event, 'rows', defaultRows) // TODO validate > 0
   }
 }

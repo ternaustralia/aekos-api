@@ -202,7 +202,7 @@ function buildHateoasLinkHeader (event, responseHeader) {
   }
 
   function queryStringWithStart (newStart) {
-    let params = event.queryStringParameters
+    let params = event.queryStringParameters || {}
     params.start = newStart
     return querystring.stringify(params)
   }

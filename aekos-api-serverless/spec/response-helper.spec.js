@@ -260,6 +260,28 @@ describe('response-helper', function () {
         '<https://api.aekos.org.au/v1/speciesData.csv?rows=20&download=false&start=20>; rel="prev", ' +
         '<https://api.aekos.org.au/v1/speciesData.csv?rows=20&download=false&start=0>; rel="first"')
     })
+
+    it('should build the HATEOAS header when no parameters were passed', function () {
+      let event = {
+        headers: reqHeaders,
+        queryStringParameters: null,
+        requestContext: {
+          path: '/v1/speciesData.csv'
+        }
+      }
+      let responseHeader = {
+        pageNumber: 1,
+        totalPages: 3,
+        params: {
+          rows: 20,
+          start: 0
+        }
+      }
+      let result = objectUnderTest.buildHateoasLinkHeader(event, responseHeader)
+      expect(result).toBe(
+        '<https://api.aekos.org.au/v1/speciesData.csv?start=20>; rel="next", ' +
+        '<https://api.aekos.org.au/v1/speciesData.csv?start=40>; rel="last"')
+    })
   })
 
   describe('.isHateoasable()', () => {

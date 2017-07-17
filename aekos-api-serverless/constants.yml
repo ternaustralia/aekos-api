@@ -11,8 +11,10 @@ paramNames:
   PARTIAL_NAME: "q"
   OFFSET: "offset"
 defaults:
-  PAGE_SIZE: "20"
   OFFSET: "0"
+  PAGE_SIZE: "20"
+  START: "0"
+  ROWS: "20"
   PAGE_NUM: "1"
 messages:
   public:
