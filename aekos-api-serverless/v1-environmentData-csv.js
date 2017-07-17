@@ -27,7 +27,7 @@ module.exports.handler = (event, context, callback) => {
     r.csv.ok(callback, result)
   }).catch(error => {
     console.error('Failed while building result', error)
-    r.json.internalServerError(callback, 'Sorry, something went wrong')
+    r.json.internalServerError(callback)
   })
 }
 

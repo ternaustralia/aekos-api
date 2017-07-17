@@ -23,7 +23,7 @@ function doHandle (db, callback) {
     r.json.ok(callback, mappedResult)
   }).catch(error => {
     console.error('Failed when querying or mapping response', error)
-    r.json.internalServerError(callback, 'Sorry about that, something has gone wrong')
+    r.json.internalServerError(callback)
   })
 }
 

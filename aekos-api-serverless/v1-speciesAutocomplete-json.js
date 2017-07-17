@@ -25,9 +25,9 @@ function doHandle (event, callback, db) {
   db.execSelectPromise(sql).then(queryResult => {
     r.json.ok(callback, queryResult)
   }).catch(error => {
-    let msg = 'Failed to execute species autocomplete SQL'
+    const msg = 'Failed to execute species autocomplete SQL'
     console.log(msg, error)
-    r.json.internalServerError(callback, msg)
+    r.json.internalServerError(callback)
   })
 }
 

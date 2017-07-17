@@ -333,8 +333,8 @@ const jsonResponseHelpers = {
   badRequest: (theCallback, theMessage) => {
     doResponse(theCallback, { message: theMessage }, 400, jsonContentType)
   },
-  internalServerError: (theCallback, theMessage) => {
-    doResponse(theCallback, { message: theMessage }, 500, jsonContentType)
+  internalServerError: (theCallback) => {
+    doResponse(theCallback, { message: msg500 }, 500, jsonContentType)
   }
 }
 

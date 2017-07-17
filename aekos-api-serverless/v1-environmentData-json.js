@@ -20,7 +20,7 @@ module.exports.handler = (event, context, callback) => {
     r.json.ok(callback, successResult)
   }).catch(error => {
     console.error('Failed to get environmentData', error)
-    r.json.internalServerError(callback, 'Sorry, something went wrong')
+    r.json.internalServerError(callback)
   })
 }
 

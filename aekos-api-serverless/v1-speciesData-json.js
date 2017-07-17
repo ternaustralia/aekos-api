@@ -20,7 +20,7 @@ function doHandle (event, callback, db, elapsedTimeCalculator) {
     r.json.ok(callback, successResult, event)
   }).catch(error => {
     console.error('Failed to get speciesData', error)
-    r.json.internalServerError(callback, 'Sorry, something went wrong')
+    r.json.internalServerError(callback)
   })
 }
 

@@ -18,7 +18,7 @@ function doHandle (event, callback, db, elapsedTimeCalculator) {
     r.csv.ok(callback, result)
   }).catch(error => {
     console.error('Failed while building result', error)
-    r.json.internalServerError(callback, 'Sorry, something went wrong')
+    r.json.internalServerError(callback)
   })
 }
 

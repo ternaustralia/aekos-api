@@ -106,13 +106,14 @@ describe('response-helper', function () {
     })
 
     describe('.internalServerError()', function () {
+      const msgFor500 = 'Sorry about that, something has gone wrong'
       it('should send the supplied body to the callback', function () {
         let response = null
         let callback = function (_, result) {
           response = result
         }
-        objectUnderTest.json.internalServerError(callback, 'something failed')
-        expect(response.body).toBe(JSON.stringify({ message: 'something failed' }))
+        objectUnderTest.json.internalServerError(callback)
+        expect(response.body).toBe(JSON.stringify({ message: msgFor500 }))
       })
 
       it('should return a 500 status code', function () {
@@ -120,7 +121,7 @@ describe('response-helper', function () {
         let callback = function (_, result) {
           response = result
         }
-        objectUnderTest.json.internalServerError(callback, 'something failed')
+        objectUnderTest.json.internalServerError(callback)
         expect(response.statusCode).toBe(500)
       })
 
@@ -129,7 +130,7 @@ describe('response-helper', function () {
         let callback = function (_, result) {
           response = result
         }
-        objectUnderTest.json.internalServerError(callback, 'something failed')
+        objectUnderTest.json.internalServerError(callback)
         expect(response.headers).toEqual({
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Credentials': true,
