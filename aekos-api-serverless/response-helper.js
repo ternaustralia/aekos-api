@@ -206,6 +206,9 @@ function buildHateoasLinkHeader (event, responseHeader) {
     params.start = newStart
     return querystring.stringify(params)
   }
+  if (typeof event === 'undefined') {
+    throw new Error('Programmer problem: event was not supplied')
+  }
   // FIXME should handle if expected values aren't available
   let start = responseHeader.params.start
   let rows = responseHeader.params.rows

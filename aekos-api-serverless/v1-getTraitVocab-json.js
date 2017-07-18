@@ -21,3 +21,5 @@ module.exports.handler = (event, context, callback) => {
     r.json.ok(callback, mappedResult)
   })
 }
+
+module.exports.responseSchema = require('./commonSchemas.js').vocabSchema

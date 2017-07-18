@@ -1,4 +1,47 @@
 exports:
+  v1LocationRelatedProperties: &v1LocationRelatedProperties
+    eventDate:
+      type: string
+    month:
+      type: number
+    year:
+      type: number
+    decimalLatitude:
+      type: number
+    decimalLongitude:
+      type: number
+    geodeticDatum:
+      type: string
+    locationID:
+      type: string
+    samplingProtocol:
+      type: string
+    bibliographicCitation:
+      type: string
+  v2LocationRelatedProperties: &v2LocationRelatedProperties
+    locationName:
+      type: string
+    datasetName:
+      type: string
+  v1SpeciesSpecificProperties: &v1SpeciesSpecificProperties
+    scientificName:
+      type: string
+    taxonRemarks:
+      type: string
+    individualCount:
+      type: number
+  v1EnvVariableArray: &v1EnvVariableArray
+    variables:
+      type: array
+      items:
+        type: object
+        properties:
+          varName:
+            type: string
+          varValue:
+            type: string
+          varUnit:
+            type: string
   fragments:
     VocabObjectSchema:
       type: array
@@ -43,7 +86,7 @@ exports:
     <<: *CommonResponseHeaderParamProperties
     speciesName:
       type: string
-  AllSpeciesResponseHeader:
+  v1AllSpeciesResponseHeader:
     type: object
     properties:
       <<: *CommonResponseHeaderProperties
@@ -51,7 +94,7 @@ exports:
         type: object
         properties:
           <<: *CommonResponseHeaderParamProperties
-  SpeciesResponseHeader:
+  v1SpeciesResponseHeader:
     type: object
     properties:
       <<: *CommonResponseHeaderProperties
@@ -59,7 +102,7 @@ exports:
         type: object
         properties:
           <<: *SpeciesResponseHeaderParamProperties
-  TraitResponseHeader:
+  v1TraitResponseHeader:
     type: object
     properties:
       <<: *CommonResponseHeaderProperties
@@ -69,7 +112,7 @@ exports:
           <<: *SpeciesResponseHeaderParamProperties
           traitName:
             type: string
-  EnvResponseHeader:
+  v1EnvResponseHeader:
     type: object
     properties:
       <<: *CommonResponseHeaderProperties
@@ -84,44 +127,39 @@ exports:
     items:
       type: object
       properties: &v1AllSpeciesDataResponseProperties
-        scientificName:
-          type: string
-        taxonRemarks:
-          type: string
-        individualCount:
-          type: number
-        eventDate:
-          type: string
-        month:
-          type: number
-        year:
-          type: number
-        decimalLatitude:
-          type: number
-        decimalLongitude:
-          type: number
-        geodeticDatum:
-          type: string
-        locationID:
-          type: string
-        samplingProtocol:
-          type: string
-        bibliographicCitation:
-          type: string
+        <<: [*v1LocationRelatedProperties, *v1SpeciesSpecificProperties]
   v2AllSpeciesDataResponse:
     type: array
     items:
       type: object
-      properties:
-        <<: *v1AllSpeciesDataResponseProperties
-        locationName:
-          type: string
-        datasetName:
-          type: string
-  v1TraitDataResponse:
+      properties: &v2AllSpeciesDataResponseProperties
+        <<: [*v1LocationRelatedProperties, *v2LocationRelatedProperties, *v1SpeciesSpecificProperties]
+  v1TraitResponse:
     type: array
     items:
       type: object
       properties:
         <<: *v1AllSpeciesDataResponseProperties
         traits:
+          type: array
+          items:
+            type: object
+            properties:
+              traitName:
+                type: string
+              traitValue:
+                type: string
+              traitUnit:
+                type: string
+  v1EnvResponse:
+    type: array
+    items:
+      type: object
+      properties:
+        <<: [*v1LocationRelatedProperties, *v1EnvVariableArray]
+  v2EnvResponse:
+    type: array
+    items:
+      type: object
+      properties:
+        <<: [*v1LocationRelatedProperties, *v2LocationRelatedProperties, *v1EnvVariableArray]

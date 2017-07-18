@@ -86,15 +86,20 @@ function getRecordsSql (start, rows, includeSpeciesRecordId, whereFragment) {
     e.samplingProtocol,
     c.bibliographicCitation,
     c.datasetName
-    FROM species AS s
+    FROM (
+      SELECT id
+      FROM species
+      ORDER BY 1
+      LIMIT ${rows} OFFSET ${start}
+    ) AS lateRowLookup
+    INNER JOIN species AS s
+    ON lateRowLookup.id = s.id
     LEFT JOIN env AS e
     ON s.locationID = e.locationID
     AND s.eventDate = e.eventDate
     LEFT JOIN citations AS c
     ON e.samplingProtocol = c.samplingProtocol
-    ${whereFragment}
-    ORDER BY 1
-    LIMIT ${rows} OFFSET ${start};`
+    ${whereFragment};`
 }
 
 module.exports.getCountSql = getCountSql

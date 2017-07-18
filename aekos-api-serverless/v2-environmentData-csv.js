@@ -3,7 +3,7 @@ let quoted = require('./FieldConfig').quoted
 let notQuoted = require('./FieldConfig').notQuoted
 let quotedListConcat = require('./FieldConfig').quotedListConcat
 let r = require('./response-helper')
-let envDataJson = require('./v1-environmentData-json')
+let envDataJson = require('./v2-environmentData-json')
 let csvHeaders = [
   notQuoted('decimalLatitude'),
   notQuoted('decimalLongitude'),
@@ -15,7 +15,9 @@ let csvHeaders = [
   notQuoted('year'),
   notQuoted('month'),
   quoted('bibliographicCitation'),
-  quoted('samplingProtocol')
+  quoted('samplingProtocol'),
+  quoted('locationName'),
+  quoted('datasetName')
 ]
 
 module.exports.handler = (event, context, callback) => {

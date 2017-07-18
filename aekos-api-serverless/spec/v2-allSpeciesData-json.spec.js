@@ -152,15 +152,20 @@ describe('v2-allSpeciesData-json', () => {
     e.samplingProtocol,
     c.bibliographicCitation,
     c.datasetName
-    FROM species AS s
+    FROM (
+      SELECT id
+      FROM species
+      ORDER BY 1
+      LIMIT 33 OFFSET 0
+    ) AS lateRowLookup
+    INNER JOIN species AS s
+    ON lateRowLookup.id = s.id
     LEFT JOIN env AS e
     ON s.locationID = e.locationID
     AND s.eventDate = e.eventDate
     LEFT JOIN citations AS c
     ON e.samplingProtocol = c.samplingProtocol
-    
-    ORDER BY 1
-    LIMIT 33 OFFSET 0;`
+    ;`
   let expectedRecordsSql2 = `
     SELECT
     s.id,

@@ -293,6 +293,25 @@ describe('response-helper', function () {
         '<https://api.aekos.org.au/v1/speciesData.csv?start=20>; rel="next", ' +
         '<https://api.aekos.org.au/v1/speciesData.csv?start=40>; rel="last"')
     })
+
+    it('should give an informative error when the event was not supplied', function () {
+      let event // undefined!
+      let responseHeader = {
+        pageNumber: 1,
+        totalPages: 1,
+        params: {
+          rows: 20,
+          start: 0
+        }
+      }
+      try {
+        objectUnderTest.buildHateoasLinkHeader(event, responseHeader)
+        fail()
+      } catch (error) {
+        expect(error.message).toBe('Programmer problem: event was not supplied')
+        // success
+      }
+    })
   })
 
   describe('.isHateoasable()', () => {

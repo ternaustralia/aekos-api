@@ -1,8 +1,8 @@
 'use strict'
 
-let objectUnderTest = require('../v1-environmentData-csv')
+let objectUnderTest = require('../v2-environmentData-csv')
 
-describe('v1-environmentData-csv', function () {
+describe('v2-environmentData-csv', function () {
   describe('createCsvRow', () => {
     it('should map the object to a CSV row', function () {
       let record = {
@@ -13,8 +13,10 @@ describe('v1-environmentData-csv', function () {
         'decimalLongitude': 143.435125,
         'geodeticDatum': 'GDA94',
         'locationID': 'aekos.org.au/collection/test.edu.au/TEST/AAAA0001',
+        'locationName': 'AAAA0001',
         'samplingProtocol': 'aekos.org.au/collection/test.edu.au/TEST',
         'bibliographicCitation': 'A Person, B Person...',
+        'datasetName': 'TEST dataset',
         'variables': [
           {
             'varName': 'disturbanceType',
@@ -44,7 +46,8 @@ describe('v1-environmentData-csv', function () {
       let result = objectUnderTest.createCsvRow(record)
       expect(result).toBe('-38.759165,143.435125,"GDA94","aekos.org.au/collection/test.edu.au/TEST/AAAA0001",' +
         '"Acacia dealbata|Acacia aneura","Grass|Clover","2014-05-09",2014,5,"A Person, B Person...",' +
-        '"aekos.org.au/collection/test.edu.au/TEST","disturbanceType","none",,"slope","4","degrees","aspect","260","degrees"')
+        '"aekos.org.au/collection/test.edu.au/TEST","AAAA0001","TEST dataset","disturbanceType","none",,"slope",' +
+        '"4","degrees","aspect","260","degrees"')
     })
   })
 })

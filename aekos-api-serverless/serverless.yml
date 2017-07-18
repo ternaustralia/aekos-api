@@ -11,21 +11,16 @@ provider:
   timeout: 15
   vpc:
     securityGroupIds:
-      - "${file(secrets.yml):${self:custom.stage}.securityGroupId}"
+      - ${file(secrets.yml):${self:custom.stage}.securityGroupId}
     subnetIds:
-      - "${file(secrets.yml):${self:custom.stage}.subnet1Id}"
-      - "${file(secrets.yml):${self:custom.stage}.subnet2Id}"
+      - ${file(secrets.yml):${self:custom.stage}.subnet1Id}
+      - ${file(secrets.yml):${self:custom.stage}.subnet2Id}
   environment:
     # FIXME get these encrypted
-    # DBURL: "${self:custom.secrets.DBURL}"
     DBURL: "${file(secrets.yml):${self:custom.stage}.DBURL}"
-    # DBPORT: "${self:custom.secrets.DBPORT}"
     DBPORT: "${file(secrets.yml):${self:custom.stage}.DBPORT}"
-    # DBNAME: "${self:custom.secrets.DBNAME}"
     DBNAME: "${file(secrets.yml):${self:custom.stage}.DBNAME}"
-    # DBUSER: "${self:custom.secrets.DBUSER}"
     DBUSER: "${file(secrets.yml):${self:custom.stage}.DBUSER}"
-    # DBPASS: "${self:custom.secrets.DBPASS}"
     DBPASS: "${file(secrets.yml):${self:custom.stage}.DBPASS}"
 
 resources:
@@ -75,46 +70,46 @@ custom:
     stage: ${self:custom.stage}
   commonModelSchemaFragments:
     AcceptHeaderDoco:
-      name: "accept"
+      name: accept
       description: "content-type mime that you want as a response e.g.: 'application/json' or 'text/csv'"
     MethodResponse400Json:
       statusCode: 400
       responseModels:
-        "application/json": "400JsonResponse"
+        "application/json": 400JsonResponse
     MethodResponse500Json:
       statusCode: 500
       responseModels:
-        "application/json": "500JsonResponse"
+        "application/json": 500JsonResponse
     StartQueryParam:
-      name: "${file(./constants.yml):paramNames.START}"
-      description: "0-indexed result start index"
+      name: ${file(./constants.yml):paramNames.START}
+      description: 0-indexed result start index
     RowsQueryParam:
-      name: "${file(./constants.yml):paramNames.ROWS}"
-      description: "records per page"
+      name: ${file(./constants.yml):paramNames.ROWS}
+      description: records per page
     SingleSpeciesNameQueryParam:
-      name: "${file(./constants.yml):paramNames.SINGLE_SPECIES_NAME}"
-      description: "single species name to search for"
+      name: ${file(./constants.yml):paramNames.SINGLE_SPECIES_NAME}
+      description: single species name to search for
       required: true
     SingleTraitNameQueryParam:
-      name: "${file(./constants.yml):paramNames.SINGLE_TRAIT_NAME}"
-      description: "single trait name filter (only values for this trait will be returned)"
+      name: ${file(./constants.yml):paramNames.SINGLE_TRAIT_NAME}
+      description: single trait name filter (only values for this trait will be returned)
     SingleVarNameQueryParam:
-      name: "${file(./constants.yml):paramNames.SINGLE_VAR_NAME}"
-      description: "single environmental variable name filter (only values for this variable will be returned)"
+      name: ${file(./constants.yml):paramNames.SINGLE_VAR_NAME}
+      description: single environmental variable name filter (only values for this variable will be returned)
     PageNumQueryParam:
-      name: "${file(./constants.yml):paramNames.PAGE_NUM}"
-      description: "1-indexed page number, default=${self:custom.constants.defaults.PAGE_NUM}"
+      name: ${file(./constants.yml):paramNames.PAGE_NUM}
+      description: 1-indexed page number, default=${self:custom.constants.defaults.PAGE_NUM}
     PageSizeQueryParam:
-      name: "${file(./constants.yml):paramNames.PAGE_SIZE}"
-      description: "records per page, default=${self:custom.constants.defaults.PAGE_SIZE}"
+      name: ${file(./constants.yml):paramNames.PAGE_SIZE}
+      description: records per page, default=${self:custom.constants.defaults.PAGE_SIZE}
     DownloadQueryParam:
-      name: "${file(./constants.yml):paramNames.DOWNLOAD}"
-      description: "true to trigger a browser download of the result, default=false"
+      name: ${file(./constants.yml):paramNames.DOWNLOAD}
+      description: true to trigger a browser download of the result, default=false
   documentation:
     # FIXME doesn't write to the format that AWS expects: {info: {description: "", version: "", title: "", contact: {name: "", email: ""}}}
     api:
-      version: '1'
-      summary: 'AEKOS API'
+      version: 2
+      summary: AEKOS API
       # description doesn't work so we add it manually after we pull the Swagger from API Gateway
       #    see: https://github.com/9cookies/serverless-aws-documentation/issues/37
     models:
@@ -131,7 +126,7 @@ custom:
           type: object
           properties:
             response: ${self:custom.modelDetails.v1AllSpeciesDataResponse}
-            responseHeader: ${self:custom.modelDetails.AllSpeciesResponseHeader}
+            responseHeader: ${self:custom.modelDetails.v1AllSpeciesResponseHeader}
       -
         name: V2AllSpeciesDataResponse
         contentType: "application/json"
@@ -139,42 +134,46 @@ custom:
           type: object
           properties:
             response: ${self:custom.modelDetails.v2AllSpeciesDataResponse}
-            responseHeader: ${self:custom.modelDetails.AllSpeciesResponseHeader}
+            responseHeader: ${self:custom.modelDetails.v1AllSpeciesResponseHeader}
       -
-        name: "V1SpeciesDataResponse"
+        name: V1SpeciesDataResponse
         contentType: "application/json"
         schema:
           type: object
           properties:
             response: ${self:custom.modelDetails.v1AllSpeciesDataResponse}
-            responseHeader: ${self:custom.modelDetails.SpeciesResponseHeader}
+            responseHeader: ${self:custom.modelDetails.v1SpeciesResponseHeader}
       -
-        name: "TraitDataJsonResponse"
+        name: V1TraitDataJsonResponse
         contentType: "application/json"
         schema:
           type: object
           properties:
-            response:
-              type: array
-              # FIXME define the object
-            responseHeader: ${self:custom.modelDetails.TraitResponseHeader}
+            response: ${self:custom.modelDetails.v1TraitResponse}
+            responseHeader: ${self:custom.modelDetails.v1TraitResponseHeader}
       -
-        name: "EnvDataResponse"
+        name: V1EnvDataResponse
         contentType: "application/json"
         schema:
           type: object
           properties:
-            response:
-              type: array
-              # FIXME define the object
-            responseHeader: ${self:custom.modelDetails.EnvResponseHeader}
+            response: ${self:custom.modelDetails.v1EnvResponse}
+            responseHeader: ${self:custom.modelDetails.v1EnvResponseHeader}
       -
-        name: "CsvResponse"
+        name: V2EnvDataResponse
+        contentType: "application/json"
+        schema:
+          type: object
+          properties:
+            response: ${self:custom.modelDetails.v2EnvResponse}
+            responseHeader: ${self:custom.modelDetails.v1EnvResponseHeader}
+      -
+        name: CsvResponse
         contentType: "text/csv"
         schema:
           type: string
       -
-        name: "400JsonResponse"
+        name: 400JsonResponse
         contentType: "application/json"
         schema:
           type: object
@@ -182,7 +181,7 @@ custom:
             message:
               type: string
       -
-        name: "500JsonResponse"
+        name: 500JsonResponse
         contentType: "application/json"
         schema:
           type: object
@@ -197,6 +196,10 @@ custom:
         name: V1EnvironmentalVariableVocabResponse
         contentType: "application/json"
         schema: ${file(./v1-getEnvironmentalVariableVocab-json.js):responseSchema}
+      -
+        name: V1TraitVocabResponse
+        contentType: "application/json"
+        schema: ${file(./v1-getTraitVocab-json.js):responseSchema}
       -
         name: V1GetEnvironmentBySpeciesRequest
         contentType: "application/json"
@@ -257,7 +260,7 @@ functions:
           method: get
           cors: true
           documentation:
-            summary: "Get all available traits for specified species"
+            summary: Get all available traits for specified species
             description: >
               Finds the traits that the supplied species have. Note that the result doesn't include the value
               of the traits, it only shows that the supplied species have values for those traits. To get
@@ -274,15 +277,15 @@ functions:
           method: get
           cors: true
           documentation:
-            summary: "Get all available species for specified traits"
+            summary: Get all available species for specified traits
             description: >
               Finds the species names that the supplied trait(s). Note that the result only shows that the supplied
               traits have species records present in the system. To get the values, you need to use the Data
               Retrieval services.
             queryParams:
               -
-                name: "${file(./constants.yml):paramNames.SINGLE_TRAIT_NAME}"
-                description: "single trait name to search for"
+                name: ${file(./constants.yml):paramNames.SINGLE_TRAIT_NAME}
+                description: single trait name to search for
                 required: true
               - ${self:custom.commonModelSchemaFragments.PageNumQueryParam}
               - ${self:custom.commonModelSchemaFragments.PageSizeQueryParam}
@@ -297,11 +300,17 @@ functions:
           method: get
           cors: true
           documentation:
-            summary: "Get trait vocabulary"
+            summary: Get trait vocabulary
             description: >
               Gets a distinct list of all the traits that appear in the system. The code and label are supplied for
               each trait. The codes are required to use as parameters for other resources and the label information
               is useful for creating UIs.
+            methodResponses:
+              -
+                statusCode: 200
+                responseModels:
+                  "application/json": V1TraitVocabResponse
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   v1-getEnvironmentalVariableVocab-json:
     handler: v1-getEnvironmentalVariableVocab-json.handler
     events:
@@ -310,7 +319,7 @@ functions:
           method: get
           cors: true
           documentation:
-            summary: "Get environmental variable vocabulary"
+            summary: Get environmental variable vocabulary
             description: >
               Gets a distinct list of all the environmental variables that appear in the system. The code and label are supplied for
               each trait. The codes are required to use as parameters for other resources and the label information
@@ -320,7 +329,6 @@ functions:
                 statusCode: 200
                 responseModels:
                   "application/json": V1EnvironmentalVariableVocabResponse
-              - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   v1-speciesAutocomplete-json:
     handler: v1-speciesAutocomplete-json.handler
@@ -330,26 +338,28 @@ functions:
           method: get
           cors: true
           documentation:
-            summary: "Autocomplete partial species names"
+            summary: Autocomplete partial species names
             description: >
               Performs an autocomplete on the partial species name supplied. Results starting with the supplied
               fragment will be returned ordered by most relevant.
             queryParams:
               -
-                name: "${self:custom.constants.paramNames.PARTIAL_NAME}"
-                description: "partial species name"
+                name: ${self:custom.constants.paramNames.PARTIAL_NAME}
+                description: partial species name
                 required: true
               -
-                name: "${self:custom.constants.paramNames.OFFSET}"
-                description: "0-indexed offset, default=${self:custom.constants.defaults.OFFSET}"
+                name: ${self:custom.constants.paramNames.OFFSET}
+                description: 0-indexed offset, default=${self:custom.constants.defaults.OFFSET}
               -
-                name: "${self:custom.constants.paramNames.PAGE_SIZE}"
-                description: "number of records per page, default=${self:custom.constants.defaults.PAGE_SIZE}"
+                name: ${self:custom.constants.paramNames.PAGE_SIZE}
+                description: number of records per page, default=${self:custom.constants.defaults.PAGE_SIZE}
             methodResponses:
               -
                 statusCode: 200
                 responseModels:
                   "application/json": V1SpeciesAutocompleteResponse
+              - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   v1-speciesSummary-json:
     handler: v1-speciesSummary-json.handler
     events:
@@ -358,7 +368,7 @@ functions:
           method: post
           cors: true
           documentation:
-            summary: "Get a summary of the specified species names"
+            summary: Get a summary of the specified species names
             description: >
               A summary of the information that the system holds on the supplied species name(s) including a count
               of records. If the system doesn't have any data on a species name, no record for the species name will
@@ -370,6 +380,8 @@ functions:
                 statusCode: 200
                 responseModels:
                   "application/json": V1SpeciesSummaryList
+              - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   v1-speciesData:
     handler: v1-speciesData.handler
     events:
@@ -378,7 +390,7 @@ functions:
           method: get
           cors: true
           documentation:
-            summary: "Get species data"
+            summary: Get species data
             description: >
               Gets Darwin Core records for the supplied species name(s) using content negotation to determine the response type.
               This resource honours Accept headers represented by any of the /speciesData.* resources.
@@ -390,10 +402,10 @@ functions:
               -
                 statusCode: 200
                 responseModels:
-                  "text/csv": "CsvResponse"
-                  "application/json": "V1SpeciesDataResponse"
+                  "text/csv": CsvResponse
+                  "application/json": V1SpeciesDataResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
-  # TODO change the v1.0 response to not include the new fields, add a v1.1 to have the fields
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   v1-speciesData-json:
     handler: v1-speciesData-json.handler
     events:
@@ -402,7 +414,7 @@ functions:
           method: get
           cors: true
           documentation:
-            summary: "Get species data in JSON format"
+            summary: Get species data in JSON format
             description: >
               Gets Darwin Core records for the supplied species name(s) in JSON format.
             queryParams:
@@ -413,8 +425,9 @@ functions:
               -
                 statusCode: 200
                 responseModels:
-                  "application/json": "V1SpeciesDataResponse"
+                  "application/json": V1SpeciesDataResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   v1-speciesData-csv:
     handler: v1-speciesData-csv.handler
     events:
@@ -423,7 +436,7 @@ functions:
           method: get
           cors: true
           documentation:
-            summary: "Get species data in CSV format"
+            summary: Get species data in CSV format
             description: >
               Gets Darwin Core records for the supplied species name(s) in CSV format.
             queryParams:
@@ -434,8 +447,9 @@ functions:
               -
                 statusCode: 200
                 responseModels:
-                  "text/csv": "CsvResponse"
+                  "text/csv": CsvResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   v1-traitData:
     handler: v1-traitData.handler
     events:
@@ -444,7 +458,7 @@ functions:
           method: get
           cors: true
           documentation:
-            summary: "Get trait data"
+            summary: Get trait data
             description: >
               Gets Darwin Core records with added trait information for the supplied species name(s) using content negotation to
               determine the response type. If you supply trait names then the result records will have the traits filtered down
@@ -462,9 +476,10 @@ functions:
               -
                 statusCode: 200
                 responseModels:
-                  "text/csv": "CsvResponse"
-                  "application/json": "TraitDataJsonResponse"
+                  "text/csv": CsvResponse
+                  "application/json": V1TraitDataJsonResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   v1-traitData-json:
     handler: v1-traitData-json.handler
     events:
@@ -473,7 +488,7 @@ functions:
           method: get
           cors: true
           documentation:
-            summary: "Get trait data in JSON format"
+            summary: Get trait data in JSON format
             description: >
               Gets Darwin Core records with added trait information in JSON format. If you supply trait names then the result
               records will have the traits filtered down to only the traits you've asked for, otherwise all traits are returned.
@@ -486,8 +501,9 @@ functions:
               -
                 statusCode: 200
                 responseModels:
-                  "application/json": "TraitDataJsonResponse"
+                  "application/json": V1TraitDataJsonResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   v1-traitData-csv:
     handler: v1-traitData-csv.handler
     events:
@@ -496,7 +512,7 @@ functions:
           method: get
           cors: true
           documentation:
-            summary: "Get trait data in CSV format"
+            summary: Get trait data in CSV format
             description: >
               Gets Darwin Core records with added trait information in CSV format. If you supply trait names then the result
               records will have the traits filtered down to only the traits you've asked for, otherwise all traits are returned.
@@ -509,8 +525,9 @@ functions:
               -
                 statusCode: 200
                 responseModels:
-                  "text/csv": "CsvResponse"
+                  "text/csv": CsvResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   v1-environmentData:
     handler: v1-environmentData.handler
     events:
@@ -519,7 +536,7 @@ functions:
           method: get
           cors: true
           documentation:
-            summary: "Get environmental variable data"
+            summary: Get environmental variable data
             description: >
               Gets environmental variable data records for the site/study location/plot visits that the supplied species name(s)
               appear at using content negotation to determine the response type. If you supply environmental variable names then
@@ -535,9 +552,39 @@ functions:
               -
                 statusCode: 200
                 responseModels:
-                  "text/csv": "CsvResponse"
-                  "application/json": "EnvDataResponse"
+                  "text/csv": CsvResponse
+                  "application/json": V1EnvDataResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
+  v2-environmentData:
+    handler: v2-environmentData.handler
+    events:
+      - http:
+          path: v2/environmentData
+          method: get
+          cors: true
+          documentation:
+            summary: Get environmental variable data
+            description: >
+              Gets environmental variable data records for the site/study location/plot visits that the supplied species name(s)
+              appear at using content negotation to determine the response type. If you supply environmental variable names then
+              the result will have the environmental variables filtered down to only the environmental variables you've asked for,
+              otherwise all environmental variables are returned. Note: not all sites have environmental variables available.
+              This resource honours Accept headers represented by any of the /environmentData.* resources. Version 2 adds two
+              new fields to each record; 'locationName' and 'datasetName'.
+            queryParams:
+              - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
+              - ${self:custom.commonModelSchemaFragments.SingleVarNameQueryParam}
+              - ${self:custom.commonModelSchemaFragments.StartQueryParam}
+              - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
+            methodResponses:
+              -
+                statusCode: 200
+                responseModels:
+                  "text/csv": CsvResponse
+                  "application/json": V2EnvDataResponse
+              - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   v1-environmentData-json:
     handler: v1-environmentData-json.handler
     events:
@@ -546,7 +593,7 @@ functions:
           method: get
           cors: true
           documentation:
-            summary: "Get environmental variable data in JSON format"
+            summary: Get environmental variable data in JSON format
             description: >
               Gets environmental variable data records for the site/study location/plot visits that the supplied species name(s)
               appear at in JSON format. If you supply environmental variable names then the result will have the environmental
@@ -561,7 +608,34 @@ functions:
               -
                 statusCode: 200
                 responseModels:
-                  "application/json": "EnvDataResponse"
+                  "application/json": V1EnvDataResponse
+              - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
+  v2-environmentData-json:
+    handler: v2-environmentData-json.handler
+    events:
+      - http:
+          path: v2/environmentData.json
+          method: get
+          cors: true
+          documentation:
+            summary: Get environmental variable data in JSON format
+            description: >
+              Gets environmental variable data records for the site/study location/plot visits that the supplied species name(s)
+              appear at in JSON format. If you supply environmental variable names then the result will have the environmental
+              variables filtered down to only the environmental variables you've asked for, otherwise all environmental
+              variables are returned. Note: not all sites have environmental variables available. Version 2 adds two new fields
+              to each record; 'locationName' and 'datasetName'.
+            queryParams:
+              - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
+              - ${self:custom.commonModelSchemaFragments.SingleVarNameQueryParam}
+              - ${self:custom.commonModelSchemaFragments.StartQueryParam}
+              - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
+            methodResponses:
+              -
+                statusCode: 200
+                responseModels:
+                  "application/json": V2EnvDataResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   v1-environmentData-csv:
@@ -572,7 +646,7 @@ functions:
           method: get
           cors: true
           documentation:
-            summary: "Get environmental variable data in CSV format"
+            summary: Get environmental variable data in CSV format
             description: >
               Gets environmental variable data records for the site/study location/plot visits that the supplied species name(s)
               appear at in CSV format. If you supply environmental variable names then the result will have the environmental
@@ -587,18 +661,46 @@ functions:
               -
                 statusCode: 200
                 responseModels:
-                  "text/csv": "CsvResponse"
+                  "text/csv": CsvResponse
+              - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
+  v2-environmentData-csv:
+    handler: v2-environmentData-csv.handler
+    events:
+      - http:
+          path: v2/environmentData.csv
+          method: get
+          cors: true
+          documentation:
+            summary: Get environmental variable data in CSV format
+            description: >
+              Gets environmental variable data records for the site/study location/plot visits that the supplied species name(s)
+              appear at in CSV format. If you supply environmental variable names then the result will have the environmental
+              variables filtered down to only the environmental variables you've asked for, otherwise all environmental
+              variables are returned. Note: not all sites have environmental variables available. Version 2 adds two new fields
+              to each record; 'locationName' and 'datasetName'.
+            queryParams:
+              - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
+              - ${self:custom.commonModelSchemaFragments.SingleVarNameQueryParam}
+              - ${self:custom.commonModelSchemaFragments.StartQueryParam}
+              - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
+            methodResponses:
+              -
+                statusCode: 200
+                responseModels:
+                  "text/csv": CsvResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   v1-allSpeciesData:
     handler: v1-allSpeciesData.handler
+    timeout: 40
     events:
       - http:
           path: v1/allSpeciesData
           method: get
           cors: true
           documentation:
-            summary: "Get all species data"
+            summary: Get all species data
             description: >
               Gets all Darwin Core records using content negotation to determine the response type. This resource honours Accept
               headers represented by any of the /v1/allSpeciesData.* resources.
@@ -609,19 +711,20 @@ functions:
               -
                 statusCode: 200
                 responseModels:
-                  "text/csv": "CsvResponse"
-                  "application/json": "V1AllSpeciesDataResponse"
+                  "text/csv": CsvResponse
+                  "application/json": V1AllSpeciesDataResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   v1-allSpeciesData-json:
     handler: v1-allSpeciesData-json.handler
+    timeout: 40
     events:
       - http:
           path: v1/allSpeciesData.json
           method: get
           cors: true
           documentation:
-            summary: "Get all species data in JSON format"
+            summary: Get all species data in JSON format
             description: >
               Gets Darwin Core records in JSON format.
             queryParams:
@@ -631,18 +734,19 @@ functions:
               -
                 statusCode: 200
                 responseModels:
-                  "application/json": "V1AllSpeciesDataResponse"
+                  "application/json": V1AllSpeciesDataResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   v2-allSpeciesData-json:
     handler: v2-allSpeciesData-json.handler
+    timeout: 40
     events:
       - http:
           path: v2/allSpeciesData.json
           method: get
           cors: true
           documentation:
-            summary: "Get all species data in JSON format"
+            summary: Get all species data in JSON format
             description: >
               Gets Darwin Core records in JSON format. Version 2 adds two new fields to each record;
               'locationName' and 'datasetName'.
@@ -658,13 +762,14 @@ functions:
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   v1-allSpeciesData-csv:
     handler: v1-allSpeciesData-csv.handler
+    timeout: 40
     events:
       - http:
           path: v1/allSpeciesData.csv
           method: get
           cors: true
           documentation:
-            summary: "Get all species occurrence data in CSV format"
+            summary: Get all species occurrence data in CSV format
             description: >
               Gets all Darwin Core records in CSV format.
             queryParams:
@@ -675,6 +780,6 @@ functions:
               -
                 statusCode: 200
                 responseModels:
-                  "text/csv": "CsvResponse"
+                  "text/csv": CsvResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
