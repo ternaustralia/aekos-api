@@ -10,8 +10,11 @@ const everythingRetrievalTag = 'Data Retrieval (everything)'
 const searchTag = 'Search'
 const tagMapping = {
   [get('/v1/environmentData')]: dataRetrievalTag,
+  [get('/v2/environmentData')]: dataRetrievalTag,
   [get('/v1/environmentData.json')]: dataRetrievalTag,
+  [get('/v2/environmentData.json')]: dataRetrievalTag,
   [get('/v1/environmentData.csv')]: dataRetrievalTag,
+  [get('/v2/environmentData.csv')]: dataRetrievalTag,
   [get('/v1/speciesData')]: dataRetrievalTag,
   [get('/v1/speciesData.json')]: dataRetrievalTag,
   [get('/v1/speciesData.csv')]: dataRetrievalTag,
