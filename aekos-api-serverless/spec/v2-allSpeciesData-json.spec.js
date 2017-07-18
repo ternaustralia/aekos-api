@@ -1,22 +1,14 @@
 'use strict'
-let objectUnderTest = require('../v1-allSpeciesData-json')
+let objectUnderTest = require('../v2-allSpeciesData-json')
 let StubDB = require('./StubDB')
 
-describe('v1-allSpeciesData-json', () => {
+describe('v2-allSpeciesData-json', () => {
   describe('doHandle', () => {
     let result = null
     beforeEach(done => {
       let stubDb = new StubDB()
       stubDb.setExecSelectPromiseResponses([
-        [{
-          recordNum: 1,
-          locationName: 'location1',
-          datasetName: 'dataset1'
-        }, {
-          recordNum: 2,
-          locationName: 'location2',
-          datasetName: 'dataset2'
-        }],
+        [{ recordNum: 1 }, { recordNum: 2 }],
         [{ recordsHeld: 31 }]
       ])
       let event = {
@@ -29,7 +21,7 @@ describe('v1-allSpeciesData-json', () => {
           'X-Forwarded-Proto': 'https'
         },
         requestContext: {
-          path: '/v1/allSpeciesData.json'
+          path: '/v2/allSpeciesData.json'
         }
       }
       let callback = (_, theResult) => {
@@ -45,8 +37,8 @@ describe('v1-allSpeciesData-json', () => {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
         'Content-Type': "'application/json'",
-        link: '<https://api.aekos.org.au/v1/allSpeciesData.json?rows=15&start=15>; rel="next", ' +
-              '<https://api.aekos.org.au/v1/allSpeciesData.json?rows=15&start=30>; rel="last"'
+        link: '<https://api.aekos.org.au/v2/allSpeciesData.json?rows=15&start=15>; rel="next", ' +
+              '<https://api.aekos.org.au/v2/allSpeciesData.json?rows=15&start=30>; rel="last"'
       })
       expect(JSON.parse(result.body)).toEqual({
         responseHeader: {
@@ -60,7 +52,7 @@ describe('v1-allSpeciesData-json', () => {
           totalPages: 3
         },
         response: [
-          { recordNum: 1 }, // no v2 fields should be in the response
+          { recordNum: 1 },
           { recordNum: 2 }
         ]
       })
@@ -72,15 +64,7 @@ describe('v1-allSpeciesData-json', () => {
     beforeEach(done => {
       let stubDb = new StubDB()
       stubDb.setExecSelectPromiseResponses([
-        [{
-          recordNum: 1,
-          locationName: 'location1',
-          datasetName: 'dataset1'
-        }, {
-          recordNum: 2,
-          locationName: 'location2',
-          datasetName: 'dataset2'
-        }],
+        [{ recordNum: 1 }, { recordNum: 2 }],
         [{ recordsHeld: 31 }]
       ])
       let event = {
@@ -90,7 +74,7 @@ describe('v1-allSpeciesData-json', () => {
           'X-Forwarded-Proto': 'https'
         },
         requestContext: {
-          path: '/v1/allSpeciesData.json'
+          path: '/v2/allSpeciesData.json'
         }
       }
       let callback = (_, theResult) => {
@@ -106,8 +90,8 @@ describe('v1-allSpeciesData-json', () => {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
         'Content-Type': "'application/json'",
-        link: '<https://api.aekos.org.au/v1/allSpeciesData.json?start=20>; rel="next", ' +
-              '<https://api.aekos.org.au/v1/allSpeciesData.json?start=20>; rel="last"'
+        link: '<https://api.aekos.org.au/v2/allSpeciesData.json?start=20>; rel="next", ' +
+              '<https://api.aekos.org.au/v2/allSpeciesData.json?start=20>; rel="last"'
       })
       expect(JSON.parse(result.body)).toEqual({
         responseHeader: {
@@ -121,10 +105,76 @@ describe('v1-allSpeciesData-json', () => {
           totalPages: 2
         },
         response: [
-          { recordNum: 1 }, // no v2 fields should be in the response
+          { recordNum: 1 },
           { recordNum: 2 }
         ]
       })
+    })
+  })
+
+  describe('extractParams', () => {
+    it('should extract the params when they are present', () => {
+      let event = {
+        queryStringParameters: {
+          rows: '15',
+          start: '0'
+        }
+      }
+      let result = objectUnderTest.extractParams(event, new StubDB())
+      expect(result.rows).toBe(15)
+      expect(result.start).toBe(0)
+    })
+
+    it('should default the paging info', () => {
+      let event = {
+        queryStringParameters: {}
+      }
+      let result = objectUnderTest.extractParams(event, new StubDB())
+      expect(result.rows).toBe(20)
+      expect(result.start).toBe(0)
+    })
+  })
+
+  let expectedRecordsSql1 = `
+    SELECT
+    
+    s.scientificName,
+    s.taxonRemarks,
+    s.individualCount,
+    s.eventDate,
+    e.\`month\`,
+    e.\`year\`,
+    e.decimalLatitude,
+    e.decimalLongitude,
+    e.geodeticDatum,
+    s.locationID,
+    e.locationName,
+    e.samplingProtocol,
+    c.bibliographicCitation,
+    c.datasetName
+    FROM species AS s
+    LEFT JOIN env AS e
+    ON s.locationID = e.locationID
+    AND s.eventDate = e.eventDate
+    LEFT JOIN citations AS c
+    ON e.samplingProtocol = c.samplingProtocol
+    
+    ORDER BY 1
+    LIMIT 33 OFFSET 0;`
+  let expectedRecordsSql2 = `
+    SELECT
+    s.id,
+    s.scientificName,`
+  describe('getRecordsSql', () => {
+    it('should be able to handle no where fragment', () => {
+      let result = objectUnderTest.getRecordsSql(0, 33, false, '')
+      expect(result).toBe(expectedRecordsSql1)
+    })
+
+    it('should be able to include the species ID fragment', () => {
+      let includeSpeciesId = true
+      let result = objectUnderTest.getRecordsSql(0, 33, includeSpeciesId, '')
+      expect(result.substr(0, expectedRecordsSql2.length)).toBe(expectedRecordsSql2)
     })
   })
 })

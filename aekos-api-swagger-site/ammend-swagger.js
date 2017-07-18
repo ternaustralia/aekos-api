@@ -27,6 +27,7 @@ const tagMapping = {
   [post('/v1/speciesSummary.json')]: searchTag,
   [get('/v1/allSpeciesData')]: everythingRetrievalTag,
   [get('/v1/allSpeciesData.json')]: everythingRetrievalTag,
+  [get('/v2/allSpeciesData.json')]: everythingRetrievalTag,
   [get('/v1/allSpeciesData.csv')]: everythingRetrievalTag,
 }
 

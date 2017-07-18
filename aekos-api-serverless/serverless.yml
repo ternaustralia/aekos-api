@@ -125,12 +125,20 @@ custom:
           type: array
           items: ${self:custom.modelDetails.SpeciesSummary}
       -
-        name: "V1AllSpeciesDataResponse"
+        name: V1AllSpeciesDataResponse
         contentType: "application/json"
         schema:
           type: object
           properties:
             response: ${self:custom.modelDetails.v1AllSpeciesDataResponse}
+            responseHeader: ${self:custom.modelDetails.AllSpeciesResponseHeader}
+      -
+        name: V2AllSpeciesDataResponse
+        contentType: "application/json"
+        schema:
+          type: object
+          properties:
+            response: ${self:custom.modelDetails.v2AllSpeciesDataResponse}
             responseHeader: ${self:custom.modelDetails.AllSpeciesResponseHeader}
       -
         name: "V1SpeciesDataResponse"
@@ -225,7 +233,7 @@ functions:
           cors: true
           documentation:
             summary: Get all available environment variable names for specified species
-            description: |
+            description: >
               Finds the environmental variables that the supplied species have. Note that the result doesn't
               include the value of the environmental variables, it only shows that the supplied species have
               values for those variable. To get the values, you need to use the Data Retrieval services.
@@ -250,7 +258,7 @@ functions:
           cors: true
           documentation:
             summary: "Get all available traits for specified species"
-            description: |
+            description: >
               Finds the traits that the supplied species have. Note that the result doesn't include the value
               of the traits, it only shows that the supplied species have values for those traits. To get
               the values, you need to use the Data Retrieval services.
@@ -267,7 +275,7 @@ functions:
           cors: true
           documentation:
             summary: "Get all available species for specified traits"
-            description: |
+            description: >
               Finds the species names that the supplied trait(s). Note that the result only shows that the supplied
               traits have species records present in the system. To get the values, you need to use the Data
               Retrieval services.
@@ -290,7 +298,7 @@ functions:
           cors: true
           documentation:
             summary: "Get trait vocabulary"
-            description: |
+            description: >
               Gets a distinct list of all the traits that appear in the system. The code and label are supplied for
               each trait. The codes are required to use as parameters for other resources and the label information
               is useful for creating UIs.
@@ -303,7 +311,7 @@ functions:
           cors: true
           documentation:
             summary: "Get environmental variable vocabulary"
-            description: |
+            description: >
               Gets a distinct list of all the environmental variables that appear in the system. The code and label are supplied for
               each trait. The codes are required to use as parameters for other resources and the label information
               is useful for creating UIs.
@@ -323,7 +331,7 @@ functions:
           cors: true
           documentation:
             summary: "Autocomplete partial species names"
-            description: |
+            description: >
               Performs an autocomplete on the partial species name supplied. Results starting with the supplied
               fragment will be returned ordered by most relevant.
             queryParams:
@@ -351,7 +359,7 @@ functions:
           cors: true
           documentation:
             summary: "Get a summary of the specified species names"
-            description: |
+            description: >
               A summary of the information that the system holds on the supplied species name(s) including a count
               of records. If the system doesn't have any data on a species name, no record for the species name will
               be in the result.
@@ -371,7 +379,7 @@ functions:
           cors: true
           documentation:
             summary: "Get species data"
-            description: |
+            description: >
               Gets Darwin Core records for the supplied species name(s) using content negotation to determine the response type.
               This resource honours Accept headers represented by any of the /speciesData.* resources.
             queryParams:
@@ -395,7 +403,7 @@ functions:
           cors: true
           documentation:
             summary: "Get species data in JSON format"
-            description: |
+            description: >
               Gets Darwin Core records for the supplied species name(s) in JSON format.
             queryParams:
               - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
@@ -416,7 +424,7 @@ functions:
           cors: true
           documentation:
             summary: "Get species data in CSV format"
-            description: |
+            description: >
               Gets Darwin Core records for the supplied species name(s) in CSV format.
             queryParams:
               - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
@@ -437,7 +445,7 @@ functions:
           cors: true
           documentation:
             summary: "Get trait data"
-            description: |
+            description: >
               Gets Darwin Core records with added trait information for the supplied species name(s) using content negotation to
               determine the response type. If you supply trait names then the result records will have the traits filtered down
               to only the traits you've asked for, otherwise all traits are returned. This resource honours Accept headers
@@ -466,7 +474,7 @@ functions:
           cors: true
           documentation:
             summary: "Get trait data in JSON format"
-            description: |
+            description: >
               Gets Darwin Core records with added trait information in JSON format. If you supply trait names then the result
               records will have the traits filtered down to only the traits you've asked for, otherwise all traits are returned.
             queryParams:
@@ -489,7 +497,7 @@ functions:
           cors: true
           documentation:
             summary: "Get trait data in CSV format"
-            description: |
+            description: >
               Gets Darwin Core records with added trait information in CSV format. If you supply trait names then the result
               records will have the traits filtered down to only the traits you've asked for, otherwise all traits are returned.
             queryParams:
@@ -512,12 +520,12 @@ functions:
           cors: true
           documentation:
             summary: "Get environmental variable data"
-            description: |
-              "Gets environmental variable data records for the site/study location/plot visits that the supplied species name(s)
+            description: >
+              Gets environmental variable data records for the site/study location/plot visits that the supplied species name(s)
               appear at using content negotation to determine the response type. If you supply environmental variable names then
               the result will have the environmental variables filtered down to only the environmental variables you've asked for,
               otherwise all environmental variables are returned. Note: not all sites have environmental variables available.
-              This resource honours Accept headers represented by any of the /environmentData.* resources."
+              This resource honours Accept headers represented by any of the /environmentData.* resources.
             queryParams:
               - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
               - ${self:custom.commonModelSchemaFragments.SingleVarNameQueryParam}
@@ -539,11 +547,11 @@ functions:
           cors: true
           documentation:
             summary: "Get environmental variable data in JSON format"
-            description: |
-              "Gets environmental variable data records for the site/study location/plot visits that the supplied species name(s)
+            description: >
+              Gets environmental variable data records for the site/study location/plot visits that the supplied species name(s)
               appear at in JSON format. If you supply environmental variable names then the result will have the environmental
               variables filtered down to only the environmental variables you've asked for, otherwise all environmental
-              variables are returned. Note: not all sites have environmental variables available."
+              variables are returned. Note: not all sites have environmental variables available.
             queryParams:
               - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
               - ${self:custom.commonModelSchemaFragments.SingleVarNameQueryParam}
@@ -565,11 +573,11 @@ functions:
           cors: true
           documentation:
             summary: "Get environmental variable data in CSV format"
-            description: |
-              "Gets environmental variable data records for the site/study location/plot visits that the supplied species name(s)
+            description: >
+              Gets environmental variable data records for the site/study location/plot visits that the supplied species name(s)
               appear at in CSV format. If you supply environmental variable names then the result will have the environmental
               variables filtered down to only the environmental variables you've asked for, otherwise all environmental
-              variables are returned. Note: not all sites have environmental variables available."
+              variables are returned. Note: not all sites have environmental variables available.
             queryParams:
               - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
               - ${self:custom.commonModelSchemaFragments.SingleVarNameQueryParam}
@@ -581,6 +589,7 @@ functions:
                 responseModels:
                   "text/csv": "CsvResponse"
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   v1-allSpeciesData:
     handler: v1-allSpeciesData.handler
     events:
@@ -590,9 +599,9 @@ functions:
           cors: true
           documentation:
             summary: "Get all species data"
-            description: |
+            description: >
               Gets all Darwin Core records using content negotation to determine the response type. This resource honours Accept
-              headers represented by any of the /allSpeciesData.* resources.
+              headers represented by any of the /v1/allSpeciesData.* resources.
             queryParams:
               - ${self:custom.commonModelSchemaFragments.StartQueryParam}
               - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
@@ -603,6 +612,7 @@ functions:
                   "text/csv": "CsvResponse"
                   "application/json": "V1AllSpeciesDataResponse"
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   v1-allSpeciesData-json:
     handler: v1-allSpeciesData-json.handler
     events:
@@ -612,7 +622,7 @@ functions:
           cors: true
           documentation:
             summary: "Get all species data in JSON format"
-            description: |
+            description: >
               Gets Darwin Core records in JSON format.
             queryParams:
               - ${self:custom.commonModelSchemaFragments.StartQueryParam}
@@ -623,6 +633,29 @@ functions:
                 responseModels:
                   "application/json": "V1AllSpeciesDataResponse"
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
+  v2-allSpeciesData-json:
+    handler: v2-allSpeciesData-json.handler
+    events:
+      - http:
+          path: v2/allSpeciesData.json
+          method: get
+          cors: true
+          documentation:
+            summary: "Get all species data in JSON format"
+            description: >
+              Gets Darwin Core records in JSON format. Version 2 adds two new fields to each record;
+              'locationName' and 'datasetName'.
+            queryParams:
+              - ${self:custom.commonModelSchemaFragments.StartQueryParam}
+              - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
+            methodResponses:
+              -
+                statusCode: 200
+                responseModels:
+                  "application/json": V2AllSpeciesDataResponse
+              - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   v1-allSpeciesData-csv:
     handler: v1-allSpeciesData-csv.handler
     events:
@@ -632,8 +665,8 @@ functions:
           cors: true
           documentation:
             summary: "Get all species occurrence data in CSV format"
-            description: |
-              "Gets all Darwin Core records in CSV format."
+            description: >
+              Gets all Darwin Core records in CSV format.
             queryParams:
               - ${self:custom.commonModelSchemaFragments.StartQueryParam}
               - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
@@ -644,3 +677,4 @@ functions:
                 responseModels:
                   "text/csv": "CsvResponse"
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}

@@ -108,14 +108,7 @@ exports:
           type: string
         bibliographicCitation:
           type: string
-  v1TraitDataResponse:
-    type: array
-    items:
-      type: object
-      properties:
-        <<: *v1AllSpeciesDataResponseProperties
-        traits:
-  v2AllSpeciesDataResponse: # FIXME define new function to use this
+  v2AllSpeciesDataResponse:
     type: array
     items:
       type: object
@@ -125,3 +118,10 @@ exports:
           type: string
         datasetName:
           type: string
+  v1TraitDataResponse:
+    type: array
+    items:
+      type: object
+      properties:
+        <<: *v1AllSpeciesDataResponseProperties
+        traits:
