@@ -9,6 +9,12 @@
 - add status code to 4/500 response objects
 - return an appropriate HTTP status when a 'page out of bounds' occurs
 - figure out why the domain-manager doesn't add the base path mapping
-- move all model stuff out of serverless.yml into the model-schemas.yml file. Have two sections: fragments and models
+- move all model stuff out of serverless.yml into the model-schemas.yml file. Have three sections: fragments, schemas and descriptions
 - move schemas into relevant handler function files, add tests to assert conformance
 - create a health check rig that calls every endpoint and verifies the responses match the schema
+- consider not using versioned URLs for resources but instead, use versioned media types.
+    - Something like application/json;vnd.aekos.species-summary+v2 (or using x. if we're naughty).
+    - More at https://www.narwhl.com/2015/03/the-ultimate-solution-to-versioning-rest-apis-content-negotiation/
+    - ...and even more at https://apigility.org/documentation/api-primer/versioning
+    - we can use this to handle the requests: https://github.com/lovell/media-type
+    - this book might help: https://www.amazon.com.au/dp/B0046RERXY/ref=cm_sw_r_cp_dp_T2_AiXBzb8PMGS10
