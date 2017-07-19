@@ -22,5 +22,5 @@ aws apigateway get-export \
   --region=$REGION \
   $TEMP_FILE
 
-cat $TEMP_FILE | node ammend-swagger.js > $OUTPUT
+node ammend-swagger.js $TEMP_FILE > $OUTPUT
 rm -f $TEMP_FILE

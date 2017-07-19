@@ -1,19 +1,28 @@
 #!/usr/bin/env node
 'use strict'
-let stdin = process.stdin
+let fs = require('fs')
+let inputFile = process.argv[2]
+if (typeof inputFile === 'undefined') {
+  console.error('[ERROR] you must supply the input file as the first param')
+  console.error(`usage: ${process.argv[1]} <input-file>`)
+  console.error(`   eg: ${process.argv[1]} /path/to/unprocessed-swagger.json`)
+  process.exit(1)
+}
 let stdout = process.stdout
-let inputChunks = []
 
 const tagMappingKeySeparator = '#'
 const dataRetrievalTag = 'Data Retrieval by Species'
 const everythingRetrievalTag = 'Data Retrieval (everything)'
 const searchTag = 'Search'
+const archivedDataRetrievalTag = 'Archived - Data Retrieval by Species'
+const archivedEverythingRetrievalTag = 'Archived - Data Retrieval (everything)'
+const archivedSearchTag = 'Archived - Search'
 const tagMapping = {
-  [get('/v1/environmentData')]: dataRetrievalTag,
+  [get('/v1/environmentData')]: archivedDataRetrievalTag,
   [get('/v2/environmentData')]: dataRetrievalTag,
-  [get('/v1/environmentData.json')]: dataRetrievalTag,
+  [get('/v1/environmentData.json')]: archivedDataRetrievalTag,
   [get('/v2/environmentData.json')]: dataRetrievalTag,
-  [get('/v1/environmentData.csv')]: dataRetrievalTag,
+  [get('/v1/environmentData.csv')]: archivedDataRetrievalTag,
   [get('/v2/environmentData.csv')]: dataRetrievalTag,
   [get('/v1/speciesData')]: dataRetrievalTag,
   [get('/v1/speciesData.json')]: dataRetrievalTag,
@@ -29,7 +38,7 @@ const tagMapping = {
   [get('/v1/speciesAutocomplete.json')]: searchTag,
   [post('/v1/speciesSummary.json')]: searchTag,
   [get('/v1/allSpeciesData')]: everythingRetrievalTag,
-  [get('/v1/allSpeciesData.json')]: everythingRetrievalTag,
+  [get('/v1/allSpeciesData.json')]: archivedEverythingRetrievalTag,
   [get('/v2/allSpeciesData.json')]: everythingRetrievalTag,
   [get('/v1/allSpeciesData.csv')]: everythingRetrievalTag,
 }
@@ -46,16 +55,12 @@ function tagMappingKey(path, method) {
   return path + tagMappingKeySeparator + method
 }
 
-stdin.resume()
-stdin.setEncoding('utf8')
-
-stdin.on('data', function (chunk) {
-  inputChunks.push(chunk);
-})
-
-stdin.on('end', function () {
-  let inputJSON = inputChunks.join()
-  let parsedData = JSON.parse(inputJSON)
+// We need to read the file because piping to stdin has a limit of 65536 chars, then it adds a comma and destroys things
+fs.readFile(inputFile, 'utf8', (error, data) => {
+  if (error) {
+    throw error
+  }
+  let parsedData = JSON.parse(data)
   tagResources(parsedData)
   addTagDescriptions(parsedData)
   addApiDescription(parsedData)
