@@ -2,13 +2,14 @@
 let quoted = require('./FieldConfig').quoted
 let notQuoted = require('./FieldConfig').notQuoted
 let r = require('./response-helper')
-let v1AllSpeciesDataJson = require('./v1-allSpeciesData-json')
-let v2AllSpeciesDataCsv = require('./v2-allSpeciesData-csv')
+let allSpeciesDataJson = require('./v2-allSpeciesData-json')
 let csvHeaders = [
   notQuoted('decimalLatitude'),
   notQuoted('decimalLongitude'),
   quoted('geodeticDatum'),
   quoted('locationID'),
+  quoted('locationName'),
+  quoted('datasetName'),
   quoted('scientificName'),
   quoted('taxonRemarks'),
   notQuoted('individualCount'),
@@ -18,6 +19,8 @@ let csvHeaders = [
   quoted('bibliographicCitation'),
   quoted('samplingProtocol')
 ]
+let yaml = require('yamljs')
+const downloadParam = yaml.load('./constants.yml').paramNames.DOWNLOAD
 module.exports.csvHeaders = csvHeaders
 
 module.exports.handler = (event, context, callback) => {
@@ -27,10 +30,10 @@ module.exports.handler = (event, context, callback) => {
 
 function doHandle (event, callback, db, elapsedTimeCalculator) {
   let processStart = r.now()
-  let params = v1AllSpeciesDataJson.extractParams(event, db)
-  v1AllSpeciesDataJson.doAllSpeciesQuery(params, processStart, db, elapsedTimeCalculator).then(successResult => {
+  let params = allSpeciesDataJson.extractParams(event, db)
+  allSpeciesDataJson.doAllSpeciesQuery(params, processStart, db, elapsedTimeCalculator).then(successResult => {
     let result = mapJsonToCsv(successResult.response)
-    let downloadFileName = v2AllSpeciesDataCsv.getCsvDownloadFileName(event)
+    let downloadFileName = getCsvDownloadFileName(event)
     r.csv.ok(callback, result, downloadFileName)
   }).catch(error => {
     console.error('Failed while building result', error)
@@ -40,6 +43,22 @@ function doHandle (event, callback, db, elapsedTimeCalculator) {
 
 module.exports._testonly = {
   doHandle: doHandle
+}
+
+module.exports.getCsvDownloadFileName = getCsvDownloadFileName
+function getCsvDownloadFileName (event) {
+  let params = event.queryStringParameters
+  if (params === null) {
+    return null
+  }
+  let downloadParamValue = params[downloadParam]
+  if (typeof downloadParamValue === 'undefined') {
+    return null
+  }
+  if (downloadParamValue === 'true') {
+    return 'aekosSpeciesData.csv'
+  }
+  return null
 }
 
 module.exports.mapJsonToCsv = mapJsonToCsv

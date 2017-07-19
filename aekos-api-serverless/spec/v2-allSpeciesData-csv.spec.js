@@ -1,8 +1,8 @@
 'use strict'
-var objectUnderTest = require('../v1-allSpeciesData-csv')
+var objectUnderTest = require('../v2-allSpeciesData-csv')
 let StubDB = require('./StubDB')
 
-describe('v1-allSpeciesData-csv', () => {
+describe('v2-allSpeciesData-csv', () => {
   describe('doHandle', () => {
     let result = null
     beforeEach(done => {
@@ -21,8 +21,10 @@ describe('v1-allSpeciesData-csv', () => {
             'decimalLongitude': 120.15956081537496,
             'geodeticDatum': 'GDA94',
             'locationID': 'aekos.org.au/collection/wa.gov.au/ravensthorpe/R181',
+            'locationName': 'R181',
             'samplingProtocol': 'aekos.org.au/collection/wa.gov.au/ravensthorpe',
-            'bibliographicCitation': 'Department of Par...'
+            'bibliographicCitation': 'Department of Par...',
+            'datasetName': 'Biological Survey of the Ravensthorpe Range (Phase 1)'
           }
         ],
         [ {recordsHeld: 31} ]
@@ -48,8 +50,8 @@ describe('v1-allSpeciesData-csv', () => {
         'Content-Type': "'text/csv'"
       })
       expect(result.body.split('\n')).toEqual([
-        `"decimalLatitude","decimalLongitude","geodeticDatum","locationID","scientificName","taxonRemarks","individualCount","eventDate","year","month","bibliographicCitation","samplingProtocol"`,
-        `-33.59758852952833,120.15956081537496,"GDA94","aekos.org.au/collection/wa.gov.au/ravensthorpe/R181","Acacia binata Maslin",,1,"2007-10-03",2007,10,"Department of Par...","aekos.org.au/collection/wa.gov.au/ravensthorpe"`
+        `"decimalLatitude","decimalLongitude","geodeticDatum","locationID","locationName","datasetName","scientificName","taxonRemarks","individualCount","eventDate","year","month","bibliographicCitation","samplingProtocol"`,
+        `-33.59758852952833,120.15956081537496,"GDA94","aekos.org.au/collection/wa.gov.au/ravensthorpe/R181","R181","Biological Survey of the Ravensthorpe Range (Phase 1)","Acacia binata Maslin",,1,"2007-10-03",2007,10,"Department of Par...","aekos.org.au/collection/wa.gov.au/ravensthorpe"`
       ])
     })
   })
@@ -103,8 +105,8 @@ describe('v1-allSpeciesData-csv', () => {
         'Content-Disposition': 'attachment;filename=aekosSpeciesData.csv'
       })
       expect(result.body.split('\n')).toEqual([
-        `"decimalLatitude","decimalLongitude","geodeticDatum","locationID","scientificName","taxonRemarks","individualCount","eventDate","year","month","bibliographicCitation","samplingProtocol"`,
-        `-33.59758852952833,120.15956081537496,"GDA94","aekos.org.au/collection/wa.gov.au/ravensthorpe/R181","Acacia binata Maslin",,1,"2007-10-03",2007,10,"Department of Par...","aekos.org.au/collection/wa.gov.au/ravensthorpe"`
+        `"decimalLatitude","decimalLongitude","geodeticDatum","locationID","locationName","datasetName","scientificName","taxonRemarks","individualCount","eventDate","year","month","bibliographicCitation","samplingProtocol"`,
+        `-33.59758852952833,120.15956081537496,"GDA94","aekos.org.au/collection/wa.gov.au/ravensthorpe/R181","R181","Biological Survey of the Ravensthorpe Range (Phase 1)","Acacia binata Maslin",,1,"2007-10-03",2007,10,"Department of Par...","aekos.org.au/collection/wa.gov.au/ravensthorpe"`
       ])
     })
   })
@@ -123,8 +125,10 @@ describe('v1-allSpeciesData-csv', () => {
           decimalLongitude: 145.584496,
           geodeticDatum: 'GDA94',
           locationID: 'aekos.org.au/collection/adelaide.edu.au/TAF/QDFWET0004',
+          locationName: 'QDFWET0004',
           samplingProtocol: 'aekos.org.au/collection/adelaide.edu.au/TAF',
-          bibliographicCitation: 'Wood SW, Bowman DMJS, Ste...'
+          bibliographicCitation: 'Wood SW, Bowman DMJS, Ste...',
+          datasetName: 'TERN AusPlots Forests Monitoring Network'
         },
         {
           scientificName: 'Acacia cincinnata',
@@ -137,18 +141,20 @@ describe('v1-allSpeciesData-csv', () => {
           decimalLongitude: 145.584496,
           geodeticDatum: 'GDA94',
           locationID: 'aekos.org.au/collection/adelaide.edu.au/TAF/QDFWET0004',
+          locationName: 'QDFWET0004',
           samplingProtocol: 'aekos.org.au/collection/adelaide.edu.au/TAF',
-          bibliographicCitation: 'Wood SW, Bowman DMJS, Ste...'
+          bibliographicCitation: 'Wood SW, Bowman DMJS, Ste...',
+          datasetName: 'TERN AusPlots Forests Monitoring Network'
         }
       ]
       let result = objectUnderTest.mapJsonToCsv(records)
       let resultLines = result.split('\n')
       expect(resultLines.length).toBe(3)
-      expect(resultLines[0]).toBe('"decimalLatitude","decimalLongitude","geodeticDatum","locationID","scientificName","taxonRemarks",' +
+      expect(resultLines[0]).toBe('"decimalLatitude","decimalLongitude","geodeticDatum","locationID","locationName","datasetName","scientificName","taxonRemarks",' +
         '"individualCount","eventDate","year","month","bibliographicCitation","samplingProtocol"')
-      expect(resultLines[1]).toBe('-17.841178,145.584496,"GDA94","aekos.org.au/collection/adelaide.edu.au/TAF/QDFWET0004","Acacia cincinnata",,' +
+      expect(resultLines[1]).toBe('-17.841178,145.584496,"GDA94","aekos.org.au/collection/adelaide.edu.au/TAF/QDFWET0004","QDFWET0004","TERN AusPlots Forests Monitoring Network","Acacia cincinnata",,' +
         '1,"2014-09-11",2014,9,"Wood SW, Bowman DMJS, Ste...","aekos.org.au/collection/adelaide.edu.au/TAF"')
-      expect(resultLines[2]).toBe('-17.841178,145.584496,"GDA94","aekos.org.au/collection/adelaide.edu.au/TAF/QDFWET0004","Acacia cincinnata",,' +
+      expect(resultLines[2]).toBe('-17.841178,145.584496,"GDA94","aekos.org.au/collection/adelaide.edu.au/TAF/QDFWET0004","QDFWET0004","TERN AusPlots Forests Monitoring Network","Acacia cincinnata",,' +
         '1,"1991-01-22",1991,1,"Wood SW, Bowman DMJS, Ste...","aekos.org.au/collection/adelaide.edu.au/TAF"')
     })
   })
@@ -156,7 +162,7 @@ describe('v1-allSpeciesData-csv', () => {
   describe('getCsvHeaderRow', () => {
     it('should return the expected row', () => {
       let result = objectUnderTest.getCsvHeaderRow()
-      expect(result).toBe('"decimalLatitude","decimalLongitude","geodeticDatum","locationID","scientificName","taxonRemarks","individualCount","eventDate","year","month","bibliographicCitation","samplingProtocol"')
+      expect(result).toBe('"decimalLatitude","decimalLongitude","geodeticDatum","locationID","locationName","datasetName","scientificName","taxonRemarks","individualCount","eventDate","year","month","bibliographicCitation","samplingProtocol"')
     })
   })
 
@@ -173,12 +179,54 @@ describe('v1-allSpeciesData-csv', () => {
         decimalLongitude: 145.584496,
         geodeticDatum: 'GDA94',
         locationID: 'aekos.org.au/collection/adelaide.edu.au/TAF/QDFWET0004',
+        locationName: 'QDFWET0004',
         samplingProtocol: 'aekos.org.au/collection/adelaide.edu.au/TAF',
-        bibliographicCitation: 'Wood SW, Bowman DMJS, Ste...'
+        bibliographicCitation: 'Wood SW, Bowman DMJS, Ste...',
+        datasetName: 'TERN AusPlots Forests Monitoring Network'
       }
       let result = objectUnderTest.createCsvRow(objectUnderTest.csvHeaders, record)
-      expect(result).toBe('-17.841178,145.584496,"GDA94","aekos.org.au/collection/adelaide.edu.au/TAF/QDFWET0004","Acacia cincinnata",,' +
+      expect(result).toBe('-17.841178,145.584496,"GDA94","aekos.org.au/collection/adelaide.edu.au/TAF/QDFWET0004","QDFWET0004","TERN AusPlots Forests Monitoring Network","Acacia cincinnata",,' +
         '1,"1991-01-22",1991,1,"Wood SW, Bowman DMJS, Ste...","aekos.org.au/collection/adelaide.edu.au/TAF"')
+    })
+  })
+
+  describe('.getCsvDownloadFileName()', () => {
+    it('should return null when no query parameters are present', () => {
+      let event = {
+        queryStringParameters: null
+      }
+      let result = objectUnderTest.getCsvDownloadFileName(event)
+      expect(result).toBeNull()
+    })
+
+    it('should return null when the "download" parameter is not present', () => {
+      let event = {
+        queryStringParameters: {
+          someParam: 'blah'
+        }
+      }
+      let result = objectUnderTest.getCsvDownloadFileName(event)
+      expect(result).toBeNull()
+    })
+
+    it('should return null when the "download" param is false', () => {
+      let event = {
+        queryStringParameters: {
+          download: false
+        }
+      }
+      let result = objectUnderTest.getCsvDownloadFileName(event)
+      expect(result).toBeNull()
+    })
+
+    it('should return the expected filename when "download" param is true', () => {
+      let event = {
+        queryStringParameters: {
+          download: 'true'
+        }
+      }
+      let result = objectUnderTest.getCsvDownloadFileName(event)
+      expect(result).toBe('aekosSpeciesData.csv')
     })
   })
 })

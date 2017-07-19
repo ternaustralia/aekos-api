@@ -393,7 +393,7 @@ functions:
             summary: Get species data
             description: >
               Gets Darwin Core records for the supplied species name(s) using content negotation to determine the response type.
-              This resource honours Accept headers represented by any of the /speciesData.* resources.
+              This resource honours Accept headers represented by any of the /v1/speciesData.* resources.
             queryParams:
               - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
               - ${self:custom.commonModelSchemaFragments.StartQueryParam}
@@ -463,7 +463,7 @@ functions:
               Gets Darwin Core records with added trait information for the supplied species name(s) using content negotation to
               determine the response type. If you supply trait names then the result records will have the traits filtered down
               to only the traits you've asked for, otherwise all traits are returned. This resource honours Accept headers
-              represented by any of the /traitData.* resources.
+              represented by any of the /v1/traitData.* resources.
             queryParams:
               - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
               - ${self:custom.commonModelSchemaFragments.SingleTraitNameQueryParam}
@@ -542,7 +542,7 @@ functions:
               appear at using content negotation to determine the response type. If you supply environmental variable names then
               the result will have the environmental variables filtered down to only the environmental variables you've asked for,
               otherwise all environmental variables are returned. Note: not all sites have environmental variables available.
-              This resource honours Accept headers represented by any of the /environmentData.* resources.
+              This resource honours Accept headers represented by any of the /v1/environmentData.* resources.
             queryParams:
               - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
               - ${self:custom.commonModelSchemaFragments.SingleVarNameQueryParam}
@@ -570,7 +570,7 @@ functions:
               appear at using content negotation to determine the response type. If you supply environmental variable names then
               the result will have the environmental variables filtered down to only the environmental variables you've asked for,
               otherwise all environmental variables are returned. Note: not all sites have environmental variables available.
-              This resource honours Accept headers represented by any of the /environmentData.* resources. Version 2 adds two
+              This resource honours Accept headers represented by any of the /v2/environmentData.* resources. Version 2 adds two
               new fields to each record; 'locationName' and 'datasetName'.
             queryParams:
               - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
@@ -715,6 +715,31 @@ functions:
                   "application/json": V1AllSpeciesDataResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
+  v2-allSpeciesData:
+    handler: v2-allSpeciesData.handler
+    timeout: 40
+    events:
+      - http:
+          path: v2/allSpeciesData
+          method: get
+          cors: true
+          documentation:
+            summary: Get all species data
+            description: >
+              Gets all Darwin Core records using content negotation to determine the response type. This resource honours Accept
+              headers represented by any of the /v2/allSpeciesData.* resources. Version 2 adds two new fields to each record;
+              'locationName' and 'datasetName'.
+            queryParams:
+              - ${self:custom.commonModelSchemaFragments.StartQueryParam}
+              - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
+            methodResponses:
+              -
+                statusCode: 200
+                responseModels:
+                  "text/csv": CsvResponse
+                  "application/json": V2AllSpeciesDataResponse
+              - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   v1-allSpeciesData-json:
     handler: v1-allSpeciesData-json.handler
     timeout: 40
@@ -772,6 +797,30 @@ functions:
             summary: Get all species occurrence data in CSV format
             description: >
               Gets all Darwin Core records in CSV format.
+            queryParams:
+              - ${self:custom.commonModelSchemaFragments.StartQueryParam}
+              - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
+              - ${self:custom.commonModelSchemaFragments.DownloadQueryParam}
+            methodResponses:
+              -
+                statusCode: 200
+                responseModels:
+                  "text/csv": CsvResponse
+              - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
+  v2-allSpeciesData-csv:
+    handler: v2-allSpeciesData-csv.handler
+    timeout: 40
+    events:
+      - http:
+          path: v2/allSpeciesData.csv
+          method: get
+          cors: true
+          documentation:
+            summary: Get all species occurrence data in CSV format
+            description: >
+              Gets all Darwin Core records in CSV format. Version 2 adds two new fields to each record;
+              'locationName' and 'datasetName'.
             queryParams:
               - ${self:custom.commonModelSchemaFragments.StartQueryParam}
               - ${self:custom.commonModelSchemaFragments.RowsQueryParam}

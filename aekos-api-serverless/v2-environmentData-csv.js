@@ -9,15 +9,15 @@ let csvHeaders = [
   notQuoted('decimalLongitude'),
   quoted('geodeticDatum'),
   quoted('locationID'),
+  quoted('locationName'),
+  quoted('datasetName'),
   quotedListConcat('scientificNames'),
   quotedListConcat('taxonRemarks'),
   quoted('eventDate'),
   notQuoted('year'),
   notQuoted('month'),
   quoted('bibliographicCitation'),
-  quoted('samplingProtocol'),
-  quoted('locationName'),
-  quoted('datasetName')
+  quoted('samplingProtocol')
 ]
 
 module.exports.handler = (event, context, callback) => {

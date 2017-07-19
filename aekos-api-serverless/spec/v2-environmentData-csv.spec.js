@@ -45,8 +45,8 @@ describe('v2-environmentData-csv', function () {
       }
       let result = objectUnderTest.createCsvRow(record)
       expect(result).toBe('-38.759165,143.435125,"GDA94","aekos.org.au/collection/test.edu.au/TEST/AAAA0001",' +
-        '"Acacia dealbata|Acacia aneura","Grass|Clover","2014-05-09",2014,5,"A Person, B Person...",' +
-        '"aekos.org.au/collection/test.edu.au/TEST","AAAA0001","TEST dataset","disturbanceType","none",,"slope",' +
+        '"AAAA0001","TEST dataset","Acacia dealbata|Acacia aneura","Grass|Clover","2014-05-09",2014,5,"A Person, B Person...",' +
+        '"aekos.org.au/collection/test.edu.au/TEST","disturbanceType","none",,"slope",' +
         '"4","degrees","aspect","260","degrees"')
     })
   })
