@@ -28,3 +28,6 @@ We develop against a specific version of NodeJS (v6.10.3 at the time of writing)
     # TODO add step about creating AWS RDS instance
     ./dev-deploy.sh # deploy the code to AWS
     # look at the ../aekos-api-swagger-site/ project for how to deploy the doco site
+
+# 200 Resource limit on CloudFormation
+As serverless uses CloudFormation internally, we're subject to the CF limits. One limit is that you cannot have more than 200 resources in a single template. We're pretty close to this already (actually we've gone over but had to do some tricky stuff to bring it back down). See [https://github.com/serverless/serverless/issues/3411]() for a discussion on possible fixes.

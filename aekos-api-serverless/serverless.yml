@@ -17,11 +17,11 @@ provider:
       - ${file(secrets.yml):${self:custom.stage}.subnet2Id}
   environment:
     # FIXME get these encrypted
-    DBURL: "${file(secrets.yml):${self:custom.stage}.DBURL}"
-    DBPORT: "${file(secrets.yml):${self:custom.stage}.DBPORT}"
-    DBNAME: "${file(secrets.yml):${self:custom.stage}.DBNAME}"
-    DBUSER: "${file(secrets.yml):${self:custom.stage}.DBUSER}"
-    DBPASS: "${file(secrets.yml):${self:custom.stage}.DBPASS}"
+    DBURL: ${file(secrets.yml):${self:custom.stage}.DBURL}
+    DBPORT: ${file(secrets.yml):${self:custom.stage}.DBPORT}
+    DBNAME: ${file(secrets.yml):${self:custom.stage}.DBNAME}
+    DBUSER: ${file(secrets.yml):${self:custom.stage}.DBUSER}
+    DBPASS: ${file(secrets.yml):${self:custom.stage}.DBPASS}
 
 resources:
   Resources:
@@ -142,6 +142,14 @@ custom:
           type: object
           properties:
             response: ${self:custom.modelDetails.v1AllSpeciesDataResponse}
+            responseHeader: ${self:custom.modelDetails.v1SpeciesResponseHeader}
+      -
+        name: V2SpeciesDataResponse
+        contentType: "application/json"
+        schema:
+          type: object
+          properties:
+            response: ${self:custom.modelDetails.v2AllSpeciesDataResponse}
             responseHeader: ${self:custom.modelDetails.v1SpeciesResponseHeader}
       -
         name: V1TraitDataJsonResponse
@@ -406,6 +414,31 @@ functions:
                   "application/json": V1SpeciesDataResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
+  v2-speciesData:
+    handler: v2-speciesData.handler
+    events:
+      - http:
+          path: v2/speciesData
+          method: get
+          cors: true
+          documentation:
+            summary: Get species data
+            description: >
+              Gets Darwin Core records for the supplied species name(s) using content negotation to determine the response type.
+              This resource honours Accept headers represented by any of the /v2/speciesData.* resources.
+              ${file(./constants.yml):messages.documentation.v2NewFields}
+            queryParams:
+              - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
+              - ${self:custom.commonModelSchemaFragments.StartQueryParam}
+              - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
+            methodResponses:
+              -
+                statusCode: 200
+                responseModels:
+                  "text/csv": CsvResponse
+                  "application/json": V2SpeciesDataResponse
+              - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   v1-speciesData-json:
     handler: v1-speciesData-json.handler
     events:
@@ -428,11 +461,56 @@ functions:
                   "application/json": V1SpeciesDataResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
+  v2-speciesData-json:
+    handler: v2-speciesData-json.handler
+    events:
+      - http:
+          path: v2/speciesData.json
+          method: get
+          cors: true
+          documentation:
+            summary: Get species data in JSON format
+            description: >
+              Gets Darwin Core records for the supplied species name(s) in JSON format.
+              ${file(./constants.yml):messages.documentation.v2NewFields}
+            queryParams:
+              - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
+              - ${self:custom.commonModelSchemaFragments.StartQueryParam}
+              - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
+            methodResponses:
+              -
+                statusCode: 200
+                responseModels:
+                  "application/json": V2SpeciesDataResponse
+              - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   v1-speciesData-csv:
     handler: v1-speciesData-csv.handler
     events:
       - http:
           path: v1/speciesData.csv
+          method: get
+          cors: true
+          documentation:
+            summary: Get species data in CSV format
+            description: >
+              Gets Darwin Core records for the supplied species name(s) in CSV format.
+            queryParams:
+              - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
+              - ${self:custom.commonModelSchemaFragments.StartQueryParam}
+              - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
+            methodResponses:
+              -
+                statusCode: 200
+                responseModels:
+                  "text/csv": CsvResponse
+              - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
+  v2-speciesData-csv:
+    handler: v2-speciesData-csv.handler
+    events:
+      - http:
+          path: v2/speciesData.csv
           method: get
           cors: true
           documentation:
@@ -570,8 +648,8 @@ functions:
               appear at using content negotation to determine the response type. If you supply environmental variable names then
               the result will have the environmental variables filtered down to only the environmental variables you've asked for,
               otherwise all environmental variables are returned. Note: not all sites have environmental variables available.
-              This resource honours Accept headers represented by any of the /v2/environmentData.* resources. Version 2 adds two
-              new fields to each record; 'locationName' and 'datasetName'.
+              This resource honours Accept headers represented by any of the /v2/environmentData.* resources.
+              ${file(./constants.yml):messages.documentation.v2NewFields}
             queryParams:
               - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
               - ${self:custom.commonModelSchemaFragments.SingleVarNameQueryParam}
@@ -624,8 +702,8 @@ functions:
               Gets environmental variable data records for the site/study location/plot visits that the supplied species name(s)
               appear at in JSON format. If you supply environmental variable names then the result will have the environmental
               variables filtered down to only the environmental variables you've asked for, otherwise all environmental
-              variables are returned. Note: not all sites have environmental variables available. Version 2 adds two new fields
-              to each record; 'locationName' and 'datasetName'.
+              variables are returned. Note: not all sites have environmental variables available.
+              ${file(./constants.yml):messages.documentation.v2NewFields}
             queryParams:
               - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
               - ${self:custom.commonModelSchemaFragments.SingleVarNameQueryParam}
@@ -677,8 +755,8 @@ functions:
               Gets environmental variable data records for the site/study location/plot visits that the supplied species name(s)
               appear at in CSV format. If you supply environmental variable names then the result will have the environmental
               variables filtered down to only the environmental variables you've asked for, otherwise all environmental
-              variables are returned. Note: not all sites have environmental variables available. Version 2 adds two new fields
-              to each record; 'locationName' and 'datasetName'.
+              variables are returned. Note: not all sites have environmental variables available.
+              ${file(./constants.yml):messages.documentation.v2NewFields}
             queryParams:
               - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
               - ${self:custom.commonModelSchemaFragments.SingleVarNameQueryParam}
@@ -727,8 +805,7 @@ functions:
             summary: Get all species data
             description: >
               Gets all Darwin Core records using content negotation to determine the response type. This resource honours Accept
-              headers represented by any of the /v2/allSpeciesData.* resources. Version 2 adds two new fields to each record;
-              'locationName' and 'datasetName'.
+              headers represented by any of the /v2/allSpeciesData.* resources. ${file(./constants.yml):messages.documentation.v2NewFields}
             queryParams:
               - ${self:custom.commonModelSchemaFragments.StartQueryParam}
               - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
@@ -773,8 +850,7 @@ functions:
           documentation:
             summary: Get all species data in JSON format
             description: >
-              Gets Darwin Core records in JSON format. Version 2 adds two new fields to each record;
-              'locationName' and 'datasetName'.
+              Gets Darwin Core records in JSON format. ${file(./constants.yml):messages.documentation.v2NewFields}
             queryParams:
               - ${self:custom.commonModelSchemaFragments.StartQueryParam}
               - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
@@ -785,8 +861,8 @@ functions:
                   "application/json": V2AllSpeciesDataResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
-  v1-allSpeciesData-csv:
-    handler: v1-allSpeciesData-csv.handler
+  allSpeciesData-csv:
+    handler: allSpeciesData-csv.handler
     timeout: 40
     events:
       - http:
@@ -808,10 +884,6 @@ functions:
                   "text/csv": CsvResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
-  v2-allSpeciesData-csv:
-    handler: v2-allSpeciesData-csv.handler
-    timeout: 40
-    events:
       - http:
           path: v2/allSpeciesData.csv
           method: get
@@ -819,8 +891,7 @@ functions:
           documentation:
             summary: Get all species occurrence data in CSV format
             description: >
-              Gets all Darwin Core records in CSV format. Version 2 adds two new fields to each record;
-              'locationName' and 'datasetName'.
+              Gets all Darwin Core records in CSV format. ${file(./constants.yml):messages.documentation.v2NewFields}
             queryParams:
               - ${self:custom.commonModelSchemaFragments.StartQueryParam}
               - ${self:custom.commonModelSchemaFragments.RowsQueryParam}

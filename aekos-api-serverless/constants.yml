@@ -20,3 +20,5 @@ defaults:
 messages:
   public:
     internalServerError: Sorry about that, something has gone wrong
+  documentation:
+    v2NewFields: Version 2 adds two new fields to each record; 'locationName' and 'datasetName'.

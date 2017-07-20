@@ -2,8 +2,8 @@
 let quoted = require('./FieldConfig').quoted
 let r = require('./response-helper')
 let traitDataJson = require('./v1-traitData-json')
-let allSpeciesDataCsv = require('./v1-allSpeciesData-csv')
-let csvHeaders = allSpeciesDataCsv.csvHeaders
+let allSpeciesDataCsv = require('./allSpeciesData-csv')
+let csvHeaders = allSpeciesDataCsv.v1CsvHeaders
 
 module.exports.handler = (event, context, callback) => {
   let db = require('./db-helper')

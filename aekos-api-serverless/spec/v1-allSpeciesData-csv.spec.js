@@ -1,8 +1,8 @@
 'use strict'
-var objectUnderTest = require('../v1-allSpeciesData-csv')
+var objectUnderTest = require('../allSpeciesData-csv')
 let StubDB = require('./StubDB')
 
-describe('v1-allSpeciesData-csv', () => {
+describe('/v1/allSpeciesData.csv', () => {
   describe('doHandle', () => {
     let result = null
     beforeEach(done => {
@@ -31,6 +31,9 @@ describe('v1-allSpeciesData-csv', () => {
         queryStringParameters: {
           rows: '15',
           start: '0'
+        },
+        requestContext: {
+          path: '/v1/allSpeciesData.csv'
         }
       }
       let callback = (_, theResult) => {
@@ -85,6 +88,9 @@ describe('v1-allSpeciesData-csv', () => {
           rows: '15',
           start: '0',
           download: 'true' // trigger response as download
+        },
+        requestContext: {
+          path: '/v1/allSpeciesData.csv'
         }
       }
       let callback = (_, theResult) => {
@@ -141,7 +147,7 @@ describe('v1-allSpeciesData-csv', () => {
           bibliographicCitation: 'Wood SW, Bowman DMJS, Ste...'
         }
       ]
-      let result = objectUnderTest.mapJsonToCsv(records)
+      let result = objectUnderTest.mapJsonToCsv(records, objectUnderTest.v1CsvHeaders)
       let resultLines = result.split('\n')
       expect(resultLines.length).toBe(3)
       expect(resultLines[0]).toBe('"decimalLatitude","decimalLongitude","geodeticDatum","locationID","scientificName","taxonRemarks",' +
@@ -155,7 +161,7 @@ describe('v1-allSpeciesData-csv', () => {
 
   describe('getCsvHeaderRow', () => {
     it('should return the expected row', () => {
-      let result = objectUnderTest.getCsvHeaderRow()
+      let result = objectUnderTest._testonly.getCsvHeaderRow(objectUnderTest.v1CsvHeaders)
       expect(result).toBe('"decimalLatitude","decimalLongitude","geodeticDatum","locationID","scientificName","taxonRemarks","individualCount","eventDate","year","month","bibliographicCitation","samplingProtocol"')
     })
   })
@@ -176,7 +182,7 @@ describe('v1-allSpeciesData-csv', () => {
         samplingProtocol: 'aekos.org.au/collection/adelaide.edu.au/TAF',
         bibliographicCitation: 'Wood SW, Bowman DMJS, Ste...'
       }
-      let result = objectUnderTest.createCsvRow(objectUnderTest.csvHeaders, record)
+      let result = objectUnderTest.createCsvRow(objectUnderTest.v1CsvHeaders, record)
       expect(result).toBe('-17.841178,145.584496,"GDA94","aekos.org.au/collection/adelaide.edu.au/TAF/QDFWET0004","Acacia cincinnata",,' +
         '1,"1991-01-22",1991,1,"Wood SW, Bowman DMJS, Ste...","aekos.org.au/collection/adelaide.edu.au/TAF"')
     })

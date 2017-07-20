@@ -11,13 +11,22 @@ module.exports.handler = (event, context, callback) => {
 }
 
 function doHandle (event, callback, db, elapsedTimeCalculator) {
-  let processStart = r.now()
-  let params = extractParams(event) // FIXME handle thrown Errors for invalid request
-  doAllSpeciesQuery(params, processStart, db, elapsedTimeCalculator).then(successResult => {
+  prepareResult(event, db, elapsedTimeCalculator).then(successResult => {
     r.json.ok(callback, successResult, event)
   }).catch(error => {
     console.error('Failed to get v2-allSpeciesData', error)
     r.json.internalServerError(callback)
+  })
+}
+
+module.exports.prepareResult = prepareResult
+function prepareResult (event, db, elapsedTimeCalculator) {
+  let processStart = r.now()
+  let params = extractParams(event) // FIXME handle thrown Errors for invalid request
+  return doAllSpeciesQuery(params, processStart, db, elapsedTimeCalculator).then(successResult => {
+    return new Promise((resolve, reject) => {
+      resolve(successResult)
+    })
   })
 }
 

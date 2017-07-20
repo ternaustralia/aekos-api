@@ -8,9 +8,7 @@ module.exports.handler = (event, context, callback) => {
 }
 
 function doHandle (event, callback, db, elapsedTimeCalculator) {
-  let processStart = r.now()
-  let params = v2AllSpeciesDataJson.extractParams(event) // FIXME handle thrown Errors for invalid request
-  v2AllSpeciesDataJson.doAllSpeciesQuery(params, processStart, db, elapsedTimeCalculator).then(successResult => {
+  v2AllSpeciesDataJson.prepareResult(event, db, elapsedTimeCalculator).then(successResult => {
     removeV2FieldsFrom(successResult)
     r.json.ok(callback, successResult, event)
   }).catch(error => {
@@ -19,6 +17,7 @@ function doHandle (event, callback, db, elapsedTimeCalculator) {
   })
 }
 
+module.exports.removeV2FieldsFrom = removeV2FieldsFrom
 function removeV2FieldsFrom (successResult) {
   successResult.response.forEach(curr => {
     delete curr.locationName

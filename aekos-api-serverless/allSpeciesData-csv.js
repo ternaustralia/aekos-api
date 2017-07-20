@@ -3,7 +3,21 @@ let quoted = require('./FieldConfig').quoted
 let notQuoted = require('./FieldConfig').notQuoted
 let r = require('./response-helper')
 let allSpeciesDataJson = require('./v2-allSpeciesData-json')
-let csvHeaders = [
+let v1CsvHeaders = [
+  notQuoted('decimalLatitude'),
+  notQuoted('decimalLongitude'),
+  quoted('geodeticDatum'),
+  quoted('locationID'),
+  quoted('scientificName'),
+  quoted('taxonRemarks'),
+  notQuoted('individualCount'),
+  quoted('eventDate'),
+  notQuoted('year'),
+  notQuoted('month'),
+  quoted('bibliographicCitation'),
+  quoted('samplingProtocol')
+]
+let v2CsvHeaders = [
   notQuoted('decimalLatitude'),
   notQuoted('decimalLongitude'),
   quoted('geodeticDatum'),
@@ -21,7 +35,8 @@ let csvHeaders = [
 ]
 let yaml = require('yamljs')
 const downloadParam = yaml.load('./constants.yml').paramNames.DOWNLOAD
-module.exports.csvHeaders = csvHeaders
+module.exports.v1CsvHeaders = v1CsvHeaders
+module.exports.v2CsvHeaders = v2CsvHeaders
 
 module.exports.handler = (event, context, callback) => {
   let db = require('./db-helper')
@@ -29,10 +44,11 @@ module.exports.handler = (event, context, callback) => {
 }
 
 function doHandle (event, callback, db, elapsedTimeCalculator) {
+  let csvHeaders = determineVersion(event)
   let processStart = r.now()
   let params = allSpeciesDataJson.extractParams(event, db)
   allSpeciesDataJson.doAllSpeciesQuery(params, processStart, db, elapsedTimeCalculator).then(successResult => {
-    let result = mapJsonToCsv(successResult.response)
+    let result = mapJsonToCsv(successResult.response, csvHeaders)
     let downloadFileName = getCsvDownloadFileName(event)
     r.csv.ok(callback, result, downloadFileName)
   }).catch(error => {
@@ -41,8 +57,22 @@ function doHandle (event, callback, db, elapsedTimeCalculator) {
   })
 }
 
+function determineVersion (event) {
+  let path = event.requestContext.path
+  const mapping = {
+    '/v1/allSpeciesData.csv': v1CsvHeaders,
+    '/v2/allSpeciesData.csv': v2CsvHeaders
+  }
+  let result = mapping[path]
+  if (typeof result === 'undefined') {
+    throw new Error(`Programmer problem: unhandled path '${path}'`)
+  }
+  return result
+}
+
 module.exports._testonly = {
-  doHandle: doHandle
+  doHandle: doHandle,
+  getCsvHeaderRow: getCsvHeaderRow
 }
 
 module.exports.getCsvDownloadFileName = getCsvDownloadFileName
@@ -62,8 +92,8 @@ function getCsvDownloadFileName (event) {
 }
 
 module.exports.mapJsonToCsv = mapJsonToCsv
-function mapJsonToCsv (records) {
-  let headerRow = getCsvHeaderRow()
+function mapJsonToCsv (records, csvHeaders) {
+  let headerRow = getCsvHeaderRow(csvHeaders)
   let dataRows = records.reduce((prev, curr) => {
     if (prev === '') {
       return createCsvRow(csvHeaders, curr)
@@ -86,8 +116,7 @@ function createCsvRow (csvHeadersParam, record) {
   return result
 }
 
-module.exports.getCsvHeaderRow = getCsvHeaderRow
-function getCsvHeaderRow () {
+function getCsvHeaderRow (csvHeaders) {
   return csvHeaders.reduce((prev, curr) => {
     if (prev === '') {
       return `"${curr.name}"`

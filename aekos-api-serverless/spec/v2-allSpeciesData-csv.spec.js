@@ -1,8 +1,8 @@
 'use strict'
-var objectUnderTest = require('../v2-allSpeciesData-csv')
+var objectUnderTest = require('../allSpeciesData-csv')
 let StubDB = require('./StubDB')
 
-describe('v2-allSpeciesData-csv', () => {
+describe('/v2/allSpeciesData.csv', () => {
   describe('doHandle', () => {
     let result = null
     beforeEach(done => {
@@ -33,6 +33,9 @@ describe('v2-allSpeciesData-csv', () => {
         queryStringParameters: {
           rows: '15',
           start: '0'
+        },
+        requestContext: {
+          path: '/v2/allSpeciesData.csv'
         }
       }
       let callback = (_, theResult) => {
@@ -87,6 +90,9 @@ describe('v2-allSpeciesData-csv', () => {
           rows: '15',
           start: '0',
           download: 'true' // trigger response as download
+        },
+        requestContext: {
+          path: '/v2/allSpeciesData.csv'
         }
       }
       let callback = (_, theResult) => {
@@ -147,7 +153,7 @@ describe('v2-allSpeciesData-csv', () => {
           datasetName: 'TERN AusPlots Forests Monitoring Network'
         }
       ]
-      let result = objectUnderTest.mapJsonToCsv(records)
+      let result = objectUnderTest.mapJsonToCsv(records, objectUnderTest.v2CsvHeaders)
       let resultLines = result.split('\n')
       expect(resultLines.length).toBe(3)
       expect(resultLines[0]).toBe('"decimalLatitude","decimalLongitude","geodeticDatum","locationID","locationName","datasetName","scientificName","taxonRemarks",' +
@@ -161,7 +167,7 @@ describe('v2-allSpeciesData-csv', () => {
 
   describe('getCsvHeaderRow', () => {
     it('should return the expected row', () => {
-      let result = objectUnderTest.getCsvHeaderRow()
+      let result = objectUnderTest._testonly.getCsvHeaderRow(objectUnderTest.v2CsvHeaders)
       expect(result).toBe('"decimalLatitude","decimalLongitude","geodeticDatum","locationID","locationName","datasetName","scientificName","taxonRemarks","individualCount","eventDate","year","month","bibliographicCitation","samplingProtocol"')
     })
   })
@@ -184,7 +190,7 @@ describe('v2-allSpeciesData-csv', () => {
         bibliographicCitation: 'Wood SW, Bowman DMJS, Ste...',
         datasetName: 'TERN AusPlots Forests Monitoring Network'
       }
-      let result = objectUnderTest.createCsvRow(objectUnderTest.csvHeaders, record)
+      let result = objectUnderTest.createCsvRow(objectUnderTest.v2CsvHeaders, record)
       expect(result).toBe('-17.841178,145.584496,"GDA94","aekos.org.au/collection/adelaide.edu.au/TAF/QDFWET0004","QDFWET0004","TERN AusPlots Forests Monitoring Network","Acacia cincinnata",,' +
         '1,"1991-01-22",1991,1,"Wood SW, Bowman DMJS, Ste...","aekos.org.au/collection/adelaide.edu.au/TAF"')
     })
