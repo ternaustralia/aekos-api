@@ -23,7 +23,7 @@ module.exports.prepareResult = prepareResult
 function prepareResult (event, db, elapsedTimeCalculator) {
   let processStart = r.now()
   let params = extractParams(event) // FIXME handle thrown Errors for invalid request
-  return doAllSpeciesQuery(params, processStart, db, elapsedTimeCalculator).then(successResult => {
+  return doAllSpeciesQuery(event, params, processStart, db, elapsedTimeCalculator).then(successResult => {
     return new Promise((resolve, reject) => {
       resolve(successResult)
     })
@@ -31,15 +31,15 @@ function prepareResult (event, db, elapsedTimeCalculator) {
 }
 
 module.exports.doAllSpeciesQuery = doAllSpeciesQuery
-function doAllSpeciesQuery (params, processStart, db, elapsedTimeCalculator) {
+function doAllSpeciesQuery (event, params, processStart, db, elapsedTimeCalculator) {
   const noWhereFragmentForAllSpecies = ''
   const recordsSql = getRecordsSql(params.start, params.rows, false, noWhereFragmentForAllSpecies)
   const countSql = getCountSql(noWhereFragmentForAllSpecies)
-  return doQuery(params, processStart, db, elapsedTimeCalculator, recordsSql, countSql)
+  return doQuery(event, params, processStart, db, elapsedTimeCalculator, recordsSql, countSql)
 }
 
 module.exports.doQuery = doQuery
-function doQuery (params, processStart, db, elapsedTimeCalculator, recordsSql, countSql) {
+function doQuery (event, params, processStart, db, elapsedTimeCalculator, recordsSql, countSql) {
   let recordsPromise = db.execSelectPromise(recordsSql)
   let countPromise = db.execSelectPromise(countSql)
   return Promise.all([recordsPromise, countPromise]).then(values => {
@@ -64,7 +64,37 @@ function doQuery (params, processStart, db, elapsedTimeCalculator, recordsSql, c
       },
       response: records
     }
+    let strategy = getStrategyForVersion(event)
+    strategy(result)
     return result
+  })
+}
+
+function getStrategyForVersion (event) {
+  const doNothing = () => {}
+  let path = event.requestContext.path
+  let isStageInPath = /^\/\w+\/v\d\//.test(path)
+  let pathWithoutStage = path
+  if (isStageInPath) {
+    pathWithoutStage = path.replace(/\/\w+/, '')
+  }
+  let pathPrefix = pathWithoutStage.substr(0, 4)
+  const mapping = {
+    '/v1/': removeV2FieldsFrom,
+    '/v2/': doNothing
+  }
+  let result = mapping[pathPrefix]
+  if (typeof result === 'undefined') {
+    throw new Error(`Programmer problem: unhandled path prefix '${pathPrefix}' extracted from path '${path}'`)
+  }
+  return result
+}
+
+module.exports.removeV2FieldsFrom = removeV2FieldsFrom
+function removeV2FieldsFrom (successResult) {
+  successResult.response.forEach(curr => {
+    delete curr.locationName
+    delete curr.datasetName
   })
 }
 

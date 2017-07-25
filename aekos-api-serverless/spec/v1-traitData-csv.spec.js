@@ -4,7 +4,8 @@ let StubDB = require('./StubDB')
 
 describe('v1-traitData-csv', () => {
   describe('doHandle', () => {
-    it('should return a 200 response when we return all traits for a species', (done) => {
+    let result = null
+    beforeEach(done => {
       let stubDb = new StubDB()
       stubDb.setExecSelectPromiseResponses([
         [
@@ -37,25 +38,29 @@ describe('v1-traitData-csv', () => {
           speciesName: 'species one',
           rows: '15',
           start: '0'
+        },
+        requestContext: {
+          path: '/v1/traitData.csv'
         }
       }
-      let callback = (error, result) => {
-        if (error) {
-          fail('Responded with error: ' + JSON.stringify(error))
-        }
-        expect(result.statusCode).toBe(200)
-        expect(result.headers).toEqual({
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Credentials': true,
-          'Content-Type': "'text/csv'"
-        })
-        expect(result.body.split('\n')).toEqual([
-          `"decimalLatitude","decimalLongitude","geodeticDatum","locationID","scientificName","taxonRemarks","individualCount","eventDate","year","month","bibliographicCitation","samplingProtocol","trait1Name","trait1Value","trait1Units","trait2Name","trait2Value","trait2Units"`,
-          `-33.59758852952833,120.15956081537496,"GDA94","aekos.org.au/collection/wa.gov.au/ravensthorpe/R181","Acacia binata Maslin",,1,"2007-10-03",2007,10,"Department of Par...","aekos.org.au/collection/wa.gov.au/ravensthorpe","trait1","value1","unit1","trait2","value2","unit2"`
-        ])
+      let callback = (_, theResult) => {
+        result = theResult
         done()
       }
       objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 42 })
+    })
+
+    it('should return a 200 response when we return all traits for a species', () => {
+      expect(result.statusCode).toBe(200)
+      expect(result.headers).toEqual({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
+        'Content-Type': "'text/csv'"
+      })
+      expect(result.body.split('\n')).toEqual([
+        `"decimalLatitude","decimalLongitude","geodeticDatum","locationID","scientificName","taxonRemarks","individualCount","eventDate","year","month","bibliographicCitation","samplingProtocol","trait1Name","trait1Value","trait1Units","trait2Name","trait2Value","trait2Units"`,
+        `-33.59758852952833,120.15956081537496,"GDA94","aekos.org.au/collection/wa.gov.au/ravensthorpe/R181","Acacia binata Maslin",,1,"2007-10-03",2007,10,"Department of Par...","aekos.org.au/collection/wa.gov.au/ravensthorpe","trait1","value1","unit1","trait2","value2","unit2"`
+      ])
     })
   })
 

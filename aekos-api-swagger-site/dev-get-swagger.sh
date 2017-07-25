@@ -2,8 +2,11 @@
 # Downloads the current Swagger definition from AWS API Gateway
 cd `dirname $0`
 set -e
-API_ID=`./get-rest-api-id.sh`
-STAGE=dev
+STAGE=$1
+if [ -z "$STAGE" ]; then
+  STAGE=dev
+fi
+API_ID=`./get-rest-api-id.sh $STAGE`
 FILE_TYPE=json
 REGION=us-west-1
 OUTPUT=swagger-aekos-api-$STAGE.$FILE_TYPE

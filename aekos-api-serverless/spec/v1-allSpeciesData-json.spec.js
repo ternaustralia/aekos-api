@@ -1,8 +1,8 @@
 'use strict'
-let objectUnderTest = require('../v1-allSpeciesData-json')
+let objectUnderTest = require('../allSpeciesData-json')
 let StubDB = require('./StubDB')
 
-describe('v1-allSpeciesData-json', () => {
+describe('/v1/allSpeciesData-json', () => {
   describe('doHandle', () => {
     let result = null
     beforeEach(done => {

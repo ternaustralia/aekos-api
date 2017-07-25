@@ -13,7 +13,7 @@ module.exports.handler = (event, context, callback) => {
 function doHandle (event, callback, db, elapsedTimeCalculator) {
   let processStart = r.now()
   let params = traitDataJson.extractParams(event, db)
-  traitDataJson.getTraitData(params, processStart, db, elapsedTimeCalculator).then(successResult => {
+  traitDataJson.getTraitData(event, params, processStart, db, elapsedTimeCalculator).then(successResult => {
     let result = mapJsonToCsv(successResult.response)
     r.csv.ok(callback, result)
   }).catch(error => {

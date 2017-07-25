@@ -1053,6 +1053,57 @@ describe('response-helper', () => {
       expect(result.message).toBeDefined()
     })
   })
+
+  describe('.newVersionHandler()', () => {
+    it('should match a single version', () => {
+      let path = '/v1/someResource'
+      let objectUnderTest = responseHelper.newVersionHandler({
+        '/v1/': () => {
+          return 'one'
+        }
+      })
+      let result = objectUnderTest.handle(path)
+      expect(result()).toBe('one')
+    })
+
+    it('should match the correct version out of many', () => {
+      let path = '/v2/someResource'
+      let objectUnderTest = responseHelper.newVersionHandler({
+        '/v1/': () => {
+          return 'one'
+        },
+        '/v2/': () => {
+          return 'two'
+        }
+      })
+      let result = objectUnderTest.handle(path)
+      expect(result()).toBe('two')
+    })
+
+    it('should throw the expected error when we pass a config that is not an object', () => {
+      try {
+        responseHelper.newVersionHandler('not an object')
+        fail()
+      } catch (error) {
+        expect(error.message).toBe('Programmer problem: supplied config is not an object')
+        // success
+      }
+    })
+
+    it('should throw the expected error when we handle a path that is not in the config', () => {
+      try {
+        let path = '/v3/someResource'
+        let objectUnderTest = responseHelper.newVersionHandler({
+          '/v1/': () => {}
+        })
+        objectUnderTest.handle(path)
+        fail()
+      } catch (error) {
+        expect(error.message).toContain("Programmer problem: unhandled path prefix '/v3/' extracted")
+        // success
+      }
+    })
+  })
 })
 
 let origConsoleError = null

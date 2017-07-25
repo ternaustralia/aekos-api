@@ -4,7 +4,8 @@ let StubDB = require('./StubDB')
 
 describe('v1-traitData-json', () => {
   describe('doHandle', () => {
-    it('should return a 200 response when we return all traits for a species', (done) => {
+    let result = null
+    beforeEach(done => {
       let stubDb = new StubDB()
       stubDb.setExecSelectPromiseResponses([
         [ {id: 'species1', scientificName: 'species one'} ],
@@ -29,47 +30,51 @@ describe('v1-traitData-json', () => {
           path: '/v1/traitData.json'
         }
       }
-      let callback = (error, result) => {
-        if (error) {
-          fail('Responded with error: ' + JSON.stringify(error))
-        }
-        expect(result.statusCode).toBe(200)
-        expect(result.headers).toEqual({
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Credentials': true,
-          'Content-Type': "'application/json'",
-          link: '<https://api.aekos.org.au/v1/traitData.json?speciesName=species%20one&rows=15&start=15>; rel="next", ' +
-                '<https://api.aekos.org.au/v1/traitData.json?speciesName=species%20one&rows=15&start=30>; rel="last"'
-        })
-        expect(JSON.parse(result.body)).toEqual({
-          responseHeader: {
-            elapsedTime: 42,
-            numFound: 31,
-            pageNumber: 1,
-            params: {
-              rows: 15,
-              start: 0,
-              speciesName: 'species one',
-              traitName: null
-            },
-            totalPages: 3
-          },
-          response: [
-            {
-              scientificName: 'species one',
-              traits: [
-                { traitName: 'trait1', traitValue: 'value1', traitUnit: 'unit1' },
-                { traitName: 'trait2', traitValue: 'value2', traitUnit: 'unit2' }
-              ]
-            }
-          ]
-        })
+      let callback = (_, theResult) => {
+        result = theResult
         done()
       }
       objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 42 })
     })
 
-    it('should echo the supplied trait name', (done) => {
+    it('should return a 200 response when we return all traits for a species', () => {
+      expect(result.statusCode).toBe(200)
+      expect(result.headers).toEqual({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
+        'Content-Type': "'application/json'",
+        link: '<https://api.aekos.org.au/v1/traitData.json?speciesName=species%20one&rows=15&start=15>; rel="next", ' +
+              '<https://api.aekos.org.au/v1/traitData.json?speciesName=species%20one&rows=15&start=30>; rel="last"'
+      })
+      expect(JSON.parse(result.body)).toEqual({
+        responseHeader: {
+          elapsedTime: 42,
+          numFound: 31,
+          pageNumber: 1,
+          params: {
+            rows: 15,
+            start: 0,
+            speciesName: 'species one',
+            traitName: null
+          },
+          totalPages: 3
+        },
+        response: [
+          {
+            scientificName: 'species one',
+            traits: [
+              { traitName: 'trait1', traitValue: 'value1', traitUnit: 'unit1' },
+              { traitName: 'trait2', traitValue: 'value2', traitUnit: 'unit2' }
+            ]
+          }
+        ]
+      })
+    })
+  })
+
+  describe('doHandle', () => {
+    let result = null
+    beforeEach(done => {
       let stubDb = new StubDB()
       stubDb.setExecSelectPromiseResponses([
         [ {id: 'species1', scientificName: 'species one'} ],
@@ -91,16 +96,17 @@ describe('v1-traitData-json', () => {
           path: '/v1/traitData.json'
         }
       }
-      let callback = (error, result) => {
-        if (error) {
-          fail('Responded with error: ' + JSON.stringify(error))
-        }
-        expect(result.statusCode).toBe(200)
-        let responseHeader = JSON.parse(result.body).responseHeader
-        expect(responseHeader.params.traitName).toBe('trait one')
+      let callback = (_, theResult) => {
+        result = theResult
         done()
       }
       objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 42 })
+    })
+
+    it('should echo the supplied trait name', () => {
+      expect(result.statusCode).toBe(200)
+      let responseHeader = JSON.parse(result.body).responseHeader
+      expect(responseHeader.params.traitName).toBe('trait one')
     })
   })
 

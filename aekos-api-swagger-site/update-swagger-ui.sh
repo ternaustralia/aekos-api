@@ -4,7 +4,7 @@ cd `dirname $0`
 set -e
 patchfile='./index.html.patch'
 targetfile='./swagger-ui-dist/index.html'
-swaggerjsonurl='/swagger-aekos-api-dev.json'
+swaggerjsonurl='/swagger-aekos-api.json'
 swaggeruidir=$1
 if [ -z "$swaggeruidir" ]; then
   echo "[ERROR] no swagger-ui git repo dir supplied."

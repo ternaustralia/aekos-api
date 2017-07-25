@@ -1,6 +1,6 @@
 'use strict'
 let r = require('./response-helper')
-let speciesDataJson = require('./v1-speciesData-json')
+let speciesDataJson = require('./speciesData-json')
 let latches = require('latches')
 let yaml = require('yamljs')
 const speciesNameParam = yaml.load('./constants.yml').paramNames.SINGLE_SPECIES_NAME
@@ -18,7 +18,7 @@ function doHandle (event, callback, db, elapsedTimeCalculator) {
     return
   }
   let params = extractParams(event, db) // FIXME handle thrown Errors for invalid request
-  getTraitData(params, processStart, db, elapsedTimeCalculator).then(successResult => {
+  getTraitData(event, params, processStart, db, elapsedTimeCalculator).then(successResult => {
     r.json.ok(callback, successResult, event)
   }).catch(error => {
     console.error('Failed while building result', error)
@@ -27,10 +27,10 @@ function doHandle (event, callback, db, elapsedTimeCalculator) {
 }
 
 module.exports.getTraitData = getTraitData
-function getTraitData (params, processStart, db, elapsedTimeCalculator) {
-  return speciesDataJson.doQuery(params, processStart, true, db, elapsedTimeCalculator).then(successResult => {
+function getTraitData (event, params, processStart, db, elapsedTimeCalculator) {
+  return speciesDataJson.doQuery(event, params, processStart, true, db, elapsedTimeCalculator).then(successResult => {
     return enrichWithTraitData(successResult, params.traitName, db)
-  }).then((successResultWithTraits) => {
+  }).then(successResultWithTraits => {
     successResultWithTraits.responseHeader.elapsedTime = elapsedTimeCalculator(processStart)
     successResultWithTraits.responseHeader.params[traitNameParam] = params.unescapedTraitName // FIXME change to support array
     return successResultWithTraits

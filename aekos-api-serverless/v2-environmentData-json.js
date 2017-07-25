@@ -1,7 +1,7 @@
 'use strict'
 let r = require('./response-helper')
 let Set = require('collections/set')
-let speciesDataJson = require('./v1-speciesData-json')
+let speciesDataJson = require('./speciesData-json')
 let yaml = require('yamljs')
 const speciesNameParam = yaml.load('./constants.yml').paramNames.SINGLE_SPECIES_NAME
 const varNameParam = yaml.load('./constants.yml').paramNames.SINGLE_VAR_NAME

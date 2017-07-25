@@ -1,7 +1,7 @@
 'use strict'
 let r = require('./response-helper')
 let yaml = require('yamljs')
-let v2AllSpeciesDataJson = require('./v2-allSpeciesData-json')
+let allSpeciesDataJson = require('./allSpeciesData-json')
 const speciesNameParam = yaml.load('./constants.yml').paramNames.SINGLE_SPECIES_NAME
 
 module.exports.handler = (event, context, callback) => {
@@ -34,7 +34,7 @@ module.exports.prepareResult = prepareResult
 function prepareResult (event, db, elapsedTimeCalculator) {
   let processStart = r.now()
   let params = extractParams(event, db) // FIXME handle thrown Errors for invalid request
-  return doQuery(params, processStart, false, db, elapsedTimeCalculator).then(successResult => {
+  return doQuery(event, params, processStart, false, db, elapsedTimeCalculator).then(successResult => {
     return new Promise((resolve, reject) => {
       resolve(successResult)
     })
@@ -42,10 +42,10 @@ function prepareResult (event, db, elapsedTimeCalculator) {
 }
 
 module.exports.doQuery = doQuery
-function doQuery (params, processStart, includeSpeciesRecordId, db, elapsedTimeCalculator) {
+function doQuery (event, params, processStart, includeSpeciesRecordId, db, elapsedTimeCalculator) {
   const recordsSql = getRecordsSql(params.speciesName, params.start, params.rows, includeSpeciesRecordId)
   const countSql = getCountSql(params.speciesName)
-  return v2AllSpeciesDataJson.doQuery(params, processStart, db, elapsedTimeCalculator, recordsSql, countSql).then(successResult => {
+  return allSpeciesDataJson.doQuery(event, params, processStart, db, elapsedTimeCalculator, recordsSql, countSql).then(successResult => {
     successResult.responseHeader.elapsedTime = elapsedTimeCalculator(processStart)
     successResult.responseHeader.params[speciesNameParam] = params.unescapedSpeciesName // FIXME change to support array
     return successResult
@@ -64,7 +64,7 @@ function getRecordsSql (escapedSpeciesName, start, rows, includeSpeciesRecordId)
       s.scientificName IN (${escapedSpeciesName})
       OR s.taxonRemarks IN (${escapedSpeciesName})
     )`
-  return v2AllSpeciesDataJson.getRecordsSql(start, rows, includeSpeciesRecordId, whereFragment)
+  return allSpeciesDataJson.getRecordsSql(start, rows, includeSpeciesRecordId, whereFragment)
 }
 
 function getCountSql (escapedSpeciesName) {
@@ -73,12 +73,12 @@ function getCountSql (escapedSpeciesName) {
       s.scientificName IN (${escapedSpeciesName})
       OR s.taxonRemarks IN (${escapedSpeciesName})
     )`
-  return v2AllSpeciesDataJson.getCountSql(whereFragment)
+  return allSpeciesDataJson.getCountSql(whereFragment)
 }
 
 module.exports.extractParams = extractParams
 function extractParams (event, db) {
-  let allSpeciesParams = v2AllSpeciesDataJson.extractParams(event)
+  let allSpeciesParams = allSpeciesDataJson.extractParams(event)
   let unescapedSpeciesName = event.queryStringParameters[speciesNameParam] // FIXME handle escaping a list when we can get multiple names
   let escapedSpeciesName = db.escape(unescapedSpeciesName)
   return new Params(escapedSpeciesName, unescapedSpeciesName, allSpeciesParams.start, allSpeciesParams.rows)

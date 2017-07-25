@@ -4,7 +4,14 @@ let stdin = process.stdin,
   stdout = process.stdout,
   inputChunks = []
 
-const stage = 'dev'
+const stage = process.argv[2]
+if (typeof stage === 'undefined') {
+  const msg = "[ERROR] mandatory parameter 'stage' is not present"
+  console.error(msg)
+  console.error(`usage: aws apigateway get-rest-apis --output json | ${process.argv[1]} <stage>`)
+  console.error(`   eg: aws apigateway get-rest-apis --output json | ${process.argv[1]} dev`)
+  throw new Error(msg)
+}
 const targetRestApiName = stage + '-aekos-api-serverless'
 
 stdin.resume()

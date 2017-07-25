@@ -189,6 +189,29 @@ function newContentNegotiationHandler (jsonHandler, csvHandler) {
   }
 }
 
+function newVersionHandler (config) {
+  if (typeof config !== 'object') {
+    throw new Error('Programmer problem: supplied config is not an object')
+  }
+  return new VersionHandler(config)
+}
+
+class VersionHandler {
+  constructor (config) {
+    this._versionPrefixLength = 4
+    this._config = config
+  }
+
+  handle (path) {
+    let versionPrefix = path.substr(0, this._versionPrefixLength)
+    let handler = this._config[versionPrefix]
+    if (handler) {
+      return handler
+    }
+    throw new Error(`Programmer problem: unhandled path prefix '${versionPrefix}' extracted from path '${path}'`)
+  }
+}
+
 function buildHateoasLinkHeader (event, responseHeader) {
   function appendCommaIfNecessary (linkHeader) {
     if (linkHeader.length > 0) {
@@ -375,5 +398,6 @@ module.exports = {
   compositeValidator: compositeValidator,
   queryStringParamIsNumberIfPresentValidator: queryStringParamIsNumberIfPresentValidator,
   pageSizeValidator: queryStringParamIsNumberIfPresentValidator(pageSizeParam),
-  pageNumValidator: queryStringParamIsNumberIfPresentValidator(pageNumParam)
+  pageNumValidator: queryStringParamIsNumberIfPresentValidator(pageNumParam),
+  newVersionHandler: newVersionHandler
 }

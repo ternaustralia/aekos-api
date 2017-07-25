@@ -1,16 +1,20 @@
 #!/bin/bash
 cd `dirname $0`
-FUNC=$1
-if [ -z "$FUNC" ]; then
+functionName=$1
+if [ -z "$functionName" ]; then
   echo "Tails to log of the supplied function."
   echo "The function name is one of the keys under 'functions' in serverless.yml."
   echo "Usage: $0 <function-name>"
   echo "   eg: $0 v1-getTraitVocab-json"
   exit 1
 fi
-FUNC=`bash -c "echo $FUNC | sed 's/\.js$//'"`
+stage=$2
+if [ -z "$stage" ]; then
+  stage=dev
+fi
+functionName=`bash -c "echo $functionName | sed 's/\.js$//'"`
 serverless logs \
-  --function=$FUNC \
-  --stage=dev \
+  --function=$functionName \
+  --stage=$stage \
   --region=us-west-1 \
   --tail

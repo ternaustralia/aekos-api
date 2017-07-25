@@ -2,7 +2,7 @@
 let quoted = require('./FieldConfig').quoted
 let notQuoted = require('./FieldConfig').notQuoted
 let r = require('./response-helper')
-let allSpeciesDataJson = require('./v2-allSpeciesData-json')
+let allSpeciesDataJson = require('./allSpeciesData-json')
 let v1CsvHeaders = [
   notQuoted('decimalLatitude'),
   notQuoted('decimalLongitude'),
@@ -44,10 +44,10 @@ module.exports.handler = (event, context, callback) => {
 }
 
 function doHandle (event, callback, db, elapsedTimeCalculator) {
-  let csvHeaders = determineVersion(event)
+  let csvHeaders = getCsvHeadersForRequestedVersion(event)
   let processStart = r.now()
   let params = allSpeciesDataJson.extractParams(event, db)
-  allSpeciesDataJson.doAllSpeciesQuery(params, processStart, db, elapsedTimeCalculator).then(successResult => {
+  allSpeciesDataJson.doAllSpeciesQuery(event, params, processStart, db, elapsedTimeCalculator).then(successResult => {
     let result = mapJsonToCsv(successResult.response, csvHeaders)
     let downloadFileName = getCsvDownloadFileName(event)
     r.csv.ok(callback, result, downloadFileName)
@@ -57,7 +57,7 @@ function doHandle (event, callback, db, elapsedTimeCalculator) {
   })
 }
 
-function determineVersion (event) {
+function getCsvHeadersForRequestedVersion (event) {
   let path = event.requestContext.path
   const mapping = {
     '/v1/allSpeciesData.csv': v1CsvHeaders,

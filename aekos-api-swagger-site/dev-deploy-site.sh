@@ -1,11 +1,16 @@
 #!/bin/bash
 cd `dirname $0`
-STAGE=dev # TODO make param
-FILE_TYPE=json # TODO make param
+STAGE=$1
+if [ -z "$STAGE" ]; then
+  STAGE=dev
+fi
+FILE_TYPE=json
 BUCKET=www.$STAGE.api.aekos.org.au
 SWAGGER_UI_DIR=swagger-ui-dist
-AWS_REGION=ap-southeast-2
+# AWS_REGION=ap-southeast-2 # TODO change to us-west-1 like the API
+AWS_REGION=us-west-1
 SWAGGER_DEF=swagger-aekos-api-$STAGE.$FILE_TYPE
+stagelessSwaggerDef=`bash -c "echo $SWAGGER_DEF" | sed "s/-$STAGE//"`
 if [ ! -f "$SWAGGER_DEF" ]; then
   echo "ERROR: can't find swagger definition ./$SWAGGER_DEF"
   exit 1
@@ -20,6 +25,6 @@ cd ..
 aws s3 cp \
   --region=$AWS_REGION \
   --acl public-read \
-  $SWAGGER_DEF s3://$BUCKET/
+  $SWAGGER_DEF s3://$BUCKET/$stagelessSwaggerDef
 echo "URL: ${BUCKET}.s3-website-${AWS_REGION}.amazonaws.com"
 

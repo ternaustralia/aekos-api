@@ -390,8 +390,8 @@ functions:
                   "application/json": V1SpeciesSummaryList
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
-  v1-speciesData:
-    handler: v1-speciesData.handler
+  speciesData:
+    handler: speciesData.handler
     events:
       - http:
           path: v1/speciesData
@@ -414,9 +414,6 @@ functions:
                   "application/json": V1SpeciesDataResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
-  v2-speciesData:
-    handler: v2-speciesData.handler
-    events:
       - http:
           path: v2/speciesData
           method: get
@@ -439,8 +436,8 @@ functions:
                   "application/json": V2SpeciesDataResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
-  v1-speciesData-json:
-    handler: v1-speciesData-json.handler
+  speciesData-json:
+    handler: speciesData-json.handler
     events:
       - http:
           path: v1/speciesData.json
@@ -461,9 +458,6 @@ functions:
                   "application/json": V1SpeciesDataResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
-  v2-speciesData-json:
-    handler: v2-speciesData-json.handler
-    events:
       - http:
           path: v2/speciesData.json
           method: get
@@ -484,8 +478,8 @@ functions:
                   "application/json": V2SpeciesDataResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
-  v1-speciesData-csv:
-    handler: v1-speciesData-csv.handler
+  speciesData-csv:
+    handler: speciesData-csv.handler
     events:
       - http:
           path: v1/speciesData.csv
@@ -506,9 +500,6 @@ functions:
                   "text/csv": CsvResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
-  v2-speciesData-csv:
-    handler: v2-speciesData-csv.handler
-    events:
       - http:
           path: v2/speciesData.csv
           method: get
@@ -769,8 +760,8 @@ functions:
                   "text/csv": CsvResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
-  v1-allSpeciesData:
-    handler: v1-allSpeciesData.handler
+  allSpeciesData:
+    handler: allSpeciesData.handler
     timeout: 40
     events:
       - http:
@@ -793,10 +784,6 @@ functions:
                   "application/json": V1AllSpeciesDataResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
-  v2-allSpeciesData:
-    handler: v2-allSpeciesData.handler
-    timeout: 40
-    events:
       - http:
           path: v2/allSpeciesData
           method: get
@@ -817,8 +804,8 @@ functions:
                   "application/json": V2AllSpeciesDataResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
-  v1-allSpeciesData-json:
-    handler: v1-allSpeciesData-json.handler
+  allSpeciesData-json:
+    handler: allSpeciesData-json.handler
     timeout: 40
     events:
       - http:
@@ -839,10 +826,6 @@ functions:
                   "application/json": V1AllSpeciesDataResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
-  v2-allSpeciesData-json:
-    handler: v2-allSpeciesData-json.handler
-    timeout: 40
-    events:
       - http:
           path: v2/allSpeciesData.json
           method: get

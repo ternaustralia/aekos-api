@@ -1,8 +1,8 @@
 'use strict'
-let objectUnderTest = require('../v2-allSpeciesData-json')
+let objectUnderTest = require('../allSpeciesData-json')
 let StubDB = require('./StubDB')
 
-describe('v2-allSpeciesData-json', () => {
+describe('/v2/allSpeciesData-json', () => {
   describe('doHandle', () => {
     let result = null
     beforeEach(done => {
@@ -122,6 +122,77 @@ describe('v2-allSpeciesData-json', () => {
         response: [
           { recordNum: 1 },
           { recordNum: 2 }
+        ]
+      })
+    })
+  })
+
+  describe('doHandle', () => {
+    let result = null
+    beforeEach(done => {
+      let stubDb = new StubDB()
+      stubDb.setExecSelectPromiseResponses([
+        [{
+          recordNum: 1,
+          locationName: 'location1',
+          datasetName: 'dataset1'
+        }, {
+          recordNum: 2,
+          locationName: 'location2',
+          datasetName: 'dataset2'
+        }],
+        [{ recordsHeld: 31 }]
+      ])
+      let event = {
+        queryStringParameters: {
+          rows: '15',
+          start: '0'
+        },
+        headers: {
+          Host: 'maazptt3zb.execute-api.us-west-1.amazonaws.com',
+          'X-Forwarded-Proto': 'https'
+        },
+        requestContext: {
+          path: '/dev/v2/allSpeciesData.json'
+        }
+      }
+      let callback = (_, theResult) => {
+        result = theResult
+        done()
+      }
+      objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 42 })
+    })
+
+    it('should work as expected when we use the out-of-the-box AWS URL including stage in the path (not a custom domain)', () => {
+      expect(result.statusCode).toBe(200)
+      expect(result.headers).toEqual({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
+        'Content-Type': "'application/json'",
+        link: '<https://maazptt3zb.execute-api.us-west-1.amazonaws.com/dev/v2/allSpeciesData.json?rows=15&start=15>; rel="next", ' +
+              '<https://maazptt3zb.execute-api.us-west-1.amazonaws.com/dev/v2/allSpeciesData.json?rows=15&start=30>; rel="last"'
+      })
+      expect(JSON.parse(result.body)).toEqual({
+        responseHeader: {
+          elapsedTime: 42,
+          numFound: 31,
+          pageNumber: 1,
+          params: {
+            rows: 15,
+            start: 0
+          },
+          totalPages: 3
+        },
+        response: [
+          {
+            recordNum: 1,
+            locationName: 'location1',
+            datasetName: 'dataset1'
+          }, {
+            recordNum: 2,
+            locationName: 'location2',
+            datasetName: 'dataset2'
+          }
         ]
       })
     })
