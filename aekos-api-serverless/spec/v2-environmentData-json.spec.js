@@ -71,8 +71,8 @@ describe('/v2/environmentData-json', () => {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
         'Content-Type': "'application/json'",
-        link: '<https://api.aekos.org.au/v2/environmentData.json?speciesName=species%20one&start=20>; rel="next", ' +
-              '<https://api.aekos.org.au/v2/environmentData.json?speciesName=species%20one&start=20>; rel="last"'
+        'link': '<https://api.aekos.org.au/v2/environmentData.json?speciesName=species%20one&start=20>; rel="next", ' +
+                '<https://api.aekos.org.au/v2/environmentData.json?speciesName=species%20one&start=20>; rel="last"'
       })
       expect(JSON.parse(result.body)).toEqual({
         responseHeader: {

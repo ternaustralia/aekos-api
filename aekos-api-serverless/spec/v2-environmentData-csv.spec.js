@@ -42,8 +42,7 @@ describe('/v2/environmentData-csv', function () {
       ])
       let event = {
         queryStringParameters: {
-          speciesName: 'species one',
-          rows: '1'
+          speciesName: 'species one'
         },
         headers: {
           Host: 'api.aekos.org.au',
@@ -65,8 +64,9 @@ describe('/v2/environmentData-csv', function () {
       expect(result.headers).toEqual({
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
-        'Content-Type': "'text/csv'"
-        // TODO need HATEOAS Link header here
+        'Content-Type': "'text/csv'",
+        'link': '<https://api.aekos.org.au/v2/environmentData.csv?speciesName=species%20one&start=20>; rel="next", ' +
+                '<https://api.aekos.org.au/v2/environmentData.csv?speciesName=species%20one&start=20>; rel="last"'
       })
       expect(result.body.split('\n')).toEqual([
         `"decimalLatitude","decimalLongitude","geodeticDatum","locationID","locationName","datasetName","scientificNames","taxonRemarks","eventDate","year","month","bibliographicCitation","samplingProtocol","variable1Name","variable1Value","variable1Units"`,
@@ -84,7 +84,7 @@ describe('/v2/environmentData-csv', function () {
         datasetName: 'dataset1',
         visitKey: 'location1#2017-07-07'
       }]
-      const countResult = [{ recordsHeld: 31 }]
+      const countResult = [{ recordsHeld: 3 }]
       const varsResult = [{
         visitKey: 'location1#2017-07-07',
         varName: 'windSpeed',
@@ -128,7 +128,8 @@ describe('/v2/environmentData-csv', function () {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
         'Content-Type': "'text/csv'",
-        'Content-Disposition': 'attachment;filename=aekosEnvironmentData.csv'
+        'Content-Disposition': 'attachment;filename=aekosEnvironmentData.csv',
+        'link': ''
       })
       expect(result.body.split('\n').length).toBe(2)
     })

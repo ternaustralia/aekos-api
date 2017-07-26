@@ -15,8 +15,8 @@ function doHandle (event, callback, db, elapsedTimeCalculator) {
   let params = traitDataJson.extractParams(event, db)
   traitDataJson.getTraitData(event, params, processStart, db, elapsedTimeCalculator).then(successResult => {
     let result = mapJsonToCsv(successResult.response)
-    // TODO add 'download' param
-    r.csv.ok(callback, result)
+    let downloadFileName = allSpeciesDataCsv.getCsvDownloadFileName(event, 'Trait')
+    r.csv.ok(callback, result, downloadFileName, event, successResult)
   }).catch(error => {
     console.error('Failed while building result', error)
     r.json.internalServerError(callback)

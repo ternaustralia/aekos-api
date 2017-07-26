@@ -10,21 +10,21 @@ describe('/v1/traitData-csv', () => {
       stubDb.setExecSelectPromiseResponses([
         [
           {
-            'id': 'some-id-123',
-            'scientificName': 'Acacia binata Maslin',
-            'taxonRemarks': null,
-            'individualCount': 1,
-            'eventDate': '2007-10-03',
-            'month': 10,
-            'year': 2007,
-            'decimalLatitude': -33.59758852952833,
-            'decimalLongitude': 120.15956081537496,
-            'geodeticDatum': 'GDA94',
-            'locationID': 'aekos.org.au/collection/wa.gov.au/ravensthorpe/R181',
-            'locationName': 'R181',
-            'samplingProtocol': 'aekos.org.au/collection/wa.gov.au/ravensthorpe',
-            'bibliographicCitation': 'Department of Par...',
-            'datasetName': 'Biological Survey of the Ravensthorpe Range (Phase 1)'
+            id: 'some-id-123',
+            scientificName: 'Acacia binata Maslin',
+            taxonRemarks: null,
+            individualCount: 1,
+            eventDate: '2007-10-03',
+            month: 10,
+            year: 2007,
+            decimalLatitude: -33.59758852952833,
+            decimalLongitude: 120.15956081537496,
+            geodeticDatum: 'GDA94',
+            locationID: 'aekos.org.au/collection/wa.gov.au/ravensthorpe/R181',
+            locationName: 'R181',
+            samplingProtocol: 'aekos.org.au/collection/wa.gov.au/ravensthorpe',
+            bibliographicCitation: 'Department of Par...',
+            datasetName: 'Biological Survey of the Ravensthorpe Range (Phase 1)'
           }
         ],
         [ {recordsHeld: 31} ],
@@ -38,6 +38,10 @@ describe('/v1/traitData-csv', () => {
           speciesName: 'species one',
           rows: '15',
           start: '0'
+        },
+        headers: {
+          Host: 'api.aekos.org.au',
+          'X-Forwarded-Proto': 'https'
         },
         requestContext: {
           path: '/v1/traitData.csv'
@@ -55,12 +59,74 @@ describe('/v1/traitData-csv', () => {
       expect(result.headers).toEqual({
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
-        'Content-Type': "'text/csv'"
+        'Content-Type': "'text/csv'",
+        'link': '<https://api.aekos.org.au/v1/traitData.csv?speciesName=species%20one&rows=15&start=15>; rel="next", ' +
+                '<https://api.aekos.org.au/v1/traitData.csv?speciesName=species%20one&rows=15&start=30>; rel="last"'
       })
       expect(result.body.split('\n')).toEqual([
         `"decimalLatitude","decimalLongitude","geodeticDatum","locationID","scientificName","taxonRemarks","individualCount","eventDate","year","month","bibliographicCitation","samplingProtocol","trait1Name","trait1Value","trait1Units","trait2Name","trait2Value","trait2Units"`,
         `-33.59758852952833,120.15956081537496,"GDA94","aekos.org.au/collection/wa.gov.au/ravensthorpe/R181","Acacia binata Maslin",,1,"2007-10-03",2007,10,"Department of Par...","aekos.org.au/collection/wa.gov.au/ravensthorpe","trait1","value1","unit1","trait2","value2","unit2"`
       ])
+    })
+  })
+
+  describe('doHandle', () => {
+    let result = null
+    beforeEach(done => {
+      let stubDb = new StubDB()
+      stubDb.setExecSelectPromiseResponses([
+        [
+          {
+            id: 'some-id-123',
+            scientificName: 'Acacia binata Maslin',
+            taxonRemarks: null,
+            individualCount: 1,
+            eventDate: '2007-10-03',
+            month: 10,
+            year: 2007,
+            decimalLatitude: -33.59758852952833,
+            decimalLongitude: 120.15956081537496,
+            geodeticDatum: 'GDA94',
+            locationID: 'aekos.org.au/collection/wa.gov.au/ravensthorpe/R181',
+            locationName: 'R181',
+            samplingProtocol: 'aekos.org.au/collection/wa.gov.au/ravensthorpe',
+            bibliographicCitation: 'Department of Par...',
+            datasetName: 'Biological Survey of the Ravensthorpe Range (Phase 1)'
+          }
+        ],
+        [ {recordsHeld: 3} ],
+        [ /* no traits to keep the test simple */ ]
+      ])
+      let event = {
+        queryStringParameters: {
+          speciesName: 'species one',
+          download: 'true' // trigger response as download
+        },
+        headers: {
+          Host: 'api.aekos.org.au',
+          'X-Forwarded-Proto': 'https'
+        },
+        requestContext: {
+          path: '/v1/traitData.csv'
+        }
+      }
+      let callback = (_, theResult) => {
+        result = theResult
+        done()
+      }
+      objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 42 })
+    })
+
+    it('should respond as a download when the download param is supplied', () => {
+      expect(result.statusCode).toBe(200)
+      expect(result.headers).toEqual({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
+        'Content-Type': "'text/csv'",
+        'Content-Disposition': 'attachment;filename=aekosTraitData.csv',
+        'link': ''
+      })
+      expect(result.body.split('\n').length).toBe(2)
     })
   })
 

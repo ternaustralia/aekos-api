@@ -373,11 +373,13 @@ const jsonResponseHelpers = {
 module.exports = {
   json: jsonResponseHelpers,
   csv: {
-    ok: (theCallback, theBody, downloadFileName) => {
-      let extraHeadersCallback = function () { }
-      if (typeof downloadFileName !== 'undefined' && downloadFileName !== null) {
-        extraHeadersCallback = headers => {
+    ok: (theCallback, theBody, downloadFileName, event, dataForHateoas) => {
+      let extraHeadersCallback = headers => {
+        if (typeof downloadFileName !== 'undefined' && downloadFileName !== null) {
           headers['Content-Disposition'] = `attachment;filename=${downloadFileName}`
+        }
+        if (isHateoasable(dataForHateoas)) {
+          headers.link = buildHateoasLinkHeader(event, dataForHateoas.responseHeader)
         }
       }
       doResponse(theCallback, theBody, 200, csvContentType, extraHeadersCallback)

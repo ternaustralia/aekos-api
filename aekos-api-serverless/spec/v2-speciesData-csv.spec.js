@@ -35,6 +35,10 @@ describe('/v2/speciesData.csv', () => {
           rows: '15',
           start: '0'
         },
+        headers: {
+          Host: 'api.aekos.org.au',
+          'X-Forwarded-Proto': 'https'
+        },
         requestContext: {
           path: '/v2/speciesData.csv'
         }
@@ -51,7 +55,9 @@ describe('/v2/speciesData.csv', () => {
       expect(result.headers).toEqual({
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
-        'Content-Type': "'text/csv'"
+        'Content-Type': "'text/csv'",
+        'link': '<https://api.aekos.org.au/v2/speciesData.csv?speciesName=species%20eleven&rows=15&start=15>; rel="next", ' +
+                '<https://api.aekos.org.au/v2/speciesData.csv?speciesName=species%20eleven&rows=15&start=30>; rel="last"'
       })
       expect(result.body.split('\n')).toEqual([
         `"decimalLatitude","decimalLongitude","geodeticDatum","locationID","locationName","datasetName","scientificName","taxonRemarks","individualCount","eventDate","year","month","bibliographicCitation","samplingProtocol"`,
@@ -84,7 +90,7 @@ describe('/v2/speciesData.csv', () => {
             'datasetName': 'Biological Survey of the Ravensthorpe Range (Phase 1)'
           }
         ],
-        [ {recordsHeld: 31} ]
+        [ {recordsHeld: 3} ]
       ])
       let event = {
         queryStringParameters: {
@@ -92,6 +98,10 @@ describe('/v2/speciesData.csv', () => {
           rows: '15',
           start: '0',
           download: 'true' // trigger response as download
+        },
+        headers: {
+          Host: 'api.aekos.org.au',
+          'X-Forwarded-Proto': 'https'
         },
         requestContext: {
           path: '/v2/allSpeciesData.csv'
@@ -110,7 +120,8 @@ describe('/v2/speciesData.csv', () => {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
         'Content-Type': "'text/csv'",
-        'Content-Disposition': 'attachment;filename=aekosSpeciesData.csv'
+        'Content-Disposition': 'attachment;filename=aekosSpeciesData.csv',
+        'link': ''
       })
       expect(result.body.split('\n')).toEqual([
         `"decimalLatitude","decimalLongitude","geodeticDatum","locationID","locationName","datasetName","scientificName","taxonRemarks","individualCount","eventDate","year","month","bibliographicCitation","samplingProtocol"`,

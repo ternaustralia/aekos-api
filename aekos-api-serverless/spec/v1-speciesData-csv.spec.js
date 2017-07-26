@@ -33,6 +33,10 @@ describe('/v1/speciesData-csv', () => {
           rows: '15',
           start: '0'
         },
+        headers: {
+          Host: 'api.aekos.org.au',
+          'X-Forwarded-Proto': 'https'
+        },
         requestContext: {
           path: '/v1/speciesData.csv'
         }
@@ -49,7 +53,9 @@ describe('/v1/speciesData-csv', () => {
       expect(result.headers).toEqual({
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
-        'Content-Type': "'text/csv'"
+        'Content-Type': "'text/csv'",
+        'link': '<https://api.aekos.org.au/v1/speciesData.csv?speciesName=species%20one&rows=15&start=15>; rel="next", ' +
+                '<https://api.aekos.org.au/v1/speciesData.csv?speciesName=species%20one&rows=15&start=30>; rel="last"'
       })
       expect(result.body.split('\n')).toEqual([
         `"decimalLatitude","decimalLongitude","geodeticDatum","locationID","scientificName","taxonRemarks","individualCount","eventDate","year","month","bibliographicCitation","samplingProtocol"`,

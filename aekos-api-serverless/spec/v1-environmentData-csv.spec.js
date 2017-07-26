@@ -64,8 +64,9 @@ describe('/v1/environmentData-csv', function () {
       expect(result.headers).toEqual({
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
-        'Content-Type': "'text/csv'"
-        // TODO need HATEOAS Link header here
+        'Content-Type': "'text/csv'",
+        'link': '<https://api.aekos.org.au/v1/environmentData.csv?speciesName=species%20one&start=20>; rel="next", ' +
+                '<https://api.aekos.org.au/v1/environmentData.csv?speciesName=species%20one&start=20>; rel="last"'
       })
       expect(result.body.split('\n')).toEqual([
         `"decimalLatitude","decimalLongitude","geodeticDatum","locationID","scientificNames","taxonRemarks","eventDate","year","month","bibliographicCitation","samplingProtocol","variable1Name","variable1Value","variable1Units"`,

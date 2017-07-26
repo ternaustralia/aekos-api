@@ -15,7 +15,7 @@ function doHandle (event, callback, db, elapsedTimeCalculator) {
   speciesDataJson.doQuery(event, params, processStart, false, db, elapsedTimeCalculator).then(successResult => {
     let result = allSpeciesDataCsv.mapJsonToCsv(successResult.response, csvHeaders)
     let downloadFileName = allSpeciesDataCsv.getCsvDownloadFileName(event, 'Species')
-    r.csv.ok(callback, result, downloadFileName)
+    r.csv.ok(callback, result, downloadFileName, event, successResult)
   }).catch(error => {
     console.error('Failed while building result', error)
     r.json.internalServerError(callback)
