@@ -14,7 +14,7 @@ function doHandle (event, callback, db, elapsedTimeCalculator) {
   prepareResult(event, db, elapsedTimeCalculator).then(successResult => {
     r.json.ok(callback, successResult, event)
   }).catch(error => {
-    console.error('Failed to get v2-allSpeciesData', error)
+    console.error('Failed to get allSpeciesData', error)
     r.json.internalServerError(callback)
   })
 }
@@ -23,11 +23,7 @@ module.exports.prepareResult = prepareResult
 function prepareResult (event, db, elapsedTimeCalculator) {
   let processStart = r.now()
   let params = extractParams(event) // FIXME handle thrown Errors for invalid request
-  return doAllSpeciesQuery(event, params, processStart, db, elapsedTimeCalculator).then(successResult => {
-    return new Promise((resolve, reject) => {
-      resolve(successResult)
-    })
-  })
+  return doAllSpeciesQuery(event, params, processStart, db, elapsedTimeCalculator)
 }
 
 module.exports.doAllSpeciesQuery = doAllSpeciesQuery
@@ -49,6 +45,11 @@ function doQuery (event, params, processStart, db, elapsedTimeCalculator, record
       throw new Error('SQL result problem: result from count query did not have exactly one row. Result=' + JSON.stringify(count))
     }
     let numFound = count[0][recordsHeldField]
+    // TODO validate  here
+    let isRecordCountMismatch = records.length === 0 && numFound > 0
+    if (isRecordCountMismatch) {
+      throw new Error(`Data problem: records.length=0 while numFound=${numFound}, suspect the record query is broken`)
+    }
     let totalPages = r.calculateTotalPages(params.rows, numFound)
     let pageNumber = r.calculatePageNumber(params.start, numFound, totalPages)
     let result = {
@@ -72,22 +73,11 @@ function doQuery (event, params, processStart, db, elapsedTimeCalculator, record
 
 function getStrategyForVersion (event) {
   const doNothing = () => {}
-  let path = event.requestContext.path
-  let isStageInPath = /^\/\w+\/v\d\//.test(path)
-  let pathWithoutStage = path
-  if (isStageInPath) {
-    pathWithoutStage = path.replace(/\/\w+/, '')
-  }
-  let pathPrefix = pathWithoutStage.substr(0, 4)
-  const mapping = {
+  let versionHandler = r.newVersionHandler({
     '/v1/': removeV2FieldsFrom,
     '/v2/': doNothing
-  }
-  let result = mapping[pathPrefix]
-  if (typeof result === 'undefined') {
-    throw new Error(`Programmer problem: unhandled path prefix '${pathPrefix}' extracted from path '${path}'`)
-  }
-  return result
+  })
+  return versionHandler.handle(event)
 }
 
 module.exports.removeV2FieldsFrom = removeV2FieldsFrom
@@ -128,6 +118,7 @@ function getRecordsSql (start, rows, includeSpeciesRecordId, whereFragment) {
     FROM (
       SELECT id
       FROM species
+      ${whereFragment}
       ORDER BY 1
       LIMIT ${rows} OFFSET ${start}
     ) AS lateRowLookup
@@ -137,8 +128,7 @@ function getRecordsSql (start, rows, includeSpeciesRecordId, whereFragment) {
     ON s.locationID = e.locationID
     AND s.eventDate = e.eventDate
     LEFT JOIN citations AS c
-    ON e.samplingProtocol = c.samplingProtocol
-    ${whereFragment};`
+    ON e.samplingProtocol = c.samplingProtocol;`
 }
 
 module.exports.getCountSql = getCountSql

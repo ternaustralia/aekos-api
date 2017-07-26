@@ -199,6 +199,10 @@ describe('/v2/speciesData-json', () => {
     FROM (
       SELECT id
       FROM species
+      WHERE (
+        scientificName IN ('species one')
+        OR taxonRemarks IN ('species one')
+      )
       ORDER BY 1
       LIMIT 33 OFFSET 0
     ) AS lateRowLookup
@@ -208,12 +212,7 @@ describe('/v2/speciesData-json', () => {
     ON s.locationID = e.locationID
     AND s.eventDate = e.eventDate
     LEFT JOIN citations AS c
-    ON e.samplingProtocol = c.samplingProtocol
-    
-    WHERE (
-      s.scientificName IN ('species one')
-      OR s.taxonRemarks IN ('species one')
-    );`
+    ON e.samplingProtocol = c.samplingProtocol;`
   let expectedRecordsSql2 = `
     SELECT
     s.id,

@@ -2,6 +2,7 @@
 let r = require('./response-helper')
 let Set = require('collections/set')
 let speciesDataJson = require('./speciesData-json')
+let allSpeciesDataJson = require('./allSpeciesData-json')
 let yaml = require('yamljs')
 const speciesNameParam = yaml.load('./constants.yml').paramNames.SINGLE_SPECIES_NAME
 const varNameParam = yaml.load('./constants.yml').paramNames.SINGLE_VAR_NAME
@@ -20,16 +21,16 @@ function doHandle (event, callback, db, elapsedTimeCalculator) {
     return
   }
   let params = extractParams(event, db)
-  doQuery(params, processStart, db, elapsedTimeCalculator).then(successResult => {
+  doQuery(event, params, processStart, db, elapsedTimeCalculator).then(successResult => {
     r.json.ok(callback, successResult, event)
   }).catch(error => {
-    console.error('Failed to get v2-environmentData', error)
+    console.error('Failed to get environmentData', error)
     r.json.internalServerError(callback)
   })
 }
 
 module.exports.doQuery = doQuery
-function doQuery (params, processStart, db, elapsedTimeCalculator) {
+function doQuery (event, params, processStart, db, elapsedTimeCalculator) {
   const recordsSql = getRecordsSql(params.speciesName, params.start, params.rows)
   const countSql = getCountSql(params.speciesName)
   let recordsPromise = db.execSelectPromise(recordsSql)
@@ -58,6 +59,8 @@ function doQuery (params, processStart, db, elapsedTimeCalculator) {
       },
       response: records
     }
+    let strategyForVersion = getStrategyForVersion(event)
+    strategyForVersion(partialResponseObj)
     return partialResponseObj
   }).then(partialResponseObj => {
     let visitKeys = partialResponseObj.response.map(e => {
@@ -120,6 +123,15 @@ function doQuery (params, processStart, db, elapsedTimeCalculator) {
     stripVisitKeys(partialResponseObj.response)
     return partialResponseObj
   })
+}
+
+function getStrategyForVersion (event) {
+  const doNothing = () => {}
+  let versionHandler = r.newVersionHandler({
+    '/v1/': allSpeciesDataJson.removeV2FieldsFrom,
+    '/v2/': doNothing
+  })
+  return versionHandler.handle(event)
 }
 
 module.exports._testonly = {

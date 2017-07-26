@@ -34,11 +34,7 @@ module.exports.prepareResult = prepareResult
 function prepareResult (event, db, elapsedTimeCalculator) {
   let processStart = r.now()
   let params = extractParams(event, db) // FIXME handle thrown Errors for invalid request
-  return doQuery(event, params, processStart, false, db, elapsedTimeCalculator).then(successResult => {
-    return new Promise((resolve, reject) => {
-      resolve(successResult)
-    })
-  })
+  return doQuery(event, params, processStart, false, db, elapsedTimeCalculator)
 }
 
 module.exports.doQuery = doQuery
@@ -59,21 +55,20 @@ module.exports._testonly = {
 
 function getRecordsSql (escapedSpeciesName, start, rows, includeSpeciesRecordId) {
   r.assertIsSupplied(escapedSpeciesName)
-  let whereFragment = `
-    WHERE (
-      s.scientificName IN (${escapedSpeciesName})
-      OR s.taxonRemarks IN (${escapedSpeciesName})
-    )`
+  let whereFragment = buildWhereFragment(escapedSpeciesName)
   return allSpeciesDataJson.getRecordsSql(start, rows, includeSpeciesRecordId, whereFragment)
 }
 
 function getCountSql (escapedSpeciesName) {
-  let whereFragment = `
-    WHERE (
-      s.scientificName IN (${escapedSpeciesName})
-      OR s.taxonRemarks IN (${escapedSpeciesName})
-    )`
+  let whereFragment = buildWhereFragment(escapedSpeciesName)
   return allSpeciesDataJson.getCountSql(whereFragment)
+}
+
+function buildWhereFragment (escapedSpeciesName) {
+  return `WHERE (
+        scientificName IN (${escapedSpeciesName})
+        OR taxonRemarks IN (${escapedSpeciesName})
+      )`
 }
 
 module.exports.extractParams = extractParams

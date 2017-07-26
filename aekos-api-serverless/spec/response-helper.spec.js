@@ -1056,18 +1056,26 @@ describe('response-helper', () => {
 
   describe('.newVersionHandler()', () => {
     it('should match a single version', () => {
-      let path = '/v1/someResource'
+      let event = {
+        requestContext: {
+          path: '/v1/someResource'
+        }
+      }
       let objectUnderTest = responseHelper.newVersionHandler({
         '/v1/': () => {
           return 'one'
         }
       })
-      let result = objectUnderTest.handle(path)
+      let result = objectUnderTest.handle(event)
       expect(result()).toBe('one')
     })
 
     it('should match the correct version out of many', () => {
-      let path = '/v2/someResource'
+      let event = {
+        requestContext: {
+          path: '/v2/someResource'
+        }
+      }
       let objectUnderTest = responseHelper.newVersionHandler({
         '/v1/': () => {
           return 'one'
@@ -1076,8 +1084,36 @@ describe('response-helper', () => {
           return 'two'
         }
       })
-      let result = objectUnderTest.handle(path)
+      let result = objectUnderTest.handle(event)
       expect(result()).toBe('two')
+    })
+
+    it('should strip the stage when present', () => {
+      let event = {
+        requestContext: {
+          path: '/dev/v1/someResource'
+        }
+      }
+      let objectUnderTest = responseHelper.newVersionHandler({
+        '/v1/': () => {
+          return 'one'
+        }
+      })
+      let result = objectUnderTest.handle(event)
+      expect(result()).toBe('one')
+    })
+
+    it('should be able to handle non-functions and the values in the config', () => {
+      let event = {
+        requestContext: {
+          path: '/dev/v1/someResource'
+        }
+      }
+      let objectUnderTest = responseHelper.newVersionHandler({
+        '/v1/': 'some value'
+      })
+      let result = objectUnderTest.handle(event)
+      expect(result).toBe('some value')
     })
 
     it('should throw the expected error when we pass a config that is not an object', () => {
@@ -1092,11 +1128,15 @@ describe('response-helper', () => {
 
     it('should throw the expected error when we handle a path that is not in the config', () => {
       try {
-        let path = '/v3/someResource'
+        let event = {
+          requestContext: {
+            path: '/v3/someResource'
+          }
+        }
         let objectUnderTest = responseHelper.newVersionHandler({
           '/v1/': () => {}
         })
-        objectUnderTest.handle(path)
+        objectUnderTest.handle(event)
         fail()
       } catch (error) {
         expect(error.message).toContain("Programmer problem: unhandled path prefix '/v3/' extracted")

@@ -7,11 +7,11 @@ We use the Swagger UI (http://swagger.io/swagger-ui/) as is provided from Swagge
  - NodeJS 7.x
  - AWS cli
  - AWS cli is configured with the correct access key
+
 ## Steps
 
         cd /path/to/aekos-api/aekos-api-swagger-site # cd into this repo
-        get-swagger.sh # pull the latest swagger definition
-        deploy-dev-site.sh # deploy the whole documentation site
+        ./dev-upload-site.sh # download the swagger definition, ammend it, deploy the swagger UI site
         # optionally, invalidate the CloudFront cache to get the new site rolled out faster
 
 # How to update the Swagger UI version

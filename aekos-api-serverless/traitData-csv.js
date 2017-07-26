@@ -1,7 +1,7 @@
 'use strict'
 let quoted = require('./FieldConfig').quoted
 let r = require('./response-helper')
-let traitDataJson = require('./v1-traitData-json')
+let traitDataJson = require('./traitData-json')
 let allSpeciesDataCsv = require('./allSpeciesData-csv')
 let csvHeaders = allSpeciesDataCsv.v1CsvHeaders
 
@@ -15,6 +15,7 @@ function doHandle (event, callback, db, elapsedTimeCalculator) {
   let params = traitDataJson.extractParams(event, db)
   traitDataJson.getTraitData(event, params, processStart, db, elapsedTimeCalculator).then(successResult => {
     let result = mapJsonToCsv(successResult.response)
+    // TODO add 'download' param
     r.csv.ok(callback, result)
   }).catch(error => {
     console.error('Failed while building result', error)

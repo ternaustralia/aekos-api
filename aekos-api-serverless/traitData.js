@@ -1,6 +1,6 @@
 'use strict'
 let r = require('./response-helper')
-let traitDataJson = require('./v1-traitData-json')
-let traitDataCsv = require('./v1-traitData-csv')
+let traitDataJson = require('./traitData-json')
+let traitDataCsv = require('./traitData-csv')
 
 module.exports.handler = r.newContentNegotiationHandler(traitDataJson, traitDataCsv)

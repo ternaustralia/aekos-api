@@ -1,8 +1,8 @@
 'use strict'
-var objectUnderTest = require('../v1-traitData-csv')
+var objectUnderTest = require('../traitData-csv')
 let StubDB = require('./StubDB')
 
-describe('v1-traitData-csv', () => {
+describe('/v1/traitData-csv', () => {
   describe('doHandle', () => {
     let result = null
     beforeEach(done => {

@@ -1,9 +1,9 @@
 'use strict'
 let Set = require('collections/set')
 let StubDB = require('./StubDB')
-let objectUnderTest = require('../v2-environmentData-json')
+let objectUnderTest = require('../environmentData-json')
 
-describe('v2-environmentData-json', () => {
+describe('/v2/environmentData-json', () => {
   describe('.doHandle()', () => {
     let result = null
     beforeEach(done => {

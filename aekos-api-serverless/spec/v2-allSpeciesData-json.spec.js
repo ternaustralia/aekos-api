@@ -198,6 +198,40 @@ describe('/v2/allSpeciesData-json', () => {
     })
   })
 
+  describe('doHandle', () => {
+    let errorMessage = null
+    beforeEach(done => {
+      let stubDb = new StubDB()
+      stubDb.setExecSelectPromiseResponses([
+        [ /* no records */ ],
+        [{ recordsHeld: 31 }]
+      ])
+      let event = {
+        queryStringParameters: {
+          rows: '15',
+          start: '0'
+        },
+        headers: {
+          Host: 'api.aekos.org.au',
+          'X-Forwarded-Proto': 'https'
+        },
+        requestContext: {
+          path: '/v2/allSpeciesData.json'
+        }
+      }
+      objectUnderTest.prepareResult(event, stubDb, () => { return 42 }).then(_ => {
+        fail()
+      }).catch(error => {
+        errorMessage = error.message
+        done()
+      })
+    })
+
+    it('should throw the expected exception when recordsHeld > 0 but no actual records are returned', () => {
+      expect(errorMessage).toBe('Data problem: records.length=0 while numFound=31, suspect the record query is broken')
+    })
+  })
+
   describe('extractParams', () => {
     it('should extract the params when they are present', () => {
       let event = {
@@ -241,6 +275,7 @@ describe('/v2/allSpeciesData-json', () => {
     FROM (
       SELECT id
       FROM species
+      
       ORDER BY 1
       LIMIT 33 OFFSET 0
     ) AS lateRowLookup
@@ -250,8 +285,7 @@ describe('/v2/allSpeciesData-json', () => {
     ON s.locationID = e.locationID
     AND s.eventDate = e.eventDate
     LEFT JOIN citations AS c
-    ON e.samplingProtocol = c.samplingProtocol
-    ;`
+    ON e.samplingProtocol = c.samplingProtocol;`
   let expectedRecordsSql2 = `
     SELECT
     s.id,

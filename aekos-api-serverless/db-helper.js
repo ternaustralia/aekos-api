@@ -38,6 +38,9 @@ module.exports.execSelectPromise = selectSql => {
 }
 
 module.exports.escape = (unescapedValue) => {
+  if (typeof unescapedValue === 'undefined') {
+    throw new Error('Data problem: supplied value cannot be undefined')
+  }
   if (unescapedValue.constructor === Array) {
     return unescapedValue.map(e => {
       return mysql.escape(e)

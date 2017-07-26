@@ -201,7 +201,7 @@ describe('/v2/allSpeciesData.csv', () => {
       let event = {
         queryStringParameters: null
       }
-      let result = objectUnderTest.getCsvDownloadFileName(event)
+      let result = objectUnderTest.getCsvDownloadFileName(event, 'Species')
       expect(result).toBeNull()
     })
 
@@ -211,7 +211,7 @@ describe('/v2/allSpeciesData.csv', () => {
           someParam: 'blah'
         }
       }
-      let result = objectUnderTest.getCsvDownloadFileName(event)
+      let result = objectUnderTest.getCsvDownloadFileName(event, 'Species')
       expect(result).toBeNull()
     })
 
@@ -221,7 +221,7 @@ describe('/v2/allSpeciesData.csv', () => {
           download: false
         }
       }
-      let result = objectUnderTest.getCsvDownloadFileName(event)
+      let result = objectUnderTest.getCsvDownloadFileName(event, 'Species')
       expect(result).toBeNull()
     })
 
@@ -231,7 +231,7 @@ describe('/v2/allSpeciesData.csv', () => {
           download: 'true'
         }
       }
-      let result = objectUnderTest.getCsvDownloadFileName(event)
+      let result = objectUnderTest.getCsvDownloadFileName(event, 'Species')
       expect(result).toBe('aekosSpeciesData.csv')
     })
   })

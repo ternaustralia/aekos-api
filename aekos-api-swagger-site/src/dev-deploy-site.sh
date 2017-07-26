@@ -1,13 +1,14 @@
 #!/bin/bash
+set -e
 cd `dirname $0`
+thisdir=`pwd`
 STAGE=$1
 if [ -z "$STAGE" ]; then
   STAGE=dev
 fi
 FILE_TYPE=json
 BUCKET=www.$STAGE.api.aekos.org.au
-SWAGGER_UI_DIR=swagger-ui-dist
-# AWS_REGION=ap-southeast-2 # TODO change to us-west-1 like the API
+SWAGGER_UI_DIR=../swagger-ui-dist
 AWS_REGION=us-west-1
 SWAGGER_DEF=swagger-aekos-api-$STAGE.$FILE_TYPE
 stagelessSwaggerDef=`bash -c "echo $SWAGGER_DEF" | sed "s/-$STAGE//"`
@@ -21,7 +22,7 @@ aws s3 sync \
   --delete \
   --acl public-read \
   . s3://$BUCKET/
-cd ..
+cd $thisdir
 aws s3 cp \
   --region=$AWS_REGION \
   --acl public-read \

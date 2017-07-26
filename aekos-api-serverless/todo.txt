@@ -5,7 +5,6 @@
 - add download option for CSVs
 - make getSpeciesByTrait perform and return the correct result
 - remove verbs from resources (v2 change)
-- add 400 and 500 responses to all resources
 - add status code to 4/500 response objects
 - return an appropriate HTTP status when a 'page out of bounds' occurs
 - figure out why the domain-manager doesn't add the base path mapping
@@ -18,3 +17,5 @@
     - ...and even more at https://apigility.org/documentation/api-primer/versioning
     - we can use this to handle the requests: https://github.com/lovell/media-type
     - this book might help: https://www.amazon.com.au/dp/B0046RERXY/ref=cm_sw_r_cp_dp_T2_AiXBzb8PMGS10
+- add a git commit hash to the doco
+- get doco plugin working for multiple events

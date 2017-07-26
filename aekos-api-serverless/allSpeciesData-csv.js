@@ -49,7 +49,7 @@ function doHandle (event, callback, db, elapsedTimeCalculator) {
   let params = allSpeciesDataJson.extractParams(event, db)
   allSpeciesDataJson.doAllSpeciesQuery(event, params, processStart, db, elapsedTimeCalculator).then(successResult => {
     let result = mapJsonToCsv(successResult.response, csvHeaders)
-    let downloadFileName = getCsvDownloadFileName(event)
+    let downloadFileName = getCsvDownloadFileName(event, 'Species')
     r.csv.ok(callback, result, downloadFileName)
   }).catch(error => {
     console.error('Failed while building result', error)
@@ -57,17 +57,13 @@ function doHandle (event, callback, db, elapsedTimeCalculator) {
   })
 }
 
+module.exports.getCsvHeadersForRequestedVersion = getCsvHeadersForRequestedVersion
 function getCsvHeadersForRequestedVersion (event) {
-  let path = event.requestContext.path
-  const mapping = {
-    '/v1/allSpeciesData.csv': v1CsvHeaders,
-    '/v2/allSpeciesData.csv': v2CsvHeaders
-  }
-  let result = mapping[path]
-  if (typeof result === 'undefined') {
-    throw new Error(`Programmer problem: unhandled path '${path}'`)
-  }
-  return result
+  let versionHandler = r.newVersionHandler({
+    '/v1/': v1CsvHeaders,
+    '/v2/': v2CsvHeaders
+  })
+  return versionHandler.handle(event)
 }
 
 module.exports._testonly = {
@@ -76,7 +72,7 @@ module.exports._testonly = {
 }
 
 module.exports.getCsvDownloadFileName = getCsvDownloadFileName
-function getCsvDownloadFileName (event) {
+function getCsvDownloadFileName (event, nameFragment) {
   let params = event.queryStringParameters
   if (params === null) {
     return null
@@ -86,7 +82,7 @@ function getCsvDownloadFileName (event) {
     return null
   }
   if (downloadParamValue === 'true') {
-    return 'aekosSpeciesData.csv'
+    return 'aekos' + nameFragment + 'Data.csv'
   }
   return null
 }

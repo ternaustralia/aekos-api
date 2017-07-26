@@ -1,8 +1,8 @@
 'use strict'
 
-let objectUnderTest = require('../v2-environmentData-csv')
+let objectUnderTest = require('../environmentData-csv')
 
-describe('v2-environmentData-csv', function () {
+describe('/v2/environmentData-csv', function () {
   describe('createCsvRow', () => {
     it('should map the object to a CSV row', function () {
       let record = {
@@ -43,7 +43,7 @@ describe('v2-environmentData-csv', function () {
           'Clover'
         ]
       }
-      let result = objectUnderTest.createCsvRow(record)
+      let result = objectUnderTest.createCsvRow(record, objectUnderTest.v2CsvHeaders)
       expect(result).toBe('-38.759165,143.435125,"GDA94","aekos.org.au/collection/test.edu.au/TEST/AAAA0001",' +
         '"AAAA0001","TEST dataset","Acacia dealbata|Acacia aneura","Grass|Clover","2014-05-09",2014,5,"A Person, B Person...",' +
         '"aekos.org.au/collection/test.edu.au/TEST","disturbanceType","none",,"slope",' +

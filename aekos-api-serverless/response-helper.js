@@ -202,11 +202,17 @@ class VersionHandler {
     this._config = config
   }
 
-  handle (path) {
-    let versionPrefix = path.substr(0, this._versionPrefixLength)
-    let handler = this._config[versionPrefix]
-    if (handler) {
-      return handler
+  handle (event) {
+    let path = event.requestContext.path
+    let isStageInPath = /^\/\w+\/v\d\//.test(path)
+    let pathWithoutStage = path
+    if (isStageInPath) {
+      pathWithoutStage = path.replace(/\/\w+/, '')
+    }
+    let versionPrefix = pathWithoutStage.substr(0, this._versionPrefixLength)
+    let result = this._config[versionPrefix]
+    if (result) {
+      return result
     }
     throw new Error(`Programmer problem: unhandled path prefix '${versionPrefix}' extracted from path '${path}'`)
   }
