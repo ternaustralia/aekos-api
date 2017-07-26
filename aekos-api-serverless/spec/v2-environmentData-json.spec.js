@@ -22,14 +22,14 @@ describe('/v2/environmentData-json', () => {
       const countResult = [{ recordsHeld: 31 }]
       const varsResult = [{
         visitKey: 'location1#2017-07-07',
-        varName: 'height',
-        varValue: '123',
-        varUnit: 'cm'
+        varName: 'windSpeed',
+        varValue: '6',
+        varUnit: 'km/h'
       }, {
         visitKey: 'location2#2008-02-02',
-        varName: 'height',
-        varValue: '468',
-        varUnit: 'cm'
+        varName: 'windSpeed',
+        varValue: '7',
+        varUnit: 'km/h'
       }]
       const speciesNamesResult = [{
         visitKey: 'location1#2017-07-07',
@@ -90,14 +90,14 @@ describe('/v2/environmentData-json', () => {
         response: [
           {
             recordNum: 1,
-            variables: [{ varName: 'height', varValue: '123', varUnit: 'cm' }],
+            variables: [{ varName: 'windSpeed', varValue: '6', varUnit: 'km/h' }],
             scientificNames: [],
             taxonRemarks: ['taxon name'],
             locationName: 'location1',
             datasetName: 'dataset1'
           }, {
             recordNum: 2,
-            variables: [{ varName: 'height', varValue: '468', varUnit: 'cm' }],
+            variables: [{ varName: 'windSpeed', varValue: '7', varUnit: 'km/h' }],
             scientificNames: ['sci name'],
             taxonRemarks: [],
             locationName: 'location2',

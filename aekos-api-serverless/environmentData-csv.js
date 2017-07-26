@@ -4,6 +4,7 @@ let notQuoted = require('./FieldConfig').notQuoted
 let quotedListConcat = require('./FieldConfig').quotedListConcat
 let r = require('./response-helper')
 let envDataJson = require('./environmentData-json')
+let allSpeciesDataCsv = require('./allSpeciesData-csv')
 let v1CsvHeaders = [
   notQuoted('decimalLatitude'),
   notQuoted('decimalLongitude'),
@@ -46,12 +47,16 @@ function doHandle (event, callback, db, elapsedTimeCalculator) {
   let params = envDataJson.extractParams(event, db)
   envDataJson.doQuery(event, params, processStart, db, elapsedTimeCalculator).then(successResult => {
     let result = mapJsonToCsv(successResult.response, csvHeaders)
-    // TODO add 'download' param
-    r.csv.ok(callback, result)
+    let downloadFileName = allSpeciesDataCsv.getCsvDownloadFileName(event, 'Environment')
+    r.csv.ok(callback, result, downloadFileName)
   }).catch(error => {
     console.error('Failed while building result', error)
     r.json.internalServerError(callback)
   })
+}
+
+module.exports._testonly = {
+  doHandle: doHandle
 }
 
 function getCsvHeadersForRequestedVersion (event) {
@@ -89,7 +94,7 @@ function createCsvRow (record, csvHeaders) {
   for (let i = 0; i < record.variables.length; i++) {
     let curr = record.variables[i]
     result += `,"${curr.varName}","${curr.varValue}",`
-    if (curr.varUnit === null) { // FIXME are they null or undefined?
+    if (curr.varUnit === null || typeof curr.varUnit === 'undefined') {
       continue
     }
     result += `"${curr.varUnit}"`
