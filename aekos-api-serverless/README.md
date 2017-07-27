@@ -2,7 +2,7 @@
 This is the server itself.
 
 ## What's it built with?
-This is a NodeJS project that uses the [Serverless framework](https://serverless.com/). We deploy to Amazon's AWS (Lambda and API Gateway) and use AWS RDS as a data store. We use Yarn to make the package management less brittle.
+This is a NodeJS project that uses the [Serverless framework](https://serverless.com/). We deploy to Amazon's AWS (Lambda and API Gateway) and use AWS RDS as a data store. We use Yarn to make the package management less brittle. See the `architecture.md` document for more information.
 
 ## Prerequisites for developing
  - NodeJS 6.10+
