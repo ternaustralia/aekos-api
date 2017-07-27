@@ -363,10 +363,20 @@ const jsonResponseHelpers = {
     doResponse(theCallback, theBody, 200, jsonContentType, extraHeadersCallback)
   },
   badRequest: (theCallback, theMessage) => {
-    doResponse(theCallback, { message: theMessage }, 400, jsonContentType)
+    let statusCode = 400
+    let body = {
+      message: theMessage,
+      statusCode: statusCode
+    }
+    doResponse(theCallback, body, statusCode, jsonContentType)
   },
   internalServerError: (theCallback) => {
-    doResponse(theCallback, { message: msg500 }, 500, jsonContentType)
+    let statusCode = 500
+    let body = {
+      message: msg500,
+      statusCode: statusCode
+    }
+    doResponse(theCallback, body, statusCode, jsonContentType)
   }
 }
 

@@ -1,6 +1,8 @@
 'use strict'
 let objectUnderTest = require('../speciesData-json')
 let StubDB = require('./StubDB')
+let ConsoleSilencer = require('./ConsoleSilencer')
+let consoleSilencer = new ConsoleSilencer()
 
 describe('/v1/speciesData-json', () => {
   describe('doHandle', () => {
@@ -139,6 +141,70 @@ describe('/v1/speciesData-json', () => {
       expect(responseHeader.params.rows).toBe(20) // we get default rows which is greater than the start
       expect(responseHeader.pageNumber).toBe(1) // should probably be 2 but it's a weird edge case
       expect(responseHeader.totalPages).toBe(1) // are there 1,2 or 3 pages?
+    })
+  })
+
+  describe('doHandle', () => {
+    let result = null
+    beforeEach(done => {
+      let stubDb = new StubDB()
+      let event = {
+        queryStringParameters: {
+          // don't supply 'speciesName'
+          start: '0'
+        }
+      }
+      let callback = (_, theResult) => {
+        result = theResult
+        done()
+      }
+      objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 42 })
+    })
+
+    it('should return a 400 response when we do not supply speciesName', () => {
+      expect(result.statusCode).toBe(400)
+      expect(result.headers).toEqual({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
+        'Content-Type': "'application/json'"
+      })
+      expect(JSON.parse(result.body)).toEqual({
+        message: "the 'speciesName' query string parameter must be supplied",
+        statusCode: 400
+      })
+    })
+  })
+
+  describe('doHandle', () => {
+    let result = null
+    beforeEach(done => {
+      let stubDb = new StubDB()
+      spyOn(stubDb, 'execSelectPromise').and.throwError('some error')
+      let event = {
+        queryStringParameters: {
+          speciesName: 'species one'
+        }
+      }
+      let callback = (_, theResult) => {
+        consoleSilencer.resetConsoleError()
+        result = theResult
+        done()
+      }
+      consoleSilencer.silenceConsoleError()
+      objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 42 })
+    })
+
+    it('should return a 500 response when executing a query fails', () => {
+      expect(result.statusCode).toBe(500)
+      expect(result.headers).toEqual({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
+        'Content-Type': "'application/json'"
+      })
+      expect(JSON.parse(result.body)).toEqual({
+        message: 'Sorry about that, something has gone wrong',
+        statusCode: 500
+      })
     })
   })
 })

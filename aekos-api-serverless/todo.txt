@@ -15,3 +15,5 @@
     - this book might help: https://www.amazon.com.au/dp/B0046RERXY/ref=cm_sw_r_cp_dp_T2_AiXBzb8PMGS10
 - add a git commit hash to the doco
 - get doco plugin working for multiple events
+- add rollbar calls for errors
+- add try-catch error trapping to respond with our 500 for all resources

@@ -21,9 +21,15 @@ function doHandle (event, callback, db, elapsedTimeCalculator) {
 
 module.exports.prepareResult = prepareResult
 function prepareResult (event, db, elapsedTimeCalculator) {
-  let processStart = r.now()
-  let params = extractParams(event) // FIXME handle thrown Errors for invalid request
-  return doAllSpeciesQuery(event, params, processStart, db, elapsedTimeCalculator)
+  return new Promise((resolve, reject) => {
+    try {
+      let processStart = r.now()
+      let params = extractParams(event) // FIXME handle thrown Errors for invalid request
+      resolve(doAllSpeciesQuery(event, params, processStart, db, elapsedTimeCalculator))
+    } catch (error) {
+      reject(error)
+    }
+  })
 }
 
 module.exports.doAllSpeciesQuery = doAllSpeciesQuery

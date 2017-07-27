@@ -110,6 +110,49 @@ describe('/v1/traitData-json', () => {
     })
   })
 
+  describe('doHandle', () => {
+    let result = null
+    beforeEach(done => {
+      let stubDb = new StubDB()
+      stubDb.setExecSelectPromiseResponses([
+        [ {id: 'species1', scientificName: 'species one'} ],
+        [ {recordsHeld: 31} ],
+        [ ]
+      ])
+      let event = {
+        queryStringParameters: {
+          // don't supply 'speciesName'
+          start: '0'
+        },
+        headers: {
+          Host: 'api.aekos.org.au',
+          'X-Forwarded-Proto': 'https'
+        },
+        requestContext: {
+          path: '/v1/traitData.json'
+        }
+      }
+      let callback = (_, theResult) => {
+        result = theResult
+        done()
+      }
+      objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 42 })
+    })
+
+    it('should return a 400 response when we do not supply speciesName', () => {
+      expect(result.statusCode).toBe(400)
+      expect(result.headers).toEqual({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
+        'Content-Type': "'application/json'"
+      })
+      expect(JSON.parse(result.body)).toEqual({
+        message: "the 'speciesName' query string parameter must be supplied",
+        statusCode: 400
+      })
+    })
+  })
+
   describe('extractParams', () => {
     it('should extract the params when they are present', () => {
       let event = {

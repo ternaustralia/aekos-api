@@ -10,7 +10,10 @@ module.exports.handler = (event, context, callback) => {
 }
 
 function doHandle (event, callback, db, elapsedTimeCalculator) {
-  validator(event, callback)
+  let isValid = validator(event, callback)
+  if (!isValid) {
+    return
+  }
   prepareResult(event, db, elapsedTimeCalculator).then(successResult => {
     r.json.ok(callback, successResult, event)
   }).catch(error => {
@@ -26,15 +29,23 @@ function validator (event, callback) {
   if (r.isQueryStringParamPresent(event, speciesNameParam)) {
     return valid
   }
+  // FIXME change message when we swap to POST
   r.json.badRequest(callback, `the '${speciesNameParam}' query string parameter must be supplied`)
   return invalid
 }
 
 module.exports.prepareResult = prepareResult
 function prepareResult (event, db, elapsedTimeCalculator) {
-  let processStart = r.now()
-  let params = extractParams(event, db) // FIXME handle thrown Errors for invalid request
-  return doQuery(event, params, processStart, false, db, elapsedTimeCalculator)
+  return new Promise((resolve, reject) => {
+    try {
+      let processStart = r.now()
+      let params = extractParams(event, db) // FIXME handle thrown Errors for invalid request
+      let result = doQuery(event, params, processStart, false, db, elapsedTimeCalculator)
+      resolve(result)
+    } catch (error) {
+      reject(error)
+    }
+  })
 }
 
 module.exports.doQuery = doQuery

@@ -14,6 +14,7 @@ module.exports.handler = (event, context, callback) => {
 function doHandle (event, callback, db, elapsedTimeCalculator) {
   let processStart = r.now()
   if (!r.isQueryStringParamPresent(event, speciesNameParam)) {
+    // FIXME change message when we swap to POST
     r.json.badRequest(callback, `the '${speciesNameParam}' query string parameter must be supplied`)
     return
   }

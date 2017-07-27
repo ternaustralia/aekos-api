@@ -1,6 +1,8 @@
 'use strict'
 let objectUnderTest = require('../allSpeciesData-json')
 let StubDB = require('./StubDB')
+let ConsoleSilencer = require('./ConsoleSilencer')
+let consoleSilencer = new ConsoleSilencer()
 
 describe('/v2/allSpeciesData-json', () => {
   describe('doHandle', () => {
@@ -252,6 +254,35 @@ describe('/v2/allSpeciesData-json', () => {
       let result = objectUnderTest.extractParams(event, new StubDB())
       expect(result.rows).toBe(20)
       expect(result.start).toBe(0)
+    })
+  })
+
+  describe('doHandle', () => {
+    let result = null
+    beforeEach(done => {
+      let stubDb = new StubDB()
+      spyOn(stubDb, 'execSelectPromise').and.throwError('some error')
+      let event = {}
+      let callback = (_, theResult) => {
+        consoleSilencer.resetConsoleError()
+        result = theResult
+        done()
+      }
+      consoleSilencer.silenceConsoleError()
+      objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 42 })
+    })
+
+    it('should return a 500 response when executing a query fails', () => {
+      expect(result.statusCode).toBe(500)
+      expect(result.headers).toEqual({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
+        'Content-Type': "'application/json'"
+      })
+      expect(JSON.parse(result.body)).toEqual({
+        message: 'Sorry about that, something has gone wrong',
+        statusCode: 500
+      })
     })
   })
 

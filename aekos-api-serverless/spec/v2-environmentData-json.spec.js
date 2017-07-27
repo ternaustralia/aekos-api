@@ -108,6 +108,34 @@ describe('/v2/environmentData-json', () => {
     })
   })
 
+  describe('.doHandle()', () => {
+    let result = null
+    beforeEach(done => {
+      let stubDb = new StubDB()
+      let event = {
+        queryStringParameters: null // don't supply 'speciesName'
+      }
+      let callback = (_, theResult) => {
+        result = theResult
+        done()
+      }
+      objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 42 })
+    })
+
+    it('should return a 400 response when we do not supply speciesName', () => {
+      expect(result.statusCode).toBe(400)
+      expect(result.headers).toEqual({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
+        'Content-Type': "'application/json'"
+      })
+      expect(JSON.parse(result.body)).toEqual({
+        message: "the 'speciesName' query string parameter must be supplied",
+        statusCode: 400
+      })
+    })
+  })
+
   describe('appendVars', () => {
     it('should map variables to records', () => {
       let records = [
@@ -221,7 +249,6 @@ describe('/v2/environmentData-json', () => {
     })
   })
 
-  // FIXME remove locationName and datasetName from v2
   let expectedRecordsSql1 = `
     SELECT DISTINCT
     CONCAT(e.locationID, '#', e.eventDate) AS visitKey,

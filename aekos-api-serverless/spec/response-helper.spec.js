@@ -1,4 +1,6 @@
 'use strict'
+let ConsoleSilencer = require('./ConsoleSilencer')
+let consoleSilencer = new ConsoleSilencer()
 
 describe('response-helper', function () {
   let objectUnderTest = require('../response-helper')
@@ -79,7 +81,10 @@ describe('response-helper', function () {
           response = result
         }
         objectUnderTest.json.badRequest(callback, 'wrong input')
-        expect(response.body).toBe(JSON.stringify({ message: 'wrong input' }))
+        expect(JSON.parse(response.body)).toEqual({
+          message: 'wrong input',
+          statusCode: 400
+        })
       })
 
       it('should return a 400 status code', function () {
@@ -113,7 +118,10 @@ describe('response-helper', function () {
           response = result
         }
         objectUnderTest.json.internalServerError(callback)
-        expect(response.body).toBe(JSON.stringify({ message: msgFor500 }))
+        expect(JSON.parse(response.body)).toEqual({
+          message: msgFor500,
+          statusCode: 500
+        })
       })
 
       it('should return a 500 status code', function () {
@@ -487,20 +495,20 @@ describe('response-helper', function () {
 
     it('should return a 500 when the responder throws as error (outside a promise)', (done) => {
       let callback = (_, result) => {
-        resetConsoleError()
+        consoleSilencer.resetConsoleError()
         expect(result.statusCode).toBe(500)
         done()
       }
       let responder = (requestBody, db) => {
         throw new Error('ka-boom')
       }
-      silenceConsoleError()
+      consoleSilencer.silenceConsoleError()
       objectUnderTest.handlePost({ body: '{}' }, callback, null, alwaysValidValidator, responder)
     })
 
     it('should return a 500 when the responder throws as error (inside a promise)', (done) => {
       let callback = (_, result) => {
-        resetConsoleError()
+        consoleSilencer.resetConsoleError()
         expect(result.statusCode).toBe(500)
         done()
       }
@@ -509,13 +517,13 @@ describe('response-helper', function () {
           throw new Error('ka-boom')
         })
       }
-      silenceConsoleError()
+      consoleSilencer.silenceConsoleError()
       objectUnderTest.handlePost({ body: '{}' }, callback, null, alwaysValidValidator, responder)
     })
 
     it('should return a 500 when the responder rejects the promise', (done) => {
       let callback = (_, result) => {
-        resetConsoleError()
+        consoleSilencer.resetConsoleError()
         expect(result.statusCode).toBe(500)
         expect(result.headers).toEqual(jsonAndCorsHeaders)
         done()
@@ -525,7 +533,7 @@ describe('response-helper', function () {
           reject(new Error('ka-boom'))
         })
       }
-      silenceConsoleError()
+      consoleSilencer.silenceConsoleError()
       objectUnderTest.handlePost({ body: '{}' }, callback, null, alwaysValidValidator, responder)
     })
 
@@ -770,9 +778,9 @@ describe('response-helper', function () {
 
     it('should be able to fallback to the code as the label for a non-existant code', () => {
       let code = 'certainlyNotInTheVocab'
-      silenceConsoleWarn()
+      consoleSilencer.silenceConsoleWarn()
       let result = objectUnderTest.resolveVocabCode(code)
-      resetConsoleWarn()
+      consoleSilencer.resetConsoleWarn()
       expect(result).toBe(code)
     })
   })
@@ -1145,20 +1153,3 @@ describe('response-helper', () => {
     })
   })
 })
-
-let origConsoleError = null
-function silenceConsoleError () {
-  origConsoleError = console.error
-  console.error = () => { }
-}
-function resetConsoleError () {
-  console.error = origConsoleError
-}
-let origConsoleWarn = null
-function silenceConsoleWarn () {
-  origConsoleWarn = console.warn
-  console.warn = () => { }
-}
-function resetConsoleWarn () {
-  console.warn = origConsoleWarn
-}
