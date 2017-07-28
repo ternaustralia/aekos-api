@@ -14,28 +14,28 @@ const tagMappingKeySeparator = '#'
 const dataRetrievalTag = 'Data Retrieval by Species'
 const everythingRetrievalTag = 'Data Retrieval (everything)'
 const searchTag = 'Search'
-const archivedDataRetrievalTag = 'Archived - Data Retrieval by Species'
-const archivedEverythingRetrievalTag = 'Archived - Data Retrieval (everything)'
-const archivedSearchTag = 'Archived - Search'
+const deprecatedDataRetrievalTag = 'Deprecated - Data Retrieval by Species'
+const deprecatedEverythingRetrievalTag = 'Deprecated - Data Retrieval (everything)'
+const deprecatedSearchTag = 'Deprecated - Search'
 const tagMapping = {
-  [get('/v1/environmentData')]: archivedDataRetrievalTag,
+  [get('/v1/environmentData')]: deprecatedDataRetrievalTag,
   [get('/v2/environmentData')]: dataRetrievalTag,
-  [get('/v1/environmentData.json')]: archivedDataRetrievalTag,
+  [get('/v1/environmentData.json')]: deprecatedDataRetrievalTag,
   [get('/v2/environmentData.json')]: dataRetrievalTag,
-  [get('/v1/environmentData.csv')]: archivedDataRetrievalTag,
+  [get('/v1/environmentData.csv')]: deprecatedDataRetrievalTag,
   [get('/v2/environmentData.csv')]: dataRetrievalTag,
-  [get('/v1/speciesData')]: archivedDataRetrievalTag,
+  [get('/v1/speciesData')]: deprecatedDataRetrievalTag,
   [get('/v2/speciesData')]: dataRetrievalTag,
-  [get('/v1/speciesData.json')]: archivedDataRetrievalTag,
+  [get('/v1/speciesData.json')]: deprecatedDataRetrievalTag,
   [get('/v2/speciesData.json')]: dataRetrievalTag,
-  [get('/v1/speciesData.csv')]: archivedDataRetrievalTag,
+  [get('/v1/speciesData.csv')]: deprecatedDataRetrievalTag,
   [get('/v2/speciesData.csv')]: dataRetrievalTag,
-  [get('/v1/traitData')]: dataRetrievalTag,
-  // [get('/v2/traitData')]: dataRetrievalTag,
-  [get('/v1/traitData.json')]: dataRetrievalTag,
-  // [get('/v2/traitData.json')]: dataRetrievalTag,
-  [get('/v1/traitData.csv')]: dataRetrievalTag,
-  // [get('/v2/traitData.csv')]: dataRetrievalTag,
+  [get('/v1/traitData')]: deprecatedDataRetrievalTag,
+  [get('/v2/traitData')]: dataRetrievalTag,
+  [get('/v1/traitData.json')]: deprecatedDataRetrievalTag,
+  [get('/v2/traitData.json')]: dataRetrievalTag,
+  [get('/v1/traitData.csv')]: deprecatedDataRetrievalTag,
+  [get('/v2/traitData.csv')]: dataRetrievalTag,
   [get('/v1/getEnvironmentalVariableVocab.json')]: searchTag,
   [get('/v1/getTraitVocab.json')]: searchTag,
   [post('/v1/getEnvironmentBySpecies.json')]: searchTag,
@@ -43,11 +43,11 @@ const tagMapping = {
   [get('/v1/getTraitsBySpecies.json')]: searchTag,
   [get('/v1/speciesAutocomplete.json')]: searchTag,
   [post('/v1/speciesSummary.json')]: searchTag,
-  [get('/v1/allSpeciesData')]: archivedEverythingRetrievalTag,
+  [get('/v1/allSpeciesData')]: deprecatedEverythingRetrievalTag,
   [get('/v2/allSpeciesData')]: everythingRetrievalTag,
-  [get('/v1/allSpeciesData.json')]: archivedEverythingRetrievalTag,
+  [get('/v1/allSpeciesData.json')]: deprecatedEverythingRetrievalTag,
   [get('/v2/allSpeciesData.json')]: everythingRetrievalTag,
-  [get('/v1/allSpeciesData.csv')]: archivedEverythingRetrievalTag,
+  [get('/v1/allSpeciesData.csv')]: deprecatedEverythingRetrievalTag,
   [get('/v2/allSpeciesData.csv')]: everythingRetrievalTag,
 }
 

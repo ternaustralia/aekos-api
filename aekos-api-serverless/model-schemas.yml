@@ -42,6 +42,18 @@ exports:
             type: string
           varUnit:
             type: string
+  v1TraitArray: &v1TraitArray
+    traits:
+      type: array
+      items:
+        type: object
+        properties:
+          traitName:
+            type: string
+          traitValue:
+            type: string
+          traitUnit:
+            type: string
   fragments:
     VocabObjectSchema:
       type: array
@@ -139,18 +151,13 @@ exports:
     items:
       type: object
       properties:
-        <<: *v1AllSpeciesDataResponseProperties
-        traits:
-          type: array
-          items:
-            type: object
-            properties:
-              traitName:
-                type: string
-              traitValue:
-                type: string
-              traitUnit:
-                type: string
+        <<: [*v1AllSpeciesDataResponseProperties, *v1TraitArray]
+  v2TraitResponse:
+    type: array
+    items:
+      type: object
+      properties:
+        <<: [*v2AllSpeciesDataResponseProperties, *v1TraitArray]
   v1EnvResponse:
     type: array
     items:

@@ -2,7 +2,7 @@
 let objectUnderTest = require('../traitData-json')
 let StubDB = require('./StubDB')
 
-describe('/v1/traitData-json', () => {
+describe('/v2/traitData-json', () => {
   describe('doHandle', () => {
     let result = null
     beforeEach(done => {
@@ -32,7 +32,7 @@ describe('/v1/traitData-json', () => {
           'X-Forwarded-Proto': 'https'
         },
         requestContext: {
-          path: '/v1/traitData.json'
+          path: '/v2/traitData.json'
         }
       }
       let callback = (_, theResult) => {
@@ -42,14 +42,14 @@ describe('/v1/traitData-json', () => {
       objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 42 })
     })
 
-    it('should return a 200 response when we return all traits for a species', () => {
+    it('should return a 200 response when we request all traits for a species', () => {
       expect(result.statusCode).toBe(200)
       expect(result.headers).toEqual({
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
         'Content-Type': "'application/json'",
-        link: '<https://api.aekos.org.au/v1/traitData.json?speciesName=species%20one&rows=15&start=15>; rel="next", ' +
-              '<https://api.aekos.org.au/v1/traitData.json?speciesName=species%20one&rows=15&start=30>; rel="last"'
+        link: '<https://api.aekos.org.au/v2/traitData.json?speciesName=species%20one&rows=15&start=15>; rel="next", ' +
+              '<https://api.aekos.org.au/v2/traitData.json?speciesName=species%20one&rows=15&start=30>; rel="last"'
       })
       expect(JSON.parse(result.body)).toEqual({
         responseHeader: {
@@ -67,7 +67,8 @@ describe('/v1/traitData-json', () => {
         response: [
           {
             scientificName: 'species one',
-            // no v2 attributes present
+            locationName: 'loc1',
+            datasetName: 'dataset1',
             traits: [
               { traitName: 'trait1', traitValue: 'value1', traitUnit: 'unit1' },
               { traitName: 'trait2', traitValue: 'value2', traitUnit: 'unit2' }
@@ -99,7 +100,7 @@ describe('/v1/traitData-json', () => {
           'X-Forwarded-Proto': 'https'
         },
         requestContext: {
-          path: '/v1/traitData.json'
+          path: '/v2/traitData.json'
         }
       }
       let callback = (_, theResult) => {
@@ -135,7 +136,7 @@ describe('/v1/traitData-json', () => {
           'X-Forwarded-Proto': 'https'
         },
         requestContext: {
-          path: '/v1/traitData.json'
+          path: '/v2/traitData.json'
         }
       }
       let callback = (_, theResult) => {

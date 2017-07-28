@@ -122,56 +122,64 @@ custom:
         schema:
           type: object
           properties:
-            response: ${self:custom.modelDetails.v1AllSpeciesDataResponse}
             responseHeader: ${self:custom.modelDetails.v1AllSpeciesResponseHeader}
+            response: ${self:custom.modelDetails.v1AllSpeciesDataResponse}
       -
         name: V2AllSpeciesDataResponse
         contentType: "application/json"
         schema:
           type: object
           properties:
-            response: ${self:custom.modelDetails.v2AllSpeciesDataResponse}
             responseHeader: ${self:custom.modelDetails.v1AllSpeciesResponseHeader}
+            response: ${self:custom.modelDetails.v2AllSpeciesDataResponse}
       -
         name: V1SpeciesDataResponse
         contentType: "application/json"
         schema:
           type: object
           properties:
-            response: ${self:custom.modelDetails.v1AllSpeciesDataResponse}
             responseHeader: ${self:custom.modelDetails.v1SpeciesResponseHeader}
+            response: ${self:custom.modelDetails.v1AllSpeciesDataResponse}
       -
         name: V2SpeciesDataResponse
         contentType: "application/json"
         schema:
           type: object
           properties:
-            response: ${self:custom.modelDetails.v2AllSpeciesDataResponse}
             responseHeader: ${self:custom.modelDetails.v1SpeciesResponseHeader}
+            response: ${self:custom.modelDetails.v2AllSpeciesDataResponse}
       -
         name: V1TraitDataJsonResponse
         contentType: "application/json"
         schema:
           type: object
           properties:
-            response: ${self:custom.modelDetails.v1TraitResponse}
             responseHeader: ${self:custom.modelDetails.v1TraitResponseHeader}
+            response: ${self:custom.modelDetails.v1TraitResponse}
+      -
+        name: V2TraitDataJsonResponse
+        contentType: "application/json"
+        schema:
+          type: object
+          properties:
+            responseHeader: ${self:custom.modelDetails.v1TraitResponseHeader}
+            response: ${self:custom.modelDetails.v2TraitResponse}
       -
         name: V1EnvDataResponse
         contentType: "application/json"
         schema:
           type: object
           properties:
-            response: ${self:custom.modelDetails.v1EnvResponse}
             responseHeader: ${self:custom.modelDetails.v1EnvResponseHeader}
+            response: ${self:custom.modelDetails.v1EnvResponse}
       -
         name: V2EnvDataResponse
         contentType: "application/json"
         schema:
           type: object
           properties:
-            response: ${self:custom.modelDetails.v2EnvResponse}
             responseHeader: ${self:custom.modelDetails.v1EnvResponseHeader}
+            response: ${self:custom.modelDetails.v2EnvResponse}
       -
         name: CsvResponse
         contentType: "text/csv"
@@ -529,6 +537,30 @@ functions:
     handler: traitData.handler
     events:
       - http:
+          path: v2/traitData
+          method: get
+          cors: true
+          documentation:
+            summary: Get trait data
+            description: >
+              Gets Darwin Core records with added trait information for the supplied species name(s) using content negotation to
+              determine the response type. If you supply trait names then the result records will have the traits filtered down
+              to only the traits you've asked for, otherwise all traits are returned. This resource honours Accept headers
+              represented by any of the /v2/traitData.* resources. ${file(./constants.yml):messages.documentation.v2NewFields}
+            queryParams:
+              - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
+              - ${self:custom.commonModelSchemaFragments.SingleTraitNameQueryParam}
+              - ${self:custom.commonModelSchemaFragments.StartQueryParam}
+              - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
+            methodResponses:
+              -
+                statusCode: 200
+                responseModels:
+                  "text/csv": CsvResponse
+                  "application/json": V2TraitDataJsonResponse
+              - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
+      - http:
           path: v1/traitData
           method: get
           cors: true
@@ -556,6 +588,28 @@ functions:
     handler: traitData-json.handler
     events:
       - http:
+          path: v2/traitData.json
+          method: get
+          cors: true
+          documentation:
+            summary: Get trait data in JSON format
+            description: >
+              Gets Darwin Core records with added trait information in JSON format. If you supply trait names then the result
+              records will have the traits filtered down to only the traits you've asked for, otherwise all traits are returned.
+              ${file(./constants.yml):messages.documentation.v2NewFields}
+            queryParams:
+              - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
+              - ${self:custom.commonModelSchemaFragments.SingleTraitNameQueryParam}
+              - ${self:custom.commonModelSchemaFragments.StartQueryParam}
+              - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
+            methodResponses:
+              -
+                statusCode: 200
+                responseModels:
+                  "application/json": V2TraitDataJsonResponse
+              - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
+      - http:
           path: v1/traitData.json
           method: get
           cors: true
@@ -579,6 +633,29 @@ functions:
   traitData-csv:
     handler: traitData-csv.handler
     events:
+      - http:
+          path: v2/traitData.csv
+          method: get
+          cors: true
+          documentation:
+            summary: Get trait data in CSV format
+            description: >
+              Gets Darwin Core records with added trait information in CSV format. If you supply trait names then the result
+              records will have the traits filtered down to only the traits you've asked for, otherwise all traits are returned.
+              ${file(./constants.yml):messages.documentation.v2NewFields}
+            queryParams:
+              - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
+              - ${self:custom.commonModelSchemaFragments.SingleTraitNameQueryParam}
+              - ${self:custom.commonModelSchemaFragments.StartQueryParam}
+              - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
+              - ${self:custom.commonModelSchemaFragments.DownloadQueryParam}
+            methodResponses:
+              -
+                statusCode: 200
+                responseModels:
+                  "text/csv": CsvResponse
+              - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
       - http:
           path: v1/traitData.csv
           method: get
