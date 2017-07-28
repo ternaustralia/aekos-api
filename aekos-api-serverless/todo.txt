@@ -17,3 +17,8 @@
 - get doco plugin working for multiple events
 - add rollbar calls for errors
 - add try-catch error trapping to respond with our 500 for all resources
+- create RSS or Atom feed for notifying of updates to the API. Could be another resource in the project, another separate API or maybe just github releases
+- create an /api endpoint that is the start for HATEOAS clients
+- add 'links' header to vocab resources with rel="search"
+- figure out what rel we can use on search resources to point to data resources
+- create example client
