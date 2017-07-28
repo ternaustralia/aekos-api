@@ -1,9 +1,11 @@
 'use strict'
 let accepts = require('accepts')
 let yaml = require('yamljs')
-const speciesNameParam = yaml.load('./constants.yml').paramNames.speciesName.multiple
+const speciesNamesParam = yaml.load('./constants.yml').paramNames.speciesName.multiple
 const pageSizeParam = yaml.load('./constants.yml').paramNames.PAGE_SIZE
 const pageNumParam = yaml.load('./constants.yml').paramNames.PAGE_NUM
+const startParam = yaml.load('./constants.yml').paramNames.START
+const rowsParam = yaml.load('./constants.yml').paramNames.ROWS
 const msg500 = yaml.load('./constants.yml').messages.public.internalServerError
 let codeToLabelMapping = require('./ontology/code-to-label.json')
 let querystring = require('querystring')
@@ -31,23 +33,99 @@ function doResponse (theCallback, theBody, statusCode, contentType, extraHeaders
   theCallback(null, response)
 }
 
-function handlePost (event, callback, db,
-    validator/* (requestBody):{isValid:boolean, message:string} */,
-    responder/* (requestBody, databaseHelper):Promise<{}> */) {
-  let requestBody = JSON.parse(event.body) // TODO consider making body non-mandatory (but why post then?)
+function handleJsonPost (event, callback, db,
+    validator/* (queryStringParameters, requestBody):{isValid:boolean, message:string} */,
+    responder/* (requestBody, databaseHelper, queryStringParameters):Promise<{}> */,
+    extrasProvider) {
+  if (typeof event.body === 'undefined') {
+    jsonResponseHelpers.badRequest(callback, 'Programmer problem: request body is undefined. Most likely you ' +
+      "haven't defined the test input or wired things up correctly. Or maybe AWS has changed the event object")
+    return
+  }
+  let requestBody = JSON.parse(event.body)
   let queryStringObj = event.queryStringParameters
-  let validationResult = validator(requestBody, queryStringObj)
+  let validationResult = validator(queryStringObj, requestBody)
   if (!validationResult.isValid) {
     jsonResponseHelpers.badRequest(callback, validationResult.message)
     return
   }
   let errorHandler = error => {
-    console.error('Failed to execute post handler', error)
-    jsonResponseHelpers.internalServerError(callback, msg500)
+    console.error('Failed to execute POST handler', error)
+    jsonResponseHelpers.internalServerError(callback)
   }
   try {
-    responder(requestBody, db, queryStringObj).then(responseBody => {
-      jsonResponseHelpers.ok(callback, responseBody)
+    responder(requestBody, db, queryStringObj, extrasProvider).then(responseBody => {
+      jsonResponseHelpers.ok(callback, responseBody, event)
+    }).catch(errorHandler)
+  } catch (error) {
+    errorHandler(error)
+  }
+}
+
+function handleCsvPost (event, callback, db,
+    validator/* (queryStringParameters, requestBody):{isValid:boolean, message:string} */,
+    responder/* (requestBody, databaseHelper, queryStringParameters):Promise<{}> */,
+    extrasProvider) {
+  let requestBody = JSON.parse(event.body)
+  let queryStringObj = event.queryStringParameters
+  let validationResult = validator(queryStringObj, requestBody)
+  if (!validationResult.isValid) {
+    jsonResponseHelpers.badRequest(callback, validationResult.message)
+    return
+  }
+  let errorHandler = error => {
+    console.error('Failed to execute POST handler', error)
+    jsonResponseHelpers.internalServerError(callback)
+  }
+  try {
+    responder(requestBody, db, queryStringObj, extrasProvider).then(responseWrapper => {
+      csvResponseHelpers.ok(callback, responseWrapper.body, responseWrapper.downloadFileName, event, responseWrapper.jsonResponse)
+    }).catch(errorHandler)
+  } catch (error) {
+    errorHandler(error)
+  }
+}
+
+function handleJsonGet (event, callback, db,
+    validator/* (queryStringParameters):{isValid:boolean, message:string} */,
+    responder/* (databaseHelper, queryStringParameters):Promise<{}> */,
+    extrasProvider) {
+  let queryStringObj = event.queryStringParameters
+  let validationResult = validator(queryStringObj)
+  if (!validationResult.isValid) {
+    jsonResponseHelpers.badRequest(callback, validationResult.message)
+    return
+  }
+  let errorHandler = error => {
+    console.error('Failed to execute GET handler', error)
+    jsonResponseHelpers.internalServerError(callback)
+  }
+  try {
+    responder(db, queryStringObj, extrasProvider).then(responseBody => {
+      jsonResponseHelpers.ok(callback, responseBody, event)
+    }).catch(errorHandler)
+  } catch (error) {
+    errorHandler(error)
+  }
+}
+
+function handleCsvGet (event, callback, db,
+    validator/* (queryStringParameters):{isValid:boolean, message:string} */,
+    responder/* (databaseHelper, queryStringParameters):Promise<{}> */,
+    extrasProvider) {
+  let queryStringObj = event.queryStringParameters
+  let validationResult = validator(queryStringObj)
+  if (!validationResult.isValid) {
+    jsonResponseHelpers.badRequest(callback, validationResult.message)
+    return
+  }
+  let errorHandler = error => {
+    console.error('Failed to execute GET handler', error)
+    jsonResponseHelpers.internalServerError(callback)
+  }
+  try {
+    responder(db, queryStringObj, extrasProvider).then(responseWrapper => {
+      csvResponseHelpers.ok(callback, responseWrapper.body, responseWrapper.downloadFileName, event, responseWrapper.jsonResponse)
     }).catch(errorHandler)
   } catch (error) {
     errorHandler(error)
@@ -75,10 +153,15 @@ function getOptionalStringParam (event, paramName, defaultValue) {
 }
 
 function getOptionalNumberParam (event, paramName, defaultValue) {
-  if (!isQueryStringParamPresent(event, paramName)) {
+  return getOptionalNumber(event.queryStringParameters, paramName, defaultValue)
+}
+
+function getOptionalNumber (containerObj, paramName, defaultValue) {
+  let isValueNotPresent = !containerObj || typeof containerObj[paramName] === 'undefined'
+  if (isValueNotPresent) {
     return parseInt(defaultValue)
   }
-  let rawValue = event.queryStringParameters[paramName]
+  let rawValue = containerObj[paramName]
   let valueType = typeof (rawValue)
   if (valueType === 'number') {
     return rawValue
@@ -88,6 +171,24 @@ function getOptionalNumberParam (event, paramName, defaultValue) {
     throw new Error(`Data problem: supplied value '${rawValue}' of type '${valueType}' is not a number.`)
   }
   return parsedValue
+}
+
+function getOptionalArray (containerObj, key, db) {
+  let unescapedResult = containerObj[key]
+  if (unescapedResult && unescapedResult.constructor !== Array) {
+    throw new Error(`Programmer problem: the '${key}' field (value='${unescapedResult}') is not an array, this should've been caught by validation`)
+  }
+  if (!unescapedResult) {
+    unescapedResult = null
+  }
+  let escapedResult = null
+  if (unescapedResult) {
+    escapedResult = db.toSqlList(unescapedResult)
+  }
+  return {
+    escaped: escapedResult,
+    unescaped: unescapedResult
+  }
 }
 
 function calculateOffset (pageNum, pageSize) {
@@ -156,9 +257,9 @@ function calculateTotalPages (rows, numFound) {
   return Math.ceil(numFound / rows)
 }
 
-function assertIsSupplied (escapedSpeciesName) {
-  if (!escapedSpeciesName) {
-    throw new Error(`Programmer problem: no escaped species name was supplied='${escapedSpeciesName}'.`)
+function assertIsSupplied (escapedSpeciesNames) {
+  if (!escapedSpeciesNames) {
+    throw new Error(`Programmer problem: no escaped species names were supplied='${escapedSpeciesNames}'.`)
   }
 }
 
@@ -301,32 +402,36 @@ const validatorNotValid = message => {
   return { isValid: false, message: message }
 }
 
-function speciesNamesValidator (requestBody, _) {
-  let speciesNames = requestBody[speciesNameParam]
+function speciesNamesValidator (_, requestBody) {
+  let isRequestBodyNotSupplied = requestBody === null || typeof requestBody === 'undefined'
+  if (isRequestBodyNotSupplied) {
+    return validatorNotValid('No request body was supplied')
+  }
+  let speciesNames = requestBody[speciesNamesParam]
   let isFieldNotSupplied = typeof speciesNames === 'undefined'
   if (isFieldNotSupplied) {
     return validatorNotValid('No species names were supplied')
   }
   let isFieldNotArray = speciesNames.constructor !== Array
   if (isFieldNotArray) {
-    return validatorNotValid(`The '${speciesNameParam}' field must be an array (of strings)`)
+    return validatorNotValid(`The '${speciesNamesParam}' field must be an array (of strings)`)
   }
   let isArrayEmpty = speciesNames.length < 1
   if (isArrayEmpty) {
-    return validatorNotValid(`The '${speciesNameParam}' field is mandatory and was not supplied`)
+    return validatorNotValid(`The '${speciesNamesParam}' field is mandatory and was not supplied`)
   }
   let isAnyElementNotStrings = speciesNames.some(element => { return typeof element !== 'string' })
   if (isAnyElementNotStrings) {
-    return validatorNotValid(`The '${speciesNameParam}' field must be an array of strings. You supplied a non-string element.`)
+    return validatorNotValid(`The '${speciesNamesParam}' field must be an array of strings. You supplied a non-string element.`)
   }
   return validatorIsValid
 }
 
 function compositeValidator (validatorArray) {
-  return (requestBody, queryStringObj) => {
+  return (queryStringObj, requestBody) => {
     for (let i = 0; i < validatorArray.length; i++) {
       let currValidator = validatorArray[i]
-      let currResult = currValidator(requestBody, queryStringObj)
+      let currResult = currValidator(queryStringObj, requestBody)
       if (!currResult.isValid) {
         return currResult
       }
@@ -335,9 +440,9 @@ function compositeValidator (validatorArray) {
   }
 }
 
-function queryStringParamIsNumberIfPresentValidator (paramName) {
-  return (_, queryStringObj) => {
-    if (queryStringObj === null) {
+function queryStringParamIsPositiveNumberIfPresentValidator (paramName) {
+  return (queryStringObj, _) => {
+    if (queryStringObj === null || typeof queryStringObj === 'undefined') {
       return validatorIsValid
     }
     let value = queryStringObj[paramName]
@@ -347,6 +452,9 @@ function queryStringParamIsNumberIfPresentValidator (paramName) {
     let parsedValue = parseInt(value)
     if (isNaN(parsedValue)) {
       return validatorNotValid(`The '${paramName}' must be a number when supplied. Supplied value = '${value}'`)
+    }
+    if (parsedValue < 0) {
+      return validatorNotValid(`The '${paramName}' must be a number >= 0. Supplied value = '${value}'`)
     }
     return validatorIsValid
   }
@@ -380,27 +488,31 @@ const jsonResponseHelpers = {
   }
 }
 
+const csvResponseHelpers = {
+  ok: (theCallback, theBody, downloadFileName, event, dataForHateoas) => {
+    let extraHeadersCallback = headers => {
+      if (typeof downloadFileName !== 'undefined' && downloadFileName !== null) {
+        headers['Content-Disposition'] = `attachment;filename=${downloadFileName}`
+      }
+      if (isHateoasable(dataForHateoas)) {
+        headers.link = buildHateoasLinkHeader(event, dataForHateoas.responseHeader)
+      }
+    }
+    doResponse(theCallback, theBody, 200, csvContentType, extraHeadersCallback)
+  }
+}
+
 module.exports = {
   json: jsonResponseHelpers,
-  csv: {
-    ok: (theCallback, theBody, downloadFileName, event, dataForHateoas) => {
-      let extraHeadersCallback = headers => {
-        if (typeof downloadFileName !== 'undefined' && downloadFileName !== null) {
-          headers['Content-Disposition'] = `attachment;filename=${downloadFileName}`
-        }
-        if (isHateoasable(dataForHateoas)) {
-          headers.link = buildHateoasLinkHeader(event, dataForHateoas.responseHeader)
-        }
-      }
-      doResponse(theCallback, theBody, 200, csvContentType, extraHeadersCallback)
-    }
-  },
+  csv: csvResponseHelpers,
   getContentType: getContentType,
   isQueryStringParamPresent: isQueryStringParamPresent,
   assertNumber: assertNumber,
   assertIsSupplied: assertIsSupplied,
   getOptionalStringParam: getOptionalStringParam,
   getOptionalNumberParam: getOptionalNumberParam,
+  getOptionalNumber: getOptionalNumber,
+  getOptionalArray: getOptionalArray,
   calculateOffset: calculateOffset,
   resolveVocabCode: resolveVocabCode,
   now: now,
@@ -409,13 +521,18 @@ module.exports = {
   calculatePageNumber: calculatePageNumber,
   calculateTotalPages: calculateTotalPages,
   newContentNegotiationHandler: newContentNegotiationHandler,
-  handlePost: handlePost,
+  handleJsonPost: handleJsonPost,
+  handleCsvPost: handleCsvPost,
+  handleJsonGet: handleJsonGet,
+  handleCsvGet: handleCsvGet,
   buildHateoasLinkHeader: buildHateoasLinkHeader,
   isHateoasable: isHateoasable,
   speciesNamesValidator: speciesNamesValidator,
   compositeValidator: compositeValidator,
-  queryStringParamIsNumberIfPresentValidator: queryStringParamIsNumberIfPresentValidator,
-  pageSizeValidator: queryStringParamIsNumberIfPresentValidator(pageSizeParam),
-  pageNumValidator: queryStringParamIsNumberIfPresentValidator(pageNumParam),
+  queryStringParamIsPositiveNumberIfPresentValidator: queryStringParamIsPositiveNumberIfPresentValidator,
+  pageSizeValidator: queryStringParamIsPositiveNumberIfPresentValidator(pageSizeParam),
+  pageNumValidator: queryStringParamIsPositiveNumberIfPresentValidator(pageNumParam),
+  startValidator: queryStringParamIsPositiveNumberIfPresentValidator(startParam),
+  rowsValidator: queryStringParamIsPositiveNumberIfPresentValidator(rowsParam),
   newVersionHandler: newVersionHandler
 }

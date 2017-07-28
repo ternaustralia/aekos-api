@@ -3,8 +3,7 @@ let r = require('./response-helper')
 let speciesDataJson = require('./speciesData-json')
 let latches = require('latches')
 let yaml = require('yamljs')
-const speciesNameParam = yaml.load('./constants.yml').paramNames.SINGLE_SPECIES_NAME
-const traitNameParam = yaml.load('./constants.yml').paramNames.SINGLE_TRAIT_NAME
+const traitNamesParam = yaml.load('./constants.yml').paramNames.traitName.multiple
 
 module.exports.handler = (event, context, callback) => {
   let db = require('./db-helper')
@@ -12,33 +11,37 @@ module.exports.handler = (event, context, callback) => {
 }
 
 function doHandle (event, callback, db, elapsedTimeCalculator) {
-  let processStart = r.now()
-  if (!r.isQueryStringParamPresent(event, speciesNameParam)) {
-    // FIXME change message when we swap to POST
-    r.json.badRequest(callback, `the '${speciesNameParam}' query string parameter must be supplied`)
-    return
-  }
-  let params = extractParams(event, db) // FIXME handle thrown Errors for invalid request
-  getTraitData(event, params, processStart, db, elapsedTimeCalculator).then(successResult => {
-    r.json.ok(callback, successResult, event)
-  }).catch(error => {
-    console.error('Failed while building result', error)
-    r.json.internalServerError(callback)
+  r.handleJsonPost(event, callback, db, validator, responder, {
+    event: event,
+    elapsedTimeCalculator: elapsedTimeCalculator
   })
+}
+
+const validator = r.compositeValidator([
+  speciesDataJson.validator
+  // TODO add trait validator
+])
+module.exports.validator = validator
+
+module.exports.responder = responder
+function responder (requestBody, db, queryStringParameters, extrasProvider) {
+  let processStart = r.now()
+  let params = extractParams(requestBody, queryStringParameters, db)
+  return getTraitData(extrasProvider.event, params, processStart, db, extrasProvider.elapsedTimeCalculator)
 }
 
 module.exports.getTraitData = getTraitData
 function getTraitData (event, params, processStart, db, elapsedTimeCalculator) {
   return speciesDataJson.doQuery(event, params, processStart, true, db, elapsedTimeCalculator).then(successResult => {
-    return enrichWithTraitData(successResult, params.traitName, db)
+    return enrichWithTraitData(successResult, params.traitNames, db)
   }).then(successResultWithTraits => {
     successResultWithTraits.responseHeader.elapsedTime = elapsedTimeCalculator(processStart)
-    successResultWithTraits.responseHeader.params[traitNameParam] = params.unescapedTraitName // FIXME change to support array
+    successResultWithTraits.responseHeader.params[traitNamesParam] = params.unescapedTraitNames
     return successResultWithTraits
   })
 }
 
-function enrichWithTraitData (successResult, traitName, db) {
+function enrichWithTraitData (successResult, traitNames, db) {
   let speciesRecords = successResult.response
   return new Promise((resolve, reject) => {
     let cdl = new latches.CountDownLatch(speciesRecords.length)
@@ -46,7 +49,7 @@ function enrichWithTraitData (successResult, traitName, db) {
       resolve(successResult)
     })
     speciesRecords.forEach(curr => {
-      const traitSql = getTraitSql(curr.id, traitName)
+      const traitSql = getTraitSql(curr.id, traitNames)
       db.execSelectPromise(traitSql).then(traitRecords => {
         curr.traits = traitRecords
         delete (curr.id)
@@ -63,11 +66,11 @@ module.exports._testonly = {
   doHandle: doHandle
 }
 
-function getTraitSql (parentId, traitName) {
+function getTraitSql (parentId, traitNames) {
   r.assertIsSupplied(parentId)
   let traitFilterFragment = ''
-  if (traitName) {
-    traitFilterFragment = `AND traitName in (${traitName})`
+  if (traitNames) {
+    traitFilterFragment = `AND traitName in (${traitNames})`
   }
   return `
     SELECT
@@ -80,31 +83,27 @@ function getTraitSql (parentId, traitName) {
 }
 
 module.exports.extractParams = extractParams
-function extractParams (event, db) {
-  let speciesParams = speciesDataJson.extractParams(event, db)
-  let unescapedTraitName = r.getOptionalStringParam(event, traitNameParam, null)
-  let escapedTraitName = null
-  if (unescapedTraitName) {
-    escapedTraitName = db.escape(unescapedTraitName)
-  }
-  return new Params(speciesParams.speciesName, speciesParams.unescapedSpeciesName, speciesParams.start,
-    speciesParams.rows, escapedTraitName, unescapedTraitName)
+function extractParams (requestBody, queryStringParameters, db) {
+  let speciesParams = speciesDataJson.extractParams(requestBody, queryStringParameters, db)
+  let traitNames = r.getOptionalArray(requestBody, traitNamesParam, db)
+  return new Params(speciesParams.speciesNames, speciesParams.unescapedSpeciesNames,
+    speciesParams.start, speciesParams.rows, traitNames.escaped, traitNames.unescaped)
 }
 
 class Params {
   constructor (
-    speciesName,
-    unescapedSpeciesName,
+    speciesNames,
+    unescapedSpeciesNames,
     start,
     rows,
-    traitName,
-    unescapedTraitName
+    traitNames,
+    unescapedTraitNames
   ) {
-    this.speciesName = speciesName
-    this.unescapedSpeciesName = unescapedSpeciesName
+    this.speciesNames = speciesNames
+    this.unescapedSpeciesNames = unescapedSpeciesNames
     this.start = start
     this.rows = rows
-    this.traitName = traitName
-    this.unescapedTraitName = unescapedTraitName
+    this.traitNames = traitNames
+    this.unescapedTraitNames = unescapedTraitNames
   }
 }

@@ -22,8 +22,8 @@ describe('/v1/speciesData-json', () => {
         [ {recordsHeld: 31} ]
       ])
       let event = {
+        body: JSON.stringify({speciesNames: ['species one']}),
         queryStringParameters: {
-          speciesName: 'species one',
           rows: '15',
           start: '0'
         },
@@ -48,8 +48,8 @@ describe('/v1/speciesData-json', () => {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
         'Content-Type': "'application/json'",
-        link: '<https://api.aekos.org.au/v1/speciesData.json?speciesName=species%20one&rows=15&start=15>; rel="next", ' +
-              '<https://api.aekos.org.au/v1/speciesData.json?speciesName=species%20one&rows=15&start=30>; rel="last"'
+        link: '<https://api.aekos.org.au/v1/speciesData.json?rows=15&start=15>; rel="next", ' +
+              '<https://api.aekos.org.au/v1/speciesData.json?rows=15&start=30>; rel="last"'
       })
       expect(JSON.parse(result.body)).toEqual({
         responseHeader: {
@@ -59,7 +59,7 @@ describe('/v1/speciesData-json', () => {
           params: {
             rows: 15,
             start: 0,
-            speciesName: 'species one'
+            speciesNames: ['species one']
           },
           totalPages: 3
         },
@@ -80,8 +80,8 @@ describe('/v1/speciesData-json', () => {
         [ {recordsHeld: 31} ]
       ])
       let event = {
+        body: JSON.stringify({speciesNames: ['species one']}),
         queryStringParameters: {
-          speciesName: 'species one',
           start: '0'
         },
         headers: {
@@ -116,8 +116,8 @@ describe('/v1/speciesData-json', () => {
         [ {recordsHeld: 14} ]
       ])
       let event = {
+        body: JSON.stringify({speciesNames: ['species one']}),
         queryStringParameters: {
-          speciesName: 'species one',
           start: '10' // start is less than the default rows value
         },
         headers: {
@@ -149,8 +149,8 @@ describe('/v1/speciesData-json', () => {
     beforeEach(done => {
       let stubDb = new StubDB()
       let event = {
+        body: null, // don't supply 'speciesName' (or even a body)
         queryStringParameters: {
-          // don't supply 'speciesName'
           start: '0'
         }
       }
@@ -161,7 +161,7 @@ describe('/v1/speciesData-json', () => {
       objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 42 })
     })
 
-    it('should return a 400 response when we do not supply speciesName', () => {
+    it('should return a 400 response when we do not supply speciesNames', () => {
       expect(result.statusCode).toBe(400)
       expect(result.headers).toEqual({
         'Access-Control-Allow-Origin': '*',
@@ -169,7 +169,7 @@ describe('/v1/speciesData-json', () => {
         'Content-Type': "'application/json'"
       })
       expect(JSON.parse(result.body)).toEqual({
-        message: "the 'speciesName' query string parameter must be supplied",
+        message: 'No request body was supplied',
         statusCode: 400
       })
     })
@@ -181,9 +181,8 @@ describe('/v1/speciesData-json', () => {
       let stubDb = new StubDB()
       spyOn(stubDb, 'execSelectPromise').and.throwError('some error')
       let event = {
-        queryStringParameters: {
-          speciesName: 'species one'
-        }
+        body: JSON.stringify({speciesNames: ['species one']}),
+        queryStringParameters: null
       }
       let callback = (_, theResult) => {
         consoleSilencer.resetConsoleError()

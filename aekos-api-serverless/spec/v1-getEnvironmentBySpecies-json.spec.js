@@ -24,7 +24,7 @@ describe('v1-getEnvironmentBySpecies-json', function () {
       let requestBody = {
         speciesNames: ['species one']
       }
-      let result = objectUnderTest._testonly.validator(requestBody, {})
+      let result = objectUnderTest._testonly.validator(null, requestBody)
       expect(result.isValid).toBe(true)
     })
 
@@ -32,7 +32,7 @@ describe('v1-getEnvironmentBySpecies-json', function () {
       let requestBody = {
         // no 'speciesNames'
       }
-      let result = objectUnderTest._testonly.validator(requestBody, {})
+      let result = objectUnderTest._testonly.validator(null, requestBody)
       expect(result.isValid).toBe(false)
     })
 
@@ -44,7 +44,7 @@ describe('v1-getEnvironmentBySpecies-json', function () {
         pageSize: '33',
         pageNum: '3'
       }
-      let result = objectUnderTest._testonly.validator(requestBody, queryString)
+      let result = objectUnderTest._testonly.validator(queryString, requestBody)
       expect(result.isValid).toBe(true)
     })
   })

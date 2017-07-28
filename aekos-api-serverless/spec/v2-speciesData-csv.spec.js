@@ -30,8 +30,8 @@ describe('/v2/speciesData.csv', () => {
         [ {recordsHeld: 31} ]
       ])
       let event = {
+        body: JSON.stringify({speciesNames: ['species eleven']}),
         queryStringParameters: {
-          speciesName: 'species eleven',
           rows: '15',
           start: '0'
         },
@@ -56,8 +56,8 @@ describe('/v2/speciesData.csv', () => {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
         'Content-Type': "'text/csv'",
-        'link': '<https://api.aekos.org.au/v2/speciesData.csv?speciesName=species%20eleven&rows=15&start=15>; rel="next", ' +
-                '<https://api.aekos.org.au/v2/speciesData.csv?speciesName=species%20eleven&rows=15&start=30>; rel="last"'
+        'link': '<https://api.aekos.org.au/v2/speciesData.csv?rows=15&start=15>; rel="next", ' +
+                '<https://api.aekos.org.au/v2/speciesData.csv?rows=15&start=30>; rel="last"'
       })
       expect(result.body.split('\n')).toEqual([
         `"decimalLatitude","decimalLongitude","geodeticDatum","locationID","locationName","datasetName","scientificName","taxonRemarks","individualCount","eventDate","year","month","bibliographicCitation","samplingProtocol"`,
@@ -93,8 +93,8 @@ describe('/v2/speciesData.csv', () => {
         [ {recordsHeld: 3} ]
       ])
       let event = {
+        body: JSON.stringify({speciesNames: ['species eleven']}),
         queryStringParameters: {
-          speciesName: 'species eleven',
           rows: '15',
           start: '0',
           download: 'true' // trigger response as download

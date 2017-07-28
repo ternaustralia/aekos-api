@@ -239,6 +239,18 @@ custom:
                 type: string
               id:
                 type: string
+      -
+        name: V1SpeciesDataRequest
+        contentType: "application/json"
+        schema: ${self:custom.modelDetails.fragments.SpeciesNamesPostRequest}
+      -
+        name: V1TraitDataRequest
+        contentType: "application/json"
+        schema: ${self:custom.modelDetails.fragments.TraitDataPostRequest}
+      -
+        name: V1EnvDataRequest
+        contentType: "application/json"
+        schema: ${self:custom.modelDetails.fragments.EnvDataPostRequest}
 plugins:
   - serverless-aws-documentation
   - serverless-domain-manager
@@ -407,7 +419,7 @@ functions:
     events:
       - http:
           path: v2/speciesData
-          method: get
+          method: post
           cors: true
           documentation:
             summary: Get species data
@@ -416,9 +428,10 @@ functions:
               This resource honours Accept headers represented by any of the /v2/speciesData.* resources.
               ${file(./constants.yml):messages.documentation.v2NewFields}
             queryParams:
-              - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
               - ${self:custom.commonModelSchemaFragments.StartQueryParam}
               - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
+            requestModels:
+               "application/json": V1SpeciesDataRequest
             methodResponses:
               -
                 statusCode: 200
@@ -429,7 +442,7 @@ functions:
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
       - http:
           path: v1/speciesData
-          method: get
+          method: post
           cors: true
           documentation:
             summary: Get species data
@@ -437,9 +450,10 @@ functions:
               Gets Darwin Core records for the supplied species name(s) using content negotation to determine the response type.
               This resource honours Accept headers represented by any of the /v1/speciesData.* resources.
             queryParams:
-              - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
               - ${self:custom.commonModelSchemaFragments.StartQueryParam}
               - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
+            requestModels:
+               "application/json": V1SpeciesDataRequest
             methodResponses:
               -
                 statusCode: 200
@@ -453,7 +467,7 @@ functions:
     events:
       - http:
           path: v2/speciesData.json
-          method: get
+          method: post
           cors: true
           documentation:
             summary: Get species data in JSON format
@@ -461,9 +475,10 @@ functions:
               Gets Darwin Core records for the supplied species name(s) in JSON format.
               ${file(./constants.yml):messages.documentation.v2NewFields}
             queryParams:
-              - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
               - ${self:custom.commonModelSchemaFragments.StartQueryParam}
               - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
+            requestModels:
+               "application/json": V1SpeciesDataRequest
             methodResponses:
               -
                 statusCode: 200
@@ -473,16 +488,17 @@ functions:
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
       - http:
           path: v1/speciesData.json
-          method: get
+          method: post
           cors: true
           documentation:
             summary: Get species data in JSON format
             description: >
               Gets Darwin Core records for the supplied species name(s) in JSON format.
             queryParams:
-              - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
               - ${self:custom.commonModelSchemaFragments.StartQueryParam}
               - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
+            requestModels:
+               "application/json": V1SpeciesDataRequest
             methodResponses:
               -
                 statusCode: 200
@@ -495,17 +511,18 @@ functions:
     events:
       - http:
           path: v2/speciesData.csv
-          method: get
+          method: post
           cors: true
           documentation:
             summary: Get species data in CSV format
             description: >
               Gets Darwin Core records for the supplied species name(s) in CSV format.
             queryParams:
-              - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
               - ${self:custom.commonModelSchemaFragments.StartQueryParam}
               - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
               - ${self:custom.commonModelSchemaFragments.DownloadQueryParam}
+            requestModels:
+               "application/json": V1SpeciesDataRequest
             methodResponses:
               -
                 statusCode: 200
@@ -515,17 +532,18 @@ functions:
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
       - http:
           path: v1/speciesData.csv
-          method: get
+          method: post
           cors: true
           documentation:
             summary: Get species data in CSV format
             description: >
               Gets Darwin Core records for the supplied species name(s) in CSV format.
             queryParams:
-              - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
               - ${self:custom.commonModelSchemaFragments.StartQueryParam}
               - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
               - ${self:custom.commonModelSchemaFragments.DownloadQueryParam}
+            requestModels:
+               "application/json": V1SpeciesDataRequest
             methodResponses:
               -
                 statusCode: 200
@@ -538,7 +556,7 @@ functions:
     events:
       - http:
           path: v2/traitData
-          method: get
+          method: post
           cors: true
           documentation:
             summary: Get trait data
@@ -548,10 +566,10 @@ functions:
               to only the traits you've asked for, otherwise all traits are returned. This resource honours Accept headers
               represented by any of the /v2/traitData.* resources. ${file(./constants.yml):messages.documentation.v2NewFields}
             queryParams:
-              - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
-              - ${self:custom.commonModelSchemaFragments.SingleTraitNameQueryParam}
               - ${self:custom.commonModelSchemaFragments.StartQueryParam}
               - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
+            requestModels:
+               "application/json": V1TraitDataRequest
             methodResponses:
               -
                 statusCode: 200
@@ -562,7 +580,7 @@ functions:
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
       - http:
           path: v1/traitData
-          method: get
+          method: post
           cors: true
           documentation:
             summary: Get trait data
@@ -572,10 +590,10 @@ functions:
               to only the traits you've asked for, otherwise all traits are returned. This resource honours Accept headers
               represented by any of the /v1/traitData.* resources.
             queryParams:
-              - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
-              - ${self:custom.commonModelSchemaFragments.SingleTraitNameQueryParam}
               - ${self:custom.commonModelSchemaFragments.StartQueryParam}
               - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
+            requestModels:
+               "application/json": V1TraitDataRequest
             methodResponses:
               -
                 statusCode: 200
@@ -589,7 +607,7 @@ functions:
     events:
       - http:
           path: v2/traitData.json
-          method: get
+          method: post
           cors: true
           documentation:
             summary: Get trait data in JSON format
@@ -598,10 +616,10 @@ functions:
               records will have the traits filtered down to only the traits you've asked for, otherwise all traits are returned.
               ${file(./constants.yml):messages.documentation.v2NewFields}
             queryParams:
-              - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
-              - ${self:custom.commonModelSchemaFragments.SingleTraitNameQueryParam}
               - ${self:custom.commonModelSchemaFragments.StartQueryParam}
               - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
+            requestModels:
+               "application/json": V1TraitDataRequest
             methodResponses:
               -
                 statusCode: 200
@@ -611,7 +629,7 @@ functions:
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
       - http:
           path: v1/traitData.json
-          method: get
+          method: post
           cors: true
           documentation:
             summary: Get trait data in JSON format
@@ -619,10 +637,10 @@ functions:
               Gets Darwin Core records with added trait information in JSON format. If you supply trait names then the result
               records will have the traits filtered down to only the traits you've asked for, otherwise all traits are returned.
             queryParams:
-              - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
-              - ${self:custom.commonModelSchemaFragments.SingleTraitNameQueryParam}
               - ${self:custom.commonModelSchemaFragments.StartQueryParam}
               - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
+            requestModels:
+               "application/json": V1TraitDataRequest
             methodResponses:
               -
                 statusCode: 200
@@ -635,7 +653,7 @@ functions:
     events:
       - http:
           path: v2/traitData.csv
-          method: get
+          method: post
           cors: true
           documentation:
             summary: Get trait data in CSV format
@@ -644,11 +662,11 @@ functions:
               records will have the traits filtered down to only the traits you've asked for, otherwise all traits are returned.
               ${file(./constants.yml):messages.documentation.v2NewFields}
             queryParams:
-              - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
-              - ${self:custom.commonModelSchemaFragments.SingleTraitNameQueryParam}
               - ${self:custom.commonModelSchemaFragments.StartQueryParam}
               - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
               - ${self:custom.commonModelSchemaFragments.DownloadQueryParam}
+            requestModels:
+               "application/json": V1TraitDataRequest
             methodResponses:
               -
                 statusCode: 200
@@ -658,7 +676,7 @@ functions:
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
       - http:
           path: v1/traitData.csv
-          method: get
+          method: post
           cors: true
           documentation:
             summary: Get trait data in CSV format
@@ -666,11 +684,11 @@ functions:
               Gets Darwin Core records with added trait information in CSV format. If you supply trait names then the result
               records will have the traits filtered down to only the traits you've asked for, otherwise all traits are returned.
             queryParams:
-              - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
-              - ${self:custom.commonModelSchemaFragments.SingleTraitNameQueryParam}
               - ${self:custom.commonModelSchemaFragments.StartQueryParam}
               - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
               - ${self:custom.commonModelSchemaFragments.DownloadQueryParam}
+            requestModels:
+               "application/json": V1TraitDataRequest
             methodResponses:
               -
                 statusCode: 200
@@ -683,7 +701,7 @@ functions:
     events:
       - http:
           path: v2/environmentData
-          method: get
+          method: post
           cors: true
           documentation:
             summary: Get environmental variable data
@@ -695,10 +713,10 @@ functions:
               This resource honours Accept headers represented by any of the /v2/environmentData.* resources.
               ${file(./constants.yml):messages.documentation.v2NewFields}
             queryParams:
-              - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
-              - ${self:custom.commonModelSchemaFragments.SingleVarNameQueryParam}
               - ${self:custom.commonModelSchemaFragments.StartQueryParam}
               - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
+            requestModels:
+               "application/json": V1EnvDataRequest
             methodResponses:
               -
                 statusCode: 200
@@ -709,7 +727,7 @@ functions:
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
       - http:
           path: v1/environmentData
-          method: get
+          method: post
           cors: true
           documentation:
             summary: Get environmental variable data
@@ -720,10 +738,10 @@ functions:
               otherwise all environmental variables are returned. Note: not all sites have environmental variables available.
               This resource honours Accept headers represented by any of the /v1/environmentData.* resources.
             queryParams:
-              - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
-              - ${self:custom.commonModelSchemaFragments.SingleVarNameQueryParam}
               - ${self:custom.commonModelSchemaFragments.StartQueryParam}
               - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
+            requestModels:
+               "application/json": V1EnvDataRequest
             methodResponses:
               -
                 statusCode: 200
@@ -737,7 +755,7 @@ functions:
     events:
       - http:
           path: v2/environmentData.json
-          method: get
+          method: post
           cors: true
           documentation:
             summary: Get environmental variable data in JSON format
@@ -748,10 +766,10 @@ functions:
               variables are returned. Note: not all sites have environmental variables available.
               ${file(./constants.yml):messages.documentation.v2NewFields}
             queryParams:
-              - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
-              - ${self:custom.commonModelSchemaFragments.SingleVarNameQueryParam}
               - ${self:custom.commonModelSchemaFragments.StartQueryParam}
               - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
+            requestModels:
+               "application/json": V1EnvDataRequest
             methodResponses:
               -
                 statusCode: 200
@@ -761,7 +779,7 @@ functions:
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
       - http:
           path: v1/environmentData.json
-          method: get
+          method: post
           cors: true
           documentation:
             summary: Get environmental variable data in JSON format
@@ -771,10 +789,10 @@ functions:
               variables filtered down to only the environmental variables you've asked for, otherwise all environmental
               variables are returned. Note: not all sites have environmental variables available.
             queryParams:
-              - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
-              - ${self:custom.commonModelSchemaFragments.SingleVarNameQueryParam}
               - ${self:custom.commonModelSchemaFragments.StartQueryParam}
               - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
+            requestModels:
+               "application/json": V1EnvDataRequest
             methodResponses:
               -
                 statusCode: 200
@@ -787,7 +805,7 @@ functions:
     events:
       - http:
           path: v2/environmentData.csv
-          method: get
+          method: post
           cors: true
           documentation:
             summary: Get environmental variable data in CSV format
@@ -798,11 +816,11 @@ functions:
               variables are returned. Note: not all sites have environmental variables available.
               ${file(./constants.yml):messages.documentation.v2NewFields}
             queryParams:
-              - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
-              - ${self:custom.commonModelSchemaFragments.SingleVarNameQueryParam}
               - ${self:custom.commonModelSchemaFragments.StartQueryParam}
               - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
               - ${self:custom.commonModelSchemaFragments.DownloadQueryParam}
+            requestModels:
+               "application/json": V1EnvDataRequest
             methodResponses:
               -
                 statusCode: 200
@@ -812,7 +830,7 @@ functions:
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
       - http:
           path: v1/environmentData.csv
-          method: get
+          method: post
           cors: true
           documentation:
             summary: Get environmental variable data in CSV format
@@ -822,11 +840,11 @@ functions:
               variables filtered down to only the environmental variables you've asked for, otherwise all environmental
               variables are returned. Note: not all sites have environmental variables available.
             queryParams:
-              - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
-              - ${self:custom.commonModelSchemaFragments.SingleVarNameQueryParam}
               - ${self:custom.commonModelSchemaFragments.StartQueryParam}
               - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
               - ${self:custom.commonModelSchemaFragments.DownloadQueryParam}
+            requestModels:
+               "application/json": V1EnvDataRequest
             methodResponses:
               -
                 statusCode: 200

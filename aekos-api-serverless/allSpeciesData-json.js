@@ -2,6 +2,8 @@
 let r = require('./response-helper')
 const recordsHeldField = 'recordsHeld'
 let yaml = require('yamljs')
+const startParam = yaml.load('./constants.yml').paramNames.START
+const rowsParam = yaml.load('./constants.yml').paramNames.ROWS
 const defaultStart = yaml.load('./constants.yml').defaults.START
 const defaultRows = yaml.load('./constants.yml').defaults.ROWS
 
@@ -10,26 +12,24 @@ module.exports.handler = (event, context, callback) => {
   doHandle(event, callback, db, r.calculateElapsedTime)
 }
 
+const validator = r.compositeValidator([
+  r.startValidator,
+  r.rowsValidator
+])
+module.exports.validator = validator
+
 function doHandle (event, callback, db, elapsedTimeCalculator) {
-  prepareResult(event, db, elapsedTimeCalculator).then(successResult => {
-    r.json.ok(callback, successResult, event)
-  }).catch(error => {
-    console.error('Failed to get allSpeciesData', error)
-    r.json.internalServerError(callback)
+  r.handleJsonGet(event, callback, db, validator, responder, {
+    event: event,
+    elapsedTimeCalculator: elapsedTimeCalculator
   })
 }
 
-module.exports.prepareResult = prepareResult
-function prepareResult (event, db, elapsedTimeCalculator) {
-  return new Promise((resolve, reject) => {
-    try {
-      let processStart = r.now()
-      let params = extractParams(event) // FIXME handle thrown Errors for invalid request
-      resolve(doAllSpeciesQuery(event, params, processStart, db, elapsedTimeCalculator))
-    } catch (error) {
-      reject(error)
-    }
-  })
+module.exports.responder = responder
+function responder (db, queryStringParameters, extrasProvider) {
+  let processStart = r.now()
+  let params = extractParams(queryStringParameters)
+  return doAllSpeciesQuery(extrasProvider.event, params, processStart, db, extrasProvider.elapsedTimeCalculator)
 }
 
 module.exports.doAllSpeciesQuery = doAllSpeciesQuery
@@ -51,7 +51,6 @@ function doQuery (event, params, processStart, db, elapsedTimeCalculator, record
       throw new Error('SQL result problem: result from count query did not have exactly one row. Result=' + JSON.stringify(count))
     }
     let numFound = count[0][recordsHeldField]
-    // TODO validate  here
     let isRecordCountMismatch = records.length === 0 && numFound > 0
     if (isRecordCountMismatch) {
       throw new Error(`Data problem: records.length=0 while numFound=${numFound}, suspect the record query is broken`)
@@ -151,9 +150,9 @@ function getCountSql (whereFragment) {
 }
 
 module.exports.extractParams = extractParams
-function extractParams (event) {
+function extractParams (queryStringParameters) {
   return {
-    start: r.getOptionalNumberParam(event, 'start', defaultStart),
-    rows: r.getOptionalNumberParam(event, 'rows', defaultRows) // TODO validate > 0
+    start: r.getOptionalNumber(queryStringParameters, startParam, defaultStart),
+    rows: r.getOptionalNumber(queryStringParameters, rowsParam, defaultRows)
   }
 }

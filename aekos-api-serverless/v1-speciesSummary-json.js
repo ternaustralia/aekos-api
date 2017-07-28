@@ -5,7 +5,7 @@ const speciesNamesParam = yaml.load('./constants.yml').paramNames.speciesName.mu
 
 module.exports.handler = (event, context, callback) => {
   let db = require('./db-helper')
-  r.handlePost(event, callback, db, r.speciesNamesValidator, responder)
+  r.handleJsonPost(event, callback, db, r.speciesNamesValidator, responder)
 }
 
 module.exports._testonly = {

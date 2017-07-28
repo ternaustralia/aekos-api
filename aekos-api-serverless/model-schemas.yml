@@ -73,6 +73,28 @@ exports:
           type: array
           items:
             type: string
+    TraitDataPostRequest:
+      type: object
+      properties:
+        speciesNames:
+          type: array
+          items:
+            type: string
+        traitNames:
+          type: array
+          items:
+            type: string
+    EnvDataPostRequest:
+      type: object
+      properties:
+        speciesNames:
+          type: array
+          items:
+            type: string
+        varNames:
+          type: array
+          items:
+            type: string
   SpeciesSummary:
     type: object
     properties:

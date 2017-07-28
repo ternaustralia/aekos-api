@@ -8,7 +8,7 @@ const defaultPageNum = yaml.load('./constants.yml').defaults.PAGE_NUM
 
 module.exports.handler = (event, context, callback) => {
   let db = require('./db-helper')
-  r.handlePost(event, callback, db, validator, responder)
+  r.handleJsonPost(event, callback, db, validator, responder)
 }
 
 const validator = r.compositeValidator([

@@ -201,63 +201,6 @@ describe('/v2/allSpeciesData-json', () => {
   })
 
   describe('doHandle', () => {
-    let errorMessage = null
-    beforeEach(done => {
-      let stubDb = new StubDB()
-      stubDb.setExecSelectPromiseResponses([
-        [ /* no records */ ],
-        [{ recordsHeld: 31 }]
-      ])
-      let event = {
-        queryStringParameters: {
-          rows: '15',
-          start: '0'
-        },
-        headers: {
-          Host: 'api.aekos.org.au',
-          'X-Forwarded-Proto': 'https'
-        },
-        requestContext: {
-          path: '/v2/allSpeciesData.json'
-        }
-      }
-      objectUnderTest.prepareResult(event, stubDb, () => { return 42 }).then(_ => {
-        fail()
-      }).catch(error => {
-        errorMessage = error.message
-        done()
-      })
-    })
-
-    it('should throw the expected exception when recordsHeld > 0 but no actual records are returned', () => {
-      expect(errorMessage).toBe('Data problem: records.length=0 while numFound=31, suspect the record query is broken')
-    })
-  })
-
-  describe('extractParams', () => {
-    it('should extract the params when they are present', () => {
-      let event = {
-        queryStringParameters: {
-          rows: '15',
-          start: '0'
-        }
-      }
-      let result = objectUnderTest.extractParams(event, new StubDB())
-      expect(result.rows).toBe(15)
-      expect(result.start).toBe(0)
-    })
-
-    it('should default the paging info', () => {
-      let event = {
-        queryStringParameters: {}
-      }
-      let result = objectUnderTest.extractParams(event, new StubDB())
-      expect(result.rows).toBe(20)
-      expect(result.start).toBe(0)
-    })
-  })
-
-  describe('doHandle', () => {
     let result = null
     beforeEach(done => {
       let stubDb = new StubDB()
@@ -283,6 +226,85 @@ describe('/v2/allSpeciesData-json', () => {
         message: 'Sorry about that, something has gone wrong',
         statusCode: 500
       })
+    })
+  })
+
+  describe('responder', () => {
+    let errorMessage = null
+    beforeEach(done => {
+      let stubDb = new StubDB()
+      stubDb.setExecSelectPromiseResponses([
+        [ /* no records */ ],
+        [{ recordsHeld: 31 }]
+      ])
+      let queryStringParameters = {
+        rows: '15',
+        start: '0'
+      }
+      objectUnderTest.responder(stubDb, queryStringParameters, {}).then(_ => {
+        fail()
+      }).catch(error => {
+        errorMessage = error.message
+        done()
+      })
+    })
+
+    it('should throw the expected exception when recordsHeld > 0 but no actual records are returned', () => {
+      expect(errorMessage).toBe('Data problem: records.length=0 while numFound=31, suspect the record query is broken')
+    })
+  })
+
+  describe('extractParams', () => {
+    it('should extract the params when they are present', () => {
+      let queryStringParameters = {
+        rows: '15',
+        start: '0'
+      }
+      let result = objectUnderTest.extractParams(queryStringParameters)
+      expect(result.rows).toBe(15)
+      expect(result.start).toBe(0)
+    })
+
+    it('should default the paging info', () => {
+      let queryStringParameters = null
+      let result = objectUnderTest.extractParams(queryStringParameters)
+      expect(result.rows).toBe(20)
+      expect(result.start).toBe(0)
+    })
+  })
+
+  describe('validator', () => {
+    it('should be valid with no values supplied', () => {
+      let queryStringParameters = null
+      let result = objectUnderTest.validator(queryStringParameters, null)
+      expect(result).toEqual({ isValid: true })
+    })
+
+    it('should be valid with both valid values supplied', () => {
+      let queryStringParameters = {
+        start: '0',
+        rows: '100'
+      }
+      let result = objectUnderTest.validator(queryStringParameters, null)
+      expect(result).toEqual({ isValid: true })
+    })
+
+    it('should be invalid with an invalid start', () => {
+      let queryStringParameters = {
+        start: '-20',
+        rows: '100'
+      }
+      let result = objectUnderTest.validator(queryStringParameters, null)
+      expect(result.isValid).toBe(false)
+    })
+
+    it('should be invalid with an invalid rows', () => {
+      let queryStringParameters = {
+        start: '0',
+        rows: '-100'
+      }
+      let result = objectUnderTest.validator(queryStringParameters, null)
+      expect(result.isValid).toBe(false)
     })
   })
 

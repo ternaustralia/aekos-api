@@ -22,3 +22,5 @@
 - add 'links' header to vocab resources with rel="search"
 - figure out what rel we can use on search resources to point to data resources
 - create example client
+- make sure env var filtering and trait filtering work
+- update search resources that still use single values for requests

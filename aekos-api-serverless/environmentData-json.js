@@ -4,8 +4,8 @@ let Set = require('collections/set')
 let speciesDataJson = require('./speciesData-json')
 let allSpeciesDataJson = require('./allSpeciesData-json')
 let yaml = require('yamljs')
-const speciesNameParam = yaml.load('./constants.yml').paramNames.SINGLE_SPECIES_NAME
-const varNameParam = yaml.load('./constants.yml').paramNames.SINGLE_VAR_NAME
+const speciesNamesParam = yaml.load('./constants.yml').paramNames.speciesName.multiple
+const varNamesParam = yaml.load('./constants.yml').paramNames.varName.multiple
 const recordsHeldField = 'recordsHeld'
 const visitKeySeparator = '#'
 
@@ -15,25 +15,29 @@ module.exports.handler = (event, context, callback) => {
 }
 
 function doHandle (event, callback, db, elapsedTimeCalculator) {
-  let processStart = r.now()
-  if (!r.isQueryStringParamPresent(event, speciesNameParam)) {
-    // FIXME change message when we swap to POST
-    r.json.badRequest(callback, `the '${speciesNameParam}' query string parameter must be supplied`)
-    return
-  }
-  let params = extractParams(event, db)
-  doQuery(event, params, processStart, db, elapsedTimeCalculator).then(successResult => {
-    r.json.ok(callback, successResult, event)
-  }).catch(error => {
-    console.error('Failed to get environmentData', error)
-    r.json.internalServerError(callback)
+  r.handleJsonPost(event, callback, db, validator, responder, {
+    event: event,
+    elapsedTimeCalculator: elapsedTimeCalculator
   })
+}
+
+const validator = r.compositeValidator([
+  speciesDataJson.validator
+  // TODO add env vars validator
+])
+module.exports.validator = validator
+
+module.exports.responder = responder
+function responder (requestBody, db, queryStringParameters, extrasProvider) {
+  let processStart = r.now()
+  let params = extractParams(requestBody, queryStringParameters, db)
+  return doQuery(extrasProvider.event, params, processStart, db, extrasProvider.elapsedTimeCalculator)
 }
 
 module.exports.doQuery = doQuery
 function doQuery (event, params, processStart, db, elapsedTimeCalculator) {
-  const recordsSql = getRecordsSql(params.speciesName, params.start, params.rows)
-  const countSql = getCountSql(params.speciesName)
+  const recordsSql = getRecordsSql(params.speciesNames, params.start, params.rows)
+  const countSql = getCountSql(params.speciesNames)
   let recordsPromise = db.execSelectPromise(recordsSql)
   let countPromise = db.execSelectPromise(countSql)
   return Promise.all([recordsPromise, countPromise]).then(values => {
@@ -53,8 +57,8 @@ function doQuery (event, params, processStart, db, elapsedTimeCalculator) {
         params: {
           rows: params.rows,
           start: params.start,
-          [speciesNameParam]: params.unescapedSpeciesName,
-          [varNameParam]: params.unescapedVarName
+          [speciesNamesParam]: params.unescapedSpeciesNames,
+          [varNamesParam]: params.unescapedVarNames
         },
         totalPages: totalPages
       },
@@ -77,7 +81,7 @@ function doQuery (event, params, processStart, db, elapsedTimeCalculator) {
     })
     let varsSql = getVarsSql(visitKeyClauses)
     let varsPromise = db.execSelectPromise(varsSql)
-    let speciesNamesClauses = params.speciesName // FIXME change to list of escaped names
+    let speciesNamesClauses = params.speciesNames
     let speciesNamesSql = getSpeciesNamesSql(visitKeyClauses, speciesNamesClauses)
     let speciesNamesPromise = db.execSelectPromise(speciesNamesSql)
     let continuePromiseChainProcessingPromise = new Promise(resolve => {
@@ -262,28 +266,27 @@ function getVisitKeyClauses (visitKeys) {
 }
 
 module.exports.extractParams = extractParams
-function extractParams (event, db) {
-  let speciesParams = speciesDataJson.extractParams(event, db)
-  let varName = null // FIXME get optional varName(s)
-  let unescapedVarName = null // FIXME do escaping
-  return new Params(speciesParams.speciesName, speciesParams.unescapedSpeciesName, speciesParams.start,
-    speciesParams.rows, varName, unescapedVarName)
+function extractParams (requestBody, queryStringParameters, db) {
+  let speciesParams = speciesDataJson.extractParams(requestBody, queryStringParameters, db)
+  let varNames = r.getOptionalArray(requestBody, varNamesParam, db)
+  return new Params(speciesParams.speciesNames, speciesParams.unescapedSpeciesNames, speciesParams.start,
+    speciesParams.rows, varNames.escaped, varNames.unescaped)
 }
 
 class Params {
   constructor (
-    speciesName,
-    unescapedSpeciesName,
+    speciesNames,
+    unescapedSpeciesNames,
     start,
     rows,
-    varName,
-    unescapedVarName
+    varNames,
+    unescapedVarNames
   ) {
-    this.speciesName = speciesName
-    this.unescapedSpeciesName = unescapedSpeciesName
+    this.speciesNames = speciesNames
+    this.unescapedSpeciesNames = unescapedSpeciesNames
     this.start = start
     this.rows = rows
-    this.varName = varName
-    this.unescapedVarName = unescapedVarName
+    this.varNames = varNames
+    this.unescapedVarNames = unescapedVarNames
   }
 }

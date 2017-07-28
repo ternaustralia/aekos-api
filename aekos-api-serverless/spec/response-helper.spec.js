@@ -1,6 +1,7 @@
 'use strict'
 let ConsoleSilencer = require('./ConsoleSilencer')
 let consoleSilencer = new ConsoleSilencer()
+let StubDB = require('./StubDB')
 
 describe('response-helper', function () {
   let objectUnderTest = require('../response-helper')
@@ -413,45 +414,58 @@ describe('response-helper', function () {
     })
   })
 
-  describe('.handlePost()', () => {
-    const alwaysValidValidator = (body) => { return { isValid: true } }
+  describe('.handleJsonPost()', () => {
+    const alwaysValidValidator = () => { return { isValid: true } }
     const jsonAndCorsHeaders = {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Credentials': true,
       'Content-Type': "'application/json'"
     }
 
-    it('should return a 400 when validation fails', (done) => {
+    it('should return a 400 when validation fails', done => {
       let callback = (_, result) => {
         expect(result.statusCode).toBe(400)
         expect(result.headers).toEqual(jsonAndCorsHeaders)
         done()
       }
-      let validator = (body) => {
+      let validator = () => {
         return { isValid: false, message: 'fail town' }
       }
-      objectUnderTest.handlePost({ body: '{}' }, callback, null, validator,
+      objectUnderTest.handleJsonPost({ body: '{}' }, callback, null, validator,
+        function () { fail('Should not have been called') })
+    })
+
+    it('should return a 400 when no body is supplied. AWS provides body: null but this will help debug tests', done => {
+      let callback = (_, result) => {
+        expect(result.statusCode).toBe(400)
+        expect(result.headers).toEqual(jsonAndCorsHeaders)
+        done()
+      }
+      let validator = () => {
+        return { isValid: false, message: 'fail town' }
+      }
+      objectUnderTest.handleJsonPost({ /* no body */ }, callback, null, validator,
         function () { fail('Should not have been called') })
     })
 
     it('should pass the requestBody to the validator', () => {
       let passedRequestBody = null
-      let validator = (body, _) => {
+      let validator = (_, body) => {
         passedRequestBody = body
         return { isValid: false, message: 'might as well stop here' }
       }
-      objectUnderTest.handlePost({ body: '{"foo":123}' }, () => {}, null, validator,
+      objectUnderTest.handleJsonPost({ body: '{"foo":123}' }, () => {}, null, validator,
         function () { fail('Should not have been called') })
       expect(passedRequestBody).toEqual({foo: 123})
     })
 
     it('should pass the query string to the validator', () => {
       let passedQueryString = null
-      let validator = (_, queryString) => {
+      let validator = (queryString, _) => {
         passedQueryString = queryString
         return { isValid: false, message: 'might as well stop here' }
       }
-      objectUnderTest.handlePost({ body: '{}', queryStringParameters: {foo: 123} }, () => {},
+      objectUnderTest.handleJsonPost({ body: '{}', queryStringParameters: {foo: 123} }, () => {},
         null, validator, function () { fail('Should not have been called') })
       expect(passedQueryString).toEqual({foo: 123})
     })
@@ -462,7 +476,7 @@ describe('response-helper', function () {
         passedRequestBody = body
         return new Promise((resolve, reject) => { resolve() })
       }
-      objectUnderTest.handlePost({ body: '{"foo":123}' }, () => {}, null,
+      objectUnderTest.handleJsonPost({ body: '{"foo":123}' }, () => {}, null,
         () => { return { isValid: true } }, responder)
       expect(passedRequestBody).toEqual({foo: 123})
     })
@@ -473,12 +487,12 @@ describe('response-helper', function () {
         passedQueryString = queryStringObj
         return new Promise((resolve, reject) => { resolve() })
       }
-      objectUnderTest.handlePost({ body: '{}', queryStringParameters: {foo: 123} }, () => {}, null,
+      objectUnderTest.handleJsonPost({ body: '{}', queryStringParameters: {foo: 123} }, () => {}, null,
         () => { return { isValid: true } }, responder)
       expect(passedQueryString).toEqual({foo: 123})
     })
 
-    it('should call the responder when validation succeeds', (done) => {
+    it('should call the responder when validation succeeds', done => {
       let isResponderCalled = false
       let callback = (_, result) => {
         expect(isResponderCalled).toBeTruthy()
@@ -490,10 +504,10 @@ describe('response-helper', function () {
           resolve()
         })
       }
-      objectUnderTest.handlePost({ body: '{}' }, callback, null, alwaysValidValidator, responder)
+      objectUnderTest.handleJsonPost({ body: '{}' }, callback, null, alwaysValidValidator, responder)
     })
 
-    it('should return a 500 when the responder throws as error (outside a promise)', (done) => {
+    it('should return a 500 when the responder throws an error (outside a promise)', done => {
       let callback = (_, result) => {
         consoleSilencer.resetConsoleError()
         expect(result.statusCode).toBe(500)
@@ -503,10 +517,10 @@ describe('response-helper', function () {
         throw new Error('ka-boom')
       }
       consoleSilencer.silenceConsoleError()
-      objectUnderTest.handlePost({ body: '{}' }, callback, null, alwaysValidValidator, responder)
+      objectUnderTest.handleJsonPost({ body: '{}' }, callback, null, alwaysValidValidator, responder)
     })
 
-    it('should return a 500 when the responder throws as error (inside a promise)', (done) => {
+    it('should return a 500 when the responder throws an error (inside a promise)', done => {
       let callback = (_, result) => {
         consoleSilencer.resetConsoleError()
         expect(result.statusCode).toBe(500)
@@ -518,10 +532,10 @@ describe('response-helper', function () {
         })
       }
       consoleSilencer.silenceConsoleError()
-      objectUnderTest.handlePost({ body: '{}' }, callback, null, alwaysValidValidator, responder)
+      objectUnderTest.handleJsonPost({ body: '{}' }, callback, null, alwaysValidValidator, responder)
     })
 
-    it('should return a 500 when the responder rejects the promise', (done) => {
+    it('should return a 500 when the responder rejects the promise', done => {
       let callback = (_, result) => {
         consoleSilencer.resetConsoleError()
         expect(result.statusCode).toBe(500)
@@ -534,10 +548,10 @@ describe('response-helper', function () {
         })
       }
       consoleSilencer.silenceConsoleError()
-      objectUnderTest.handlePost({ body: '{}' }, callback, null, alwaysValidValidator, responder)
+      objectUnderTest.handleJsonPost({ body: '{}' }, callback, null, alwaysValidValidator, responder)
     })
 
-    it('should return the response body when all is successful', (done) => {
+    it('should return the response body when all is successful', done => {
       let callback = (_, result) => {
         expect(result.statusCode).toBe(200)
         expect(result.headers).toEqual(jsonAndCorsHeaders)
@@ -549,7 +563,7 @@ describe('response-helper', function () {
           resolve({ someField: 123 })
         })
       }
-      objectUnderTest.handlePost({ body: '{}' }, callback, null, alwaysValidValidator, responder)
+      objectUnderTest.handleJsonPost({ body: '{}' }, callback, null, alwaysValidValidator, responder)
     })
   })
 
@@ -656,7 +670,7 @@ describe('response-helper', function () {
   })
 
   describe('getOptionalNumberParam', function () {
-    it('can get the value when it is present as a number', function () {
+    it('should pass the query string object to the inner function', function () {
       let event = {
         queryStringParameters: {
           pageSize: 10
@@ -665,51 +679,51 @@ describe('response-helper', function () {
       let result = objectUnderTest.getOptionalNumberParam(event, 'pageSize', 20)
       expect(result).toBe(10)
     })
+  })
 
-    it('can get the value when it is present as a string', function () {
-      let event = {
-        queryStringParameters: {
-          pageSize: '42'
-        }
+  describe('getOptionalNumber', () => {
+    it('can get the value when it is present as a number', () => {
+      let containerObj = {
+        pageSize: 10
       }
-      let result = objectUnderTest.getOptionalNumberParam(event, 'pageSize', 20)
+      let result = objectUnderTest.getOptionalNumber(containerObj, 'pageSize', 20)
+      expect(result).toBe(10)
+    })
+
+    it('can get the value when it is present as a string', () => {
+      let containerObj = {
+        pageSize: '42'
+      }
+      let result = objectUnderTest.getOptionalNumber(containerObj, 'pageSize', 20)
       expect(result).toBe(42)
     })
 
-    it('can get the default when the value is NOT present', function () {
-      let event = {
-        queryStringParameters: {
-          somethingElse: 'foo'
-        }
+    it('can get the default when the value is NOT present', () => {
+      let containerObj = {
+        somethingElse: 'foo'
       }
-      let result = objectUnderTest.getOptionalNumberParam(event, 'pageSize', 20)
+      let result = objectUnderTest.getOptionalNumber(containerObj, 'pageSize', 20)
       expect(result).toBe(20)
     })
 
-    it('can get the default when no params are present', function () {
-      let event = {
-        queryStringParameters: null
-      }
-      let result = objectUnderTest.getOptionalNumberParam(event, 'pageSize', 20)
+    it('can get the default when no params are present', () => {
+      let containerObj = null
+      let result = objectUnderTest.getOptionalNumber(containerObj, 'pageSize', 20)
       expect(result).toBe(20)
     })
 
-    it('can get the default when the default is a numeric string', function () {
-      let event = {
-        queryStringParameters: null
-      }
-      let result = objectUnderTest.getOptionalNumberParam(event, 'pageSize', '20')
+    it('can get the default when the default is a numeric string', () => {
+      let containerObj = null
+      let result = objectUnderTest.getOptionalNumber(containerObj, 'pageSize', '20')
       expect(result).toBe(20)
     })
 
-    it('should throw when we pass a string that cannot be parsed to a number', function () {
-      let event = {
-        queryStringParameters: {
-          pageSize: 'blah'
-        }
+    it('should throw when we pass a string that cannot be parsed to a number', () => {
+      let containerObj = {
+        pageSize: 'blah'
       }
       expect(() => {
-        objectUnderTest.getOptionalNumberParam(event, 'pageSize', 20)
+        objectUnderTest.getOptionalNumber(containerObj, 'pageSize', 20)
       }).toThrow()
     })
   })
@@ -927,7 +941,7 @@ describe('response-helper', function () {
       expect(trackerModule.hasBeenCalled()).toBeTruthy()
     })
 
-    it('should return a 400 when it cannot handle the Accept header', (done) => {
+    it('should return a 400 when it cannot handle the Accept header', done => {
       let trackerModule = new TrackCallsModule()
       let cnHandler = objectUnderTest.newContentNegotiationHandler(() => { }, trackerModule)
       let event = {
@@ -947,7 +961,7 @@ describe('response-helper', function () {
       let requestBody = {
         speciesNames: ['species one']
       }
-      let result = objectUnderTest.speciesNamesValidator(requestBody)
+      let result = objectUnderTest.speciesNamesValidator(null, requestBody)
       expect(result.isValid).toBe(true)
     })
 
@@ -955,13 +969,13 @@ describe('response-helper', function () {
       let requestBody = {
         speciesNames: []
       }
-      let result = objectUnderTest.speciesNamesValidator(requestBody)
+      let result = objectUnderTest.speciesNamesValidator(null, requestBody)
       expect(result.isValid).toBe(false)
     })
 
     it('should be invalid when the body is not an object', () => {
       let requestBody = 'a string'
-      let result = objectUnderTest.speciesNamesValidator(requestBody)
+      let result = objectUnderTest.speciesNamesValidator(null, requestBody)
       expect(result.isValid).toBe(false)
     })
 
@@ -969,7 +983,7 @@ describe('response-helper', function () {
       let requestBody = {
         someOtherField: 123
       }
-      let result = objectUnderTest.speciesNamesValidator(requestBody)
+      let result = objectUnderTest.speciesNamesValidator(null, requestBody)
       expect(result.isValid).toBe(false)
     })
 
@@ -977,7 +991,7 @@ describe('response-helper', function () {
       let requestBody = {
         speciesNames: 'not an array'
       }
-      let result = objectUnderTest.speciesNamesValidator(requestBody)
+      let result = objectUnderTest.speciesNamesValidator(null, requestBody)
       expect(result.isValid).toBe(false)
     })
 
@@ -985,8 +999,56 @@ describe('response-helper', function () {
       let requestBody = {
         speciesNames: [1, 2, 3]
       }
-      let result = objectUnderTest.speciesNamesValidator(requestBody)
+      let result = objectUnderTest.speciesNamesValidator(null, requestBody)
       expect(result.isValid).toBe(false)
+    })
+
+    it('should be invalid when no body is present (null)', () => {
+      let requestBody = null
+      let result = objectUnderTest.speciesNamesValidator(null, requestBody)
+      expect(result.isValid).toBe(false)
+    })
+
+    it('should be invalid when no body is present (undefined)', () => {
+      let event = {}
+      let result = objectUnderTest.speciesNamesValidator(null, event.bodyWillBeUndefined)
+      expect(result.isValid).toBe(false)
+    })
+  })
+
+  describe('.getOptionalArray()', () => {
+    it('should get the array when present', () => {
+      let requestBody = {
+        speciesNames: ['species one']
+      }
+      let result = objectUnderTest.getOptionalArray(requestBody, 'speciesNames', new StubDB())
+      expect(result).toEqual({
+        escaped: "'species one'",
+        unescaped: ['species one']
+      })
+    })
+
+    it('should return the expected result when no array is present', () => {
+      let requestBody = { /* empty */ }
+      let result = objectUnderTest.getOptionalArray(requestBody, 'speciesNames', new StubDB())
+      expect(result).toEqual({
+        escaped: null,
+        unescaped: null
+      })
+    })
+
+    it('should throw the expected error when the value is present but not an array', () => {
+      let requestBody = {
+        speciesNames: 'not an array'
+      }
+      try {
+        objectUnderTest.getOptionalArray(requestBody, 'speciesNames', new StubDB())
+        fail()
+      } catch (error) {
+        // success!
+        expect(error.message).toBe("Programmer problem: the 'speciesNames' field (value='not an " +
+        "array') is not an array, this should've been caught by validation")
+      }
     })
   })
 })
@@ -1027,36 +1089,62 @@ describe('response-helper', () => {
     })
   })
 
-  describe('.queryStringParamIsNumberIfPresentValidator()', () => {
+  describe('.queryStringParamIsPositiveNumberIfPresentValidator()', () => {
     it('should pass validation when the param is NOT present', () => {
-      let objectUnderTest = responseHelper.queryStringParamIsNumberIfPresentValidator('param1')
+      let objectUnderTest = responseHelper.queryStringParamIsPositiveNumberIfPresentValidator('param1')
       let queryStringObject = {}
-      let result = objectUnderTest(null, queryStringObject)
+      let result = objectUnderTest(queryStringObject, null)
       expect(result).toEqual({ isValid: true })
     })
 
-    it('should pass validation when no params are present', () => {
-      let objectUnderTest = responseHelper.queryStringParamIsNumberIfPresentValidator('param1')
+    it('should pass validation when no params are present (null)', () => {
+      let objectUnderTest = responseHelper.queryStringParamIsPositiveNumberIfPresentValidator('param1')
       let queryStringObject = null
-      let result = objectUnderTest(null, queryStringObject)
+      let result = objectUnderTest(queryStringObject, null)
+      expect(result).toEqual({ isValid: true })
+    })
+
+    it('should pass validation when no params are present (undefined)', () => {
+      let objectUnderTest = responseHelper.queryStringParamIsPositiveNumberIfPresentValidator('param1')
+      let event = {}
+      let result = objectUnderTest(event.willBeUndefined, null)
       expect(result).toEqual({ isValid: true })
     })
 
     it('should pass validation when the param is present and a number', () => {
-      let objectUnderTest = responseHelper.queryStringParamIsNumberIfPresentValidator('param1')
+      let objectUnderTest = responseHelper.queryStringParamIsPositiveNumberIfPresentValidator('param1')
       let queryStringObject = {
         param1: '123' // API Gateway passes strings
       }
-      let result = objectUnderTest(null, queryStringObject)
+      let result = objectUnderTest(queryStringObject, null)
       expect(result).toEqual({ isValid: true })
     })
 
+    it('should pass validation when the param is zero', () => {
+      let objectUnderTest = responseHelper.queryStringParamIsPositiveNumberIfPresentValidator('param1')
+      let queryStringObject = {
+        param1: '0'
+      }
+      let result = objectUnderTest(queryStringObject, null)
+      expect(result).toEqual({ isValid: true })
+    })
+
+    it('should fail validation when the param is present but is a negative number', () => {
+      let objectUnderTest = responseHelper.queryStringParamIsPositiveNumberIfPresentValidator('param1')
+      let queryStringObject = {
+        param1: '-1'
+      }
+      let result = objectUnderTest(queryStringObject, null)
+      expect(result.isValid).toBe(false)
+      expect(result.message).toBeDefined()
+    })
+
     it('should fail validation when the param is present and NOT a number', () => {
-      let objectUnderTest = responseHelper.queryStringParamIsNumberIfPresentValidator('param1')
+      let objectUnderTest = responseHelper.queryStringParamIsPositiveNumberIfPresentValidator('param1')
       let queryStringObject = {
         param1: 'asdf'
       }
-      let result = objectUnderTest(null, queryStringObject)
+      let result = objectUnderTest(queryStringObject, null)
       expect(result.isValid).toBe(false)
       expect(result.message).toBeDefined()
     })

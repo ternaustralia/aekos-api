@@ -46,9 +46,11 @@ describe('/v1/environmentData-json', () => {
         speciesNamesResult
       ])
       let event = {
-        queryStringParameters: {
-          speciesName: 'species one'
-        },
+        body: JSON.stringify({
+          speciesNames: ['species one']
+          // don't supply 'varNames'
+        }),
+        queryStringParameters: null,
         headers: {
           Host: 'api.aekos.org.au',
           'X-Forwarded-Proto': 'https'
@@ -70,8 +72,8 @@ describe('/v1/environmentData-json', () => {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
         'Content-Type': "'application/json'",
-        link: '<https://api.aekos.org.au/v1/environmentData.json?speciesName=species%20one&start=20>; rel="next", ' +
-              '<https://api.aekos.org.au/v1/environmentData.json?speciesName=species%20one&start=20>; rel="last"'
+        link: '<https://api.aekos.org.au/v1/environmentData.json?start=20>; rel="next", ' +
+              '<https://api.aekos.org.au/v1/environmentData.json?start=20>; rel="last"'
       })
       expect(JSON.parse(result.body)).toEqual({
         responseHeader: {
@@ -81,8 +83,8 @@ describe('/v1/environmentData-json', () => {
           params: {
             rows: 20,
             start: 0,
-            speciesName: 'species one',
-            varName: null
+            speciesNames: ['species one'],
+            varNames: null
           },
           totalPages: 2
         },

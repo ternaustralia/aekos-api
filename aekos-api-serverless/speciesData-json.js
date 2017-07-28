@@ -2,45 +2,34 @@
 let r = require('./response-helper')
 let yaml = require('yamljs')
 let allSpeciesDataJson = require('./allSpeciesData-json')
-const speciesNameParam = yaml.load('./constants.yml').paramNames.SINGLE_SPECIES_NAME
+const speciesNamesParam = yaml.load('./constants.yml').paramNames.speciesName.multiple
 
 module.exports.handler = (event, context, callback) => {
   let db = require('./db-helper')
   doHandle(event, callback, db, r.calculateElapsedTime)
 }
 
+const validator = r.compositeValidator([
+  allSpeciesDataJson.validator,
+  r.speciesNamesValidator
+])
+module.exports.validator = validator
+
 function doHandle (event, callback, db, elapsedTimeCalculator) {
-  let isValid = validator(event, callback)
-  if (!isValid) {
-    return
-  }
-  prepareResult(event, db, elapsedTimeCalculator).then(successResult => {
-    r.json.ok(callback, successResult, event)
-  }).catch(error => {
-    console.error('Failed to get speciesData', error)
-    r.json.internalServerError(callback)
+  r.handleJsonPost(event, callback, db, validator, responder, {
+    event: event,
+    elapsedTimeCalculator: elapsedTimeCalculator
   })
 }
 
-module.exports.validator = validator
-function validator (event, callback) {
-  const valid = true
-  const invalid = false
-  if (r.isQueryStringParamPresent(event, speciesNameParam)) {
-    return valid
-  }
-  // FIXME change message when we swap to POST
-  r.json.badRequest(callback, `the '${speciesNameParam}' query string parameter must be supplied`)
-  return invalid
-}
-
-module.exports.prepareResult = prepareResult
-function prepareResult (event, db, elapsedTimeCalculator) {
+module.exports.responder = responder
+function responder (requestBody, db, queryStringParameters, extrasProvider) {
   return new Promise((resolve, reject) => {
     try {
       let processStart = r.now()
-      let params = extractParams(event, db) // FIXME handle thrown Errors for invalid request
-      let result = doQuery(event, params, processStart, false, db, elapsedTimeCalculator)
+      let params = extractParams(requestBody, queryStringParameters, db)
+      const dontIncludeSpeciesRecordId = false
+      let result = doQuery(extrasProvider.event, params, processStart, dontIncludeSpeciesRecordId, db, extrasProvider.elapsedTimeCalculator)
       resolve(result)
     } catch (error) {
       reject(error)
@@ -50,11 +39,11 @@ function prepareResult (event, db, elapsedTimeCalculator) {
 
 module.exports.doQuery = doQuery
 function doQuery (event, params, processStart, includeSpeciesRecordId, db, elapsedTimeCalculator) {
-  const recordsSql = getRecordsSql(params.speciesName, params.start, params.rows, includeSpeciesRecordId)
-  const countSql = getCountSql(params.speciesName)
+  const recordsSql = getRecordsSql(params.speciesNames, params.start, params.rows, includeSpeciesRecordId)
+  const countSql = getCountSql(params.speciesNames)
   return allSpeciesDataJson.doQuery(event, params, processStart, db, elapsedTimeCalculator, recordsSql, countSql).then(successResult => {
     successResult.responseHeader.elapsedTime = elapsedTimeCalculator(processStart)
-    successResult.responseHeader.params[speciesNameParam] = params.unescapedSpeciesName // FIXME change to support array
+    successResult.responseHeader.params[speciesNamesParam] = params.unescapedSpeciesNames
     return successResult
   })
 }
@@ -83,22 +72,21 @@ function buildWhereFragment (escapedSpeciesName) {
 }
 
 module.exports.extractParams = extractParams
-function extractParams (event, db) {
-  let allSpeciesParams = allSpeciesDataJson.extractParams(event)
-  let unescapedSpeciesName = event.queryStringParameters[speciesNameParam] // FIXME handle escaping a list when we can get multiple names
-  let escapedSpeciesName = db.escape(unescapedSpeciesName)
-  return new Params(escapedSpeciesName, unescapedSpeciesName, allSpeciesParams.start, allSpeciesParams.rows)
+function extractParams (requestBody, queryStringParameters, db) {
+  let allSpeciesParams = allSpeciesDataJson.extractParams(queryStringParameters)
+  let speciesNames = r.getOptionalArray(requestBody, speciesNamesParam, db)
+  return new Params(speciesNames.escaped, speciesNames.unescaped, allSpeciesParams.start, allSpeciesParams.rows)
 }
 
 class Params {
   constructor (
-    speciesName,
-    unescapedSpeciesName,
+    speciesNames,
+    unescapedSpeciesNames,
     start,
     rows
   ) {
-    this.speciesName = speciesName
-    this.unescapedSpeciesName = unescapedSpeciesName
+    this.speciesNames = speciesNames
+    this.unescapedSpeciesNames = unescapedSpeciesNames
     this.start = start
     this.rows = rows
   }

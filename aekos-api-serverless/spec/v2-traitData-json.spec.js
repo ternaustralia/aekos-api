@@ -21,9 +21,11 @@ describe('/v2/traitData-json', () => {
         ]
       ])
       let event = {
+        body: JSON.stringify({
+          speciesNames: ['species one']
+          // don't supply 'traitNames'
+        }),
         queryStringParameters: {
-          speciesName: 'species one',
-          // don't supply 'traitName'
           rows: '15',
           start: '0'
         },
@@ -48,8 +50,8 @@ describe('/v2/traitData-json', () => {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
         'Content-Type': "'application/json'",
-        link: '<https://api.aekos.org.au/v2/traitData.json?speciesName=species%20one&rows=15&start=15>; rel="next", ' +
-              '<https://api.aekos.org.au/v2/traitData.json?speciesName=species%20one&rows=15&start=30>; rel="last"'
+        link: '<https://api.aekos.org.au/v2/traitData.json?rows=15&start=15>; rel="next", ' +
+              '<https://api.aekos.org.au/v2/traitData.json?rows=15&start=30>; rel="last"'
       })
       expect(JSON.parse(result.body)).toEqual({
         responseHeader: {
@@ -59,8 +61,8 @@ describe('/v2/traitData-json', () => {
           params: {
             rows: 15,
             start: 0,
-            speciesName: 'species one',
-            traitName: null
+            speciesNames: ['species one'],
+            traitNames: null
           },
           totalPages: 3
         },
@@ -89,9 +91,11 @@ describe('/v2/traitData-json', () => {
         [ ]
       ])
       let event = {
+        body: JSON.stringify({
+          speciesNames: ['species eleven'],
+          traitNames: ['trait one']
+        }),
         queryStringParameters: {
-          speciesName: 'species one',
-          traitName: 'trait one',
           rows: '15',
           start: '0'
         },
@@ -113,7 +117,7 @@ describe('/v2/traitData-json', () => {
     it('should echo the supplied trait name', () => {
       expect(result.statusCode).toBe(200)
       let responseHeader = JSON.parse(result.body).responseHeader
-      expect(responseHeader.params.traitName).toBe('trait one')
+      expect(responseHeader.params.traitNames).toEqual(['trait one'])
     })
   })
 
@@ -127,16 +131,12 @@ describe('/v2/traitData-json', () => {
         [ ]
       ])
       let event = {
+        body: JSON.stringify({
+          // don't supply 'speciesNames'
+          traitNames: ['trait one']
+        }),
         queryStringParameters: {
-          // don't supply 'speciesName'
           start: '0'
-        },
-        headers: {
-          Host: 'api.aekos.org.au',
-          'X-Forwarded-Proto': 'https'
-        },
-        requestContext: {
-          path: '/v2/traitData.json'
         }
       }
       let callback = (_, theResult) => {
@@ -146,7 +146,7 @@ describe('/v2/traitData-json', () => {
       objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 42 })
     })
 
-    it('should return a 400 response when we do not supply speciesName', () => {
+    it('should return a 400 response when we do not supply speciesNames', () => {
       expect(result.statusCode).toBe(400)
       expect(result.headers).toEqual({
         'Access-Control-Allow-Origin': '*',
@@ -154,7 +154,7 @@ describe('/v2/traitData-json', () => {
         'Content-Type': "'application/json'"
       })
       expect(JSON.parse(result.body)).toEqual({
-        message: "the 'speciesName' query string parameter must be supplied",
+        message: 'No species names were supplied',
         statusCode: 400
       })
     })
@@ -162,34 +162,33 @@ describe('/v2/traitData-json', () => {
 
   describe('extractParams', () => {
     it('should extract the params when they are present', () => {
-      let event = {
-        queryStringParameters: {
-          speciesName: 'species one',
-          traitName: 'trait one',
-          rows: '15',
-          start: '0'
-        }
+      let queryStringParameters = {
+        rows: '15',
+        start: '0'
       }
-      let result = objectUnderTest.extractParams(event, new StubDB())
-      expect(result.speciesName).toBe("'species one'")
-      expect(result.unescapedSpeciesName).toBe('species one')
-      expect(result.traitName).toBe("'trait one'")
-      expect(result.unescapedTraitName).toBe('trait one')
+      let requestBody = {
+        speciesNames: ['species five'],
+        traitNames: ['trait one']
+      }
+      let result = objectUnderTest.extractParams(requestBody, queryStringParameters, new StubDB())
+      expect(result.speciesNames).toBe("'species five'")
+      expect(result.unescapedSpeciesNames).toEqual(['species five'])
+      expect(result.traitNames).toBe("'trait one'")
+      expect(result.unescapedTraitNames).toEqual(['trait one'])
       expect(result.rows).toBe(15)
       expect(result.start).toBe(0)
     })
 
     it('should default the paging info', () => {
-      let event = {
-        queryStringParameters: {
-          speciesName: 'species two'
-        }
+      let requestBody = {
+        speciesNames: ['species two']
       }
-      let result = objectUnderTest.extractParams(event, new StubDB())
-      expect(result.speciesName).toBe("'species two'")
-      expect(result.unescapedSpeciesName).toBe('species two')
-      expect(result.traitName).toBeNull()
-      expect(result.unescapedTraitName).toBeNull()
+      let queryStringParameters = null
+      let result = objectUnderTest.extractParams(requestBody, queryStringParameters, new StubDB())
+      expect(result.speciesNames).toBe("'species two'")
+      expect(result.unescapedSpeciesNames).toEqual(['species two'])
+      expect(result.traitNames).toBeNull()
+      expect(result.unescapedTraitNames).toBeNull()
       expect(result.rows).toBe(20)
       expect(result.start).toBe(0)
     })

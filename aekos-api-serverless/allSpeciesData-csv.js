@@ -43,17 +43,30 @@ module.exports.handler = (event, context, callback) => {
   doHandle(event, callback, db, r.calculateElapsedTime)
 }
 
+const validator = r.compositeValidator([
+  allSpeciesDataJson.validator
+  // TODO validate download query string parameter
+])
+
 function doHandle (event, callback, db, elapsedTimeCalculator) {
-  let csvHeaders = getCsvHeadersForRequestedVersion(event)
-  let processStart = r.now()
-  let params = allSpeciesDataJson.extractParams(event, db)
-  allSpeciesDataJson.doAllSpeciesQuery(event, params, processStart, db, elapsedTimeCalculator).then(successResult => {
-    let result = mapJsonToCsv(successResult.response, csvHeaders)
-    let downloadFileName = getCsvDownloadFileName(event, 'Species')
-    r.csv.ok(callback, result, downloadFileName, event, successResult)
-  }).catch(error => {
-    console.error('Failed while building result', error)
-    r.json.internalServerError(callback)
+  r.handleCsvGet(event, callback, db, validator, responder, {
+    event: event,
+    elapsedTimeCalculator: elapsedTimeCalculator
+  })
+}
+
+function responder (db, queryStringParameters, extrasProvider) {
+  return new Promise((resolve, reject) => {
+    let csvHeaders = getCsvHeadersForRequestedVersion(extrasProvider.event)
+    allSpeciesDataJson.responder(db, queryStringParameters, extrasProvider).then(successResult => {
+      let result = mapJsonToCsv(successResult.response, csvHeaders)
+      let downloadFileName = getCsvDownloadFileName(extrasProvider.event, 'Species')
+      resolve({
+        body: result,
+        downloadFileName: downloadFileName,
+        jsonResponse: successResult
+      })
+    }).catch(reject)
   })
 }
 

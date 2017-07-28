@@ -41,9 +41,11 @@ describe('/v1/environmentData-csv', function () {
         speciesNamesResult
       ])
       let event = {
-        queryStringParameters: {
-          speciesName: 'species one'
-        },
+        body: JSON.stringify({
+          speciesNames: ['species one']
+          // don't supply 'varNames'
+        }),
+        queryStringParameters: null,
         headers: {
           Host: 'api.aekos.org.au',
           'X-Forwarded-Proto': 'https'
@@ -65,8 +67,8 @@ describe('/v1/environmentData-csv', function () {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
         'Content-Type': "'text/csv'",
-        'link': '<https://api.aekos.org.au/v1/environmentData.csv?speciesName=species%20one&start=20>; rel="next", ' +
-                '<https://api.aekos.org.au/v1/environmentData.csv?speciesName=species%20one&start=20>; rel="last"'
+        'link': '<https://api.aekos.org.au/v1/environmentData.csv?start=20>; rel="next", ' +
+                '<https://api.aekos.org.au/v1/environmentData.csv?start=20>; rel="last"'
       })
       expect(result.body.split('\n')).toEqual([
         `"decimalLatitude","decimalLongitude","geodeticDatum","locationID","scientificNames","taxonRemarks","eventDate","year","month","bibliographicCitation","samplingProtocol","variable1Name","variable1Value","variable1Units"`,
