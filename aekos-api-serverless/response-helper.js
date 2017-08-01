@@ -2,6 +2,7 @@
 let accepts = require('accepts')
 let yaml = require('yamljs')
 const speciesNamesParam = yaml.load('./constants.yml').paramNames.speciesName.multiple
+const traitNamesParam = yaml.load('./constants.yml').paramNames.traitName.multiple
 const pageSizeParam = yaml.load('./constants.yml').paramNames.PAGE_SIZE
 const pageNumParam = yaml.load('./constants.yml').paramNames.PAGE_NUM
 const startParam = yaml.load('./constants.yml').paramNames.START
@@ -273,7 +274,19 @@ function calculateElapsedTime (startMs) {
 
 function newContentNegotiationHandler (jsonHandler, csvHandler) {
   return function (event, context, callback) {
-    let contentTypeIndicator = getContentType(event)
+    let urlSuffix = getUrlSuffix(event)
+    let contentTypeIndicator
+    switch (urlSuffix) {
+      case 'json':
+        contentTypeIndicator = contentTypes.json
+        break
+      case 'csv':
+        contentTypeIndicator = contentTypes.csv
+        break
+      default:
+        contentTypeIndicator = getContentType(event)
+        break
+    }
     switch (contentTypeIndicator) {
       case contentTypes.json:
         jsonHandler.handler(event, context, callback)
@@ -288,6 +301,19 @@ function newContentNegotiationHandler (jsonHandler, csvHandler) {
         throw new Error(`Programmer error: unknown content type indicator returned '${contentTypeIndicator}'`)
     }
   }
+}
+
+function getUrlSuffix (event) {
+  if (!event || !event.path) {
+    return null
+  }
+  let path = event.path
+  let regex = /\.\w+$/
+  let match = regex.exec(path)
+  if (!match) {
+    return null
+  }
+  return match[0].replace('.', '')
 }
 
 function newVersionHandler (config) {
@@ -403,26 +429,34 @@ const validatorNotValid = message => {
 }
 
 function speciesNamesValidator (_, requestBody) {
+  return genericNamesValidator(speciesNamesParam, _, requestBody)
+}
+
+function traitNamesMandatoryValidator (_, requestBody) {
+  return genericNamesValidator(traitNamesParam, _, requestBody)
+}
+
+function genericNamesValidator (namesParam, _, requestBody) {
   let isRequestBodyNotSupplied = requestBody === null || typeof requestBody === 'undefined'
   if (isRequestBodyNotSupplied) {
     return validatorNotValid('No request body was supplied')
   }
-  let speciesNames = requestBody[speciesNamesParam]
-  let isFieldNotSupplied = typeof speciesNames === 'undefined'
+  let names = requestBody[namesParam]
+  let isFieldNotSupplied = typeof names === 'undefined'
   if (isFieldNotSupplied) {
-    return validatorNotValid('No species names were supplied')
+    return validatorNotValid(`The '${namesParam}' field was not supplied`)
   }
-  let isFieldNotArray = speciesNames.constructor !== Array
+  let isFieldNotArray = names.constructor !== Array
   if (isFieldNotArray) {
-    return validatorNotValid(`The '${speciesNamesParam}' field must be an array (of strings)`)
+    return validatorNotValid(`The '${namesParam}' field must be an array (of strings)`)
   }
-  let isArrayEmpty = speciesNames.length < 1
+  let isArrayEmpty = names.length < 1
   if (isArrayEmpty) {
-    return validatorNotValid(`The '${speciesNamesParam}' field is mandatory and was not supplied`)
+    return validatorNotValid(`The '${namesParam}' field is mandatory and was not supplied`)
   }
-  let isAnyElementNotStrings = speciesNames.some(element => { return typeof element !== 'string' })
+  let isAnyElementNotStrings = names.some(element => { return typeof element !== 'string' })
   if (isAnyElementNotStrings) {
-    return validatorNotValid(`The '${speciesNamesParam}' field must be an array of strings. You supplied a non-string element.`)
+    return validatorNotValid(`The '${namesParam}' field must be an array of strings. You supplied a non-string element.`)
   }
   return validatorIsValid
 }
@@ -527,12 +561,17 @@ module.exports = {
   handleCsvGet: handleCsvGet,
   buildHateoasLinkHeader: buildHateoasLinkHeader,
   isHateoasable: isHateoasable,
+  genericNamesValidator: genericNamesValidator,
   speciesNamesValidator: speciesNamesValidator,
+  traitNamesMandatoryValidator: traitNamesMandatoryValidator,
   compositeValidator: compositeValidator,
   queryStringParamIsPositiveNumberIfPresentValidator: queryStringParamIsPositiveNumberIfPresentValidator,
   pageSizeValidator: queryStringParamIsPositiveNumberIfPresentValidator(pageSizeParam),
   pageNumValidator: queryStringParamIsPositiveNumberIfPresentValidator(pageNumParam),
   startValidator: queryStringParamIsPositiveNumberIfPresentValidator(startParam),
   rowsValidator: queryStringParamIsPositiveNumberIfPresentValidator(rowsParam),
-  newVersionHandler: newVersionHandler
+  newVersionHandler: newVersionHandler,
+  _testonly: {
+    getUrlSuffix: getUrlSuffix
+  }
 }

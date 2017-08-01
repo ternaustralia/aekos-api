@@ -904,58 +904,6 @@ describe('response-helper', function () {
     })
   })
 
-  describe('newContentNegotiationHandler', () => {
-    function TrackCallsModule () {
-      let isCalled = false
-
-      return {
-        handler: () => {
-          isCalled = true
-        },
-        hasBeenCalled: () => {
-          return isCalled
-        }
-      }
-    }
-    it('should call the JSON handler when we have a JSON Accept header', () => {
-      let trackerModule = new TrackCallsModule()
-      let cnHandler = objectUnderTest.newContentNegotiationHandler(trackerModule, () => { })
-      let event = {
-        headers: {
-          Accept: 'application/json'
-        }
-      }
-      cnHandler(event, null, null)
-      expect(trackerModule.hasBeenCalled()).toBeTruthy()
-    })
-
-    it('should call the CSV handler when we have a CSV Accept header', () => {
-      let trackerModule = new TrackCallsModule()
-      let cnHandler = objectUnderTest.newContentNegotiationHandler(() => { }, trackerModule)
-      let event = {
-        headers: {
-          Accept: 'text/csv'
-        }
-      }
-      cnHandler(event, null, null)
-      expect(trackerModule.hasBeenCalled()).toBeTruthy()
-    })
-
-    it('should return a 400 when it cannot handle the Accept header', done => {
-      let trackerModule = new TrackCallsModule()
-      let cnHandler = objectUnderTest.newContentNegotiationHandler(() => { }, trackerModule)
-      let event = {
-        headers: {
-          Accept: 'something/weird'
-        }
-      }
-      cnHandler(event, null, (_, result) => {
-        expect(result.statusCode).toBe(400)
-        done()
-      })
-    })
-  })
-
   describe('.speciesNamesValidator()', () => {
     it('should validate with one species', () => {
       let requestBody = {
@@ -972,47 +920,109 @@ describe('response-helper', function () {
       let result = objectUnderTest.speciesNamesValidator(null, requestBody)
       expect(result.isValid).toBe(false)
     })
+  })
+
+  describe('.traitNamesMandatoryValidator()', () => {
+    it('should validate with one trait name', () => {
+      let requestBody = {
+        traitNames: ['trait one']
+      }
+      let result = objectUnderTest.traitNamesMandatoryValidator(null, requestBody)
+      expect(result.isValid).toBe(true)
+    })
+
+    it('should be invalid with no traits', () => {
+      let requestBody = {
+        traitNames: []
+      }
+      let result = objectUnderTest.traitNamesMandatoryValidator(null, requestBody)
+      expect(result.isValid).toBe(false)
+    })
+  })
+
+  describe('.genericNamesValidator()', () => {
+    it('should validate with one name', () => {
+      let requestBody = {
+        targetNames: ['thingy one']
+      }
+      let result = objectUnderTest.genericNamesValidator('targetNames', null, requestBody)
+      expect(result.isValid).toBe(true)
+    })
+
+    it('should be invalid with no names', () => {
+      let requestBody = {
+        targetNames: []
+      }
+      let result = objectUnderTest.genericNamesValidator('targetNames', null, requestBody)
+      expect(result.isValid).toBe(false)
+    })
 
     it('should be invalid when the body is not an object', () => {
       let requestBody = 'a string'
-      let result = objectUnderTest.speciesNamesValidator(null, requestBody)
+      let result = objectUnderTest.genericNamesValidator('targetNames', null, requestBody)
       expect(result.isValid).toBe(false)
     })
 
-    it('should be invalid when the speciesNames field is not present', () => {
+    it('should be invalid when the targetNames field is not present', () => {
       let requestBody = {
         someOtherField: 123
       }
-      let result = objectUnderTest.speciesNamesValidator(null, requestBody)
+      let result = objectUnderTest.genericNamesValidator('targetNames', null, requestBody)
       expect(result.isValid).toBe(false)
     })
 
-    it('should be invalid when the speciesNames field is the wrong type', () => {
+    it('should be invalid when the targetNames field is the wrong type', () => {
       let requestBody = {
-        speciesNames: 'not an array'
+        targetNames: 'not an array'
       }
-      let result = objectUnderTest.speciesNamesValidator(null, requestBody)
+      let result = objectUnderTest.genericNamesValidator('targetNames', null, requestBody)
       expect(result.isValid).toBe(false)
     })
 
-    it('should be invalid when the speciesNames field is an array containing the wrong type elements', () => {
+    it('should be invalid when the targetNames field is an array containing the wrong type elements', () => {
       let requestBody = {
-        speciesNames: [1, 2, 3]
+        targetNames: [1, 2, 3]
       }
-      let result = objectUnderTest.speciesNamesValidator(null, requestBody)
+      let result = objectUnderTest.genericNamesValidator('targetNames', null, requestBody)
       expect(result.isValid).toBe(false)
     })
 
     it('should be invalid when no body is present (null)', () => {
       let requestBody = null
-      let result = objectUnderTest.speciesNamesValidator(null, requestBody)
+      let result = objectUnderTest.genericNamesValidator('targetNames', null, requestBody)
       expect(result.isValid).toBe(false)
     })
 
     it('should be invalid when no body is present (undefined)', () => {
       let event = {}
-      let result = objectUnderTest.speciesNamesValidator(null, event.bodyWillBeUndefined)
+      let result = objectUnderTest.genericNamesValidator('targetNames', null, event.bodyWillBeUndefined)
       expect(result.isValid).toBe(false)
+    })
+  })
+
+  describe('.getUrlSuffix()', () => {
+    it('should get the JSON suffix when present', () => {
+      let event = {
+        path: '/some/path.json'
+      }
+      let result = objectUnderTest._testonly.getUrlSuffix(event)
+      expect(result).toBe('json')
+    })
+
+    it('should get the CSV suffix when present', () => {
+      let event = {
+        path: '/some/path.csv'
+      }
+      let result = objectUnderTest._testonly.getUrlSuffix(event)
+      expect(result).toBe('csv')
+    })
+
+    it('should return null when no suffix is present', () => {
+      let event = {
+        path: '/some/path'
+      }
+      let result = objectUnderTest._testonly.getUrlSuffix(event)
+      expect(result).toBeNull()
     })
   })
 
@@ -1238,6 +1248,82 @@ describe('response-helper', () => {
         expect(error.message).toContain("Programmer problem: unhandled path prefix '/v3/' extracted")
         // success
       }
+    })
+  })
+
+  describe('newContentNegotiationHandler', () => {
+    function TrackCallsModule () {
+      let isCalled = false
+
+      return {
+        handler: () => {
+          isCalled = true
+        },
+        hasBeenCalled: () => {
+          return isCalled
+        }
+      }
+    }
+
+    it('should call the JSON handler when we have a JSON Accept header', () => {
+      let trackerModule = new TrackCallsModule()
+      let objectUnderTest = responseHelper.newContentNegotiationHandler(trackerModule, () => { })
+      let event = {
+        headers: {
+          Accept: 'application/json'
+        }
+      }
+      objectUnderTest(event, null, null)
+      expect(trackerModule.hasBeenCalled()).toBeTruthy()
+    })
+
+    it('should call the JSON handler when we have a .json suffix on URL', () => {
+      let trackerModule = new TrackCallsModule()
+      let objectUnderTest = responseHelper.newContentNegotiationHandler(trackerModule, () => { })
+      let event = {
+        path: '/some/path.json'
+      }
+      objectUnderTest(event, null, null)
+      expect(trackerModule.hasBeenCalled()).toBeTruthy()
+    })
+
+    it('should call the CSV handler when we have a CSV Accept header', () => {
+      let trackerModule = new TrackCallsModule()
+      let objectUnderTest = responseHelper.newContentNegotiationHandler(() => { }, trackerModule)
+      let event = {
+        headers: {
+          Accept: 'text/csv'
+        }
+      }
+      objectUnderTest(event, null, null)
+      expect(trackerModule.hasBeenCalled()).toBeTruthy()
+    })
+
+    it('should call the CSV handler when we have a .csv suffix on URL (ignoring the Accept header)', () => {
+      let trackerModule = new TrackCallsModule()
+      let objectUnderTest = responseHelper.newContentNegotiationHandler(() => { }, trackerModule)
+      let event = {
+        path: '/some/path.csv',
+        headers: {
+          Accept: 'application/json' // needs to ignore this header
+        }
+      }
+      objectUnderTest(event, null, null)
+      expect(trackerModule.hasBeenCalled()).toBeTruthy()
+    })
+
+    it('should return a 400 when it cannot handle the Accept header', done => {
+      let trackerModule = new TrackCallsModule()
+      let objectUnderTest = responseHelper.newContentNegotiationHandler(() => { }, trackerModule)
+      let event = {
+        headers: {
+          Accept: 'something/weird'
+        }
+      }
+      objectUnderTest(event, null, (_, result) => {
+        expect(result.statusCode).toBe(400)
+        done()
+      })
     })
   })
 })

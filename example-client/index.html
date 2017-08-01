@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AEKOS API example web client</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+    crossorigin="anonymous">
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body ng-app="aekosapiexample" ng-controller="TheController" class="container">
+  <h1>'Species by trait' workflow using AEKOS API example web client</h1>
+  <div class="row">
+    <div class="form-horizontal col-xs-8">
+      <div class="form-group">
+        <label for="baseUrl" class="col-xs-3 control-label">Base URL</label>
+        <div class="col-xs-9">
+          <input type="text" class="form-control" id="baseUrl" ng-model="baseUrl">
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-6">
+      <p>Firstly, we need to get a list of the available traits</p>
+      <button class="btn btn-default btn-lg" ng-click="loadVocabs()">Load trait vocab</button>
+    </div>
+    <div class="col-xs-6">
+      <h3>Traits</h3>
+      <div ng-show="traits" ng-repeat="trait in traits">
+        <input type="checkbox" id="{{trait.code}}" ng-model="isChecked" ng-change="trait.isChecked = isChecked"></input>
+        <label for="{{trait.code}}">{{trait.label}} ({{trait.recordsHeld}} records)</label>
+      </div>
+      <div ng-show="isLoading(traits)">Loading...</div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-6">
+      <p>Next we can find species that have the traits you've selected above</p>
+      <button class="btn btn-default" ng-click="findSpecies()">Find species with selected traits</button>
+    </div>
+    <div class="col-xs-6">
+      <div ng-show="species" ng-repeat="sp in species">
+        <input type="checkbox" id="{{sp.name}}" ng-model="isChecked" ng-change="sp.isChecked = isChecked"></input>
+        <label for="{{sp.name}}">{{sp.name}} ({{sp.recordsHeld}} records)</label>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-6">
+      <p>Now we can retrieve Darwin Core + traits data for the species you've selected above</p>
+      <button class="btn btn-default" ng-click="getTraitData()">Retrieve Darwin Core + trait data</button>
+    </div>
+    <div class="col-xs-6" ng-show="traitRecords">
+      <div>Found a total of {{traitRecordsHeader.numFound}} records. Currently on page {{traitRecordsHeader.pageNumber}}</div>
+      <div ng-repeat="curr in traitRecords">
+        <code>{{curr}}</code>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.5/angular.min.js"></script>
+  <script type="text/javascript" src="script.js"></script>
+</body>
+
+</html>

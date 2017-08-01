@@ -64,12 +64,19 @@ exports:
             type: string
           label:
             type: string
-          recorsHeld:
+          recordsHeld:
             type: number
     SpeciesNamesPostRequest:
       type: object
       properties:
         speciesNames:
+          type: array
+          items:
+            type: string
+    TraitNamesPostRequest:
+      type: object
+      properties:
+        traitNames:
           type: array
           items:
             type: string
@@ -95,6 +102,15 @@ exports:
           type: array
           items:
             type: string
+  V1SpeciesByTraitResponse:
+    type: object
+    properties:
+      id:
+        type: string
+      recordsHeld:
+        type: integer
+      name:
+        type: string
   SpeciesSummary:
     type: object
     properties:

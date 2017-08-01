@@ -19,7 +19,8 @@ const validator = r.compositeValidator([
 
 module.exports._testonly = {
   responder: responder,
-  validator: validator
+  validator: validator,
+  wrapAsEvent: wrapAsEvent
 }
 
 function responder (requestBody, db, queryStringObj) {

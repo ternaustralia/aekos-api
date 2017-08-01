@@ -2,8 +2,8 @@
 let r = require('./response-helper')
 let db = require('./db-helper')
 
-let mapQueryResult = (queryResult) => {
-  queryResult.forEach(function (element) {
+let mapQueryResult = queryResult => {
+  queryResult.forEach(element => {
     element.label = r.resolveVocabCode(element.code)
   })
   return queryResult

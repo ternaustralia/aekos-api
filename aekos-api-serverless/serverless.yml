@@ -226,6 +226,22 @@ custom:
         contentType: "application/json"
         schema: ${self:custom.modelDetails.fragments.SpeciesNamesPostRequest}
       -
+        name: V1SpeciesByTraitRequest
+        contentType: "application/json"
+        schema: ${self:custom.modelDetails.fragments.TraitNamesPostRequest}
+      -
+        name: V1SpeciesByTraitResponse
+        contentType: "application/json"
+        schema: ${self:custom.modelDetails.V1SpeciesByTraitResponse}
+      -
+        name: V1TraitBySpeciesRequest
+        contentType: "application/json"
+        schema: ${self:custom.modelDetails.fragments.SpeciesNamesPostRequest}
+      -
+        name: V1TraitBySpeciesResponse
+        contentType: "application/json"
+        schema: ${self:custom.modelDetails.fragments.VocabObjectSchema}
+      -
         name: V1SpeciesAutocompleteResponse
         contentType: "application/json"
         schema:
@@ -264,11 +280,11 @@ functions:
           method: post
           cors: true
           documentation:
-            summary: Get all available environment variable names for specified species
+            summary: Retrieve all available environment variable names for specified species
             description: >
               Finds the environmental variables that the supplied species have. Note that the result doesn't
               include the value of the environmental variables, it only shows that the supplied species have
-              values for those variable. To get the values, you need to use the Data Retrieval services.
+              values for those variables. To get the values, you need to use the Data Retrieval resources.
             queryParams:
               - ${self:custom.commonModelSchemaFragments.PageNumQueryParam}
               - ${self:custom.commonModelSchemaFragments.PageSizeQueryParam}
@@ -286,19 +302,24 @@ functions:
     events:
       - http:
           path: v1/getTraitsBySpecies.json
-          method: get
+          method: post
           cors: true
           documentation:
-            summary: Get all available traits for specified species
+            summary: Retrieve all available traits for specified species
             description: >
               Finds the traits that the supplied species have. Note that the result doesn't include the value
               of the traits, it only shows that the supplied species have values for those traits. To get
-              the values, you need to use the Data Retrieval services.
+              the values, you need to use the Data Retrieval resources.
             queryParams:
-              - ${self:custom.commonModelSchemaFragments.SingleSpeciesNameQueryParam}
               - ${self:custom.commonModelSchemaFragments.PageNumQueryParam}
               - ${self:custom.commonModelSchemaFragments.PageSizeQueryParam}
+            requestModels:
+               "application/json": V1TraitBySpeciesRequest
             methodResponses:
+              -
+                statusCode: 200
+                responseModels:
+                  "application/json": V1TraitBySpeciesResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   v1-getSpeciesByTrait-json:
@@ -306,22 +327,24 @@ functions:
     events:
       - http:
           path: v1/getSpeciesByTrait.json
-          method: get
+          method: post
           cors: true
           documentation:
-            summary: Get all available species for specified traits
+            summary: Retrieve all available species for specified traits
             description: >
               Finds the species names that the supplied trait(s). Note that the result only shows that the supplied
-              traits have species records present in the system. To get the values, you need to use the Data
-              Retrieval services.
+              traits have species records present in the system. To get the values of the traits, you need to use the Data
+              Retrieval resources.
             queryParams:
-              -
-                name: ${file(./constants.yml):paramNames.SINGLE_TRAIT_NAME}
-                description: single trait name to search for
-                required: true
               - ${self:custom.commonModelSchemaFragments.PageNumQueryParam}
               - ${self:custom.commonModelSchemaFragments.PageSizeQueryParam}
+            requestModels:
+               "application/json": V1SpeciesByTraitRequest
             methodResponses:
+              -
+                statusCode: 200
+                responseModels:
+                  "application/json": V1SpeciesByTraitResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   v1-getTraitVocab-json:
@@ -462,9 +485,6 @@ functions:
                   "application/json": V1SpeciesDataResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
-  speciesData-json:
-    handler: speciesData-json.handler
-    events:
       - http:
           path: v2/speciesData.json
           method: post
@@ -506,9 +526,6 @@ functions:
                   "application/json": V1SpeciesDataResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
-  speciesData-csv:
-    handler: speciesData-csv.handler
-    events:
       - http:
           path: v2/speciesData.csv
           method: post

@@ -154,7 +154,7 @@ describe('/v2/traitData-json', () => {
         'Content-Type': "'application/json'"
       })
       expect(JSON.parse(result.body)).toEqual({
-        message: 'No species names were supplied',
+        message: "The 'speciesNames' field was not supplied",
         statusCode: 400
       })
     })

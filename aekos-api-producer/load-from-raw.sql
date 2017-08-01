@@ -31,6 +31,15 @@ SELECT *
 FROM rawdata.traits
 WHERE parentId IN (SELECT id FROM species);
 
+SELECT 'Creating pre-baked trait counts';
+DROP TABLE IF EXISTS traitcounts;
+CREATE TABLE traitcounts AS
+SELECT COALESCE(s.scientificName, s.taxonRemarks) AS speciesName, t.traitName AS traitName, count(*) AS recordsHeld
+FROM species AS s
+INNER JOIN traits AS t
+ON t.parentId = s.id
+GROUP BY 1,2;
+
 SELECT 'Clearing loaded RAW citations';
 DELETE FROM rawdata.citations
 WHERE samplingProtocol IN (SELECT samplingProtocol FROM citations);
@@ -63,3 +72,4 @@ SELECT count(*) AS traitsOrphans FROM rawdata.traits;
 -- DELETE FROM envvars;
 -- DELETE FROM env;
 -- DELETE FROM citations;
+-- DROP TABLE traitcounts;

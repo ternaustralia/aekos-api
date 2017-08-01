@@ -1,41 +1,55 @@
 'use strict'
 let r = require('./response-helper')
-let db = require('./db-helper')
-const speciesNameParam = 'speciesName'
-
-function mapResults (queryResult) {
-  queryResult.forEach(function (e) {
-    e.label = r.resolveVocabCode(e.code)
-  })
-  return queryResult
-}
-module.exports.mapResults = mapResults
+let v1TraitVocab = require('./v1-getTraitVocab-json')
+let yaml = require('yamljs')
+const speciesNamesParam = yaml.load('./constants.yml').paramNames.speciesName.multiple
+let envByS = require('./v1-getEnvironmentBySpecies-json') // remove when we don't need wrapAsEvent hack anymore
+const defaultPageSize = yaml.load('./constants.yml').defaults.PAGE_SIZE
+const defaultPageNum = yaml.load('./constants.yml').defaults.PAGE_NUM
 
 module.exports.handler = (event, context, callback) => {
-  if (!r.isQueryStringParamPresent(event, speciesNameParam)) {
-    r.json.badRequest(callback, `the '${speciesNameParam}' query string parameter must be supplied`)
-    return
-  }
-  // FIXME handle escaping a list when we can get multiple names
-  let speciesName = event.queryStringParameters[speciesNameParam]
-  let escapedSpeciesName = db.escape(speciesName)
-  let pageSize = r.getOptionalNumberParam(event, 'pageSize', 50)
-  let pageNum = r.getOptionalNumberParam(event, 'pageNum', 1)
+  let db = require('./db-helper')
+  r.handleJsonPost(event, callback, db, validator, responder)
+}
+
+const validator = r.speciesNamesValidator
+
+function responder (requestBody, db, queryStringObj) {
+  let speciesNames = requestBody[speciesNamesParam]
+  let escapedSpeciesName = db.toSqlList(speciesNames)
+  let pageSize = r.getOptionalNumberParam(envByS._testonly.wrapAsEvent(queryStringObj), 'pageSize', defaultPageSize)
+  let pageNum = r.getOptionalNumberParam(envByS._testonly.wrapAsEvent(queryStringObj), 'pageNum', defaultPageNum)
+  let sql = getSql(escapedSpeciesName, pageNum, pageSize)
+  return db.execSelectPromise(sql).then(queryResult => {
+    return new Promise((resolve, reject) => {
+      try {
+        let mappedResults = v1TraitVocab.mapQueryResult(queryResult)
+        resolve(mappedResults)
+      } catch (error) {
+        reject(error)
+      }
+    })
+  })
+}
+
+module.exports._testonly = {
+  getSql: getSql,
+  responder: responder,
+  validator: validator
+}
+
+function getSql (escapedSpeciesNames, pageNum, pageSize) {
   let offset = r.calculateOffset(pageNum, pageSize)
-  const sql = `
+  return `
     SELECT t.traitName AS code, count(*) AS recordsHeld
     FROM species AS s
     INNER JOIN traits AS t
     ON t.parentId = s.id
     AND (
-      s.scientificName IN (${escapedSpeciesName})
-      OR s.taxonRemarks IN (${escapedSpeciesName})
+      s.scientificName IN (${escapedSpeciesNames})
+      OR s.taxonRemarks IN (${escapedSpeciesNames})
     )
     GROUP BY 1
     ORDER BY 1
     LIMIT ${pageSize} OFFSET ${offset};`
-  db.execSelect(sql, (queryResult) => {
-    let mappedResults = mapResults(queryResult)
-    r.json.ok(callback, mappedResults)
-  })
 }
