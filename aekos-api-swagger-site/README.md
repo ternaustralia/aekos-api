@@ -5,12 +5,13 @@ We use the Swagger UI (http://swagger.io/swagger-ui/) as is provided from Swagge
 # How to update our Swagger definition
 ## Prerequisites
  - NodeJS 7.x
- - AWS cli
- - AWS cli is configured with the correct access key
+ - [Yarn](https://yarnpkg.com)
+ - AWS CLI (configured with the correct access key)
 
 ## Steps
 
         cd /path/to/aekos-api/aekos-api-swagger-site # cd into this repo
+        yarn # install dependencies
         ./dev-upload-site.sh # download the swagger definition, ammend it, deploy the swagger UI site
         # optionally, invalidate the CloudFront cache to get the new site rolled out faster
 
@@ -25,4 +26,4 @@ We use the Swagger UI (http://swagger.io/swagger-ui/) as is provided from Swagge
         # optionally, invalidate the CloudFront cache to get the new site rolled out faster
 
 ## Note about patching Swagger UI styles
-At the time of writing Swagger UI doesn't deal well with headings or lists in the description (which we use both of). We fix as part of the `update-swagger-ui.sh` script. If we no longer need to make these changes, edit the script and delete the patch file.
+At the time of writing Swagger UI doesn't deal well with headings or lists in the description (which we use both of). We fix this using the `update-swagger-ui.sh` script. If we no longer need to make these changes, edit the script and delete the patch file.

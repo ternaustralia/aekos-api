@@ -27,5 +27,13 @@ aws s3 cp \
   --region=$AWS_REGION \
   --acl public-read \
   $SWAGGER_DEF s3://$BUCKET/$stagelessSwaggerDef
+aws s3 cp \
+  --region=$AWS_REGION \
+  --acl public-read \
+  feed.rss s3://$BUCKET/
+aws s3 cp \
+  --region=$AWS_REGION \
+  --acl public-read \
+  feed.atom s3://$BUCKET/
 echo "URL: ${BUCKET}.s3-website-${AWS_REGION}.amazonaws.com"
 

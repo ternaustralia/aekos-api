@@ -1,1 +1,3 @@
 swagger-aekos-api-*
+node_modules/
+feed.*

@@ -1,0 +1,9 @@
+{
+  "name": "aekos-api-swagger-site",
+  "version": "1",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "feed": "^1.1.0"
+  }
+}
