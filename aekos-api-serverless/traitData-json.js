@@ -1,8 +1,9 @@
 'use strict'
 let r = require('./response-helper')
+let allSpeciesDataJson = require('./allSpeciesData-json')
 let speciesDataJson = require('./speciesData-json')
-let latches = require('latches')
 let yaml = require('yamljs')
+const speciesNamesParam = yaml.load('./constants.yml').paramNames.speciesName.multiple
 const traitNamesParam = yaml.load('./constants.yml').paramNames.traitName.multiple
 
 module.exports.handler = (event, context, callback) => {
@@ -32,54 +33,112 @@ function responder (requestBody, db, queryStringParameters, extrasProvider) {
 
 module.exports.getTraitData = getTraitData
 function getTraitData (event, params, processStart, db, elapsedTimeCalculator) {
-  return speciesDataJson.doQuery(event, params, processStart, true, db, elapsedTimeCalculator).then(successResult => {
-    return enrichWithTraitData(successResult, params.traitNames, db)
-  }).then(successResultWithTraits => {
+  const recordsSql = getRecordsSql(params.speciesNames, params.start, params.rows, params.traitNames)
+  const countSql = getCountSql(params.speciesNames)
+  return allSpeciesDataJson.doQuery(event, params, processStart, db, elapsedTimeCalculator, recordsSql, countSql).then(successResult => {
+    successResult.responseHeader.elapsedTime = elapsedTimeCalculator(processStart)
+    successResult.responseHeader.params[speciesNamesParam] = params.unescapedSpeciesNames
+    successResult.responseHeader.params[traitNamesParam] = params.unescapedTraitNames
+    let successResultWithTraits = rollupRecords(successResult)
     successResultWithTraits.responseHeader.elapsedTime = elapsedTimeCalculator(processStart)
-    successResultWithTraits.responseHeader.params[traitNamesParam] = params.unescapedTraitNames
     return successResultWithTraits
   })
 }
 
-function enrichWithTraitData (successResult, traitNames, db) {
-  let speciesRecords = successResult.response
-  return new Promise((resolve, reject) => {
-    let cdl = new latches.CountDownLatch(speciesRecords.length)
-    cdl.wait(function () {
-      resolve(successResult)
-    })
-    speciesRecords.forEach(curr => {
-      const traitSql = getTraitSql(curr.id, traitNames)
-      db.execSelectPromise(traitSql).then(traitRecords => {
-        curr.traits = traitRecords
-        delete (curr.id)
-        cdl.hit()
-      }).catch(error => {
-        reject(new Error(`DB problem: failed while adding traits to species.id='${curr.id}' with error=${JSON.stringify(error)}`))
-      })
-    })
-  })
-}
-
 module.exports._testonly = {
-  getTraitSql: getTraitSql,
+  getRecordsSql: getRecordsSql,
+  getCountSql: getCountSql,
+  rollupRecords: rollupRecords,
   doHandle: doHandle
 }
 
-function getTraitSql (parentId, traitNames) {
-  r.assertIsSupplied(parentId)
-  let traitFilterFragment = ''
-  if (traitNames) {
-    traitFilterFragment = `AND traitName in (${traitNames})`
+/*
+ * Transforms the response so we have one record with all of its traits.
+ * It uses the 'key' field to determine record identity, grabs all the trait
+ * fields and expects all other fields to be the same for each repeat of the record.
+ */
+function rollupRecords (responseObj) {
+  const fieldNameKey = 'id'
+  const fieldNamesTraits = ['traitName', 'traitValue', 'traitUnit']
+  let keyManager = {}
+  responseObj.response.forEach(currRawRecord => {
+    let keyField = currRawRecord[fieldNameKey]
+    if (typeof keyField === 'undefined') {
+      throw new Error(`Data problem: record did not have the '${fieldNameKey}' field`)
+    }
+    if (typeof keyManager[keyField] === 'undefined') {
+      let record = {
+        traits: []
+      }
+      Object.keys(currRawRecord).forEach(currFieldName => {
+        if (currFieldName === fieldNameKey) {
+          return
+        }
+        if (fieldNamesTraits.indexOf(currFieldName) >= 0) {
+          return
+        }
+        record[currFieldName] = currRawRecord[currFieldName]
+      })
+      keyManager[keyField] = record
+    }
+    let record = keyManager[keyField]
+    let newTrait = {}
+    fieldNamesTraits.forEach(currFieldName => {
+      newTrait[currFieldName] = currRawRecord[currFieldName]
+    })
+    record.traits.push(newTrait)
+  })
+  let result = []
+  Object.keys(keyManager).forEach(currKey => {
+    result.push(keyManager[currKey])
+  })
+  return {
+    response: result,
+    responseHeader: responseObj.responseHeader
   }
+}
+
+function getRecordsSql (escapedSpeciesName, start, rows, traitNames) {
+  r.assertIsSupplied(escapedSpeciesName)
+  let traitNamesFilterFragment = getTraitNamesFilterFragment(traitNames, 'AND')
+  let whereFragment = buildWhereFragment(escapedSpeciesName, traitNames)
+  let extraSelectFields = `,
+    t.traitName,
+    t.traitValue,
+    t.traitUnit`
+  let extraJoinFragment = `
+    INNER JOIN traits AS t
+    ON t.parentId = s.id
+    ${traitNamesFilterFragment}`
+  const yesIncludeSpeciesRecordId = true
+  return allSpeciesDataJson.getRecordsSql(start, rows, whereFragment,
+    extraSelectFields, extraJoinFragment, yesIncludeSpeciesRecordId)
+}
+
+function getCountSql (escapedSpeciesName, traitNames) {
+  let whereFragment = buildWhereFragment(escapedSpeciesName, traitNames)
+  return allSpeciesDataJson.getCountSql(whereFragment)
+}
+
+function buildWhereFragment (escapedSpeciesName, traitNames) {
+  let traitNamesFilterFragment = getTraitNamesFilterFragment(traitNames, 'WHERE')
   return `
-    SELECT
-    traitName,
-    traitValue,
-    traitUnit
-    FROM traits
-    WHERE parentId = '${parentId}'
-    ${traitFilterFragment};`
+      WHERE id IN (
+        SELECT parentId
+        FROM traits AS t
+        ${traitNamesFilterFragment}
+      )
+      AND (
+        scientificName IN (${escapedSpeciesName})
+        OR taxonRemarks IN (${escapedSpeciesName})
+      )`
+}
+
+function getTraitNamesFilterFragment (escapedTraitNames, prefix) {
+  if (!escapedTraitNames) {
+    return '--'
+  }
+  return `${prefix} t.traitName IN (${escapedTraitNames})`
 }
 
 module.exports.extractParams = extractParams

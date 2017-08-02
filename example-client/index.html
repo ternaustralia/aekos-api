@@ -23,45 +23,132 @@
       </div>
     </div>
   </div>
-  <div class="row">
-    <div class="col-xs-6">
-      <p>Firstly, we need to get a list of the available traits</p>
-      <button class="btn btn-default btn-lg" ng-click="loadVocabs()">Load trait vocab</button>
-    </div>
-    <div class="col-xs-6">
-      <h3>Traits</h3>
-      <div ng-show="traits" ng-repeat="trait in traits">
-        <input type="checkbox" id="{{trait.code}}" ng-model="isChecked" ng-change="trait.isChecked = isChecked"></input>
-        <label for="{{trait.code}}">{{trait.label}} ({{trait.recordsHeld}} records)</label>
+  <div class="row step">
+    <div class="col-xs-5">
+      <h2>Step 1: Get trait vocab</h2>
+      <h3>Step 1.1: Load vocab</h3>
+      <p>Firstly, we need to get a list of the available traits. Click the button to load the vocab.</p>
+      <div class="text-center">
+        <button class="btn btn-default" ng-click="loadVocabs()">Load trait vocab</button>
       </div>
-      <div ng-show="isLoading(traits)">Loading...</div>
+      <h3>Step 1.2: Select traits</h3>
+      <p>Once loaded, select the traits that you want to find species for.
+      </p>
     </div>
-  </div>
-  <div class="row">
-    <div class="col-xs-6">
-      <p>Next we can find species that have the traits you've selected above</p>
-      <button class="btn btn-default" ng-click="findSpecies()">Find species with selected traits</button>
-    </div>
-    <div class="col-xs-6">
-      <div ng-show="species" ng-repeat="sp in species">
-        <input type="checkbox" id="{{sp.name}}" ng-model="isChecked" ng-change="sp.isChecked = isChecked"></input>
-        <label for="{{sp.name}}">{{sp.name}} ({{sp.recordsHeld}} records)</label>
-      </div>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-xs-6">
-      <p>Now we can retrieve Darwin Core + traits data for the species you've selected above</p>
-      <button class="btn btn-default" ng-click="getTraitData()">Retrieve Darwin Core + trait data</button>
-    </div>
-    <div class="col-xs-6" ng-show="traitRecords">
-      <div>Found a total of {{traitRecordsHeader.numFound}} records. Currently on page {{traitRecordsHeader.pageNumber}}</div>
-      <div ng-repeat="curr in traitRecords">
-        <code>{{curr}}</code>
+    <div class="col-xs-7">
+      <div class="panel panel-default">
+        <div class="panel-heading">Trait Vocabulary</div>
+        <div class="panel-body">
+          <div ng-show="traits" ng-repeat="trait in traits">
+            <input type="checkbox" id="{{trait.code}}" ng-model="isChecked" ng-change="trait.isChecked = isChecked"></input>
+            <label for="{{trait.code}}">{{trait.label}} ({{trait.recordsHeld}} records)</label>
+          </div>
+          <div ng-show="isLoadingTraits">Loading...</div>
+          <div ng-hide="isLoadVocabClicked">&lt;&lt;&lt;--Click the button to load traits</div>
+        </div>
       </div>
     </div>
   </div>
+  <div class="row step">
+    <div class="col-xs-5">
+      <h2>Step 2: Get species</h2>
+      <h3>Step 2.1: Load species with trait(s)</h3>
+      <p>Next we can find species that have the traits you've selected:</p>
+      <ul>
+        <li ng-repeat="curr in traits | filterSelected">{{curr.label}}</li>
+      </ul>
+      <div class="text-center">
+        <button class="btn btn-default" ng-click="findSpecies()">Find species with selected trait(s)</button>
+      </div>
+      <div class="text-center">
+        <button class="btn btn-default" ng-click="speciesNextPage()">Next page &gt;</button>
+      </div>
+      <h3>Step 2.2: Select species</h3>
+      <p>Once loaded, select the species that you want to retrieve data for.</p>
+    </div>
+    <div class="col-xs-7">
+      <div class="panel panel-default">
+        <div class="panel-heading">Species with trait(s)</div>
+        <div class="panel-body species-list">
+          <div ng-show="species" ng-repeat="sp in species">
+            <input type="checkbox" id="{{sp.name}}" ng-model="isChecked" ng-change="sp.isChecked = isChecked"></input>
+            <label for="{{sp.name}}">{{sp.name}} ({{sp.recordsHeld}} records)</label>
+          </div>
+          <div ng-show="isLoadingSpecies">Loading...</div>
+          <div ng-hide="isLoadSpeciesClicked">&lt;&lt;&lt;--Click the button to load species</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row step">
+    <div class="col-xs-5">
+      <h2>Step 3a: Retrieve Darwin Core + traits data</h2>
+      <p>Now we can retrieve the Darwin Core + traits data for the species you've selected:</p>
+      <ul>
+        <li ng-repeat="curr in species | filterSelected">{{curr.name}}</li>
+      </ul>
+      <p>...and optionally we can filter the list of trait data to only include the traits you've selected (otherwise we retrieve
+        all traits):</p>
+      <ul>
+        <li ng-repeat="curr in traits | filterSelected">{{curr.label}}</li>
+      </ul>
+      <div>
+        <input type="checkbox" ng-model="isApplyTraitFilter" id="traitFilter">
+        <label for="traitFilter">Apply filter to only retrieve data for selected traits</label>
+      </div>
+      <div class="form-horizontal">
+        <div class="form-group">
+          <div class="col-xs-9">
+            <input type="radio" class="form-control" id="traitDataJson" value="application/json" ng-model="traitDataAccept">
+          </div>
+          <label for="traitDataJson" class="col-xs-3 control-label">application/json</label>
+        </div>
+        <div class="form-group">
+          <div class="col-xs-9">
+            <input type="radio" class="form-control" id="traitDataCsv" value="text/csv" ng-model="traitDataAccept">
+          </div>
+          <label for="traitDataCsv" class="col-xs-3 control-label">text/csv</label>
+        </div>
+      </div>
+      <div>
+      </div>
+      <div class="text-center">
+        <button class="btn btn-default" ng-click="getTraitData()">Retrieve Darwin Core + trait data</button>
+      </div>
+      <div class="text-center">
+        <button class="btn btn-default btn-sm" ng-click="traitDataChangePage(traitDataFirstPageUrl)" ng-show="traitDataFirstPageUrl">
+          &lt;&lt; First page
+        </button>
+        <button class="btn btn-default btn-sm" ng-click="traitDataChangePage(traitDataPrevPageUrl)" ng-show="traitDataPrevPageUrl">
+          &lt; Previous page
+        </button>
+        <button class="btn btn-default btn-sm" ng-click="traitDataChangePage(traitDataNextPageUrl)" ng-show="traitDataNextPageUrl">
+          Next page &gt;
+        </button>
+        <button class="btn btn-default btn-sm" ng-click="traitDataChangePage(traitDataLastPageUrl)" ng-show="traitDataLastPageUrl">
+          Last page &gt;&gt;
+        </button>
+      </div>
+    </div>
+    <div class="col-xs-7">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          Species with trait(s)
+          <span ng-show="traitRecords.length && traitDataResultWindow === 'json'"> | {{traitRecordsHeader.numFound}} total records | page {{traitRecordsHeader.pageNumber}}</span>
+        </div>
+        <div class="panel-body species-list" ng-if="traitDataResultWindow === 'json'">
+          <pre>{{prettyTraitDataJson()}}</pre>
+        </div>
+        <pre class="panel-body species-list" ng-if="traitDataResultWindow === 'csv'">{{traitRecords}}</pre>
+        <div class="panel-body" ng-show="isLoadingTraitData">Loading...</div>
+        <div class="panel-body" ng-hide="isLoadTraitDataClicked">&lt;&lt;&lt;--Click the button to load trait data</div>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.5/angular.min.js"></script>
+  <script src="https://cdn.rawgit.com/wombleton/link-headers/master/src/main/uritemplate.js"></script>
+  <script src="https://cdn.rawgit.com/wombleton/link-headers/master/src/main/linkheaders.js"></script>
   <script type="text/javascript" src="script.js"></script>
 </body>
 

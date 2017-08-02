@@ -45,6 +45,7 @@ describe('/v2/speciesData-json', () => {
       expect(result.headers).toEqual({
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
+        'Access-Control-Expose-Headers': 'link',
         'Content-Type': "'application/json'",
         link: '<https://api.aekos.org.au/v2/speciesData.json?rows=15&start=15>; rel="next", ' +
               '<https://api.aekos.org.au/v2/speciesData.json?rows=15&start=30>; rel="last"'
@@ -180,7 +181,6 @@ describe('/v2/speciesData-json', () => {
 
   let expectedRecordsSql1 = `
     SELECT
-    
     s.scientificName,
     s.taxonRemarks,
     s.individualCount,
@@ -212,13 +212,9 @@ describe('/v2/speciesData-json', () => {
     AND s.eventDate = e.eventDate
     LEFT JOIN citations AS c
     ON e.samplingProtocol = c.samplingProtocol;`
-  let expectedRecordsSql2 = `
-    SELECT
-    s.id,
-    s.scientificName,`
   describe('getRecordsSql', () => {
     it('should be able to handle a single species', () => {
-      let result = objectUnderTest._testonly.getRecordsSql("'species one'", 0, 33, false)
+      let result = objectUnderTest._testonly.getRecordsSql("'species one'", 0, 33)
       expect(result).toBe(expectedRecordsSql1)
     })
 
@@ -228,11 +224,19 @@ describe('/v2/speciesData-json', () => {
         objectUnderTest._testonly.getRecordsSql(undefinedSpeciesName)
       }).toThrow()
     })
+  })
 
-    it('should be able to include the species ID fragment', () => {
-      let includeSpeciesId = true
-      let result = objectUnderTest._testonly.getRecordsSql("'species one'", 0, 33, includeSpeciesId)
-      expect(result.substr(0, expectedRecordsSql2.length)).toBe(expectedRecordsSql2)
+  let expectedCountSql1 = `
+    SELECT count(*) AS recordsHeld
+    FROM species AS s
+      WHERE (
+        scientificName IN ('species one', 'species two')
+        OR taxonRemarks IN ('species one', 'species two')
+      );`
+  describe('getCountSql', () => {
+    it('should be able to handle supplied species', () => {
+      let result = objectUnderTest._testonly.getCountSql("'species one', 'species two'")
+      expect(result).toBe(expectedCountSql1)
     })
   })
 })

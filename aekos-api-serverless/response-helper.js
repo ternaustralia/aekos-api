@@ -16,6 +16,7 @@ function getHeaders (contentType) {
   return {
     'Access-Control-Allow-Origin': '*', // Required for CORS support to work
     'Access-Control-Allow-Credentials': true,
+    'Access-Control-Expose-Headers': 'link',
     'Content-Type': contentType // Required for cookies, authorization headers with HTTPS
   }
 }

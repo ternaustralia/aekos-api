@@ -24,14 +24,32 @@ describe('/v1/traitData-csv', () => {
             locationName: 'R181',
             samplingProtocol: 'aekos.org.au/collection/wa.gov.au/ravensthorpe',
             bibliographicCitation: 'Department of Par...',
-            datasetName: 'Biological Survey of the Ravensthorpe Range (Phase 1)'
+            datasetName: 'Biological Survey of the Ravensthorpe Range (Phase 1)',
+            traitName: 'trait1',
+            traitValue: 'value1',
+            traitUnit: 'unit1'
+          }, {
+            id: 'some-id-123',
+            scientificName: 'Acacia binata Maslin',
+            taxonRemarks: null,
+            individualCount: 1,
+            eventDate: '2007-10-03',
+            month: 10,
+            year: 2007,
+            decimalLatitude: -33.59758852952833,
+            decimalLongitude: 120.15956081537496,
+            geodeticDatum: 'GDA94',
+            locationID: 'aekos.org.au/collection/wa.gov.au/ravensthorpe/R181',
+            locationName: 'R181',
+            samplingProtocol: 'aekos.org.au/collection/wa.gov.au/ravensthorpe',
+            bibliographicCitation: 'Department of Par...',
+            datasetName: 'Biological Survey of the Ravensthorpe Range (Phase 1)',
+            traitName: 'trait2',
+            traitValue: 'value2',
+            traitUnit: 'unit2'
           }
         ],
-        [ {recordsHeld: 31} ],
-        [
-          { traitName: 'trait1', traitValue: 'value1', traitUnit: 'unit1' },
-          { traitName: 'trait2', traitValue: 'value2', traitUnit: 'unit2' }
-        ]
+        [ {recordsHeld: 31} ]
       ])
       let event = {
         body: JSON.stringify({
@@ -62,6 +80,7 @@ describe('/v1/traitData-csv', () => {
       expect(result.headers).toEqual({
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
+        'Access-Control-Expose-Headers': 'link',
         'Content-Type': "'text/csv'",
         'link': '<https://api.aekos.org.au/v1/traitData.csv?rows=15&start=15>; rel="next", ' +
                 '<https://api.aekos.org.au/v1/traitData.csv?rows=15&start=30>; rel="last"'
@@ -128,6 +147,7 @@ describe('/v1/traitData-csv', () => {
       expect(result.headers).toEqual({
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
+        'Access-Control-Expose-Headers': 'link',
         'Content-Type': "'text/csv'",
         'Content-Disposition': 'attachment;filename=aekosTraitData.csv',
         'link': ''

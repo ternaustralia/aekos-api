@@ -66,6 +66,7 @@ describe('/v2/environmentData-csv', function () {
       expect(result.headers).toEqual({
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
+        'Access-Control-Expose-Headers': 'link',
         'Content-Type': "'text/csv'",
         'link': '<https://api.aekos.org.au/v2/environmentData.csv?start=20>; rel="next", ' +
                 '<https://api.aekos.org.au/v2/environmentData.csv?start=20>; rel="last"'
@@ -132,6 +133,7 @@ describe('/v2/environmentData-csv', function () {
       expect(result.headers).toEqual({
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
+        'Access-Control-Expose-Headers': 'link',
         'Content-Type': "'text/csv'",
         'Content-Disposition': 'attachment;filename=aekosEnvironmentData.csv',
         'link': ''

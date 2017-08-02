@@ -28,8 +28,7 @@ function responder (requestBody, db, queryStringParameters, extrasProvider) {
     try {
       let processStart = r.now()
       let params = extractParams(requestBody, queryStringParameters, db)
-      const dontIncludeSpeciesRecordId = false
-      let result = doQuery(extrasProvider.event, params, processStart, dontIncludeSpeciesRecordId, db, extrasProvider.elapsedTimeCalculator)
+      let result = doQuery(extrasProvider.event, params, processStart, db, extrasProvider.elapsedTimeCalculator)
       resolve(result)
     } catch (error) {
       reject(error)
@@ -38,8 +37,8 @@ function responder (requestBody, db, queryStringParameters, extrasProvider) {
 }
 
 module.exports.doQuery = doQuery
-function doQuery (event, params, processStart, includeSpeciesRecordId, db, elapsedTimeCalculator) {
-  const recordsSql = getRecordsSql(params.speciesNames, params.start, params.rows, includeSpeciesRecordId)
+function doQuery (event, params, processStart, db, elapsedTimeCalculator) {
+  const recordsSql = getRecordsSql(params.speciesNames, params.start, params.rows)
   const countSql = getCountSql(params.speciesNames)
   return allSpeciesDataJson.doQuery(event, params, processStart, db, elapsedTimeCalculator, recordsSql, countSql).then(successResult => {
     successResult.responseHeader.elapsedTime = elapsedTimeCalculator(processStart)
@@ -50,13 +49,14 @@ function doQuery (event, params, processStart, includeSpeciesRecordId, db, elaps
 
 module.exports._testonly = {
   getRecordsSql: getRecordsSql,
+  getCountSql: getCountSql,
   doHandle: doHandle
 }
 
-function getRecordsSql (escapedSpeciesName, start, rows, includeSpeciesRecordId) {
+function getRecordsSql (escapedSpeciesName, start, rows) {
   r.assertIsSupplied(escapedSpeciesName)
   let whereFragment = buildWhereFragment(escapedSpeciesName)
-  return allSpeciesDataJson.getRecordsSql(start, rows, includeSpeciesRecordId, whereFragment)
+  return allSpeciesDataJson.getRecordsSql(start, rows, whereFragment)
 }
 
 function getCountSql (escapedSpeciesName) {
@@ -65,7 +65,8 @@ function getCountSql (escapedSpeciesName) {
 }
 
 function buildWhereFragment (escapedSpeciesName) {
-  return `WHERE (
+  return `
+      WHERE (
         scientificName IN (${escapedSpeciesName})
         OR taxonRemarks IN (${escapedSpeciesName})
       )`

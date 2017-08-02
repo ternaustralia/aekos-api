@@ -41,6 +41,7 @@ describe('v1-getEnvironmentalVariableVocab-json', function () {
       expect(result.headers).toEqual({
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
+        'Access-Control-Expose-Headers': 'link',
         'Content-Type': "'application/json'"
       })
       expect(result.body).toBe(JSON.stringify(

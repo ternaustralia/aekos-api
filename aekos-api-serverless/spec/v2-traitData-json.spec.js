@@ -8,17 +8,24 @@ describe('/v2/traitData-json', () => {
     beforeEach(done => {
       let stubDb = new StubDB()
       stubDb.setExecSelectPromiseResponses([
-        [ {
+        [{
           id: 'species1',
           scientificName: 'species one',
           locationName: 'loc1',
-          datasetName: 'dataset1'
-        } ],
-        [ {recordsHeld: 31} ],
-        [
-          { traitName: 'trait1', traitValue: 'value1', traitUnit: 'unit1' },
-          { traitName: 'trait2', traitValue: 'value2', traitUnit: 'unit2' }
-        ]
+          datasetName: 'dataset1',
+          traitName: 'trait1',
+          traitValue: 'value1',
+          traitUnit: 'unit1'
+        }, {
+          id: 'species1',
+          scientificName: 'species one',
+          locationName: 'loc1',
+          datasetName: 'dataset1',
+          traitName: 'trait2',
+          traitValue: 'value2',
+          traitUnit: 'unit2'
+        }],
+        [{ recordsHeld: 31 }]
       ])
       let event = {
         body: JSON.stringify({
@@ -49,9 +56,10 @@ describe('/v2/traitData-json', () => {
       expect(result.headers).toEqual({
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
+        'Access-Control-Expose-Headers': 'link',
         'Content-Type': "'application/json'",
         link: '<https://api.aekos.org.au/v2/traitData.json?rows=15&start=15>; rel="next", ' +
-              '<https://api.aekos.org.au/v2/traitData.json?rows=15&start=30>; rel="last"'
+        '<https://api.aekos.org.au/v2/traitData.json?rows=15&start=30>; rel="last"'
       })
       expect(JSON.parse(result.body)).toEqual({
         responseHeader: {
@@ -86,9 +94,9 @@ describe('/v2/traitData-json', () => {
     beforeEach(done => {
       let stubDb = new StubDB()
       stubDb.setExecSelectPromiseResponses([
-        [ {id: 'species1', scientificName: 'species one'} ],
-        [ {recordsHeld: 31} ],
-        [ ]
+        [{ id: 'species1', scientificName: 'species one' }],
+        [{ recordsHeld: 31 }],
+        []
       ])
       let event = {
         body: JSON.stringify({
@@ -126,9 +134,9 @@ describe('/v2/traitData-json', () => {
     beforeEach(done => {
       let stubDb = new StubDB()
       stubDb.setExecSelectPromiseResponses([
-        [ {id: 'species1', scientificName: 'species one'} ],
-        [ {recordsHeld: 31} ],
-        [ ]
+        [{ id: 'species1', scientificName: 'species one' }],
+        [{ recordsHeld: 31 }],
+        []
       ])
       let event = {
         body: JSON.stringify({
@@ -151,6 +159,7 @@ describe('/v2/traitData-json', () => {
       expect(result.headers).toEqual({
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
+        'Access-Control-Expose-Headers': 'link',
         'Content-Type': "'application/json'"
       })
       expect(JSON.parse(result.body)).toEqual({
@@ -194,39 +203,245 @@ describe('/v2/traitData-json', () => {
     })
   })
 
-  let expectedTraitSql1 = `
+  let expectedRecordsSql1 = `
     SELECT
-    traitName,
-    traitValue,
-    traitUnit
-    FROM traits
-    WHERE parentId = 'some-parent-id123'
-    AND traitName in ('trait one');`
-  let expectedTraitSql2 = `
+    s.id,
+    s.scientificName,
+    s.taxonRemarks,
+    s.individualCount,
+    s.eventDate,
+    e.\`month\`,
+    e.\`year\`,
+    e.decimalLatitude,
+    e.decimalLongitude,
+    e.geodeticDatum,
+    s.locationID,
+    e.locationName,
+    e.samplingProtocol,
+    c.bibliographicCitation,
+    c.datasetName,
+    t.traitName,
+    t.traitValue,
+    t.traitUnit
+    FROM (
+      SELECT id
+      FROM species
+      WHERE id IN (
+        SELECT parentId
+        FROM traits AS t
+        --
+      )
+      AND (
+        scientificName IN ('species one', 'species two')
+        OR taxonRemarks IN ('species one', 'species two')
+      )
+      ORDER BY 1
+      LIMIT 22 OFFSET 0
+    ) AS lateRowLookup
+    INNER JOIN species AS s
+    ON lateRowLookup.id = s.id
+    INNER JOIN traits AS t
+    ON t.parentId = s.id
+    --
+    LEFT JOIN env AS e
+    ON s.locationID = e.locationID
+    AND s.eventDate = e.eventDate
+    LEFT JOIN citations AS c
+    ON e.samplingProtocol = c.samplingProtocol;`
+  let expectedRecordsSql2 = `
     SELECT
-    traitName,
-    traitValue,
-    traitUnit
-    FROM traits
-    WHERE parentId = 'some-parent-id123'
-    ;`
-  describe('getTraitSql', () => {
-    it('should be able to handle a single trait', () => {
-      let result = objectUnderTest._testonly.getTraitSql('some-parent-id123', "'trait one'")
-      expect(result).toBe(expectedTraitSql1)
+    s.id,
+    s.scientificName,
+    s.taxonRemarks,
+    s.individualCount,
+    s.eventDate,
+    e.\`month\`,
+    e.\`year\`,
+    e.decimalLatitude,
+    e.decimalLongitude,
+    e.geodeticDatum,
+    s.locationID,
+    e.locationName,
+    e.samplingProtocol,
+    c.bibliographicCitation,
+    c.datasetName,
+    t.traitName,
+    t.traitValue,
+    t.traitUnit
+    FROM (
+      SELECT id
+      FROM species
+      WHERE id IN (
+        SELECT parentId
+        FROM traits AS t
+        WHERE t.traitName IN ('trait one', 'trait two')
+      )
+      AND (
+        scientificName IN ('species one', 'species two')
+        OR taxonRemarks IN ('species one', 'species two')
+      )
+      ORDER BY 1
+      LIMIT 22 OFFSET 0
+    ) AS lateRowLookup
+    INNER JOIN species AS s
+    ON lateRowLookup.id = s.id
+    INNER JOIN traits AS t
+    ON t.parentId = s.id
+    AND t.traitName IN ('trait one', 'trait two')
+    LEFT JOIN env AS e
+    ON s.locationID = e.locationID
+    AND s.eventDate = e.eventDate
+    LEFT JOIN citations AS c
+    ON e.samplingProtocol = c.samplingProtocol;`
+  describe('getRecordsSql', () => {
+    it('should be able to handle species with no trait filter', () => {
+      let speciesNames = "'species one', 'species two'"
+      let traitNames = null
+      let result = objectUnderTest._testonly.getRecordsSql(speciesNames, 0, 22, traitNames)
+      expect(result).toBe(expectedRecordsSql1)
     })
 
-    it('should throw an error when we do not supply a parent ID', () => {
-      let undefinedParentId
-      expect(() => {
-        objectUnderTest._testonly.getTraitSql(undefinedParentId, "'trait one'")
-      }).toThrow()
+    it('should be able to handle when a trait filter is applied', () => {
+      let speciesNames = "'species one', 'species two'"
+      let traitNames = "'trait one', 'trait two'"
+      let result = objectUnderTest._testonly.getRecordsSql(speciesNames, 0, 22, traitNames)
+      expect(result).toBe(expectedRecordsSql2)
+    })
+  })
+
+  let expectedCountSql1 = `
+    SELECT count(*) AS recordsHeld
+    FROM species AS s
+      WHERE id IN (
+        SELECT parentId
+        FROM traits AS t
+        --
+      )
+      AND (
+        scientificName IN ('species one', 'species two')
+        OR taxonRemarks IN ('species one', 'species two')
+      );`
+  let expectedCountSql2 = `
+    SELECT count(*) AS recordsHeld
+    FROM species AS s
+      WHERE id IN (
+        SELECT parentId
+        FROM traits AS t
+        WHERE t.traitName IN ('trait one', 'trait two')
+      )
+      AND (
+        scientificName IN ('species one', 'species two')
+        OR taxonRemarks IN ('species one', 'species two')
+      );`
+  describe('getCountSql', () => {
+    it('should be able to handle species with no trait filter', () => {
+      let speciesNames = "'species one', 'species two'"
+      let traitNames = null
+      let result = objectUnderTest._testonly.getCountSql(speciesNames, traitNames)
+      expect(result).toBe(expectedCountSql1)
     })
 
-    it('should be able to handle when no trait filter is applied', () => {
-      let noTraits = null
-      let result = objectUnderTest._testonly.getTraitSql('some-parent-id123', noTraits)
-      expect(result).toBe(expectedTraitSql2)
+    it('should be able to handle when a trait filter is applied', () => {
+      let speciesNames = "'species one', 'species two'"
+      let traitNames = "'trait one', 'trait two'"
+      let result = objectUnderTest._testonly.getCountSql(speciesNames, traitNames)
+      expect(result).toBe(expectedCountSql2)
+    })
+  })
+
+  describe('.rollupRecords()', () => {
+    it('should throw the expected error when we supply a record without a key field', () => {
+      let responseObj = {
+        responseHeader: {},
+        response: [{ someField: 'this record has no id field' }]
+      }
+      try {
+        objectUnderTest._testonly.rollupRecords(responseObj)
+        fail()
+      } catch (error) {
+        expect(error.message).toBe("Data problem: record did not have the 'id' field")
+      }
+    })
+
+    it('should be able to handle no records', () => {
+      let responseObj = {
+        responseHeader: {},
+        response: []
+      }
+      let result = objectUnderTest._testonly.rollupRecords(responseObj)
+      expect(result).toEqual({
+        responseHeader: {},
+        response: []
+      })
+    })
+
+    it('should be able to handle one record', () => {
+      let responseObj = {
+        responseHeader: {},
+        response: [{
+          id: 123,
+          otherField1: 'foo',
+          otherField2: 'bar',
+          traitName: 'height',
+          traitValue: '3',
+          traitUnit: 'metres'
+        }]
+      }
+      let result = objectUnderTest._testonly.rollupRecords(responseObj)
+      expect(result).toEqual({
+        responseHeader: {},
+        response: [{
+          otherField1: 'foo',
+          otherField2: 'bar',
+          traits: [
+            {
+              traitName: 'height',
+              traitValue: '3',
+              traitUnit: 'metres'
+            }
+          ]
+        }]
+      })
+    })
+
+    it('should be able to rollup two rollable records', () => {
+      let responseObj = {
+        responseHeader: {},
+        response: [{
+          id: 123,
+          otherField1: 'foo',
+          otherField2: 'bar',
+          traitName: 'height',
+          traitValue: '3',
+          traitUnit: 'metres'
+        }, {
+          id: 123,
+          otherField1: 'foo',
+          otherField2: 'bar',
+          traitName: 'canopyCover',
+          traitValue: '21',
+          traitUnit: 'percent'
+        }]
+      }
+      let result = objectUnderTest._testonly.rollupRecords(responseObj)
+      expect(result).toEqual({
+        responseHeader: {},
+        response: [{
+          otherField1: 'foo',
+          otherField2: 'bar',
+          traits: [
+            {
+              traitName: 'height',
+              traitValue: '3',
+              traitUnit: 'metres'
+            }, {
+              traitName: 'canopyCover',
+              traitValue: '21',
+              traitUnit: 'percent'
+            }
+          ]
+        }]
+      })
     })
   })
 })

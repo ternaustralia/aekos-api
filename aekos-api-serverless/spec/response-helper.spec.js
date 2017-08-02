@@ -34,6 +34,7 @@ describe('response-helper', function () {
         expect(response.headers).toEqual({
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Credentials': true,
+          'Access-Control-Expose-Headers': 'link',
           'Content-Type': "'application/json'"
         })
       })
@@ -68,6 +69,7 @@ describe('response-helper', function () {
         expect(response.headers).toEqual({
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Credentials': true,
+          'Access-Control-Expose-Headers': 'link',
           'Content-Type': "'application/json'",
           link: '<https://api.aekos.org.au/v1/someResource.json?rows=15&start=15>; rel="next", ' +
           '<https://api.aekos.org.au/v1/someResource.json?rows=15&start=30>; rel="last"'
@@ -106,6 +108,7 @@ describe('response-helper', function () {
         expect(response.headers).toEqual({
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Credentials': true,
+          'Access-Control-Expose-Headers': 'link',
           'Content-Type': "'application/json'"
         })
       })
@@ -143,6 +146,7 @@ describe('response-helper', function () {
         expect(response.headers).toEqual({
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Credentials': true,
+          'Access-Control-Expose-Headers': 'link',
           'Content-Type': "'application/json'"
         })
       })
@@ -419,33 +423,48 @@ describe('response-helper', function () {
     const jsonAndCorsHeaders = {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Credentials': true,
+      'Access-Control-Expose-Headers': 'link',
       'Content-Type': "'application/json'"
     }
 
-    it('should return a 400 when validation fails', done => {
-      let callback = (_, result) => {
+    describe('', () => {
+      let result = null
+      beforeEach(done => {
+        let callback = (_, theResult) => {
+          result = theResult
+          done()
+        }
+        let validator = () => {
+          return { isValid: false, message: 'fail town' }
+        }
+        objectUnderTest.handleJsonPost({ body: '{}' }, callback, null, validator,
+          function () { fail('Should not have been called') })
+      })
+
+      it('should return a 400 when validation fails', () => {
         expect(result.statusCode).toBe(400)
         expect(result.headers).toEqual(jsonAndCorsHeaders)
-        done()
-      }
-      let validator = () => {
-        return { isValid: false, message: 'fail town' }
-      }
-      objectUnderTest.handleJsonPost({ body: '{}' }, callback, null, validator,
-        function () { fail('Should not have been called') })
+      })
     })
 
-    it('should return a 400 when no body is supplied. AWS provides body: null but this will help debug tests', done => {
-      let callback = (_, result) => {
+    describe('', () => {
+      let result = null
+      beforeEach(done => {
+        let callback = (_, theResult) => {
+          result = theResult
+          done()
+        }
+        let validator = () => {
+          return { isValid: false, message: 'fail town' }
+        }
+        objectUnderTest.handleJsonPost({ /* no body */ }, callback, null, validator,
+          function () { fail('Should not have been called') })
+      })
+
+      it('should return a 400 when no body is supplied. AWS provides body: null but this will help debug tests', () => {
         expect(result.statusCode).toBe(400)
         expect(result.headers).toEqual(jsonAndCorsHeaders)
-        done()
-      }
-      let validator = () => {
-        return { isValid: false, message: 'fail town' }
-      }
-      objectUnderTest.handleJsonPost({ /* no body */ }, callback, null, validator,
-        function () { fail('Should not have been called') })
+      })
     })
 
     it('should pass the requestBody to the validator', () => {
@@ -492,78 +511,111 @@ describe('response-helper', function () {
       expect(passedQueryString).toEqual({foo: 123})
     })
 
-    it('should call the responder when validation succeeds', done => {
+    describe('', () => {
       let isResponderCalled = false
-      let callback = (_, result) => {
+      beforeEach(done => {
+        let callback = (_, theResult) => {
+          done()
+        }
+        let responder = (requestBody, db) => {
+          isResponderCalled = true
+          return new Promise(resolve => {
+            resolve()
+          })
+        }
+        objectUnderTest.handleJsonPost({ body: '{}' }, callback, null, alwaysValidValidator, responder)
+      })
+
+      it('should call the responder when validation succeeds', () => {
         expect(isResponderCalled).toBeTruthy()
-        done()
-      }
-      let responder = (requestBody, db) => {
-        isResponderCalled = true
-        return new Promise(resolve => {
-          resolve()
-        })
-      }
-      objectUnderTest.handleJsonPost({ body: '{}' }, callback, null, alwaysValidValidator, responder)
+      })
     })
 
-    it('should return a 500 when the responder throws an error (outside a promise)', done => {
-      let callback = (_, result) => {
-        consoleSilencer.resetConsoleError()
-        expect(result.statusCode).toBe(500)
-        done()
-      }
-      let responder = (requestBody, db) => {
-        throw new Error('ka-boom')
-      }
-      consoleSilencer.silenceConsoleError()
-      objectUnderTest.handleJsonPost({ body: '{}' }, callback, null, alwaysValidValidator, responder)
-    })
-
-    it('should return a 500 when the responder throws an error (inside a promise)', done => {
-      let callback = (_, result) => {
-        consoleSilencer.resetConsoleError()
-        expect(result.statusCode).toBe(500)
-        done()
-      }
-      let responder = (requestBody, db) => {
-        return new Promise(() => {
+    describe('', () => {
+      let result = null
+      beforeEach(done => {
+        let callback = (_, theResult) => {
+          consoleSilencer.resetConsoleError()
+          result = theResult
+          done()
+        }
+        let responder = (requestBody, db) => {
           throw new Error('ka-boom')
-        })
-      }
-      consoleSilencer.silenceConsoleError()
-      objectUnderTest.handleJsonPost({ body: '{}' }, callback, null, alwaysValidValidator, responder)
+        }
+        consoleSilencer.silenceConsoleError()
+        objectUnderTest.handleJsonPost({ body: '{}' }, callback, null, alwaysValidValidator, responder)
+      })
+
+      it('should return a 500 when the responder throws an error (outside a promise)', () => {
+        expect(result.statusCode).toBe(500)
+      })
     })
 
-    it('should return a 500 when the responder rejects the promise', done => {
-      let callback = (_, result) => {
-        consoleSilencer.resetConsoleError()
+    describe('', () => {
+      let result = null
+      beforeEach(done => {
+        let callback = (_, theResult) => {
+          consoleSilencer.resetConsoleError()
+          result = theResult
+          done()
+        }
+        let responder = (requestBody, db) => {
+          return new Promise(() => {
+            throw new Error('ka-boom')
+          })
+        }
+        consoleSilencer.silenceConsoleError()
+        objectUnderTest.handleJsonPost({ body: '{}' }, callback, null, alwaysValidValidator, responder)
+      })
+
+      it('should return a 500 when the responder throws an error (inside a promise)', () => {
+        expect(result.statusCode).toBe(500)
+      })
+    })
+
+    describe('', () => {
+      let result = null
+      beforeEach(done => {
+        let callback = (_, theResult) => {
+          consoleSilencer.resetConsoleError()
+          result = theResult
+          done()
+        }
+        let responder = (requestBody, db) => {
+          return new Promise((resolve, reject) => {
+            reject(new Error('ka-boom'))
+          })
+        }
+        consoleSilencer.silenceConsoleError()
+        objectUnderTest.handleJsonPost({ body: '{}' }, callback, null, alwaysValidValidator, responder)
+      })
+
+      it('should return a 500 when the responder rejects the promise', () => {
         expect(result.statusCode).toBe(500)
         expect(result.headers).toEqual(jsonAndCorsHeaders)
-        done()
-      }
-      let responder = (requestBody, db) => {
-        return new Promise((resolve, reject) => {
-          reject(new Error('ka-boom'))
-        })
-      }
-      consoleSilencer.silenceConsoleError()
-      objectUnderTest.handleJsonPost({ body: '{}' }, callback, null, alwaysValidValidator, responder)
+      })
     })
 
-    it('should return the response body when all is successful', done => {
-      let callback = (_, result) => {
+    describe('', () => {
+      let result = null
+      beforeEach(done => {
+        let callback = (_, theResult) => {
+          result = theResult
+          done()
+        }
+        let responder = (requestBody, db) => {
+          return new Promise((resolve, reject) => {
+            resolve({ someField: 123 })
+          })
+        }
+        objectUnderTest.handleJsonPost({ body: '{}' }, callback, null, alwaysValidValidator, responder)
+      })
+
+      it('should return the response body when all is successful', () => {
         expect(result.statusCode).toBe(200)
         expect(result.headers).toEqual(jsonAndCorsHeaders)
         expect(result.body).toBe(JSON.stringify({ someField: 123 }))
-        done()
-      }
-      let responder = (requestBody, db) => {
-        return new Promise((resolve, reject) => {
-          resolve({ someField: 123 })
-        })
-      }
-      objectUnderTest.handleJsonPost({ body: '{}' }, callback, null, alwaysValidValidator, responder)
+      })
     })
   })
 

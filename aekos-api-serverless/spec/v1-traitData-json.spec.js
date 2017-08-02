@@ -8,17 +8,24 @@ describe('/v1/traitData-json', () => {
     beforeEach(done => {
       let stubDb = new StubDB()
       stubDb.setExecSelectPromiseResponses([
-        [ {
+        [{
           id: 'species1',
           scientificName: 'species one',
           locationName: 'loc1',
-          datasetName: 'dataset1'
-        } ],
-        [ {recordsHeld: 31} ],
-        [
-          { traitName: 'trait1', traitValue: 'value1', traitUnit: 'unit1' },
-          { traitName: 'trait2', traitValue: 'value2', traitUnit: 'unit2' }
-        ]
+          datasetName: 'dataset1',
+          traitName: 'trait1',
+          traitValue: 'value1',
+          traitUnit: 'unit1'
+        }, {
+          id: 'species1',
+          scientificName: 'species one',
+          locationName: 'loc1',
+          datasetName: 'dataset1',
+          traitName: 'trait2',
+          traitValue: 'value2',
+          traitUnit: 'unit2'
+        }],
+        [ {recordsHeld: 31} ]
       ])
       let event = {
         body: JSON.stringify({
@@ -49,6 +56,7 @@ describe('/v1/traitData-json', () => {
       expect(result.headers).toEqual({
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
+        'Access-Control-Expose-Headers': 'link',
         'Content-Type': "'application/json'",
         link: '<https://api.aekos.org.au/v1/traitData.json?rows=15&start=15>; rel="next", ' +
               '<https://api.aekos.org.au/v1/traitData.json?rows=15&start=30>; rel="last"'
@@ -154,6 +162,7 @@ describe('/v1/traitData-json', () => {
       expect(result.headers).toEqual({
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
+        'Access-Control-Expose-Headers': 'link',
         'Content-Type': "'application/json'"
       })
       expect(JSON.parse(result.body)).toEqual({

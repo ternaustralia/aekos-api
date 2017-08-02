@@ -79,6 +79,7 @@ describe('v1-speciesAutocomplete-json', () => {
         expect(result.headers).toEqual({
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Credentials': true,
+          'Access-Control-Expose-Headers': 'link',
           'Content-Type': "'application/json'"
         })
         expect(result.body).toBe(JSON.stringify({ someField: 123 }))

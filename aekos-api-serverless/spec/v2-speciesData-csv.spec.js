@@ -55,6 +55,7 @@ describe('/v2/speciesData.csv', () => {
       expect(result.headers).toEqual({
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
+        'Access-Control-Expose-Headers': 'link',
         'Content-Type': "'text/csv'",
         'link': '<https://api.aekos.org.au/v2/speciesData.csv?rows=15&start=15>; rel="next", ' +
                 '<https://api.aekos.org.au/v2/speciesData.csv?rows=15&start=30>; rel="last"'
@@ -119,6 +120,7 @@ describe('/v2/speciesData.csv', () => {
       expect(result.headers).toEqual({
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
+        'Access-Control-Expose-Headers': 'link',
         'Content-Type': "'text/csv'",
         'Content-Disposition': 'attachment;filename=aekosSpeciesData.csv',
         'link': ''

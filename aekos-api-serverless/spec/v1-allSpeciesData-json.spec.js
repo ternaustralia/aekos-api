@@ -44,6 +44,7 @@ describe('/v1/allSpeciesData-json', () => {
       expect(result.headers).toEqual({
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
+        'Access-Control-Expose-Headers': 'link',
         'Content-Type': "'application/json'",
         link: '<https://api.aekos.org.au/v1/allSpeciesData.json?rows=15&start=15>; rel="next", ' +
               '<https://api.aekos.org.au/v1/allSpeciesData.json?rows=15&start=30>; rel="last"'
@@ -105,6 +106,7 @@ describe('/v1/allSpeciesData-json', () => {
       expect(result.headers).toEqual({
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
+        'Access-Control-Expose-Headers': 'link',
         'Content-Type': "'application/json'",
         link: '<https://api.aekos.org.au/v1/allSpeciesData.json?start=20>; rel="next", ' +
               '<https://api.aekos.org.au/v1/allSpeciesData.json?start=20>; rel="last"'

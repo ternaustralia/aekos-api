@@ -35,7 +35,7 @@ function responder (db, queryStringParameters, extrasProvider) {
 module.exports.doAllSpeciesQuery = doAllSpeciesQuery
 function doAllSpeciesQuery (event, params, processStart, db, elapsedTimeCalculator) {
   const noWhereFragmentForAllSpecies = ''
-  const recordsSql = getRecordsSql(params.start, params.rows, false, noWhereFragmentForAllSpecies)
+  const recordsSql = getRecordsSql(params.start, params.rows)
   const countSql = getCountSql(noWhereFragmentForAllSpecies)
   return doQuery(event, params, processStart, db, elapsedTimeCalculator, recordsSql, countSql)
 }
@@ -97,15 +97,23 @@ module.exports._testonly = {
   doHandle: doHandle
 }
 
+function coalesce (val1, val2) {
+  if (typeof val1 !== 'undefined') {
+    return val1
+  }
+  return val2
+}
+
 module.exports.getRecordsSql = getRecordsSql
-function getRecordsSql (start, rows, includeSpeciesRecordId, whereFragment) {
+function getRecordsSql (start, rows, lateRowWhereOrJoinFragment,
+    extraSelectFieldsFragment, extraJoinFragment, isIncludeSpeciesRecordId) {
   let speciesIdFragment = ''
-  if (includeSpeciesRecordId) {
-    speciesIdFragment = 's.id,'
+  if (isIncludeSpeciesRecordId) {
+    speciesIdFragment = `
+    s.id,`
   }
   return `
-    SELECT
-    ${speciesIdFragment}
+    SELECT${speciesIdFragment}
     s.scientificName,
     s.taxonRemarks,
     s.individualCount,
@@ -119,16 +127,15 @@ function getRecordsSql (start, rows, includeSpeciesRecordId, whereFragment) {
     e.locationName,
     e.samplingProtocol,
     c.bibliographicCitation,
-    c.datasetName
+    c.datasetName${coalesce(extraSelectFieldsFragment, '')}
     FROM (
       SELECT id
-      FROM species
-      ${whereFragment}
+      FROM species${coalesce(lateRowWhereOrJoinFragment, '')}
       ORDER BY 1
       LIMIT ${rows} OFFSET ${start}
     ) AS lateRowLookup
     INNER JOIN species AS s
-    ON lateRowLookup.id = s.id
+    ON lateRowLookup.id = s.id${coalesce(extraJoinFragment, '')}
     LEFT JOIN env AS e
     ON s.locationID = e.locationID
     AND s.eventDate = e.eventDate
@@ -140,13 +147,7 @@ module.exports.getCountSql = getCountSql
 function getCountSql (whereFragment) {
   return `
     SELECT count(*) AS ${recordsHeldField}
-    FROM species AS s
-    INNER JOIN env AS e
-    ON s.locationID = e.locationID
-    AND s.eventDate = e.eventDate
-    INNER JOIN citations AS c
-    ON e.samplingProtocol = c.samplingProtocol
-    ${whereFragment};`
+    FROM species AS s${whereFragment};`
 }
 
 module.exports.extractParams = extractParams

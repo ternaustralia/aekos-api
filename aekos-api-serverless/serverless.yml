@@ -63,6 +63,17 @@ custom:
   domainName: ${file(secrets.yml):${self:custom.stage}.domainName}
   documentationUrl: https://www.${self:custom.domainName}
   modelDetails: ${file(./model-schemas.yml):exports}
+  customCors:
+    origin: '*'
+    headers:
+      - Content-Type
+      - X-Amz-Date
+      - Authorization
+      - X-Api-Key
+      - X-Amz-Security-Token
+      - X-Amz-User-Agent
+      - link
+    allowCredentials: false
   constants: ${file(./constants.yml)}
   customDomain:
     basePath: '(none)'
@@ -278,7 +289,7 @@ functions:
       - http:
           path: v1/getEnvironmentBySpecies.json
           method: post
-          cors: true
+          cors: ${self:custom.customCors}
           documentation:
             summary: Retrieve all available environment variable names for specified species
             description: >
@@ -303,7 +314,7 @@ functions:
       - http:
           path: v1/getTraitsBySpecies.json
           method: post
-          cors: true
+          cors: ${self:custom.customCors}
           documentation:
             summary: Retrieve all available traits for specified species
             description: >
@@ -328,7 +339,7 @@ functions:
       - http:
           path: v1/getSpeciesByTrait.json
           method: post
-          cors: true
+          cors: ${self:custom.customCors}
           documentation:
             summary: Retrieve all available species for specified traits
             description: >
@@ -353,7 +364,7 @@ functions:
       - http:
           path: v1/getTraitVocab.json
           method: get
-          cors: true
+          cors: ${self:custom.customCors}
           documentation:
             summary: Get trait vocabulary
             description: >
@@ -372,7 +383,7 @@ functions:
       - http:
           path: v1/getEnvironmentalVariableVocab.json
           method: get
-          cors: true
+          cors: ${self:custom.customCors}
           documentation:
             summary: Get environmental variable vocabulary
             description: >
@@ -391,7 +402,7 @@ functions:
       - http:
           path: v1/speciesAutocomplete.json
           method: get
-          cors: true
+          cors: ${self:custom.customCors}
           documentation:
             summary: Autocomplete partial species names
             description: >
@@ -421,7 +432,7 @@ functions:
       - http:
           path: v1/speciesSummary.json
           method: post
-          cors: true
+          cors: ${self:custom.customCors}
           documentation:
             summary: Get a summary of the specified species names
             description: >
@@ -443,7 +454,7 @@ functions:
       - http:
           path: v2/speciesData
           method: post
-          cors: true
+          cors: ${self:custom.customCors}
           documentation:
             summary: Get species data
             description: >
@@ -466,7 +477,7 @@ functions:
       - http:
           path: v1/speciesData
           method: post
-          cors: true
+          cors: ${self:custom.customCors}
           documentation:
             summary: Get species data
             description: >
@@ -488,7 +499,7 @@ functions:
       - http:
           path: v2/speciesData.json
           method: post
-          cors: true
+          cors: ${self:custom.customCors}
           documentation:
             summary: Get species data in JSON format
             description: >
@@ -509,7 +520,7 @@ functions:
       - http:
           path: v1/speciesData.json
           method: post
-          cors: true
+          cors: ${self:custom.customCors}
           documentation:
             summary: Get species data in JSON format
             description: >
@@ -529,7 +540,7 @@ functions:
       - http:
           path: v2/speciesData.csv
           method: post
-          cors: true
+          cors: ${self:custom.customCors}
           documentation:
             summary: Get species data in CSV format
             description: >
@@ -550,7 +561,7 @@ functions:
       - http:
           path: v1/speciesData.csv
           method: post
-          cors: true
+          cors: ${self:custom.customCors}
           documentation:
             summary: Get species data in CSV format
             description: >
@@ -574,7 +585,7 @@ functions:
       - http:
           path: v2/traitData
           method: post
-          cors: true
+          cors: ${self:custom.customCors}
           documentation:
             summary: Get trait data
             description: >
@@ -598,7 +609,7 @@ functions:
       - http:
           path: v1/traitData
           method: post
-          cors: true
+          cors: ${self:custom.customCors}
           documentation:
             summary: Get trait data
             description: >
@@ -625,7 +636,7 @@ functions:
       - http:
           path: v2/traitData.json
           method: post
-          cors: true
+          cors: ${self:custom.customCors}
           documentation:
             summary: Get trait data in JSON format
             description: >
@@ -647,7 +658,7 @@ functions:
       - http:
           path: v1/traitData.json
           method: post
-          cors: true
+          cors: ${self:custom.customCors}
           documentation:
             summary: Get trait data in JSON format
             description: >
@@ -671,7 +682,7 @@ functions:
       - http:
           path: v2/traitData.csv
           method: post
-          cors: true
+          cors: ${self:custom.customCors}
           documentation:
             summary: Get trait data in CSV format
             description: >
@@ -694,7 +705,7 @@ functions:
       - http:
           path: v1/traitData.csv
           method: post
-          cors: true
+          cors: ${self:custom.customCors}
           documentation:
             summary: Get trait data in CSV format
             description: >
@@ -719,7 +730,7 @@ functions:
       - http:
           path: v2/environmentData
           method: post
-          cors: true
+          cors: ${self:custom.customCors}
           documentation:
             summary: Get environmental variable data
             description: >
@@ -745,7 +756,7 @@ functions:
       - http:
           path: v1/environmentData
           method: post
-          cors: true
+          cors: ${self:custom.customCors}
           documentation:
             summary: Get environmental variable data
             description: >
@@ -773,7 +784,7 @@ functions:
       - http:
           path: v2/environmentData.json
           method: post
-          cors: true
+          cors: ${self:custom.customCors}
           documentation:
             summary: Get environmental variable data in JSON format
             description: >
@@ -797,7 +808,7 @@ functions:
       - http:
           path: v1/environmentData.json
           method: post
-          cors: true
+          cors: ${self:custom.customCors}
           documentation:
             summary: Get environmental variable data in JSON format
             description: >
@@ -823,7 +834,7 @@ functions:
       - http:
           path: v2/environmentData.csv
           method: post
-          cors: true
+          cors: ${self:custom.customCors}
           documentation:
             summary: Get environmental variable data in CSV format
             description: >
@@ -848,7 +859,7 @@ functions:
       - http:
           path: v1/environmentData.csv
           method: post
-          cors: true
+          cors: ${self:custom.customCors}
           documentation:
             summary: Get environmental variable data in CSV format
             description: >
@@ -876,7 +887,7 @@ functions:
       - http:
           path: v2/allSpeciesData
           method: get
-          cors: true
+          cors: ${self:custom.customCors}
           documentation:
             summary: Get all species data
             description: >
@@ -896,7 +907,7 @@ functions:
       - http:
           path: v1/allSpeciesData
           method: get
-          cors: true
+          cors: ${self:custom.customCors}
           documentation:
             summary: Get all species data
             description: >
@@ -920,7 +931,7 @@ functions:
       - http:
           path: v2/allSpeciesData.json
           method: get
-          cors: true
+          cors: ${self:custom.customCors}
           documentation:
             summary: Get all species data in JSON format
             description: >
@@ -938,7 +949,7 @@ functions:
       - http:
           path: v1/allSpeciesData.json
           method: get
-          cors: true
+          cors: ${self:custom.customCors}
           documentation:
             summary: Get all species data in JSON format
             description: >
@@ -960,7 +971,7 @@ functions:
       - http:
           path: v2/allSpeciesData.csv
           method: get
-          cors: true
+          cors: ${self:custom.customCors}
           documentation:
             summary: Get all species occurrence data in CSV format
             description: >
@@ -979,7 +990,7 @@ functions:
       - http:
           path: v1/allSpeciesData.csv
           method: get
-          cors: true
+          cors: ${self:custom.customCors}
           documentation:
             summary: Get all species occurrence data in CSV format
             description: >

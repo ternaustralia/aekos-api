@@ -46,6 +46,7 @@ describe('/v2/allSpeciesData-json', () => {
       expect(result.headers).toEqual({
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
+        'Access-Control-Expose-Headers': 'link',
         'Content-Type': "'application/json'",
         link: '<https://api.aekos.org.au/v2/allSpeciesData.json?rows=15&start=15>; rel="next", ' +
               '<https://api.aekos.org.au/v2/allSpeciesData.json?rows=15&start=30>; rel="last"'
@@ -106,6 +107,7 @@ describe('/v2/allSpeciesData-json', () => {
       expect(result.headers).toEqual({
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
+        'Access-Control-Expose-Headers': 'link',
         'Content-Type': "'application/json'",
         link: '<https://api.aekos.org.au/v2/allSpeciesData.json?start=20>; rel="next", ' +
               '<https://api.aekos.org.au/v2/allSpeciesData.json?start=20>; rel="last"'
@@ -170,6 +172,7 @@ describe('/v2/allSpeciesData-json', () => {
       expect(result.headers).toEqual({
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
+        'Access-Control-Expose-Headers': 'link',
         'Content-Type': "'application/json'",
         link: '<https://maazptt3zb.execute-api.us-west-1.amazonaws.com/dev/v2/allSpeciesData.json?rows=15&start=15>; rel="next", ' +
               '<https://maazptt3zb.execute-api.us-west-1.amazonaws.com/dev/v2/allSpeciesData.json?rows=15&start=30>; rel="last"'
@@ -220,6 +223,7 @@ describe('/v2/allSpeciesData-json', () => {
       expect(result.headers).toEqual({
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
+        'Access-Control-Expose-Headers': 'link',
         'Content-Type': "'application/json'"
       })
       expect(JSON.parse(result.body)).toEqual({
@@ -310,7 +314,6 @@ describe('/v2/allSpeciesData-json', () => {
 
   let expectedRecordsSql1 = `
     SELECT
-    
     s.scientificName,
     s.taxonRemarks,
     s.individualCount,
@@ -328,7 +331,6 @@ describe('/v2/allSpeciesData-json', () => {
     FROM (
       SELECT id
       FROM species
-      
       ORDER BY 1
       LIMIT 33 OFFSET 0
     ) AS lateRowLookup
@@ -343,16 +345,81 @@ describe('/v2/allSpeciesData-json', () => {
     SELECT
     s.id,
     s.scientificName,`
+  let expectedRecordsSql3 = `
+    SELECT
+    s.scientificName,
+    s.taxonRemarks,
+    s.individualCount,
+    s.eventDate,
+    e.\`month\`,
+    e.\`year\`,
+    e.decimalLatitude,
+    e.decimalLongitude,
+    e.geodeticDatum,
+    s.locationID,
+    e.locationName,
+    e.samplingProtocol,
+    c.bibliographicCitation,
+    c.datasetName
+      --EXTRA SELECT FIELDS
+    FROM (
+      SELECT id
+      FROM species
+      --WHERE FRAGMENT
+      ORDER BY 1
+      LIMIT 22 OFFSET 0
+    ) AS lateRowLookup
+    INNER JOIN species AS s
+    ON lateRowLookup.id = s.id
+      --EXTRA JOIN FRAGMENT
+    LEFT JOIN env AS e
+    ON s.locationID = e.locationID
+    AND s.eventDate = e.eventDate
+    LEFT JOIN citations AS c
+    ON e.samplingProtocol = c.samplingProtocol;`
   describe('getRecordsSql', () => {
     it('should be able to handle no where fragment', () => {
-      let result = objectUnderTest.getRecordsSql(0, 33, false, '')
+      let result = objectUnderTest.getRecordsSql(0, 33)
       expect(result).toBe(expectedRecordsSql1)
     })
 
     it('should be able to include the species ID fragment', () => {
       let includeSpeciesId = true
-      let result = objectUnderTest.getRecordsSql(0, 33, includeSpeciesId, '')
+      let result = objectUnderTest.getRecordsSql(0, 33, '', '', '', includeSpeciesId)
       expect(result.substr(0, expectedRecordsSql2.length)).toBe(expectedRecordsSql2)
+    })
+
+    it('should be able to handle all extension points supplied', () => {
+      let whereOrJoinFragment = `
+      --WHERE FRAGMENT`
+      let selectFragment = `
+      --EXTRA SELECT FIELDS`
+      let joinFragment = `
+      --EXTRA JOIN FRAGMENT`
+      let result = objectUnderTest.getRecordsSql(0, 22, whereOrJoinFragment,
+        selectFragment, joinFragment)
+      expect(result).toBe(expectedRecordsSql3)
+    })
+  })
+
+  let expectedCountSql1 = `
+    SELECT count(*) AS recordsHeld
+    FROM species AS s;`
+  let expectedCountSql2 = `
+    SELECT count(*) AS recordsHeld
+    FROM species AS s
+        WHERE FRAGMENT;`
+  describe('getCountSql', () => {
+    it('should be able to handle no where fragment', () => {
+      let result = objectUnderTest.getCountSql('')
+      expect(result).toBe(expectedCountSql1)
+    })
+
+    it('should be able to handle a supplied where fragment', () => {
+      let whereFragment = `
+        WHERE FRAGMENT`
+      let result = objectUnderTest.getCountSql(whereFragment)
+      expect(result).toBe(expectedCountSql2)
     })
   })
 })
