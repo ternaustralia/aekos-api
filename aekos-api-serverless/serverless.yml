@@ -41,11 +41,11 @@ resources:
               text/html: Empty
             ResponseParameters:
               method.response.header.Location: true
-            StatusCode: 301
+            StatusCode: '301'
         Integration:
           RequestTemplates:
             application/json: |
-              {"statusCode": 301}
+              {"statusCode": "301"}
           Type: MOCK
           IntegrationResponses:
             - ResponseParameters:
@@ -55,7 +55,7 @@ resources:
                   <html><body>
                     <p>Redirecting to documentation <a href="${self:custom.documentationUrl}">${self:custom.documentationUrl}</a>
                   </body></html>
-              StatusCode: 301
+              StatusCode: '301'
 
 custom:
   stage: ${opt:stage, self:provider.stage}
@@ -81,11 +81,11 @@ custom:
     stage: ${self:custom.stage}
   commonModelSchemaFragments:
     MethodResponse400Json:
-      statusCode: 400
+      statusCode: '400'
       responseModels:
         "application/json": 400JsonResponse
     MethodResponse500Json:
-      statusCode: 500
+      statusCode: '500'
       responseModels:
         "application/json": 500JsonResponse
     StartQueryParam:
@@ -223,11 +223,11 @@ custom:
       -
         name: V1EnvironmentalVariableVocabResponse
         contentType: "application/json"
-        schema: ${file(./v1-getEnvironmentalVariableVocab-json.js):responseSchema}
+        schema: ${file(./environmentalVariableVocab-json.js):responseSchema}
       -
         name: V1TraitVocabResponse
         contentType: "application/json"
-        schema: ${file(./v1-getTraitVocab-json.js):responseSchema}
+        schema: ${file(./traitVocab-json.js):responseSchema}
       -
         name: V1GetEnvironmentBySpeciesRequest
         contentType: "application/json"
@@ -303,7 +303,7 @@ functions:
                "application/json": V1GetEnvironmentBySpeciesRequest
             methodResponses:
               -
-                statusCode: 200
+                statusCode: '200'
                 responseModels:
                   "application/json": V1EnvironmentBySpeciesResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
@@ -328,7 +328,7 @@ functions:
                "application/json": V1TraitBySpeciesRequest
             methodResponses:
               -
-                statusCode: 200
+                statusCode: '200'
                 responseModels:
                   "application/json": V1TraitBySpeciesResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
@@ -353,13 +353,13 @@ functions:
                "application/json": V1SpeciesByTraitRequest
             methodResponses:
               -
-                statusCode: 200
+                statusCode: '200'
                 responseModels:
                   "application/json": V1SpeciesByTraitResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
-  v1-getTraitVocab-json:
-    handler: v1-getTraitVocab-json.handler
+  traitVocab-json:
+    handler: traitVocab-json.handler
     events:
       - http:
           path: v1/getTraitVocab.json
@@ -373,12 +373,28 @@ functions:
               is useful for creating UIs.
             methodResponses:
               -
-                statusCode: 200
+                statusCode: '200'
                 responseModels:
                   "application/json": V1TraitVocabResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
-  v1-getEnvironmentalVariableVocab-json:
-    handler: v1-getEnvironmentalVariableVocab-json.handler
+      - http:
+          path: v2/getTraitVocab.json
+          method: get
+          cors: ${self:custom.customCors}
+          documentation:
+            summary: Get trait vocabulary
+            description: >
+              Gets a distinct list of all the traits that appear in the system. The code and label are supplied for
+              each trait. The codes are required to use as parameters for other resources and the label information
+              is useful for creating UIs.
+            methodResponses:
+              -
+                statusCode: '200'
+                responseModels:
+                  "application/json": V1TraitVocabResponse
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
+  environmentalVariableVocab-json:
+    handler: environmentalVariableVocab-json.handler
     events:
       - http:
           path: v1/getEnvironmentalVariableVocab.json
@@ -392,7 +408,23 @@ functions:
               is useful for creating UIs.
             methodResponses:
               -
-                statusCode: 200
+                statusCode: '200'
+                responseModels:
+                  "application/json": V1EnvironmentalVariableVocabResponse
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
+      - http:
+          path: v2/getEnvironmentalVariableVocab.json
+          method: get
+          cors: ${self:custom.customCors}
+          documentation:
+            summary: Get environmental variable vocabulary
+            description: >
+              Gets a distinct list of all the environmental variables that appear in the system. The code and label are supplied for
+              each trait. The codes are required to use as parameters for other resources and the label information
+              is useful for creating UIs.
+            methodResponses:
+              -
+                statusCode: '200'
                 responseModels:
                   "application/json": V1EnvironmentalVariableVocabResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
@@ -421,7 +453,7 @@ functions:
                 description: number of records per page, default=${self:custom.constants.defaults.PAGE_SIZE}
             methodResponses:
               -
-                statusCode: 200
+                statusCode: '200'
                 responseModels:
                   "application/json": V1SpeciesAutocompleteResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
@@ -443,7 +475,7 @@ functions:
                "application/json": V1SpeciesSummaryRequest
             methodResponses:
               -
-                statusCode: 200
+                statusCode: '200'
                 responseModels:
                   "application/json": V1SpeciesSummaryList
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
@@ -468,7 +500,7 @@ functions:
                "application/json": V1SpeciesDataRequest
             methodResponses:
               -
-                statusCode: 200
+                statusCode: '200'
                 responseModels:
                   "text/csv": CsvResponse
                   "application/json": V2SpeciesDataResponse
@@ -490,7 +522,7 @@ functions:
                "application/json": V1SpeciesDataRequest
             methodResponses:
               -
-                statusCode: 200
+                statusCode: '200'
                 responseModels:
                   "text/csv": CsvResponse
                   "application/json": V1SpeciesDataResponse
@@ -512,7 +544,7 @@ functions:
                "application/json": V1SpeciesDataRequest
             methodResponses:
               -
-                statusCode: 200
+                statusCode: '200'
                 responseModels:
                   "application/json": V2SpeciesDataResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
@@ -532,7 +564,7 @@ functions:
                "application/json": V1SpeciesDataRequest
             methodResponses:
               -
-                statusCode: 200
+                statusCode: '200'
                 responseModels:
                   "application/json": V1SpeciesDataResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
@@ -553,7 +585,7 @@ functions:
                "application/json": V1SpeciesDataRequest
             methodResponses:
               -
-                statusCode: 200
+                statusCode: '200'
                 responseModels:
                   "text/csv": CsvResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
@@ -574,7 +606,7 @@ functions:
                "application/json": V1SpeciesDataRequest
             methodResponses:
               -
-                statusCode: 200
+                statusCode: '200'
                 responseModels:
                   "text/csv": CsvResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
@@ -601,10 +633,15 @@ functions:
                "application/json": V1TraitDataRequest
             methodResponses:
               -
-                statusCode: 200
+                statusCode: '200'
                 responseModels:
-                  "text/csv": CsvResponse
                   "application/json": V2TraitDataJsonResponse
+                  "text/csv": CsvResponse
+                responseHeaders:
+                  -
+                    name: link
+                    description: describes other actions that can be taken
+                    type: string
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
       - http:
@@ -626,7 +663,7 @@ functions:
                "application/json": V1TraitDataRequest
             methodResponses:
               -
-                statusCode: 200
+                statusCode: '200'
                 responseModels:
                   "text/csv": CsvResponse
                   "application/json": V1TraitDataJsonResponse
@@ -653,7 +690,7 @@ functions:
                "application/json": V1TraitDataRequest
             methodResponses:
               -
-                statusCode: 200
+                statusCode: '200'
                 responseModels:
                   "application/json": V2TraitDataJsonResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
@@ -675,7 +712,7 @@ functions:
                "application/json": V1TraitDataRequest
             methodResponses:
               -
-                statusCode: 200
+                statusCode: '200'
                 responseModels:
                   "application/json": V1TraitDataJsonResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
@@ -702,7 +739,7 @@ functions:
                "application/json": V1TraitDataRequest
             methodResponses:
               -
-                statusCode: 200
+                statusCode: '200'
                 responseModels:
                   "text/csv": CsvResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
@@ -725,7 +762,7 @@ functions:
                "application/json": V1TraitDataRequest
             methodResponses:
               -
-                statusCode: 200
+                statusCode: '200'
                 responseModels:
                   "text/csv": CsvResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
@@ -753,7 +790,7 @@ functions:
                "application/json": V1EnvDataRequest
             methodResponses:
               -
-                statusCode: 200
+                statusCode: '200'
                 responseModels:
                   "text/csv": CsvResponse
                   "application/json": V2EnvDataResponse
@@ -778,7 +815,7 @@ functions:
                "application/json": V1EnvDataRequest
             methodResponses:
               -
-                statusCode: 200
+                statusCode: '200'
                 responseModels:
                   "text/csv": CsvResponse
                   "application/json": V1EnvDataResponse
@@ -806,7 +843,7 @@ functions:
                "application/json": V1EnvDataRequest
             methodResponses:
               -
-                statusCode: 200
+                statusCode: '200'
                 responseModels:
                   "application/json": V2EnvDataResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
@@ -829,7 +866,7 @@ functions:
                "application/json": V1EnvDataRequest
             methodResponses:
               -
-                statusCode: 200
+                statusCode: '200'
                 responseModels:
                   "application/json": V1EnvDataResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
@@ -857,7 +894,7 @@ functions:
                "application/json": V1EnvDataRequest
             methodResponses:
               -
-                statusCode: 200
+                statusCode: '200'
                 responseModels:
                   "text/csv": CsvResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
@@ -881,7 +918,7 @@ functions:
                "application/json": V1EnvDataRequest
             methodResponses:
               -
-                statusCode: 200
+                statusCode: '200'
                 responseModels:
                   "text/csv": CsvResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
@@ -904,7 +941,7 @@ functions:
               - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
             methodResponses:
               -
-                statusCode: 200
+                statusCode: '200'
                 responseModels:
                   "text/csv": CsvResponse
                   "application/json": V2AllSpeciesDataResponse
@@ -924,7 +961,7 @@ functions:
               - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
             methodResponses:
               -
-                statusCode: 200
+                statusCode: '200'
                 responseModels:
                   "text/csv": CsvResponse
                   "application/json": V1AllSpeciesDataResponse
@@ -947,7 +984,7 @@ functions:
               - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
             methodResponses:
               -
-                statusCode: 200
+                statusCode: '200'
                 responseModels:
                   "application/json": V2AllSpeciesDataResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
@@ -965,7 +1002,7 @@ functions:
               - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
             methodResponses:
               -
-                statusCode: 200
+                statusCode: '200'
                 responseModels:
                   "application/json": V1AllSpeciesDataResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
@@ -988,7 +1025,7 @@ functions:
               - ${self:custom.commonModelSchemaFragments.DownloadQueryParam}
             methodResponses:
               -
-                statusCode: 200
+                statusCode: '200'
                 responseModels:
                   "text/csv": CsvResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
@@ -1007,7 +1044,7 @@ functions:
               - ${self:custom.commonModelSchemaFragments.DownloadQueryParam}
             methodResponses:
               -
-                statusCode: 200
+                statusCode: '200'
                 responseModels:
                   "text/csv": CsvResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}

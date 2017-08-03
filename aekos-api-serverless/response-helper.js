@@ -414,14 +414,11 @@ function isHateoasable (response) {
     return false
   }
   let responseHeader = response.responseHeader
-  if (typeof responseHeader.pageNumber === 'number' &&
+  return typeof responseHeader.pageNumber === 'number' &&
     responseHeader.params &&
     typeof responseHeader.params.rows === 'number' &&
     typeof responseHeader.params.start === 'number' &&
-    typeof responseHeader.totalPages === 'number') {
-    return true
-  }
-  return false
+    typeof responseHeader.totalPages === 'number'
 }
 
 const validatorIsValid = { isValid: true }

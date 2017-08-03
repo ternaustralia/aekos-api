@@ -1,8 +1,8 @@
 'use strict'
 
-var objectUnderTest = require('../v1-getTraitVocab-json')
+var objectUnderTest = require('../traitVocab-json')
 
-describe('v1-getTraitVocab-json', function () {
+describe('/v1/getTraitVocab-json', function () {
   it('should map to the code field', function () {
     let queryResult = [
       {

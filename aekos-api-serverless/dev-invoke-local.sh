@@ -6,7 +6,7 @@ if [ -z "$FUNC" ]; then
   echo "Invokes a single function."
   echo "The function name is one of the keys under 'functions' in serverless.yml."
   echo "Usage: $0 <function-name>"
-  echo "   eg: $0 v1-getTraitVocab-json"
+  echo "   eg: $0 traitVocab-json"
   exit 1
 fi
 FUNC=`bash -c "echo $FUNC | sed 's/\.js$//'"`

@@ -1,6 +1,6 @@
 'use strict'
 let r = require('./response-helper')
-let getEnvVarVocab = require('./v1-getEnvironmentalVariableVocab-json.js')
+let getEnvVarVocab = require('./environmentalVariableVocab-json.js')
 let yaml = require('yamljs')
 const speciesNamesParam = yaml.load('./constants.yml').paramNames.speciesName.multiple
 const defaultPageSize = yaml.load('./constants.yml').defaults.PAGE_SIZE

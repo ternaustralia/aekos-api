@@ -1,8 +1,8 @@
 'use strict'
-let objectUnderTest = require('../v1-getEnvironmentalVariableVocab-json')
+let objectUnderTest = require('../environmentalVariableVocab-json')
 let StubDB = require('./StubDB')
 
-describe('v1-getEnvironmentalVariableVocab-json', function () {
+describe('/v1/getEnvironmentalVariableVocab-json', function () {
   describe('.mapQueryResult()', () => {
     it('should map to the code field', function () {
       let queryResult = [
