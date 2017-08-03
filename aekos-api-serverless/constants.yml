@@ -26,3 +26,8 @@ messages:
     internalServerError: Sorry about that, something has gone wrong
   documentation:
     v2NewFields: Version 2 adds two new fields to each record; 'locationName' and 'datasetName'.
+    traitDataVsSpeciesData: >
+      This resource differs from 'speciesData*' in that it will potentially return fewer records.
+      'speciesData*' will return all species records whereas this resource will only return records
+      that have either a) any traits, if no trait filter is applied, or b) the specified traits if
+      a filter is applied. You'll never get records with no traits from this resource.

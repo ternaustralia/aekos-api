@@ -12,7 +12,7 @@
 </head>
 
 <body ng-app="aekosapiexample" ng-controller="TheController" class="container">
-  <h1>'Species by trait' workflow using AEKOS API example web client</h1>
+  <h1>'Species by trait' then 'trait data' example web client - AEKOS API</h1>
   <div class="row">
     <div class="form-horizontal col-xs-8">
       <div class="form-group">
@@ -60,8 +60,8 @@
       <div class="text-center">
         <button class="btn btn-default" ng-click="findSpecies()">Find species with selected trait(s)</button>
       </div>
-      <div class="text-center">
-        <button class="btn btn-default" ng-click="speciesNextPage()">Next page &gt;</button>
+      <div class="text-center paging-buttons">
+        <button class="btn btn-default btn-sm" ng-click="speciesNextPage()">Next page &gt;</button>
       </div>
       <h3>Step 2.2: Select species</h3>
       <p>Once loaded, select the species that you want to retrieve data for.</p>
@@ -82,7 +82,7 @@
   </div>
   <div class="row step">
     <div class="col-xs-5">
-      <h2>Step 3a: Retrieve Darwin Core + traits data</h2>
+      <h2>Step 3: Retrieve Darwin Core + traits data</h2>
       <p>Now we can retrieve the Darwin Core + traits data for the species you've selected:</p>
       <ul>
         <li ng-repeat="curr in species | filterSelected">{{curr.name}}</li>
@@ -92,22 +92,19 @@
       <ul>
         <li ng-repeat="curr in traits | filterSelected">{{curr.label}}</li>
       </ul>
-      <div>
-        <input type="checkbox" ng-model="isApplyTraitFilter" id="traitFilter">
-        <label for="traitFilter">Apply filter to only retrieve data for selected traits</label>
-      </div>
+      <p>
+        <label>
+          <input type="checkbox" ng-model="isApplyTraitFilter">
+          Apply filter to only retrieve data for selected traits
+        </label>
+      </p>
+      <div>Content-type (sent as 'Accept' header):</div>
       <div class="form-horizontal">
-        <div class="form-group">
-          <div class="col-xs-9">
-            <input type="radio" class="form-control" id="traitDataJson" value="application/json" ng-model="traitDataAccept">
-          </div>
-          <label for="traitDataJson" class="col-xs-3 control-label">application/json</label>
+        <div class="checkbox">
+          <label><input type="radio" value="application/json" ng-model="traitDataAccept"> application/json</label>
         </div>
-        <div class="form-group">
-          <div class="col-xs-9">
-            <input type="radio" class="form-control" id="traitDataCsv" value="text/csv" ng-model="traitDataAccept">
-          </div>
-          <label for="traitDataCsv" class="col-xs-3 control-label">text/csv</label>
+        <div class="checkbox">
+          <label><input type="radio" value="text/csv" ng-model="traitDataAccept"> text/csv</label>
         </div>
       </div>
       <div>
@@ -115,17 +112,17 @@
       <div class="text-center">
         <button class="btn btn-default" ng-click="getTraitData()">Retrieve Darwin Core + trait data</button>
       </div>
-      <div class="text-center">
-        <button class="btn btn-default btn-sm" ng-click="traitDataChangePage(traitDataFirstPageUrl)" ng-show="traitDataFirstPageUrl">
+      <div class="text-center paging-buttons">
+        <button class="btn btn-default btn-sm" ng-click="traitDataChangePage(traitDataFirstPageUrl)" ng-disabled="!traitDataFirstPageUrl">
           &lt;&lt; First page
         </button>
-        <button class="btn btn-default btn-sm" ng-click="traitDataChangePage(traitDataPrevPageUrl)" ng-show="traitDataPrevPageUrl">
+        <button class="btn btn-default btn-sm" ng-click="traitDataChangePage(traitDataPrevPageUrl)" ng-disabled="!traitDataPrevPageUrl">
           &lt; Previous page
         </button>
-        <button class="btn btn-default btn-sm" ng-click="traitDataChangePage(traitDataNextPageUrl)" ng-show="traitDataNextPageUrl">
+        <button class="btn btn-default btn-sm" ng-click="traitDataChangePage(traitDataNextPageUrl)" ng-disabled="!traitDataNextPageUrl">
           Next page &gt;
         </button>
-        <button class="btn btn-default btn-sm" ng-click="traitDataChangePage(traitDataLastPageUrl)" ng-show="traitDataLastPageUrl">
+        <button class="btn btn-default btn-sm" ng-click="traitDataChangePage(traitDataLastPageUrl)" ng-disabled="!traitDataLastPageUrl">
           Last page &gt;&gt;
         </button>
       </div>

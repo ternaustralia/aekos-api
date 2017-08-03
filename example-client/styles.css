@@ -12,3 +12,7 @@
   max-height: 300px;
   overflow-y: auto;
 }
+
+.paging-buttons {
+  margin-top: 1em;
+}

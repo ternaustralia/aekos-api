@@ -591,7 +591,8 @@ functions:
             description: >
               Gets Darwin Core records with added trait information for the supplied species name(s) using content negotation to
               determine the response type. If you supply trait names then the result records will have the traits filtered down
-              to only the traits you've asked for, otherwise all traits are returned. This resource honours Accept headers
+              to only the traits you've asked for, otherwise all traits are returned.
+              ${file(./constants.yml):messages.documentation.traitDataVsSpeciesData} This resource honours Accept headers
               represented by any of the /v2/traitData.* resources. ${file(./constants.yml):messages.documentation.v2NewFields}
             queryParams:
               - ${self:custom.commonModelSchemaFragments.StartQueryParam}
@@ -615,7 +616,8 @@ functions:
             description: >
               Gets Darwin Core records with added trait information for the supplied species name(s) using content negotation to
               determine the response type. If you supply trait names then the result records will have the traits filtered down
-              to only the traits you've asked for, otherwise all traits are returned. This resource honours Accept headers
+              to only the traits you've asked for, otherwise all traits are returned.
+              ${file(./constants.yml):messages.documentation.traitDataVsSpeciesData} This resource honours Accept headers
               represented by any of the /v1/traitData.* resources.
             queryParams:
               - ${self:custom.commonModelSchemaFragments.StartQueryParam}
@@ -642,6 +644,7 @@ functions:
             description: >
               Gets Darwin Core records with added trait information in JSON format. If you supply trait names then the result
               records will have the traits filtered down to only the traits you've asked for, otherwise all traits are returned.
+              ${file(./constants.yml):messages.documentation.traitDataVsSpeciesData}
               ${file(./constants.yml):messages.documentation.v2NewFields}
             queryParams:
               - ${self:custom.commonModelSchemaFragments.StartQueryParam}
@@ -664,6 +667,7 @@ functions:
             description: >
               Gets Darwin Core records with added trait information in JSON format. If you supply trait names then the result
               records will have the traits filtered down to only the traits you've asked for, otherwise all traits are returned.
+              ${file(./constants.yml):messages.documentation.traitDataVsSpeciesData}
             queryParams:
               - ${self:custom.commonModelSchemaFragments.StartQueryParam}
               - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
@@ -688,6 +692,7 @@ functions:
             description: >
               Gets Darwin Core records with added trait information in CSV format. If you supply trait names then the result
               records will have the traits filtered down to only the traits you've asked for, otherwise all traits are returned.
+              ${file(./constants.yml):messages.documentation.traitDataVsSpeciesData}
               ${file(./constants.yml):messages.documentation.v2NewFields}
             queryParams:
               - ${self:custom.commonModelSchemaFragments.StartQueryParam}
@@ -711,6 +716,7 @@ functions:
             description: >
               Gets Darwin Core records with added trait information in CSV format. If you supply trait names then the result
               records will have the traits filtered down to only the traits you've asked for, otherwise all traits are returned.
+              ${file(./constants.yml):messages.documentation.traitDataVsSpeciesData}
             queryParams:
               - ${self:custom.commonModelSchemaFragments.StartQueryParam}
               - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
