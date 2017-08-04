@@ -32,3 +32,4 @@ messages:
       that have either a) any traits, if no trait filter is applied, or b) the specified traits if
       a filter is applied. You'll never get records with no traits from this resource.
     noChangesSinceV1: No changes since version 1, just keeping version numbers synchronised.
+    noIdSinceV1: "Changes since version 1: the 'id' field is no longer included in the response."

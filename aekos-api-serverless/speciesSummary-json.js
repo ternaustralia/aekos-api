@@ -5,7 +5,9 @@ const speciesNamesParam = yaml.load('./constants.yml').paramNames.speciesName.mu
 
 module.exports.handler = (event, context, callback) => {
   let db = require('./db-helper')
-  r.handleJsonPost(event, callback, db, r.speciesNamesValidator, responder)
+  r.handleJsonPost(event, callback, db, r.speciesNamesValidator, responder, {
+    event: event
+  })
 }
 
 module.exports._testonly = {
@@ -13,16 +15,40 @@ module.exports._testonly = {
   getSql: getSql
 }
 
-function responder (requestBody, db) {
+function responder (requestBody, db, _, extrasProvider) {
   let speciesNames = requestBody[speciesNamesParam]
   let sql = getSql(speciesNames, db)
-  return db.execSelectPromise(sql)
+  return db.execSelectPromise(sql).then(sqlResult => {
+    return new Promise((resolve, reject) => {
+      try {
+        let strategy = getVersionStrategy(extrasProvider.event)
+        strategy(sqlResult)
+        resolve(sqlResult)
+      } catch (error) {
+        reject(error)
+      }
+    })
+  })
+}
+
+function addIdField (records) {
+  records.forEach(curr => {
+    curr.id = 'notusedanymore'
+  })
+}
+
+function getVersionStrategy (event) {
+  let versionHandler = r.newVersionHandler({
+    '/v1/': addIdField,
+    '/v2/': () => {}
+  })
+  return versionHandler.handle(event)
 }
 
 function getSql (speciesNames, db) {
   let escapedSpeciesNames = db.toSqlList(speciesNames)
   return `
-    SELECT speciesName, sum(recordsHeld) AS recordsHeld, 'notusedanymore' AS id
+    SELECT speciesName, sum(recordsHeld) AS recordsHeld
     FROM (
       SELECT scientificName AS speciesName, count(*) AS recordsHeld
       FROM species

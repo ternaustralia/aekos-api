@@ -108,16 +108,23 @@ exports:
       id:
         type: string
       recordsHeld:
-        type: integer
+        type: number
       name:
         type: string
-  SpeciesSummary:
+  V1SpeciesSummary:
     type: object
     properties:
       id:
         type: string
       recordsHeld:
-        type: integer
+        type: number
+      speciesName:
+        type: string
+  V2SpeciesSummary:
+    type: object
+    properties:
+      recordsHeld:
+        type: number
       speciesName:
         type: string
   CommonResponseHeaderProperties: &CommonResponseHeaderProperties
