@@ -36,8 +36,10 @@ const tagMapping = {
   [post('/v2/traitData.json')]: dataRetrievalTag,
   [post('/v1/traitData.csv')]: deprecatedDataRetrievalTag,
   [post('/v2/traitData.csv')]: dataRetrievalTag,
-  [get('/v1/getEnvironmentalVariableVocab.json')]: searchTag,
-  [get('/v1/getTraitVocab.json')]: searchTag,
+  [get('/v1/getEnvironmentalVariableVocab.json')]: deprecatedSearchTag,
+  [get('/v2/getEnvironmentalVariableVocab.json')]: searchTag,
+  [get('/v1/getTraitVocab.json')]: deprecatedSearchTag,
+  [get('/v2/getTraitVocab.json')]: searchTag,
   [post('/v1/getEnvironmentBySpecies.json')]: searchTag,
   [post('/v1/getSpeciesByTrait.json')]: searchTag,
   [post('/v1/getTraitsBySpecies.json')]: searchTag,
@@ -49,6 +51,16 @@ const tagMapping = {
   [get('/v2/allSpeciesData.json')]: everythingRetrievalTag,
   [get('/v1/allSpeciesData.csv')]: deprecatedEverythingRetrievalTag,
   [get('/v2/allSpeciesData.csv')]: everythingRetrievalTag,
+}
+const responseMapping = {
+  '/v1/environmentData': 'V1EnvDataResponse',
+  '/v2/environmentData': 'V2EnvDataResponse',
+  '/v1/speciesData': 'V1SpeciesDataResponse',
+  '/v2/speciesData': 'V2SpeciesDataResponse',
+  '/v1/traitData': 'V1TraitDataJsonResponse',
+  '/v2/traitData': 'V2TraitDataJsonResponse',
+  '/v1/allSpeciesData': 'V1AllSpeciesDataResponse',
+  '/v2/allSpeciesData': 'V2AllSpeciesDataResponse'
 }
 
 function get(path) {
@@ -74,6 +86,8 @@ fs.readFile(inputFile, 'utf8', (error, data) => {
   addApiDescription(parsedData)
   removeRootRedirectResource(parsedData)
   updateParameterTypes(parsedData)
+  fixContentNegotiationResponses(parsedData)
+  cleanCsvProducesLists(parsedData)
   stdout.write(JSON.stringify(parsedData, null, 2))
   stdout.write('\n')
 })
@@ -176,9 +190,53 @@ function removeRootRedirectResource (parsedData) {
   delete (parsedData.paths['/'])
 }
 
+/*
+ * OpenAPI v2 doesn't support content negotiation responses, that is
+ * multiple responses with different content types for a single statusCode.
+ * v3 of the spec does support this but that's not ready as of the time of
+ * writing. API Gateway correctly has 'application/json' and 'text/csv'
+ * responses but when we export to swagger, only the last defined response
+ * is used. I suspect they're created in API Gateway alphabetically so
+ * that means 'text/csv' is last and that's the response schema that all
+ * our content negotiation methods get when the JSON schema would be much
+ * more useful. Here, we force things back to using the JSON schema.
+ * Yeah, it's brittle but it gets the job done.
+ */
+function fixContentNegotiationResponses (parsedData) {
+  Object.keys(parsedData.paths).forEach(currPathKey => {
+    let currPath = parsedData.paths[currPathKey]
+    let correctResponseModelName = responseMapping[currPathKey]
+    if (typeof correctResponseModelName === 'undefined') {
+      return
+    }
+    let whateverMethod = Object.keys(currPath)[0]
+    let modelRef = `#/definitions/${correctResponseModelName}`
+    currPath[whateverMethod].responses['200'].schema['$ref'] = modelRef
+  })
+}
+
+/*
+ * The 'produces' arrays for '*.csv' resource in the swagger document
+ * are getting 'application/json' put in them. I'm not sure why, maybe
+ * because they technically do produce that under different status codes
+ * (not 200). In any case, it looks weird so we're removing it.
+ */
+function cleanCsvProducesLists (parsedData) {
+  Object.keys(parsedData.paths).forEach(currPathKey => {
+    let currPathObj = parsedData.paths[currPathKey]
+    let isCsvSpecificPath = /\.csv$/.test(currPathKey)
+    if (!isCsvSpecificPath) {
+      return
+    }
+    Object.keys(currPathObj).forEach(currMethod => {
+      currPathObj[currMethod].produces = [ 'text/csv' ]
+    })
+  })
+}
+
 // Whitespace is important in this block
 const theDesc = `
-The AEKOS API is used for Machine2Machine (M2M) REST access to AEKOS ecological data.
+The AEKOS API is used for machine readable HTTP (REST) access to AEKOS ecological data.
 
 # High level workflow
  1. Start with a trait or species

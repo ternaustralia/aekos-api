@@ -113,6 +113,10 @@ custom:
     DownloadQueryParam:
       name: ${file(./constants.yml):paramNames.DOWNLOAD}
       description: true to trigger a browser download of the result, default=false
+    LinkHeader:
+      name: link
+      description: describes other actions that can be taken
+      type: string
   documentation:
     # FIXME doesn't write to the format that AWS expects: {info: {description: "", version: "", title: "", contact: {name: "", email: ""}}}
     api:
@@ -478,6 +482,8 @@ functions:
                 statusCode: '200'
                 responseModels:
                   "application/json": V1SpeciesSummaryList
+                responseHeaders:
+                  - ${self:custom.commonModelSchemaFragments.LinkHeader}
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   speciesData:
@@ -504,6 +510,8 @@ functions:
                 responseModels:
                   "text/csv": CsvResponse
                   "application/json": V2SpeciesDataResponse
+                responseHeaders:
+                  - ${self:custom.commonModelSchemaFragments.LinkHeader}
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
       - http:
@@ -526,6 +534,8 @@ functions:
                 responseModels:
                   "text/csv": CsvResponse
                   "application/json": V1SpeciesDataResponse
+                responseHeaders:
+                  - ${self:custom.commonModelSchemaFragments.LinkHeader}
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
       - http:
@@ -547,6 +557,8 @@ functions:
                 statusCode: '200'
                 responseModels:
                   "application/json": V2SpeciesDataResponse
+                responseHeaders:
+                  - ${self:custom.commonModelSchemaFragments.LinkHeader}
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
       - http:
@@ -567,6 +579,8 @@ functions:
                 statusCode: '200'
                 responseModels:
                   "application/json": V1SpeciesDataResponse
+                responseHeaders:
+                  - ${self:custom.commonModelSchemaFragments.LinkHeader}
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
       - http:
@@ -588,6 +602,8 @@ functions:
                 statusCode: '200'
                 responseModels:
                   "text/csv": CsvResponse
+                responseHeaders:
+                  - ${self:custom.commonModelSchemaFragments.LinkHeader}
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
       - http:
@@ -609,6 +625,8 @@ functions:
                 statusCode: '200'
                 responseModels:
                   "text/csv": CsvResponse
+                responseHeaders:
+                  - ${self:custom.commonModelSchemaFragments.LinkHeader}
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   traitData:
@@ -635,13 +653,10 @@ functions:
               -
                 statusCode: '200'
                 responseModels:
-                  "application/json": V2TraitDataJsonResponse
                   "text/csv": CsvResponse
+                  "application/json": V2TraitDataJsonResponse
                 responseHeaders:
-                  -
-                    name: link
-                    description: describes other actions that can be taken
-                    type: string
+                  - ${self:custom.commonModelSchemaFragments.LinkHeader}
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
       - http:
@@ -667,11 +682,10 @@ functions:
                 responseModels:
                   "text/csv": CsvResponse
                   "application/json": V1TraitDataJsonResponse
+                responseHeaders:
+                  - ${self:custom.commonModelSchemaFragments.LinkHeader}
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
-  traitData-json:
-    handler: traitData-json.handler
-    events:
       - http:
           path: v2/traitData.json
           method: post
@@ -693,6 +707,8 @@ functions:
                 statusCode: '200'
                 responseModels:
                   "application/json": V2TraitDataJsonResponse
+                responseHeaders:
+                  - ${self:custom.commonModelSchemaFragments.LinkHeader}
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
       - http:
@@ -715,11 +731,10 @@ functions:
                 statusCode: '200'
                 responseModels:
                   "application/json": V1TraitDataJsonResponse
+                responseHeaders:
+                  - ${self:custom.commonModelSchemaFragments.LinkHeader}
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
-  traitData-csv:
-    handler: traitData-csv.handler
-    events:
       - http:
           path: v2/traitData.csv
           method: post
@@ -742,6 +757,8 @@ functions:
                 statusCode: '200'
                 responseModels:
                   "text/csv": CsvResponse
+                responseHeaders:
+                  - ${self:custom.commonModelSchemaFragments.LinkHeader}
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
       - http:
@@ -765,6 +782,8 @@ functions:
                 statusCode: '200'
                 responseModels:
                   "text/csv": CsvResponse
+                responseHeaders:
+                  - ${self:custom.commonModelSchemaFragments.LinkHeader}
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   environmentData:
@@ -794,6 +813,8 @@ functions:
                 responseModels:
                   "text/csv": CsvResponse
                   "application/json": V2EnvDataResponse
+                responseHeaders:
+                  - ${self:custom.commonModelSchemaFragments.LinkHeader}
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
       - http:
@@ -819,11 +840,10 @@ functions:
                 responseModels:
                   "text/csv": CsvResponse
                   "application/json": V1EnvDataResponse
+                responseHeaders:
+                  - ${self:custom.commonModelSchemaFragments.LinkHeader}
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
-  environmentData-json:
-    handler: environmentData-json.handler
-    events:
       - http:
           path: v2/environmentData.json
           method: post
@@ -846,6 +866,8 @@ functions:
                 statusCode: '200'
                 responseModels:
                   "application/json": V2EnvDataResponse
+                responseHeaders:
+                  - ${self:custom.commonModelSchemaFragments.LinkHeader}
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
       - http:
@@ -869,11 +891,10 @@ functions:
                 statusCode: '200'
                 responseModels:
                   "application/json": V1EnvDataResponse
+                responseHeaders:
+                  - ${self:custom.commonModelSchemaFragments.LinkHeader}
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
-  environmentData-csv:
-    handler: environmentData-csv.handler
-    events:
       - http:
           path: v2/environmentData.csv
           method: post
@@ -897,6 +918,8 @@ functions:
                 statusCode: '200'
                 responseModels:
                   "text/csv": CsvResponse
+                responseHeaders:
+                  - ${self:custom.commonModelSchemaFragments.LinkHeader}
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
       - http:
@@ -921,6 +944,8 @@ functions:
                 statusCode: '200'
                 responseModels:
                   "text/csv": CsvResponse
+                responseHeaders:
+                  - ${self:custom.commonModelSchemaFragments.LinkHeader}
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   allSpeciesData:
@@ -945,6 +970,8 @@ functions:
                 responseModels:
                   "text/csv": CsvResponse
                   "application/json": V2AllSpeciesDataResponse
+                responseHeaders:
+                  - ${self:custom.commonModelSchemaFragments.LinkHeader}
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
       - http:
@@ -965,12 +992,10 @@ functions:
                 responseModels:
                   "text/csv": CsvResponse
                   "application/json": V1AllSpeciesDataResponse
+                responseHeaders:
+                  - ${self:custom.commonModelSchemaFragments.LinkHeader}
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
-  allSpeciesData-json:
-    handler: allSpeciesData-json.handler
-    timeout: 40
-    events:
       - http:
           path: v2/allSpeciesData.json
           method: get
@@ -987,6 +1012,8 @@ functions:
                 statusCode: '200'
                 responseModels:
                   "application/json": V2AllSpeciesDataResponse
+                responseHeaders:
+                  - ${self:custom.commonModelSchemaFragments.LinkHeader}
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
       - http:
@@ -1005,12 +1032,10 @@ functions:
                 statusCode: '200'
                 responseModels:
                   "application/json": V1AllSpeciesDataResponse
+                responseHeaders:
+                  - ${self:custom.commonModelSchemaFragments.LinkHeader}
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
-  allSpeciesData-csv:
-    handler: allSpeciesData-csv.handler
-    timeout: 40
-    events:
       - http:
           path: v2/allSpeciesData.csv
           method: get
@@ -1028,6 +1053,8 @@ functions:
                 statusCode: '200'
                 responseModels:
                   "text/csv": CsvResponse
+                responseHeaders:
+                  - ${self:custom.commonModelSchemaFragments.LinkHeader}
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
       - http:
@@ -1047,5 +1074,7 @@ functions:
                 statusCode: '200'
                 responseModels:
                   "text/csv": CsvResponse
+                responseHeaders:
+                  - ${self:custom.commonModelSchemaFragments.LinkHeader}
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
