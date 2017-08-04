@@ -1,7 +1,7 @@
 'use strict'
 let StubDB = require('./StubDB')
 
-describe('/v1/getTraitsBySpecies-json', () => {
+describe('/v2/getTraitsBySpecies-json', () => {
   let objectUnderTest = require('../traitsBySpecies-json')
 
   describe('.doHandle()', () => {

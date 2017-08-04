@@ -2650,9 +2650,9 @@ semver@~5.0.1:
   version "5.0.3"
   resolved "https://registry.yarnpkg.com/semver/-/semver-5.0.3.tgz#77466de589cd5d3c95f138aa78bc569a3cb5d27a"
 
-serverless-aws-documentation@^0.7.0:
-  version "0.7.0"
-  resolved "https://registry.yarnpkg.com/serverless-aws-documentation/-/serverless-aws-documentation-0.7.0.tgz#224b17aaaef192def5002200492b74573fd422b3"
+serverless-aws-documentation@tomsaleeba/serverless-aws-documentation#4e7f314898e6b958f2c6ea3749835c27cd7cadb4:
+  version "0.7.2"
+  resolved "https://codeload.github.com/tomsaleeba/serverless-aws-documentation/tar.gz/4e7f314898e6b958f2c6ea3749835c27cd7cadb4"
   dependencies:
     object-hash "^1.1.7"
 
@@ -2662,9 +2662,9 @@ serverless-domain-manager@^1.1.6:
   dependencies:
     aws-sdk "^2.2.33"
 
-serverless@^1.17.0:
-  version "1.17.0"
-  resolved "https://registry.yarnpkg.com/serverless/-/serverless-1.17.0.tgz#7a221d93c2f50511c94fa89631384bf34efa46b1"
+serverless@^1.19.0:
+  version "1.19.0"
+  resolved "https://registry.yarnpkg.com/serverless/-/serverless-1.19.0.tgz#2d682a730e14253158ef7605526f2424473556ca"
   dependencies:
     apollo-client "^1.4.2"
     archiver "^1.1.0"

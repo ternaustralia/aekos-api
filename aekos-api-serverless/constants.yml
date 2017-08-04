@@ -31,3 +31,4 @@ messages:
       'speciesData*' will return all species records whereas this resource will only return records
       that have either a) any traits, if no trait filter is applied, or b) the specified traits if
       a filter is applied. You'll never get records with no traits from this resource.
+    noChangesSinceV1: No changes since version 1, just keeping version numbers synchronised.

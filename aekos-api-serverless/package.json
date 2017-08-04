@@ -10,7 +10,9 @@
     "jasmine": "^2.6.0",
     "jasmine-core": "^2.6.1",
     "nodemon": "^1.11.0",
-    "serverless-aws-documentation": "^0.7.0",
+    "serverless": "^1.19.0",
+    "serverless-aws-documentation": "tomsaleeba/serverless-aws-documentation#4e7f314898e6b958f2c6ea3749835c27cd7cadb4",
+    "serverless-domain-manager": "^1.1.6",
     "standard": "^10.0.2"
   },
   "dependencies": {
@@ -19,8 +21,6 @@
     "jsonschema": "^1.1.1",
     "mysql": "^2.13.0",
     "promise-mysql": "^3.0.1",
-    "serverless": "^1.17.0",
-    "serverless-domain-manager": "^1.1.6",
     "yamljs": "^0.2.10"
   }
 }
