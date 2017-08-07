@@ -5,6 +5,10 @@ const speciesNamesParam = yaml.load('./constants.yml').paramNames.speciesName.mu
 
 module.exports.handler = (event, context, callback) => {
   let db = require('./db-helper')
+  doHandle(event, callback, db)
+}
+
+function doHandle (event, callback, db) {
   r.handleJsonPost(event, callback, db, r.speciesNamesValidator, responder, {
     event: event
   })
@@ -12,7 +16,8 @@ module.exports.handler = (event, context, callback) => {
 
 module.exports._testonly = {
   responder: responder,
-  getSql: getSql
+  getSql: getSql,
+  doHandle: doHandle
 }
 
 function responder (requestBody, db, _, extrasProvider) {
@@ -21,14 +26,19 @@ function responder (requestBody, db, _, extrasProvider) {
   return db.execSelectPromise(sql).then(sqlResult => {
     return new Promise((resolve, reject) => {
       try {
-        let strategy = getVersionStrategy(extrasProvider.event)
-        strategy(sqlResult)
+        processWithVersionStrategy(sqlResult, extrasProvider.event)
         resolve(sqlResult)
       } catch (error) {
         reject(error)
       }
     })
   })
+}
+
+module.exports.processWithVersionStrategy = processWithVersionStrategy
+function processWithVersionStrategy (sqlResult, event) {
+  let strategy = getVersionStrategy(event)
+  strategy(sqlResult)
 }
 
 function addIdField (records) {

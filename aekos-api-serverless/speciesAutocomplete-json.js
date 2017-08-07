@@ -1,12 +1,13 @@
 'use strict'
 let r = require('./response-helper')
+let speciesSummary = require('./speciesSummary-json')
 const startsWithChar = '%'
 let yaml = require('yamljs')
 const qParam = yaml.load('./constants.yml').paramNames.PARTIAL_NAME
-const offsetParam = yaml.load('./constants.yml').paramNames.OFFSET
-const offsetDefault = yaml.load('./constants.yml').defaults.OFFSET
-const pageSizeParam = yaml.load('./constants.yml').paramNames.PAGE_SIZE
-const pageSizeDefault = yaml.load('./constants.yml').defaults.PAGE_SIZE
+const startParam = yaml.load('./constants.yml').paramNames.START
+const startDefault = yaml.load('./constants.yml').defaults.START
+const rowsParam = yaml.load('./constants.yml').paramNames.ROWS
+const rowsDefault = yaml.load('./constants.yml').defaults.ROWS
 
 module.exports.handler = (event, context, callback) => {
   let db = require('./db-helper')
@@ -19,10 +20,11 @@ function doHandle (event, callback, db) {
     return
   }
   let partialName = event.queryStringParameters[qParam]
-  let offset = r.getOptionalNumberParam(event, offsetParam, offsetDefault)
-  let pageSize = r.getOptionalNumberParam(event, pageSizeParam, pageSizeDefault)
-  const sql = getSql(partialName, pageSize, offset, db)
+  let start = r.getOptionalNumberParam(event, startParam, startDefault)
+  let rows = r.getOptionalNumberParam(event, rowsParam, rowsDefault)
+  const sql = getSql(partialName, rows, start, db)
   db.execSelectPromise(sql).then(queryResult => {
+    speciesSummary.processWithVersionStrategy(queryResult, event)
     r.json.ok(callback, queryResult)
   }).catch(error => {
     console.log('Failed to execute species autocomplete SQL', error)
@@ -35,10 +37,10 @@ module.exports._testonly = {
   doHandle: doHandle
 }
 
-function getSql (partialName, pageSize, offset, db) {
+function getSql (partialName, rows, start, db) {
   let escapedPartialName = db.escape(partialName + startsWithChar)
   return `
-    SELECT speciesName, sum(recordsHeld) AS recordsHeld, 'notusedanymore' AS id
+    SELECT speciesName, sum(recordsHeld) AS recordsHeld
     FROM (
       SELECT scientificName AS speciesName, count(*) AS recordsHeld
       FROM species
@@ -53,5 +55,5 @@ function getSql (partialName, pageSize, offset, db) {
     WHERE speciesName IS NOT NULL
     GROUP BY 1
     ORDER BY 1
-    LIMIT ${pageSize} OFFSET ${offset};`
+    LIMIT ${rows} OFFSET ${start};`
 }

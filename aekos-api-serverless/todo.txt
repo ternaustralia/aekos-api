@@ -25,3 +25,7 @@
 - create example client
 - make sure env var filtering and trait filtering work
 - update search resources that still use single values for requests
+
+look at marking v1 resources as deprecated (might not need separate groups then)
+strip id field from v2 search resources
+check that speciesAutocomplete is finished off (ammend mappings?)

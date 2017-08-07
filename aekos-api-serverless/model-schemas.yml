@@ -111,21 +111,18 @@ exports:
         type: number
       name:
         type: string
+  V2SpeciesSummary:
+    type: object
+    properties: &V2SpeciesSummaryProperties
+      recordsHeld:
+        type: number
+      speciesName:
+        type: string
   V1SpeciesSummary:
     type: object
     properties:
+      <<: *V2SpeciesSummaryProperties
       id:
-        type: string
-      recordsHeld:
-        type: number
-      speciesName:
-        type: string
-  V2SpeciesSummary:
-    type: object
-    properties:
-      recordsHeld:
-        type: number
-      speciesName:
         type: string
   CommonResponseHeaderProperties: &CommonResponseHeaderProperties
     elapsedTime:

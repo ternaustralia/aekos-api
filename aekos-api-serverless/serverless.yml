@@ -113,6 +113,10 @@ custom:
     DownloadQueryParam:
       name: ${file(./constants.yml):paramNames.DOWNLOAD}
       description: true to trigger a browser download of the result, default=false
+    PartialNameParam:
+      name: ${self:custom.constants.paramNames.PARTIAL_NAME}
+      description: partial species name
+      required: true
     LinkHeader:
       name: link
       description: describes other actions that can be taken
@@ -133,6 +137,18 @@ custom:
           items: ${self:custom.modelDetails.V1SpeciesSummary}
       -
         name: V2SpeciesSummaryResponse
+        contentType: "application/json"
+        schema:
+          type: array
+          items: ${self:custom.modelDetails.V2SpeciesSummary}
+      -
+        name: V1SpeciesAutocompleteResponse
+        contentType: "application/json"
+        schema:
+          type: array
+          items: ${self:custom.modelDetails.V1SpeciesSummary}
+      -
+        name: V2SpeciesAutocompleteResponse
         contentType: "application/json"
         schema:
           type: array
@@ -266,20 +282,6 @@ custom:
         name: V1TraitBySpeciesResponse
         contentType: "application/json"
         schema: ${self:custom.modelDetails.fragments.VocabObjectSchema}
-      -
-        name: V1SpeciesAutocompleteResponse
-        contentType: "application/json"
-        schema:
-          type: array
-          items:
-            type: object
-            properties:
-              speciesName:
-                type: string
-              recordsHeld:
-                type: string
-              id:
-                type: string
       -
         name: V1SpeciesDataRequest
         contentType: "application/json"
@@ -465,8 +467,8 @@ functions:
                 responseModels:
                   "application/json": V1EnvironmentalVariableVocabResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
-  v1-speciesAutocomplete-json:
-    handler: v1-speciesAutocomplete-json.handler
+  speciesAutocomplete-json:
+    handler: speciesAutocomplete-json.handler
     events:
       - http:
           path: v1/speciesAutocomplete.json
@@ -478,21 +480,35 @@ functions:
               Performs an autocomplete on the partial species name supplied. Results starting with the supplied
               fragment will be returned ordered by most relevant.
             queryParams:
-              -
-                name: ${self:custom.constants.paramNames.PARTIAL_NAME}
-                description: partial species name
-                required: true
-              -
-                name: ${self:custom.constants.paramNames.OFFSET}
-                description: 0-indexed offset, default=${self:custom.constants.defaults.OFFSET}
-              -
-                name: ${self:custom.constants.paramNames.PAGE_SIZE}
-                description: number of records per page, default=${self:custom.constants.defaults.PAGE_SIZE}
+              - ${self:custom.commonModelSchemaFragments.PartialNameParam}
+              - ${self:custom.commonModelSchemaFragments.StartQueryParam}
+              - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
             methodResponses:
               -
                 statusCode: '200'
                 responseModels:
                   "application/json": V1SpeciesAutocompleteResponse
+              - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
+      - http:
+          path: v2/speciesAutocomplete.json
+          method: get
+          cors: ${self:custom.customCors}
+          documentation:
+            summary: Autocomplete partial species names
+            description: >
+              Performs an autocomplete on the partial species name supplied. Results starting with the supplied
+              fragment will be returned ordered by most relevant.
+              ${file(./constants.yml):messages.documentation.noIdSinceV1}
+            queryParams:
+              - ${self:custom.commonModelSchemaFragments.PartialNameParam}
+              - ${self:custom.commonModelSchemaFragments.StartQueryParam}
+              - ${self:custom.commonModelSchemaFragments.RowsQueryParam}
+            methodResponses:
+              -
+                statusCode: '200'
+                responseModels:
+                  "application/json": V2SpeciesAutocompleteResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   speciesSummary-json:
@@ -515,8 +531,6 @@ functions:
                 statusCode: '200'
                 responseModels:
                   "application/json": V1SpeciesSummaryResponse
-                responseHeaders:
-                  - ${self:custom.commonModelSchemaFragments.LinkHeader}
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
       - http:
@@ -536,8 +550,6 @@ functions:
                 statusCode: '200'
                 responseModels:
                   "application/json": V2SpeciesSummaryResponse
-                responseHeaders:
-                  - ${self:custom.commonModelSchemaFragments.LinkHeader}
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   speciesData:

@@ -13,14 +13,12 @@ paramNames:
   ROWS: "rows"
   START: "start"
   PARTIAL_NAME: "q"
-  OFFSET: "offset"
   DOWNLOAD: "download"
 defaults:
-  OFFSET: "0"
+  PAGE_NUM: "1"
   PAGE_SIZE: "20"
   START: "0"
   ROWS: "20"
-  PAGE_NUM: "1"
 messages:
   public:
     internalServerError: Sorry about that, something has gone wrong

@@ -3,29 +3,35 @@ var objectUnderTest = require('../speciesSummary-json')
 let StubDB = require('./StubDB')
 
 describe('/v1/speciesSummary-json', () => {
-  describe('.responder()', () => {
+  describe('.doHandle()', () => {
     let result = null
     beforeEach(done => {
-      let postBody = { speciesNames: ['species one'] }
       let stubDb = new StubDB()
       stubDb.setExecSelectPromiseResponses([
         [{ speciesName: 'species one', recordsHeld: 123 }]
       ])
-      let extrasProvider = {
-        event: {
-          requestContext: {
-            path: '/v1/speciesSummary.json'
-          }
-        }
+      let event = {
+        requestContext: {
+          path: '/v1/speciesSummary.json'
+        },
+        body: JSON.stringify({ speciesNames: ['species one'] })
       }
-      objectUnderTest._testonly.responder(postBody, stubDb, null, extrasProvider).then(responseBody => {
-        result = responseBody
+      let callback = (_, theResult) => {
+        result = theResult
         done()
-      })
+      }
+      objectUnderTest._testonly.doHandle(event, callback, stubDb)
     })
 
     it('should handle a single element', () => {
-      expect(result).toEqual([
+      expect(result.statusCode).toBe(200)
+      expect(result.headers).toEqual({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
+        'Access-Control-Expose-Headers': 'link',
+        'Content-Type': "'application/json'"
+      })
+      expect(JSON.parse(result.body)).toEqual([
         { speciesName: 'species one', recordsHeld: 123, id: 'notusedanymore' }
       ])
     })
