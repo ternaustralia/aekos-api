@@ -1,7 +1,6 @@
 - add HATEOAS headers for search resources
 - make getSpeciesByTrait perform and return the correct result
-- remove verbs from resources (v2 change)
-- add status code to 4/500 response objects
+- remove verbs from resources (v3 change)
 - return an appropriate HTTP status when a 'page out of bounds' occurs
 - figure out why the domain-manager doesn't add the base path mapping
 - move all model stuff out of serverless.yml into the model-schemas.yml file. Have three sections: fragments, schemas and descriptions
@@ -14,7 +13,6 @@
     - we can use this to handle the requests: https://github.com/lovell/media-type
     - this book might help: https://www.amazon.com.au/dp/B0046RERXY/ref=cm_sw_r_cp_dp_T2_AiXBzb8PMGS10
 - add a git commit hash to the doco
-- get doco plugin working for multiple events
 - add rollbar calls for errors
 - add try-catch error trapping to respond with our 500 for all resources
 - create RSS or Atom feed for notifying of updates to the API. Could be another resource in the project, another separate API or maybe just github releases
@@ -23,9 +21,7 @@
 - consider adding type= attribute to link header items
 - figure out what rel we can use on search resources to point to data resources
 - create example client
-- make sure env var filtering and trait filtering work
 - update search resources that still use single values for requests
 
 look at marking v1 resources as deprecated (might not need separate groups then)
 strip id field from v2 search resources
-check that speciesAutocomplete is finished off (ammend mappings?)

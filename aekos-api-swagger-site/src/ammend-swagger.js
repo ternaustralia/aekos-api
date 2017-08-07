@@ -10,51 +10,6 @@ if (typeof inputFile === 'undefined') {
 }
 let stdout = process.stdout
 
-const tagMappingKeySeparator = '#'
-const dataRetrievalTag = 'Data Retrieval by Species'
-const everythingRetrievalTag = 'Data Retrieval (everything)'
-const searchTag = 'Search'
-const deprecatedDataRetrievalTag = 'Deprecated - Data Retrieval by Species'
-const deprecatedEverythingRetrievalTag = 'Deprecated - Data Retrieval (everything)'
-const deprecatedSearchTag = 'Deprecated - Search'
-const tagMapping = {
-  [post('/v1/environmentData')]: deprecatedDataRetrievalTag,
-  [post('/v2/environmentData')]: dataRetrievalTag,
-  [post('/v1/environmentData.json')]: deprecatedDataRetrievalTag,
-  [post('/v2/environmentData.json')]: dataRetrievalTag,
-  [post('/v1/environmentData.csv')]: deprecatedDataRetrievalTag,
-  [post('/v2/environmentData.csv')]: dataRetrievalTag,
-  [post('/v1/speciesData')]: deprecatedDataRetrievalTag,
-  [post('/v2/speciesData')]: dataRetrievalTag,
-  [post('/v1/speciesData.json')]: deprecatedDataRetrievalTag,
-  [post('/v2/speciesData.json')]: dataRetrievalTag,
-  [post('/v1/speciesData.csv')]: deprecatedDataRetrievalTag,
-  [post('/v2/speciesData.csv')]: dataRetrievalTag,
-  [post('/v1/traitData')]: deprecatedDataRetrievalTag,
-  [post('/v2/traitData')]: dataRetrievalTag,
-  [post('/v1/traitData.json')]: deprecatedDataRetrievalTag,
-  [post('/v2/traitData.json')]: dataRetrievalTag,
-  [post('/v1/traitData.csv')]: deprecatedDataRetrievalTag,
-  [post('/v2/traitData.csv')]: dataRetrievalTag,
-  [get('/v1/getEnvironmentalVariableVocab.json')]: deprecatedSearchTag,
-  [get('/v2/getEnvironmentalVariableVocab.json')]: searchTag,
-  [get('/v1/getTraitVocab.json')]: deprecatedSearchTag,
-  [get('/v2/getTraitVocab.json')]: searchTag,
-  [post('/v1/getEnvironmentBySpecies.json')]: searchTag,
-  [post('/v1/getSpeciesByTrait.json')]: searchTag,
-  [post('/v1/getTraitsBySpecies.json')]: deprecatedSearchTag,
-  [post('/v2/getTraitsBySpecies.json')]: searchTag,
-  [get('/v1/speciesAutocomplete.json')]: deprecatedSearchTag,
-  [get('/v2/speciesAutocomplete.json')]: searchTag,
-  [post('/v1/speciesSummary.json')]: deprecatedSearchTag,
-  [post('/v2/speciesSummary.json')]: searchTag,
-  [get('/v1/allSpeciesData')]: deprecatedEverythingRetrievalTag,
-  [get('/v2/allSpeciesData')]: everythingRetrievalTag,
-  [get('/v1/allSpeciesData.json')]: deprecatedEverythingRetrievalTag,
-  [get('/v2/allSpeciesData.json')]: everythingRetrievalTag,
-  [get('/v1/allSpeciesData.csv')]: deprecatedEverythingRetrievalTag,
-  [get('/v2/allSpeciesData.csv')]: everythingRetrievalTag,
-}
 const responseMapping = {
   '/v1/environmentData': 'V1EnvDataResponse',
   '/v2/environmentData': 'V2EnvDataResponse',
@@ -66,26 +21,13 @@ const responseMapping = {
   '/v2/allSpeciesData': 'V2AllSpeciesDataResponse'
 }
 
-function get(path) {
-  return tagMappingKey(path, 'get')
-}
-
-function post(path) {
-  return tagMappingKey(path, 'post')
-}
-
-function tagMappingKey(path, method) {
-  return path + tagMappingKeySeparator + method
-}
-
 // We need to read the file because piping to stdin has a limit of 65536 chars, then it adds a comma and destroys things
 fs.readFile(inputFile, 'utf8', (error, data) => {
   if (error) {
     throw error
   }
   let parsedData = JSON.parse(data)
-  tagResources(parsedData)
-  addTagDescriptions(parsedData)
+  removeOptionsMethods(parsedData)
   addApiDescription(parsedData)
   removeRootRedirectResource(parsedData)
   updateParameterTypes(parsedData)
@@ -95,23 +37,16 @@ fs.readFile(inputFile, 'utf8', (error, data) => {
   stdout.write('\n')
 })
 
-function tagResources(parsedData) {
+function removeOptionsMethods(parsedData) {
   Object.keys(parsedData.paths).forEach(currPathKey => {
     let currPath = parsedData.paths[currPathKey]
     Object.keys(currPath).forEach(currMethodKey => {
       let currMethod = currPath[currMethodKey]
       let isOptionsMethod = currMethodKey === 'options'
-      if (isOptionsMethod) {
-        delete currPath[currMethodKey]
+      if (!isOptionsMethod) {
         return
       }
-      let key = tagMappingKey(currPathKey, currMethodKey)
-      let tag = tagMapping[key]
-      let isNoTagDefined = typeof tag === 'undefined'
-      if (isNoTagDefined) {
-        return
-      }
-      currMethod.tags = [tag]
+      delete currPath[currMethodKey]
     })
   })
 }
@@ -154,23 +89,6 @@ function updateParameterTypes (parsedData) {
       })
     })
   })
-}
-
-function addTagDescriptions(parsedData) {
-  parsedData.tags = [
-    {
-      name: dataRetrievalTag,
-      description: 'Retrieve data using parameters from search'
-    },
-    {
-      name: everythingRetrievalTag,
-      description: 'Retrieve all records'
-    },
-    {
-      name: searchTag,
-      description: 'Find species, traits and environmental variables'
-    }
-  ]
 }
 
 function addApiDescription(parsedData) {

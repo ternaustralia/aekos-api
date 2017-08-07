@@ -79,6 +79,13 @@ custom:
     basePath: '(none)'
     domainName: ${self:custom.domainName}
     stage: ${self:custom.stage}
+  tags:
+    dataRetrievalTag: Data Retrieval by Species
+    everythingRetrievalTag: Data Retrieval (everything)
+    searchTag: Search
+    deprecatedDataRetrievalTag: Deprecated - Data Retrieval by Species
+    deprecatedEverythingRetrievalTag: Deprecated - Data Retrieval (everything)
+    deprecatedSearchTag: Deprecated - Search
   commonModelSchemaFragments:
     MethodResponse400Json:
       statusCode: '400'
@@ -128,6 +135,16 @@ custom:
       summary: AEKOS API
       # description doesn't work so we add it manually after we pull the Swagger from API Gateway
       #    see: https://github.com/9cookies/serverless-aws-documentation/issues/37
+      tags:
+        -
+          name: ${self:custom.tags.dataRetrievalTag}
+          description: Retrieve data using parameters from search
+        -
+          name: ${self:custom.tags.everythingRetrievalTag}
+          description: Retrieve all records
+        -
+          name: ${self:custom.tags.searchTag}
+          description: Find species, traits and environmental variables
     models:
       -
         name: V1SpeciesSummaryResponse
@@ -308,6 +325,8 @@ functions:
           cors: ${self:custom.customCors}
           documentation:
             summary: Retrieve all available environment variable names for specified species
+            tags:
+              - ${self:custom.tags.searchTag}
             description: >
               Finds the environmental variables that the supplied species have. Note that the result doesn't
               include the value of the environmental variables, it only shows that the supplied species have
@@ -333,6 +352,8 @@ functions:
           cors: ${self:custom.customCors}
           documentation:
             summary: Retrieve all available traits for specified species
+            tags:
+              - ${self:custom.tags.deprecatedSearchTag}
             description: >
               Finds the traits that the supplied species have. Note that the result doesn't include the value
               of the traits, it only shows that the supplied species have values for those traits. To get
@@ -355,6 +376,8 @@ functions:
           cors: ${self:custom.customCors}
           documentation:
             summary: Retrieve all available traits for specified species
+            tags:
+              - ${self:custom.tags.searchTag}
             description: >
               Finds the traits that the supplied species have. Note that the result doesn't include the value
               of the traits, it only shows that the supplied species have values for those traits. To get
@@ -381,6 +404,8 @@ functions:
           cors: ${self:custom.customCors}
           documentation:
             summary: Retrieve all available species for specified traits
+            tags:
+              - ${self:custom.tags.searchTag}
             description: >
               Finds the species names that the supplied trait(s). Note that the result only shows that the supplied
               traits have species records present in the system. To get the values of the traits, you need to use the Data
@@ -406,6 +431,8 @@ functions:
           cors: ${self:custom.customCors}
           documentation:
             summary: Get trait vocabulary
+            tags:
+              - ${self:custom.tags.deprecatedSearchTag}
             description: >
               Gets a distinct list of all the traits that appear in the system. The code and label are supplied for
               each trait. The codes are required to use as parameters for other resources and the label information
@@ -422,6 +449,8 @@ functions:
           cors: ${self:custom.customCors}
           documentation:
             summary: Get trait vocabulary
+            tags:
+              - ${self:custom.tags.searchTag}
             description: >
               Gets a distinct list of all the traits that appear in the system. The code and label are supplied for
               each trait. The codes are required to use as parameters for other resources and the label information
@@ -441,6 +470,8 @@ functions:
           cors: ${self:custom.customCors}
           documentation:
             summary: Get environmental variable vocabulary
+            tags:
+              - ${self:custom.tags.deprecatedSearchTag}
             description: >
               Gets a distinct list of all the environmental variables that appear in the system. The code and label are supplied for
               each trait. The codes are required to use as parameters for other resources and the label information
@@ -457,6 +488,8 @@ functions:
           cors: ${self:custom.customCors}
           documentation:
             summary: Get environmental variable vocabulary
+            tags:
+              - ${self:custom.tags.searchTag}
             description: >
               Gets a distinct list of all the environmental variables that appear in the system. The code and label are supplied for
               each trait. The codes are required to use as parameters for other resources and the label information
@@ -476,6 +509,8 @@ functions:
           cors: ${self:custom.customCors}
           documentation:
             summary: Autocomplete partial species names
+            tags:
+              - ${self:custom.tags.deprecatedSearchTag}
             description: >
               Performs an autocomplete on the partial species name supplied. Results starting with the supplied
               fragment will be returned ordered by most relevant.
@@ -496,6 +531,8 @@ functions:
           cors: ${self:custom.customCors}
           documentation:
             summary: Autocomplete partial species names
+            tags:
+              - ${self:custom.tags.searchTag}
             description: >
               Performs an autocomplete on the partial species name supplied. Results starting with the supplied
               fragment will be returned ordered by most relevant.
@@ -520,6 +557,8 @@ functions:
           cors: ${self:custom.customCors}
           documentation:
             summary: Get a summary of the specified species names
+            tags:
+              - ${self:custom.tags.deprecatedSearchTag}
             description: >
               A summary of the information that the system holds on the supplied species name(s) including a count
               of records. If the system doesn't have any data on a species name, no record for the species name will
@@ -539,6 +578,8 @@ functions:
           cors: ${self:custom.customCors}
           documentation:
             summary: Get a summary of the specified species names
+            tags:
+              - ${self:custom.tags.searchTag}
             description: >
               A summary of the information that the system holds on the supplied species name(s) including a count
               of records. If the system doesn't have any data on a species name, no record for the species name will
@@ -561,6 +602,8 @@ functions:
           cors: ${self:custom.customCors}
           documentation:
             summary: Get species data
+            tags:
+              - ${self:custom.tags.dataRetrievalTag}
             description: >
               Gets Darwin Core records for the supplied species name(s) using content negotation to determine the response type.
               This resource honours Accept headers represented by any of the /v2/speciesData.* resources.
@@ -586,6 +629,8 @@ functions:
           cors: ${self:custom.customCors}
           documentation:
             summary: Get species data
+            tags:
+              - ${self:custom.tags.deprecatedDataRetrievalTag}
             description: >
               Gets Darwin Core records for the supplied species name(s) using content negotation to determine the response type.
               This resource honours Accept headers represented by any of the /v1/speciesData.* resources.
@@ -610,6 +655,8 @@ functions:
           cors: ${self:custom.customCors}
           documentation:
             summary: Get species data in JSON format
+            tags:
+              - ${self:custom.tags.dataRetrievalTag}
             description: >
               Gets Darwin Core records for the supplied species name(s) in JSON format.
               ${file(./constants.yml):messages.documentation.v2NewFields}
@@ -633,6 +680,8 @@ functions:
           cors: ${self:custom.customCors}
           documentation:
             summary: Get species data in JSON format
+            tags:
+              - ${self:custom.tags.deprecatedDataRetrievalTag}
             description: >
               Gets Darwin Core records for the supplied species name(s) in JSON format.
             queryParams:
@@ -655,6 +704,8 @@ functions:
           cors: ${self:custom.customCors}
           documentation:
             summary: Get species data in CSV format
+            tags:
+              - ${self:custom.tags.dataRetrievalTag}
             description: >
               Gets Darwin Core records for the supplied species name(s) in CSV format.
             queryParams:
@@ -678,6 +729,8 @@ functions:
           cors: ${self:custom.customCors}
           documentation:
             summary: Get species data in CSV format
+            tags:
+              - ${self:custom.tags.deprecatedDataRetrievalTag}
             description: >
               Gets Darwin Core records for the supplied species name(s) in CSV format.
             queryParams:
@@ -704,6 +757,8 @@ functions:
           cors: ${self:custom.customCors}
           documentation:
             summary: Get trait data
+            tags:
+              - ${self:custom.tags.dataRetrievalTag}
             description: >
               Gets Darwin Core records with added trait information for the supplied species name(s) using content negotation to
               determine the response type. If you supply trait names then the result records will have the traits filtered down
@@ -731,6 +786,8 @@ functions:
           cors: ${self:custom.customCors}
           documentation:
             summary: Get trait data
+            tags:
+              - ${self:custom.tags.deprecatedDataRetrievalTag}
             description: >
               Gets Darwin Core records with added trait information for the supplied species name(s) using content negotation to
               determine the response type. If you supply trait names then the result records will have the traits filtered down
@@ -758,6 +815,8 @@ functions:
           cors: ${self:custom.customCors}
           documentation:
             summary: Get trait data in JSON format
+            tags:
+              - ${self:custom.tags.dataRetrievalTag}
             description: >
               Gets Darwin Core records with added trait information in JSON format. If you supply trait names then the result
               records will have the traits filtered down to only the traits you've asked for, otherwise all traits are returned.
@@ -783,6 +842,8 @@ functions:
           cors: ${self:custom.customCors}
           documentation:
             summary: Get trait data in JSON format
+            tags:
+              - ${self:custom.tags.deprecatedDataRetrievalTag}
             description: >
               Gets Darwin Core records with added trait information in JSON format. If you supply trait names then the result
               records will have the traits filtered down to only the traits you've asked for, otherwise all traits are returned.
@@ -807,6 +868,8 @@ functions:
           cors: ${self:custom.customCors}
           documentation:
             summary: Get trait data in CSV format
+            tags:
+              - ${self:custom.tags.dataRetrievalTag}
             description: >
               Gets Darwin Core records with added trait information in CSV format. If you supply trait names then the result
               records will have the traits filtered down to only the traits you've asked for, otherwise all traits are returned.
@@ -833,6 +896,8 @@ functions:
           cors: ${self:custom.customCors}
           documentation:
             summary: Get trait data in CSV format
+            tags:
+              - ${self:custom.tags.deprecatedDataRetrievalTag}
             description: >
               Gets Darwin Core records with added trait information in CSV format. If you supply trait names then the result
               records will have the traits filtered down to only the traits you've asked for, otherwise all traits are returned.
@@ -861,6 +926,8 @@ functions:
           cors: ${self:custom.customCors}
           documentation:
             summary: Get environmental variable data
+            tags:
+              - ${self:custom.tags.dataRetrievalTag}
             description: >
               Gets environmental variable data records for the site/study location/plot visits that the supplied species name(s)
               appear at using content negotation to determine the response type. If you supply environmental variable names then
@@ -889,6 +956,8 @@ functions:
           cors: ${self:custom.customCors}
           documentation:
             summary: Get environmental variable data
+            tags:
+              - ${self:custom.tags.deprecatedDataRetrievalTag}
             description: >
               Gets environmental variable data records for the site/study location/plot visits that the supplied species name(s)
               appear at using content negotation to determine the response type. If you supply environmental variable names then
@@ -916,6 +985,8 @@ functions:
           cors: ${self:custom.customCors}
           documentation:
             summary: Get environmental variable data in JSON format
+            tags:
+              - ${self:custom.tags.dataRetrievalTag}
             description: >
               Gets environmental variable data records for the site/study location/plot visits that the supplied species name(s)
               appear at in JSON format. If you supply environmental variable names then the result will have the environmental
@@ -942,6 +1013,8 @@ functions:
           cors: ${self:custom.customCors}
           documentation:
             summary: Get environmental variable data in JSON format
+            tags:
+              - ${self:custom.tags.deprecatedDataRetrievalTag}
             description: >
               Gets environmental variable data records for the site/study location/plot visits that the supplied species name(s)
               appear at in JSON format. If you supply environmental variable names then the result will have the environmental
@@ -967,6 +1040,8 @@ functions:
           cors: ${self:custom.customCors}
           documentation:
             summary: Get environmental variable data in CSV format
+            tags:
+              - ${self:custom.tags.dataRetrievalTag}
             description: >
               Gets environmental variable data records for the site/study location/plot visits that the supplied species name(s)
               appear at in CSV format. If you supply environmental variable names then the result will have the environmental
@@ -994,6 +1069,8 @@ functions:
           cors: ${self:custom.customCors}
           documentation:
             summary: Get environmental variable data in CSV format
+            tags:
+              - ${self:custom.tags.deprecatedDataRetrievalTag}
             description: >
               Gets environmental variable data records for the site/study location/plot visits that the supplied species name(s)
               appear at in CSV format. If you supply environmental variable names then the result will have the environmental
@@ -1024,6 +1101,8 @@ functions:
           cors: ${self:custom.customCors}
           documentation:
             summary: Get all species data
+            tags:
+              - ${self:custom.tags.everythingRetrievalTag}
             description: >
               Gets all Darwin Core records using content negotation to determine the response type. This resource honours Accept
               headers represented by any of the /v2/allSpeciesData.* resources. ${file(./constants.yml):messages.documentation.v2NewFields}
@@ -1046,6 +1125,8 @@ functions:
           cors: ${self:custom.customCors}
           documentation:
             summary: Get all species data
+            tags:
+              - ${self:custom.tags.deprecatedEverythingRetrievalTag}
             description: >
               Gets all Darwin Core records using content negotation to determine the response type. This resource honours Accept
               headers represented by any of the /v1/allSpeciesData.* resources.
@@ -1068,6 +1149,8 @@ functions:
           cors: ${self:custom.customCors}
           documentation:
             summary: Get all species data in JSON format
+            tags:
+              - ${self:custom.tags.everythingRetrievalTag}
             description: >
               Gets Darwin Core records in JSON format. ${file(./constants.yml):messages.documentation.v2NewFields}
             queryParams:
@@ -1088,6 +1171,8 @@ functions:
           cors: ${self:custom.customCors}
           documentation:
             summary: Get all species data in JSON format
+            tags:
+              - ${self:custom.tags.deprecatedEverythingRetrievalTag}
             description: >
               Gets Darwin Core records in JSON format.
             queryParams:
@@ -1108,6 +1193,8 @@ functions:
           cors: ${self:custom.customCors}
           documentation:
             summary: Get all species occurrence data in CSV format
+            tags:
+              - ${self:custom.tags.everythingRetrievalTag}
             description: >
               Gets all Darwin Core records in CSV format. ${file(./constants.yml):messages.documentation.v2NewFields}
             queryParams:
@@ -1129,6 +1216,8 @@ functions:
           cors: ${self:custom.customCors}
           documentation:
             summary: Get all species occurrence data in CSV format
+            tags:
+              - ${self:custom.tags.deprecatedEverythingRetrievalTag}
             description: >
               Gets all Darwin Core records in CSV format.
             queryParams:

@@ -11,7 +11,7 @@
     "jasmine-core": "^2.6.1",
     "nodemon": "^1.11.0",
     "serverless": "^1.19.0",
-    "serverless-aws-documentation": "tomsaleeba/serverless-aws-documentation#4e7f314898e6b958f2c6ea3749835c27cd7cadb4",
+    "serverless-aws-documentation": "tomsaleeba/serverless-aws-documentation#23280eae238a4f1e0b6d5d3885f6079ca6227963",
     "serverless-domain-manager": "^1.1.6",
     "standard": "^10.0.2"
   },
