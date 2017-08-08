@@ -1249,28 +1249,28 @@ describe('response-helper', () => {
 
   describe('.queryStringParamIsPositiveNumberIfPresentValidator()', () => {
     it('should pass validation when the param is NOT present', () => {
-      let objectUnderTest = responseHelper.queryStringParamIsPositiveNumberIfPresentValidator('param1')
+      let objectUnderTest = responseHelper._testonly.queryStringParamIsPositiveNumberIfPresentValidator('param1')
       let queryStringObject = {}
       let result = objectUnderTest(queryStringObject, null)
       expect(result).toEqual({ isValid: true })
     })
 
     it('should pass validation when no params are present (null)', () => {
-      let objectUnderTest = responseHelper.queryStringParamIsPositiveNumberIfPresentValidator('param1')
+      let objectUnderTest = responseHelper._testonly.queryStringParamIsPositiveNumberIfPresentValidator('param1')
       let queryStringObject = null
       let result = objectUnderTest(queryStringObject, null)
       expect(result).toEqual({ isValid: true })
     })
 
     it('should pass validation when no params are present (undefined)', () => {
-      let objectUnderTest = responseHelper.queryStringParamIsPositiveNumberIfPresentValidator('param1')
+      let objectUnderTest = responseHelper._testonly.queryStringParamIsPositiveNumberIfPresentValidator('param1')
       let event = {}
       let result = objectUnderTest(event.willBeUndefined, null)
       expect(result).toEqual({ isValid: true })
     })
 
     it('should pass validation when the param is present and a number', () => {
-      let objectUnderTest = responseHelper.queryStringParamIsPositiveNumberIfPresentValidator('param1')
+      let objectUnderTest = responseHelper._testonly.queryStringParamIsPositiveNumberIfPresentValidator('param1')
       let queryStringObject = {
         param1: '123' // API Gateway passes strings
       }
@@ -1279,7 +1279,7 @@ describe('response-helper', () => {
     })
 
     it('should pass validation when the param is zero', () => {
-      let objectUnderTest = responseHelper.queryStringParamIsPositiveNumberIfPresentValidator('param1')
+      let objectUnderTest = responseHelper._testonly.queryStringParamIsPositiveNumberIfPresentValidator('param1')
       let queryStringObject = {
         param1: '0'
       }
@@ -1288,7 +1288,7 @@ describe('response-helper', () => {
     })
 
     it('should fail validation when the param is present but is a negative number', () => {
-      let objectUnderTest = responseHelper.queryStringParamIsPositiveNumberIfPresentValidator('param1')
+      let objectUnderTest = responseHelper._testonly.queryStringParamIsPositiveNumberIfPresentValidator('param1')
       let queryStringObject = {
         param1: '-1'
       }
@@ -1298,7 +1298,7 @@ describe('response-helper', () => {
     })
 
     it('should fail validation when the param is present and NOT a number', () => {
-      let objectUnderTest = responseHelper.queryStringParamIsPositiveNumberIfPresentValidator('param1')
+      let objectUnderTest = responseHelper._testonly.queryStringParamIsPositiveNumberIfPresentValidator('param1')
       let queryStringObject = {
         param1: 'asdf'
       }

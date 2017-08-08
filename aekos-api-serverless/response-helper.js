@@ -602,13 +602,13 @@ module.exports = {
   traitNamesOptionalValidator: traitNamesOptionalValidator,
   envVarNamesOptionalValidator: envVarNamesOptionalValidator,
   compositeValidator: compositeValidator,
-  queryStringParamIsPositiveNumberIfPresentValidator: queryStringParamIsPositiveNumberIfPresentValidator,
   pageSizeValidator: queryStringParamIsPositiveNumberIfPresentValidator(pageSizeParam),
   pageNumValidator: queryStringParamIsPositiveNumberIfPresentValidator(pageNumParam),
   startValidator: queryStringParamIsPositiveNumberIfPresentValidator(startParam),
   rowsValidator: queryStringParamIsPositiveNumberIfPresentValidator(rowsParam),
   newVersionHandler: newVersionHandler,
   _testonly: {
+    queryStringParamIsPositiveNumberIfPresentValidator: queryStringParamIsPositiveNumberIfPresentValidator,
     genericMandatoryNamesValidator: genericMandatoryNamesValidator,
     genericOptionalNamesValidator: genericOptionalNamesValidator,
     getUrlSuffix: getUrlSuffix

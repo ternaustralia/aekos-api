@@ -46,7 +46,7 @@ module.exports.escape = (unescapedValue) => {
       return mysql.escape(e)
     })
   }
-  return mysql.escape(unescapedValue) // FIXME handle a list
+  return mysql.escape(unescapedValue)
 }
 
 module.exports.toSqlList = (unescapedValues) => {
