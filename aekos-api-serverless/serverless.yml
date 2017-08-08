@@ -252,6 +252,10 @@ custom:
         contentType: "application/json"
         schema: ${self:custom.modelDetails.fragments.VocabObjectSchema}
       -
+        name: V2EnvironmentBySpeciesResponse
+        contentType: "application/json"
+        schema: ${self:custom.modelDetails.fragments.VocabObjectSchema}
+      -
         name: V1EnvironmentalVariableVocabResponse
         contentType: "application/json"
         schema: ${file(./environmentalVariableVocab-json.js):responseSchema}
@@ -261,6 +265,10 @@ custom:
         schema: ${file(./traitVocab-json.js):responseSchema}
       -
         name: V1GetEnvironmentBySpeciesRequest
+        contentType: "application/json"
+        schema: ${self:custom.modelDetails.fragments.SpeciesNamesPostRequest}
+      -
+        name: V2EnvironmentBySpeciesRequest
         contentType: "application/json"
         schema: ${self:custom.modelDetails.fragments.SpeciesNamesPostRequest}
       -
@@ -324,8 +332,8 @@ plugins:
   - serverless-domain-manager
 
 functions:
-  v1-getEnvironmentBySpecies-json:
-    handler: v1-getEnvironmentBySpecies-json.handler
+  environmentBySpecies-json:
+    handler: environmentBySpecies-json.handler
     events:
       - http:
           path: v1/getEnvironmentBySpecies.json
@@ -334,7 +342,7 @@ functions:
           documentation:
             summary: Retrieve all available environment variable names for specified species
             tags:
-              - ${self:custom.tags.searchTag}
+              - ${self:custom.tags.deprecatedSearchTag}
             description: >
               Finds the environmental variables that the supplied species have. Note that the result doesn't
               include the value of the environmental variables, it only shows that the supplied species have
@@ -349,6 +357,31 @@ functions:
                 statusCode: '200'
                 responseModels:
                   "application/json": V1EnvironmentBySpeciesResponse
+              - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
+      - http:
+          path: v2/getEnvironmentBySpecies.json
+          method: post
+          cors: ${self:custom.customCors}
+          documentation:
+            summary: Retrieve all available environment variable names for specified species
+            tags:
+              - ${self:custom.tags.searchTag}
+            description: >
+              Finds the environmental variables that the supplied species have. Note that the result doesn't
+              include the value of the environmental variables, it only shows that the supplied species have
+              values for those variables. To get the values, you need to use the Data Retrieval resources.
+              ${file(./constants.yml):messages.documentation.noChangesSinceV1}
+            queryParams:
+              - ${self:custom.commonModelSchemaFragments.PageNumQueryParam}
+              - ${self:custom.commonModelSchemaFragments.PageSizeQueryParam}
+            requestModels:
+               "application/json": V2EnvironmentBySpeciesRequest
+            methodResponses:
+              -
+                statusCode: '200'
+                responseModels:
+                  "application/json": V2EnvironmentBySpeciesResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   traitsBySpecies-json:

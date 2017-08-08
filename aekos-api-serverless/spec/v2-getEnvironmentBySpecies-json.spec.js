@@ -2,7 +2,7 @@
 let objectUnderTest = require('../environmentBySpecies-json')
 let StubDB = require('./StubDB')
 
-describe('/v1/getEnvironmentBySpecies-json', function () {
+describe('/v2/getEnvironmentBySpecies-json', function () {
   describe('.doHandle()', () => {
     let expectedSql = `
     SELECT v.varName AS code, count(*) AS recordsHeld
@@ -31,7 +31,7 @@ describe('/v1/getEnvironmentBySpecies-json', function () {
         queryStringParameters: null,
         body: JSON.stringify({ speciesNames: ['species one'] }),
         requestContext: {
-          path: '/v1/getEnvironmentBySpecies.json'
+          path: '/v2/getEnvironmentBySpecies.json'
         }
       }
       let callback = (_, theResult) => {
@@ -87,7 +87,7 @@ describe('/v1/getEnvironmentBySpecies-json', function () {
         },
         body: JSON.stringify({ speciesNames: ['species one', 'species two'] }),
         requestContext: {
-          path: '/v1/getEnvironmentBySpecies.json'
+          path: '/v2/getEnvironmentBySpecies.json'
         }
       }
       let callback = (_, theResult) => {
@@ -109,6 +109,36 @@ describe('/v1/getEnvironmentBySpecies-json', function () {
         { code: 'clay', recordsHeld: 123, label: 'Clay Content' }
       ])
       expect(stubDb.execSelectPromise).toHaveBeenCalledWith(expectedSql)
+    })
+  })
+
+  describe('validator', () => {
+    it('should validate with a single species name', () => {
+      let requestBody = {
+        speciesNames: ['species one']
+      }
+      let result = objectUnderTest._testonly.validator(null, requestBody)
+      expect(result.isValid).toBe(true)
+    })
+
+    it('should fail validation with no species names', () => {
+      let requestBody = {
+        // no 'speciesNames'
+      }
+      let result = objectUnderTest._testonly.validator(null, requestBody)
+      expect(result.isValid).toBe(false)
+    })
+
+    it('should validate with a single species name and paging params', () => {
+      let requestBody = {
+        speciesNames: ['species one']
+      }
+      let queryString = {
+        pageSize: '33',
+        pageNum: '3'
+      }
+      let result = objectUnderTest._testonly.validator(queryString, requestBody)
+      expect(result.isValid).toBe(true)
     })
   })
 })

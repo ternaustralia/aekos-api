@@ -1,6 +1,6 @@
 'use strict'
 let r = require('./response-helper')
-let envByS = require('./v1-getEnvironmentBySpecies-json') // remove when we don't need wrapAsEvent hack anymore
+let envByS = require('./environmentBySpecies-json') // remove when we don't need wrapAsEvent hack anymore
 let speciesSummary = require('./speciesSummary-json')
 let yaml = require('yamljs')
 const traitNamesParam = yaml.load('./constants.yml').paramNames.traitName.multiple

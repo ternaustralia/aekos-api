@@ -3,7 +3,7 @@ let r = require('./response-helper')
 let v1TraitVocab = require('./traitVocab-json')
 let yaml = require('yamljs')
 const speciesNamesParam = yaml.load('./constants.yml').paramNames.speciesName.multiple
-let envByS = require('./v1-getEnvironmentBySpecies-json') // remove when we don't need wrapAsEvent hack anymore
+let envByS = require('./environmentBySpecies-json') // remove when we don't need wrapAsEvent hack anymore
 const defaultPageSize = yaml.load('./constants.yml').defaults.PAGE_SIZE
 const defaultPageNum = yaml.load('./constants.yml').defaults.PAGE_NUM
 
