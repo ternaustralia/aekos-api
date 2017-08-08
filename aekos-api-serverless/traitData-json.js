@@ -34,7 +34,7 @@ function responder (requestBody, db, queryStringParameters, extrasProvider) {
 module.exports.getTraitData = getTraitData
 function getTraitData (event, params, processStart, db, elapsedTimeCalculator) {
   const recordsSql = getRecordsSql(params.speciesNames, params.start, params.rows, params.traitNames)
-  const countSql = getCountSql(params.speciesNames)
+  const countSql = getCountSql(params.speciesNames, params.traitNames)
   return allSpeciesDataJson.doQuery(event, params, processStart, db, elapsedTimeCalculator, recordsSql, countSql).then(successResult => {
     successResult.responseHeader.elapsedTime = elapsedTimeCalculator(processStart)
     successResult.responseHeader.params[speciesNamesParam] = params.unescapedSpeciesNames

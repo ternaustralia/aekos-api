@@ -4,9 +4,22 @@ let StubDB = require('./StubDB')
 
 describe('/v2/traitData-json', () => {
   describe('doHandle', () => {
+    let expectedSql = `
+    SELECT count(*) AS recordsHeld
+    FROM species AS s
+      WHERE id IN (
+        SELECT parentId
+        FROM traits AS t
+        --
+      )
+      AND (
+        scientificName IN ('species one')
+        OR taxonRemarks IN ('species one')
+      );`
+
     let result = null
+    let stubDb = new StubDB()
     beforeEach(done => {
-      let stubDb = new StubDB()
       stubDb.setExecSelectPromiseResponses([
         [{
           id: 'species1',
@@ -27,6 +40,7 @@ describe('/v2/traitData-json', () => {
         }],
         [{ recordsHeld: 31 }]
       ])
+      spyOn(stubDb, 'execSelectPromise').and.callThrough()
       let event = {
         body: JSON.stringify({
           speciesNames: ['species one']
@@ -86,18 +100,32 @@ describe('/v2/traitData-json', () => {
           }
         ]
       })
+      expect(stubDb.execSelectPromise).toHaveBeenCalledWith(expectedSql)
     })
   })
 
   describe('doHandle', () => {
+    let expectedSql = `
+    SELECT count(*) AS recordsHeld
+    FROM species AS s
+      WHERE id IN (
+        SELECT parentId
+        FROM traits AS t
+        WHERE t.traitName IN ('trait one')
+      )
+      AND (
+        scientificName IN ('species eleven')
+        OR taxonRemarks IN ('species eleven')
+      );`
+
     let result = null
+    let stubDb = new StubDB()
     beforeEach(done => {
-      let stubDb = new StubDB()
       stubDb.setExecSelectPromiseResponses([
         [{ id: 'species1', scientificName: 'species one' }],
-        [{ recordsHeld: 31 }],
-        []
+        [{ recordsHeld: 31 }]
       ])
+      spyOn(stubDb, 'execSelectPromise').and.callThrough()
       let event = {
         body: JSON.stringify({
           speciesNames: ['species eleven'],
@@ -126,6 +154,7 @@ describe('/v2/traitData-json', () => {
       expect(result.statusCode).toBe(200)
       let responseHeader = JSON.parse(result.body).responseHeader
       expect(responseHeader.params.traitNames).toEqual(['trait one'])
+      expect(stubDb.execSelectPromise).toHaveBeenCalledWith(expectedSql)
     })
   })
 
@@ -135,8 +164,7 @@ describe('/v2/traitData-json', () => {
       let stubDb = new StubDB()
       stubDb.setExecSelectPromiseResponses([
         [{ id: 'species1', scientificName: 'species one' }],
-        [{ recordsHeld: 31 }],
-        []
+        [{ recordsHeld: 31 }]
       ])
       let event = {
         body: JSON.stringify({
