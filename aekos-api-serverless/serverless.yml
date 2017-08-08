@@ -441,7 +441,7 @@ functions:
             description: >
               Finds the species names that the supplied trait(s). Note that the result only shows that the supplied
               traits have species records present in the system. To get the values of the traits, you need to use the Data
-              Retrieval resources. ${file(./constants.yml):messages.documentation.noChangesSinceV1}
+              Retrieval resources. ${file(./constants.yml):messages.documentation.noIdSinceV1}
             queryParams:
               - ${self:custom.commonModelSchemaFragments.PageNumQueryParam}
               - ${self:custom.commonModelSchemaFragments.PageSizeQueryParam}
