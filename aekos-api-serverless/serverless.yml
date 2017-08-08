@@ -312,7 +312,15 @@ custom:
         contentType: "application/json"
         schema: ${self:custom.modelDetails.fragments.SpeciesNamesPostRequest}
       -
+        name: V2TraitBySpeciesRequest
+        contentType: "application/json"
+        schema: ${self:custom.modelDetails.fragments.SpeciesNamesPostRequest}
+      -
         name: V1TraitBySpeciesResponse
+        contentType: "application/json"
+        schema: ${self:custom.modelDetails.fragments.VocabObjectSchema}
+      -
+        name: V2TraitBySpeciesResponse
         contentType: "application/json"
         schema: ${self:custom.modelDetails.fragments.VocabObjectSchema}
       -
@@ -428,12 +436,12 @@ functions:
               - ${self:custom.commonModelSchemaFragments.PageNumQueryParam}
               - ${self:custom.commonModelSchemaFragments.PageSizeQueryParam}
             requestModels:
-               "application/json": V1TraitBySpeciesRequest
+               "application/json": V2TraitBySpeciesRequest
             methodResponses:
               -
                 statusCode: '200'
                 responseModels:
-                  "application/json": V1TraitBySpeciesResponse
+                  "application/json": V2TraitBySpeciesResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   speciesByTrait-json:
