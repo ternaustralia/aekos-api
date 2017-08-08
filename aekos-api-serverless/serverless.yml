@@ -151,13 +151,13 @@ custom:
         contentType: "application/json"
         schema:
           type: array
-          items: ${self:custom.modelDetails.V1SpeciesSummary}
+          items: ${self:custom.modelDetails.V1SpeciesSummaryResponse}
       -
         name: V2SpeciesAutocompleteResponse
         contentType: "application/json"
         schema:
           type: array
-          items: ${self:custom.modelDetails.V2SpeciesSummary}
+          items: ${self:custom.modelDetails.V2SpeciesSummaryResponse}
       -
         name: V1AllSpeciesDataResponse
         contentType: "application/json"
