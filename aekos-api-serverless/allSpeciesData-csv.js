@@ -44,8 +44,8 @@ module.exports.handler = (event, context, callback) => {
 }
 
 const validator = r.compositeValidator([
-  allSpeciesDataJson.validator
-  // TODO validate download query string parameter
+  allSpeciesDataJson.validator,
+  r.downloadParamValidator
 ])
 
 function doHandle (event, callback, db, elapsedTimeCalculator) {
@@ -81,7 +81,8 @@ function getCsvHeadersForRequestedVersion (event) {
 
 module.exports._testonly = {
   doHandle: doHandle,
-  getCsvHeaderRow: getCsvHeaderRow
+  getCsvHeaderRow: getCsvHeaderRow,
+  validator: validator
 }
 
 module.exports.getCsvDownloadFileName = getCsvDownloadFileName
@@ -91,10 +92,10 @@ function getCsvDownloadFileName (event, nameFragment) {
     return null
   }
   let downloadParamValue = params[downloadParam]
-  if (typeof downloadParamValue === 'undefined') {
+  if (typeof downloadParamValue === 'undefined' || typeof downloadParamValue !== 'string') {
     return null
   }
-  if (downloadParamValue === 'true') {
+  if (downloadParamValue.toLowerCase() === 'true') {
     return 'aekos' + nameFragment + 'Data.csv'
   }
   return null

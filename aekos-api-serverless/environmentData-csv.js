@@ -42,8 +42,8 @@ module.exports.handler = (event, context, callback) => {
 }
 
 const validator = r.compositeValidator([
-  envDataJson.validator
-  // TODO validate download query string parameter
+  envDataJson.validator,
+  r.downloadParamValidator
 ])
 
 function doHandle (event, callback, db, elapsedTimeCalculator) {

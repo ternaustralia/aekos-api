@@ -8,6 +8,7 @@ const pageSizeParam = yaml.load('./constants.yml').paramNames.PAGE_SIZE
 const pageNumParam = yaml.load('./constants.yml').paramNames.PAGE_NUM
 const startParam = yaml.load('./constants.yml').paramNames.START
 const rowsParam = yaml.load('./constants.yml').paramNames.ROWS
+const downloadParam = yaml.load('./constants.yml').paramNames.DOWNLOAD
 const msg500 = yaml.load('./constants.yml').messages.public.internalServerError
 let codeToLabelMapping = require('./ontology/code-to-label.json')
 let querystring = require('querystring')
@@ -512,21 +513,52 @@ function compositeValidator (validatorArray) {
 
 function queryStringParamIsPositiveNumberIfPresentValidator (paramName) {
   return (queryStringObj, _) => {
-    if (queryStringObj === null || typeof queryStringObj === 'undefined') {
+    let isQueryStringNotPresent = queryStringObj === null || typeof queryStringObj === 'undefined'
+    if (isQueryStringNotPresent) {
       return validatorIsValid
     }
     let value = queryStringObj[paramName]
-    if (typeof value === 'undefined') {
+    let isParamNotPresent = typeof value === 'undefined'
+    if (isParamNotPresent) {
       return validatorIsValid
     }
     let parsedValue = parseInt(value)
-    if (isNaN(parsedValue)) {
+    let isParamNotANumber = isNaN(parsedValue)
+    if (isParamNotANumber) {
       return validatorNotValid(`The '${paramName}' must be a number when supplied. Supplied value = '${value}'`)
     }
-    if (parsedValue < 0) {
+    let isParamNegative = parsedValue < 0
+    if (isParamNegative) {
       return validatorNotValid(`The '${paramName}' must be a number >= 0. Supplied value = '${value}'`)
     }
     return validatorIsValid
+  }
+}
+
+function queryStringParamIsBooleanIfPresentValidator (paramName) {
+  return (queryStringObj, _) => {
+    let isQueryStringNotPresent = queryStringObj === null || typeof queryStringObj === 'undefined'
+    if (isQueryStringNotPresent) {
+      return validatorIsValid
+    }
+    let value = queryStringObj[paramName]
+    let isParamNotPresent = typeof value === 'undefined'
+    if (isParamNotPresent) {
+      return validatorIsValid
+    }
+    let isParamNotString = typeof value !== 'string'
+    if (isParamNotString) { // unlikely because AWS should stringify everything
+      return validatorNotValid(`The '${paramName}' must be a stringified boolean when supplied. Supplied value = '${value}'`)
+    }
+    let lowercaseValue = value.toLowerCase()
+    switch (lowercaseValue) {
+      case 'true':
+      case 'false':
+        return validatorIsValid
+      default:
+        return validatorNotValid(`The '${paramName}' must be a stringified boolean when supplied. Supplied value = '${value}'.` +
+          ` Acceptable values are (case insensitive) 'true' or 'false'.`)
+    }
   }
 }
 
@@ -606,9 +638,11 @@ module.exports = {
   pageNumValidator: queryStringParamIsPositiveNumberIfPresentValidator(pageNumParam),
   startValidator: queryStringParamIsPositiveNumberIfPresentValidator(startParam),
   rowsValidator: queryStringParamIsPositiveNumberIfPresentValidator(rowsParam),
+  downloadParamValidator: queryStringParamIsBooleanIfPresentValidator(downloadParam),
   newVersionHandler: newVersionHandler,
   _testonly: {
     queryStringParamIsPositiveNumberIfPresentValidator: queryStringParamIsPositiveNumberIfPresentValidator,
+    queryStringParamIsBooleanIfPresentValidator: queryStringParamIsBooleanIfPresentValidator,
     genericMandatoryNamesValidator: genericMandatoryNamesValidator,
     genericOptionalNamesValidator: genericOptionalNamesValidator,
     getUrlSuffix: getUrlSuffix

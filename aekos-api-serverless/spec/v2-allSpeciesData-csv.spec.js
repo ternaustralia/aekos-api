@@ -130,6 +130,32 @@ describe('/v2/allSpeciesData.csv', () => {
     })
   })
 
+  describe('.validator()', () => {
+    it('should be valid with true download param', () => {
+      let queryStringObj = {
+        download: 'true'
+      }
+      let result = objectUnderTest._testonly.validator(queryStringObj, null)
+      expect(result.isValid).toBe(true)
+    })
+
+    it('should be valid with false download param', () => {
+      let queryStringObj = {
+        download: 'false'
+      }
+      let result = objectUnderTest._testonly.validator(queryStringObj, null)
+      expect(result.isValid).toBe(true)
+    })
+
+    it('should be invalid when download param is not a boolean string', () => {
+      let queryStringObj = {
+        download: 'blah'
+      }
+      let result = objectUnderTest._testonly.validator(queryStringObj, null)
+      expect(result.isValid).toBe(false)
+    })
+  })
+
   describe('mapJsonToCsv', () => {
     it('should map the records to CSV when they are fully populated', () => {
       let records = [
@@ -228,10 +254,20 @@ describe('/v2/allSpeciesData.csv', () => {
       expect(result).toBeNull()
     })
 
-    it('should return null when the "download" param is false', () => {
+    it('should return null when the "download" param is not a string', () => {
       let event = {
         queryStringParameters: {
           download: false
+        }
+      }
+      let result = objectUnderTest.getCsvDownloadFileName(event, 'Species')
+      expect(result).toBeNull()
+    })
+
+    it('should return null when the "download" param is false', () => {
+      let event = {
+        queryStringParameters: {
+          download: 'false'
         }
       }
       let result = objectUnderTest.getCsvDownloadFileName(event, 'Species')
@@ -242,6 +278,16 @@ describe('/v2/allSpeciesData.csv', () => {
       let event = {
         queryStringParameters: {
           download: 'true'
+        }
+      }
+      let result = objectUnderTest.getCsvDownloadFileName(event, 'Species')
+      expect(result).toBe('aekosSpeciesData.csv')
+    })
+
+    it('should return the expected filename when "download" param is true but not lowercase', () => {
+      let event = {
+        queryStringParameters: {
+          download: 'TRue'
         }
       }
       let result = objectUnderTest.getCsvDownloadFileName(event, 'Species')

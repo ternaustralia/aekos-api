@@ -1247,6 +1247,48 @@ describe('response-helper', () => {
     })
   })
 
+  describe('.queryStringParamIsBooleanIfPresentValidator()', () => {
+    let objectUnderTest = responseHelper._testonly.queryStringParamIsBooleanIfPresentValidator('param1')
+    it('should pass validation when the param is NOT present', () => {
+      let queryStringObject = {}
+      let result = objectUnderTest(queryStringObject, null)
+      expect(result).toEqual({ isValid: true })
+    })
+
+    it('should pass validation when the param is present and true', () => {
+      let queryStringObject = { param1: 'true' }
+      let result = objectUnderTest(queryStringObject, null)
+      expect(result).toEqual({ isValid: true })
+    })
+
+    it('should pass validation when the param is present and false', () => {
+      let queryStringObject = { param1: 'false' }
+      let result = objectUnderTest(queryStringObject, null)
+      expect(result).toEqual({ isValid: true })
+    })
+
+    it('should pass validation when the param is present and not lowercase true', () => {
+      let queryStringObject = { param1: 'TRuE' }
+      let result = objectUnderTest(queryStringObject, null)
+      expect(result).toEqual({ isValid: true })
+    })
+
+    it('should fail validation when the param is present and not a string', () => {
+      let queryStringObject = { param1: 123 }
+      let result = objectUnderTest(queryStringObject, null)
+      expect(result).toEqual({
+        isValid: false, message: "The 'param1' must be a stringified boolean when supplied. Supplied value = '123'" })
+    })
+
+    it('should fail validation when the param is present and not a valid value', () => {
+      let queryStringObject = { param1: 'blah' }
+      let result = objectUnderTest(queryStringObject, null)
+      expect(result).toEqual({
+        isValid: false, message: "The 'param1' must be a stringified boolean when supplied. Supplied value = 'blah'. Acceptable values are (case insensitive) 'true' or 'false'."
+      })
+    })
+  })
+
   describe('.queryStringParamIsPositiveNumberIfPresentValidator()', () => {
     it('should pass validation when the param is NOT present', () => {
       let objectUnderTest = responseHelper._testonly.queryStringParamIsPositiveNumberIfPresentValidator('param1')
