@@ -102,26 +102,30 @@ exports:
           type: array
           items:
             type: string
-  V1SpeciesByTraitResponse:
+  V2SpeciesByTraitResponse:
     type: object
-    properties:
-      id:
-        type: string
+    properties: &V2SpeciesByTraitResponseProperties
       recordsHeld:
         type: number
       name:
         type: string
-  V2SpeciesSummary:
+  V1SpeciesByTraitResponse:
     type: object
-    properties: &V2SpeciesSummaryProperties
+    properties:
+      <<: *V2SpeciesByTraitResponseProperties
+      id:
+        type: string
+  V2SpeciesSummaryResponse:
+    type: object
+    properties: &V2SpeciesSummaryResponseProperties
       recordsHeld:
         type: number
       speciesName:
         type: string
-  V1SpeciesSummary:
+  V1SpeciesSummaryResponse:
     type: object
     properties:
-      <<: *V2SpeciesSummaryProperties
+      <<: *V2SpeciesSummaryResponseProperties
       id:
         type: string
   CommonResponseHeaderProperties: &CommonResponseHeaderProperties

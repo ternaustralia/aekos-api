@@ -1,7 +1,7 @@
 'use strict'
 let StubDB = require('./StubDB')
 
-describe('/v1/getSpeciesByTrait-json', () => {
+describe('/v2/getSpeciesByTrait-json', () => {
   let objectUnderTest = require('../speciesByTrait-json')
 
   describe('.doHandle()', () => {
@@ -19,7 +19,7 @@ describe('/v1/getSpeciesByTrait-json', () => {
         queryStringParameters: null,
         body: JSON.stringify({traitNames: ['trait one']}),
         requestContext: {
-          path: '/v1/getSpeciesByTrait.json'
+          path: '/v2/getSpeciesByTrait.json'
         }
       }
       stubDb.setExecSelectPromiseResponses([
@@ -41,7 +41,7 @@ describe('/v1/getSpeciesByTrait-json', () => {
         'Content-Type': "'application/json'"
       })
       expect(JSON.parse(result.body)).toEqual([
-        { speciesName: 'species one', recordsHeld: 123, id: 'notusedanymore' }
+        { speciesName: 'species one', recordsHeld: 123 }
       ])
       expect(stubDb.execSelectPromise).toHaveBeenCalledWith(expectedSql)
     })
@@ -65,7 +65,7 @@ describe('/v1/getSpeciesByTrait-json', () => {
         },
         body: JSON.stringify({traitNames: ['trait one', 'trait two']}),
         requestContext: {
-          path: '/v1/getSpeciesByTrait.json'
+          path: '/v2/getSpeciesByTrait.json'
         }
       }
       stubDb.setExecSelectPromiseResponses([
@@ -87,9 +87,41 @@ describe('/v1/getSpeciesByTrait-json', () => {
         'Content-Type': "'application/json'"
       })
       expect(JSON.parse(result.body)).toEqual([
-        { speciesName: 'species one', recordsHeld: 123, id: 'notusedanymore' }
+        { speciesName: 'species one', recordsHeld: 123 }
       ])
       expect(stubDb.execSelectPromise).toHaveBeenCalledWith(expectedSql)
+    })
+  })
+
+  describe('.getSql()', () => {
+    let expectedSql1 = `
+    SELECT speciesName AS name, recordsHeld
+    FROM traitcounts
+    WHERE traitName IN ('height')
+    ORDER BY 1
+    LIMIT 20 OFFSET 0;`
+    it('should return the expected SQL with one trait name', () => {
+      let stubDb = new StubDB()
+      let result = objectUnderTest._testonly.getSql("'height'", 1, 20, stubDb)
+      expect(result).toBe(expectedSql1)
+    })
+  })
+
+  describe('.validator()', () => {
+    it('should pass validation with valid input', () => {
+      let requestBody = {
+        traitNames: ['trait one']
+      }
+      let result = objectUnderTest._testonly.validator(null, requestBody)
+      expect(result.isValid).toBe(true)
+    })
+
+    it('should fail validation with invalid input', () => {
+      let requestBody = {
+        traitNames: 'trait one' // should be an array
+      }
+      let result = objectUnderTest._testonly.validator(null, requestBody)
+      expect(result.isValid).toBe(false)
     })
   })
 })
