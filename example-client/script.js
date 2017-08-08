@@ -12,7 +12,7 @@ app.controller('TheController', function ($http, $scope) {
     resetStep3()
     $scope.isLoadVocabClicked = true
     $scope.isLoadingTraits = true
-    $http.get($scope.baseUrl + '/v1/getTraitVocab.json').then(function (response) {
+    $http.get($scope.baseUrl + '/v2/getTraitVocab.json').then(function (response) {
       $scope.isLoadingTraits = false
       $scope.traits = response.data
     }, errorHandler)
@@ -58,7 +58,7 @@ app.controller('TheController', function ($http, $scope) {
         pageSize: $scope.speciesPaging.pageSize
       }
     }
-    $http.post($scope.baseUrl + '/v1/getSpeciesByTrait.json', data, config).then(function (response) {
+    $http.post($scope.baseUrl + '/v2/getSpeciesByTrait.json', data, config).then(function (response) {
       $scope.isLoadingSpecies = false
       $scope.species = response.data
     }, errorHandler)
@@ -68,10 +68,7 @@ app.controller('TheController', function ($http, $scope) {
     $scope.traitRecords = []
     $scope.traitRecordsHeader = {}
     $scope.isLoadTraitDataClicked = false
-  }
-
-  $scope.getTraitData = function () {
-    traitDataHelper($scope.baseUrl + '/v2/traitData')
+    $scope.isApplyTraitFilter = true
   }
 
   $scope.getTraitData = function () {
