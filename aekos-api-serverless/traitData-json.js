@@ -19,8 +19,8 @@ function doHandle (event, callback, db, elapsedTimeCalculator) {
 }
 
 const validator = r.compositeValidator([
-  speciesDataJson.validator
-  // TODO add trait validator
+  speciesDataJson.validator,
+  r.traitNamesOptionalValidator
 ])
 module.exports.validator = validator
 

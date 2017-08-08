@@ -992,12 +992,84 @@ describe('response-helper', function () {
     })
   })
 
-  describe('.genericNamesValidator()', () => {
+  describe('.traitNamesOptionalValidator()', () => {
+    it('should validate with one trait name', () => {
+      let requestBody = {
+        traitNames: ['trait one']
+      }
+      let result = objectUnderTest.traitNamesOptionalValidator(null, requestBody)
+      expect(result.isValid).toBe(true)
+    })
+
+    it('should be valid with no traits', () => {
+      let requestBody = {
+        traitNames: []
+      }
+      let result = objectUnderTest.traitNamesOptionalValidator(null, requestBody)
+      expect(result.isValid).toBe(true)
+    })
+
+    it('should be valid with no body', () => {
+      let requestBody = null
+      let result = objectUnderTest.traitNamesOptionalValidator(null, requestBody)
+      expect(result.isValid).toBe(true)
+    })
+  })
+
+  describe('.genericOptionalNamesValidator()', () => {
+    it('should validate with no body', () => {
+      let requestBody = null
+      let result = objectUnderTest._testonly.genericOptionalNamesValidator('targetNames', null, requestBody)
+      expect(result.isValid).toBe(true)
+    })
+
+    it('should validate when the target property is not present', () => {
+      let requestBody = {
+        somethingElse: 'blah'
+      }
+      let result = objectUnderTest._testonly.genericOptionalNamesValidator('targetNames', null, requestBody)
+      expect(result.isValid).toBe(true)
+    })
+
+    it('should validate when the target property is present with no items', () => {
+      let requestBody = {
+        targetNames: []
+      }
+      let result = objectUnderTest._testonly.genericOptionalNamesValidator('targetNames', null, requestBody)
+      expect(result.isValid).toBe(true)
+    })
+
+    it('should validate when the target property is present and has valid items', () => {
+      let requestBody = {
+        targetNames: ['name one']
+      }
+      let result = objectUnderTest._testonly.genericOptionalNamesValidator('targetNames', null, requestBody)
+      expect(result.isValid).toBe(true)
+    })
+
+    it('should catch when the target property is present and has invalid items', () => {
+      let requestBody = {
+        targetNames: ['name one', 2]
+      }
+      let result = objectUnderTest._testonly.genericOptionalNamesValidator('targetNames', null, requestBody)
+      expect(result.isValid).toBe(false)
+    })
+
+    it('should catch when the target property is present and is the wrong type', () => {
+      let requestBody = {
+        targetNames: 'not an array'
+      }
+      let result = objectUnderTest._testonly.genericOptionalNamesValidator('targetNames', null, requestBody)
+      expect(result.isValid).toBe(false)
+    })
+  })
+
+  describe('.genericMandatoryNamesValidator()', () => {
     it('should validate with one name', () => {
       let requestBody = {
         targetNames: ['thingy one']
       }
-      let result = objectUnderTest.genericNamesValidator('targetNames', null, requestBody)
+      let result = objectUnderTest._testonly.genericMandatoryNamesValidator('targetNames', null, requestBody)
       expect(result.isValid).toBe(true)
     })
 
@@ -1005,13 +1077,13 @@ describe('response-helper', function () {
       let requestBody = {
         targetNames: []
       }
-      let result = objectUnderTest.genericNamesValidator('targetNames', null, requestBody)
+      let result = objectUnderTest._testonly.genericMandatoryNamesValidator('targetNames', null, requestBody)
       expect(result.isValid).toBe(false)
     })
 
     it('should be invalid when the body is not an object', () => {
       let requestBody = 'a string'
-      let result = objectUnderTest.genericNamesValidator('targetNames', null, requestBody)
+      let result = objectUnderTest._testonly.genericMandatoryNamesValidator('targetNames', null, requestBody)
       expect(result.isValid).toBe(false)
     })
 
@@ -1019,7 +1091,7 @@ describe('response-helper', function () {
       let requestBody = {
         someOtherField: 123
       }
-      let result = objectUnderTest.genericNamesValidator('targetNames', null, requestBody)
+      let result = objectUnderTest._testonly.genericMandatoryNamesValidator('targetNames', null, requestBody)
       expect(result.isValid).toBe(false)
     })
 
@@ -1027,7 +1099,7 @@ describe('response-helper', function () {
       let requestBody = {
         targetNames: 'not an array'
       }
-      let result = objectUnderTest.genericNamesValidator('targetNames', null, requestBody)
+      let result = objectUnderTest._testonly.genericMandatoryNamesValidator('targetNames', null, requestBody)
       expect(result.isValid).toBe(false)
     })
 
@@ -1035,19 +1107,19 @@ describe('response-helper', function () {
       let requestBody = {
         targetNames: [1, 2, 3]
       }
-      let result = objectUnderTest.genericNamesValidator('targetNames', null, requestBody)
+      let result = objectUnderTest._testonly.genericMandatoryNamesValidator('targetNames', null, requestBody)
       expect(result.isValid).toBe(false)
     })
 
     it('should be invalid when no body is present (null)', () => {
       let requestBody = null
-      let result = objectUnderTest.genericNamesValidator('targetNames', null, requestBody)
+      let result = objectUnderTest._testonly.genericMandatoryNamesValidator('targetNames', null, requestBody)
       expect(result.isValid).toBe(false)
     })
 
     it('should be invalid when no body is present (undefined)', () => {
       let event = {}
-      let result = objectUnderTest.genericNamesValidator('targetNames', null, event.bodyWillBeUndefined)
+      let result = objectUnderTest._testonly.genericMandatoryNamesValidator('targetNames', null, event.bodyWillBeUndefined)
       expect(result.isValid).toBe(false)
     })
   })

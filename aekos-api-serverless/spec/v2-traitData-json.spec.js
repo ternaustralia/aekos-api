@@ -231,6 +231,47 @@ describe('/v2/traitData-json', () => {
     })
   })
 
+  describe('.validator()', () => {
+    it('should be valid with just species names', () => {
+      let queryStringObj = null
+      let requestBody = {
+        speciesNames: ['species one']
+      }
+      let result = objectUnderTest.validator(queryStringObj, requestBody)
+      expect(result.isValid).toBe(true)
+    })
+
+    it('should be valid with species names and trait names', () => {
+      let queryStringObj = null
+      let requestBody = {
+        speciesNames: ['species one', 'species two'],
+        traitNames: ['trait one', 'trait two']
+      }
+      let result = objectUnderTest.validator(queryStringObj, requestBody)
+      expect(result.isValid).toBe(true)
+    })
+
+    it('should be invalid without species names', () => {
+      let queryStringObj = null
+      let requestBody = {
+        // no 'speciesNames'
+        traitNames: ['trait one', 'trait two']
+      }
+      let result = objectUnderTest.validator(queryStringObj, requestBody)
+      expect(result.isValid).toBe(false)
+    })
+
+    it('should be invalid when trait names is not an array', () => {
+      let queryStringObj = null
+      let requestBody = {
+        speciesNames: ['species one', 'species two'],
+        traitNames: 'trait one' // not an array
+      }
+      let result = objectUnderTest.validator(queryStringObj, requestBody)
+      expect(result.isValid).toBe(false)
+    })
+  })
+
   let expectedRecordsSql1 = `
     SELECT
     s.id,

@@ -427,14 +427,16 @@ const validatorNotValid = message => {
 }
 
 function speciesNamesValidator (_, requestBody) {
-  return genericNamesValidator(speciesNamesParam, _, requestBody)
+  return genericMandatoryNamesValidator(speciesNamesParam, _, requestBody)
 }
 
 function traitNamesMandatoryValidator (_, requestBody) {
-  return genericNamesValidator(traitNamesParam, _, requestBody)
+  return genericMandatoryNamesValidator(traitNamesParam, _, requestBody)
 }
 
-function genericNamesValidator (namesParam, _, requestBody) {
+// Validates that the target property MUST be present, is the right type, has items and
+// the items are the right type
+function genericMandatoryNamesValidator (namesParam, _, requestBody) {
   let isRequestBodyNotSupplied = requestBody === null || typeof requestBody === 'undefined'
   if (isRequestBodyNotSupplied) {
     return validatorNotValid('No request body was supplied')
@@ -451,6 +453,37 @@ function genericNamesValidator (namesParam, _, requestBody) {
   let isArrayEmpty = names.length < 1
   if (isArrayEmpty) {
     return validatorNotValid(`The '${namesParam}' field is mandatory and was not supplied`)
+  }
+  let isAnyElementNotStrings = names.some(element => { return typeof element !== 'string' })
+  if (isAnyElementNotStrings) {
+    return validatorNotValid(`The '${namesParam}' field must be an array of strings. You supplied a non-string element.`)
+  }
+  return validatorIsValid
+}
+
+function traitNamesOptionalValidator (_, requestBody) {
+  return genericOptionalNamesValidator(traitNamesParam, _, requestBody)
+}
+
+// Validates that IF the target property is present then it is the right type and
+// if it has items that the items are the right type
+function genericOptionalNamesValidator (namesParam, _, requestBody) {
+  let isRequestBodyNotSupplied = requestBody === null || typeof requestBody === 'undefined'
+  if (isRequestBodyNotSupplied) {
+    return validatorIsValid
+  }
+  let names = requestBody[namesParam]
+  let isFieldNotSupplied = typeof names === 'undefined'
+  if (isFieldNotSupplied) {
+    return validatorIsValid
+  }
+  let isFieldNotArray = names.constructor !== Array
+  if (isFieldNotArray) {
+    return validatorNotValid(`The '${namesParam}' field must be an array (of strings)`)
+  }
+  let isArrayEmpty = names.length < 1
+  if (isArrayEmpty) {
+    return validatorIsValid
   }
   let isAnyElementNotStrings = names.some(element => { return typeof element !== 'string' })
   if (isAnyElementNotStrings) {
@@ -559,9 +592,9 @@ module.exports = {
   handleCsvGet: handleCsvGet,
   buildHateoasLinkHeader: buildHateoasLinkHeader,
   isHateoasable: isHateoasable,
-  genericNamesValidator: genericNamesValidator,
   speciesNamesValidator: speciesNamesValidator,
   traitNamesMandatoryValidator: traitNamesMandatoryValidator,
+  traitNamesOptionalValidator: traitNamesOptionalValidator,
   compositeValidator: compositeValidator,
   queryStringParamIsPositiveNumberIfPresentValidator: queryStringParamIsPositiveNumberIfPresentValidator,
   pageSizeValidator: queryStringParamIsPositiveNumberIfPresentValidator(pageSizeParam),
@@ -570,6 +603,8 @@ module.exports = {
   rowsValidator: queryStringParamIsPositiveNumberIfPresentValidator(rowsParam),
   newVersionHandler: newVersionHandler,
   _testonly: {
+    genericMandatoryNamesValidator: genericMandatoryNamesValidator,
+    genericOptionalNamesValidator: genericOptionalNamesValidator,
     getUrlSuffix: getUrlSuffix
   }
 }
