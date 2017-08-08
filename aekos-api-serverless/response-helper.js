@@ -3,6 +3,7 @@ let accepts = require('accepts')
 let yaml = require('yamljs')
 const speciesNamesParam = yaml.load('./constants.yml').paramNames.speciesName.multiple
 const traitNamesParam = yaml.load('./constants.yml').paramNames.traitName.multiple
+const varNamesParam = yaml.load('./constants.yml').paramNames.varName.multiple
 const pageSizeParam = yaml.load('./constants.yml').paramNames.PAGE_SIZE
 const pageNumParam = yaml.load('./constants.yml').paramNames.PAGE_NUM
 const startParam = yaml.load('./constants.yml').paramNames.START
@@ -465,6 +466,10 @@ function traitNamesOptionalValidator (_, requestBody) {
   return genericOptionalNamesValidator(traitNamesParam, _, requestBody)
 }
 
+function envVarNamesOptionalValidator (_, requestBody) {
+  return genericOptionalNamesValidator(varNamesParam, _, requestBody)
+}
+
 // Validates that IF the target property is present then it is the right type and
 // if it has items that the items are the right type
 function genericOptionalNamesValidator (namesParam, _, requestBody) {
@@ -595,6 +600,7 @@ module.exports = {
   speciesNamesValidator: speciesNamesValidator,
   traitNamesMandatoryValidator: traitNamesMandatoryValidator,
   traitNamesOptionalValidator: traitNamesOptionalValidator,
+  envVarNamesOptionalValidator: envVarNamesOptionalValidator,
   compositeValidator: compositeValidator,
   queryStringParamIsPositiveNumberIfPresentValidator: queryStringParamIsPositiveNumberIfPresentValidator,
   pageSizeValidator: queryStringParamIsPositiveNumberIfPresentValidator(pageSizeParam),

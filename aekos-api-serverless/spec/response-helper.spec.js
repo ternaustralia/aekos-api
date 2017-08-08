@@ -1016,6 +1016,30 @@ describe('response-helper', function () {
     })
   })
 
+  describe('.envVarNamesOptionalValidator()', () => {
+    it('should validate with one var name', () => {
+      let requestBody = {
+        varNames: ['var one']
+      }
+      let result = objectUnderTest.envVarNamesOptionalValidator(null, requestBody)
+      expect(result.isValid).toBe(true)
+    })
+
+    it('should be valid with no vars', () => {
+      let requestBody = {
+        varNames: []
+      }
+      let result = objectUnderTest.envVarNamesOptionalValidator(null, requestBody)
+      expect(result.isValid).toBe(true)
+    })
+
+    it('should be valid with no body', () => {
+      let requestBody = null
+      let result = objectUnderTest.envVarNamesOptionalValidator(null, requestBody)
+      expect(result.isValid).toBe(true)
+    })
+  })
+
   describe('.genericOptionalNamesValidator()', () => {
     it('should validate with no body', () => {
       let requestBody = null

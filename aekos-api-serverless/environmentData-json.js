@@ -22,8 +22,8 @@ function doHandle (event, callback, db, elapsedTimeCalculator) {
 }
 
 const validator = r.compositeValidator([
-  speciesDataJson.validator
-  // TODO add env vars validator
+  speciesDataJson.validator,
+  r.envVarNamesOptionalValidator
 ])
 module.exports.validator = validator
 

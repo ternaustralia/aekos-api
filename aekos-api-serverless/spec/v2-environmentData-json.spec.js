@@ -141,6 +141,47 @@ describe('/v2/environmentData-json', () => {
     })
   })
 
+  describe('.validator()', () => {
+    it('should be valid with just species names', () => {
+      let queryStringObj = null
+      let requestBody = {
+        speciesNames: ['species one']
+      }
+      let result = objectUnderTest.validator(queryStringObj, requestBody)
+      expect(result.isValid).toBe(true)
+    })
+
+    it('should be valid with species names and var names', () => {
+      let queryStringObj = null
+      let requestBody = {
+        speciesNames: ['species one', 'species two'],
+        varNames: ['var one', 'var two']
+      }
+      let result = objectUnderTest.validator(queryStringObj, requestBody)
+      expect(result.isValid).toBe(true)
+    })
+
+    it('should be invalid without species names', () => {
+      let queryStringObj = null
+      let requestBody = {
+        // no 'speciesNames'
+        varNames: ['var one', 'var two']
+      }
+      let result = objectUnderTest.validator(queryStringObj, requestBody)
+      expect(result.isValid).toBe(false)
+    })
+
+    it('should be invalid when var names is not an array', () => {
+      let queryStringObj = null
+      let requestBody = {
+        speciesNames: ['species one', 'species two'],
+        varNames: 'var one' // not an array
+      }
+      let result = objectUnderTest.validator(queryStringObj, requestBody)
+      expect(result.isValid).toBe(false)
+    })
+  })
+
   describe('appendVars', () => {
     it('should map variables to records', () => {
       let records = [
