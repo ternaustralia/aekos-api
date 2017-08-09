@@ -1,0 +1,20 @@
+<div class="container">
+  <div class="jumbotron">
+    <h1>AEKOS API Examples</h1>
+    <p>Real world examples on how to use the AEKOS API</p>
+  </div>
+  <h2>Examples</h2>
+  <div class="panel panel-default" ng-repeat="curr in examples">
+    <div class="panel-heading">
+      <h3 class="panel-title">{{curr.title}}</h3>
+    </div>
+    <div class="panel-body">
+      {{curr.description}}
+      <div>
+        <a ui-sref="{{curr.sref}}" class="btn btn-default" role="button">
+          View demo
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

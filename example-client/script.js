@@ -1,6 +1,40 @@
-var app = angular.module('aekosapiexample', [])
+var app = angular.module('aekosapiexample', ['ui.router'])
 
-app.controller('TheController', function ($http, $scope) {
+app.config(function ($urlRouterProvider, $stateProvider) {
+  $urlRouterProvider.otherwise('/home')
+  $stateProvider.state({
+    name: 'home',
+    url: '/home',
+    component: 'home'
+  })
+  $stateProvider.state({
+    name: 'speciesByTrait',
+    url: '/species-by-trait',
+    component: 'speciesByTrait'
+  })
+})
+
+app.component('home', {
+  templateUrl: './home.html',
+  controller: 'HomeController'
+})
+
+app.controller('HomeController', function ($scope) {
+  $scope.examples = [
+    {
+      title: 'Species by Trait',
+      description: 'Start with a vocabulary of traits, find species that have those traits then retrieve the species and trait data.',
+      sref: 'speciesByTrait'
+    }
+  ]
+})
+
+app.component('speciesByTrait', {
+  templateUrl: './species-by-trait.html',
+  controller: 'SpeciesByTraitController'
+})
+
+app.controller('SpeciesByTraitController', function ($http, $scope) {
   $scope.baseUrl = 'https://k2jqcign2l.execute-api.us-west-1.amazonaws.com/test'
   var speciesPageSize = 100
   $scope.traitDataAccept = 'application/json'
