@@ -2650,9 +2650,9 @@ semver@~5.0.1:
   version "5.0.3"
   resolved "https://registry.yarnpkg.com/semver/-/semver-5.0.3.tgz#77466de589cd5d3c95f138aa78bc569a3cb5d27a"
 
-serverless-aws-documentation@tomsaleeba/serverless-aws-documentation#23280eae238a4f1e0b6d5d3885f6079ca6227963:
-  version "0.7.2"
-  resolved "https://codeload.github.com/tomsaleeba/serverless-aws-documentation/tar.gz/23280eae238a4f1e0b6d5d3885f6079ca6227963"
+serverless-aws-documentation@^0.8:
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/serverless-aws-documentation/-/serverless-aws-documentation-0.8.0.tgz#9ee9a626ca2f78cf5a4ae5529bca331b10cb2917"
   dependencies:
     object-hash "^1.1.7"
 
