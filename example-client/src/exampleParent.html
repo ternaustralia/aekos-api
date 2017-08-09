@@ -1,0 +1,17 @@
+<div class="container">
+  <h1 class="text-center">AEKOS API example web client</h1>
+  <div class="row">
+    <div class="col-xs-2">
+      <a class="btn btn-default" ui-sref="home">Back to home</a>
+    </div>
+    <div class="form-horizontal col-xs-8">
+      <div class="form-group">
+        <label for="baseUrl" class="col-xs-3 control-label">Base URL</label>
+        <div class="col-xs-9">
+          <input type="text" class="form-control" id="baseUrl" ng-change="updateBaseUrl(baseUrl)" ng-model="baseUrl">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div ui-view></div>

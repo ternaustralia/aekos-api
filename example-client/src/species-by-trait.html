@@ -1,15 +1,5 @@
 <div class="container">
-  <h1>'Species by trait' then 'trait data' example web client - AEKOS API</h1>
-  <div class="row">
-    <div class="form-horizontal col-xs-8">
-      <div class="form-group">
-        <label for="baseUrl" class="col-xs-3 control-label">Base URL</label>
-        <div class="col-xs-9">
-          <input type="text" class="form-control" id="baseUrl" ng-model="baseUrl">
-        </div>
-      </div>
-    </div>
-  </div>
+  <h2>'Species by trait' then 'trait data'</h2>
   <div class="row step">
     <div class="col-xs-5">
       <h2>Step 1: Get trait vocab</h2>
@@ -117,13 +107,11 @@
     <div class="col-xs-7">
       <div class="panel panel-default">
         <div class="panel-heading">
-          Species with trait(s)
+          Darwin Core records with trait data
           <span ng-show="traitRecords.length && traitDataResultWindow === 'json'"> | {{traitRecordsHeader.numFound}} total records | page {{traitRecordsHeader.pageNumber}}</span>
         </div>
-        <div class="panel-body species-list" ng-if="traitDataResultWindow === 'json'">
-          <pre>{{prettyTraitDataJson()}}</pre>
-        </div>
-        <pre class="panel-body species-list" ng-if="traitDataResultWindow === 'csv'">{{traitRecords}}</pre>
+        <div class="panel-body data-list" ng-if="traitDataResultWindow === 'json'">{{prettyTraitDataJson()}}</div>
+        <div class="panel-body data-list" ng-if="traitDataResultWindow === 'csv'">{{traitRecords}}</div>
         <div class="panel-body" ng-show="isLoadingTraitData">Loading...</div>
         <div class="panel-body" ng-hide="isLoadTraitDataClicked">&lt;&lt;&lt;--Click the button to load trait data</div>
       </div>

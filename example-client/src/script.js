@@ -8,14 +8,40 @@ app.config(function ($urlRouterProvider, $stateProvider) {
     component: 'home'
   })
   $stateProvider.state({
-    name: 'speciesByTrait',
+    name: 'exampleParent',
+    component: 'exampleParent'
+  })
+  $stateProvider.state({
+    name: 'exampleParent.speciesByTrait',
     url: '/species-by-trait',
     component: 'speciesByTrait'
   })
 })
 
+app.factory('baseUrlService', function () {
+  var baseUrl = 'https://k2jqcign2l.execute-api.us-west-1.amazonaws.com/test'
+  return {
+    getBaseUrl: function () {
+      return baseUrl
+    },
+    setBaseUrl: function (newUrl) {
+      baseUrl = newUrl
+    }
+  }
+})
+
+app.component('exampleParent', {
+  templateUrl: './src/exampleParent.html',
+  controller: function ($scope, baseUrlService) {
+    $scope.baseUrl = baseUrlService.getBaseUrl()
+    $scope.updateBaseUrl = function (newUrl) {
+      baseUrlService.setBaseUrl(newUrl)
+    }
+  }
+})
+
 app.component('home', {
-  templateUrl: './home.html',
+  templateUrl: './src/home.html',
   controller: 'HomeController'
 })
 
@@ -24,18 +50,17 @@ app.controller('HomeController', function ($scope) {
     {
       title: 'Species by Trait',
       description: 'Start with a vocabulary of traits, find species that have those traits then retrieve the species and trait data.',
-      sref: 'speciesByTrait'
+      sref: 'exampleParent.speciesByTrait'
     }
   ]
 })
 
 app.component('speciesByTrait', {
-  templateUrl: './species-by-trait.html',
+  templateUrl: './src/species-by-trait.html',
   controller: 'SpeciesByTraitController'
 })
 
-app.controller('SpeciesByTraitController', function ($http, $scope) {
-  $scope.baseUrl = 'https://k2jqcign2l.execute-api.us-west-1.amazonaws.com/test'
+app.controller('SpeciesByTraitController', function ($http, $scope, baseUrlService) {
   var speciesPageSize = 100
   $scope.traitDataAccept = 'application/json'
 
@@ -46,7 +71,7 @@ app.controller('SpeciesByTraitController', function ($http, $scope) {
     resetStep3()
     $scope.isLoadVocabClicked = true
     $scope.isLoadingTraits = true
-    $http.get($scope.baseUrl + '/v2/getTraitVocab.json').then(function (response) {
+    $http.get(baseUrlService.getBaseUrl() + '/v2/getTraitVocab.json').then(function (response) {
       $scope.isLoadingTraits = false
       $scope.traits = response.data
     }, errorHandler)
@@ -92,7 +117,7 @@ app.controller('SpeciesByTraitController', function ($http, $scope) {
         pageSize: $scope.speciesPaging.pageSize
       }
     }
-    $http.post($scope.baseUrl + '/v2/getSpeciesByTrait.json', data, config).then(function (response) {
+    $http.post(baseUrlService.getBaseUrl() + '/v2/getSpeciesByTrait.json', data, config).then(function (response) {
       $scope.isLoadingSpecies = false
       $scope.species = response.data
     }, errorHandler)
@@ -106,7 +131,7 @@ app.controller('SpeciesByTraitController', function ($http, $scope) {
   }
 
   $scope.getTraitData = function () {
-    traitDataHelper($scope.baseUrl + '/v2/traitData')
+    traitDataHelper(baseUrlService.getBaseUrl() + '/v2/traitData')
   }
 
   $scope.traitDataChangePage = function (url) {

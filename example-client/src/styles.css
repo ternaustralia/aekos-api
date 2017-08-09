@@ -8,9 +8,19 @@
   padding: 1em;
 }
 
+.species-list, .data-list {
+  overflow-y: auto;
+}
+
 .species-list {
   max-height: 300px;
-  overflow-y: auto;
+}
+
+.data-list {
+  max-height: 400px;
+  white-space: pre;
+  font-family: monospace;
+  font-size: 0.9em;
 }
 
 .paging-buttons {
