@@ -8,28 +8,28 @@ describe('/v1/environmentData-json', () => {
     beforeEach(done => {
       let stubDb = new StubDB()
       const recordsResult = [{
-        recordNum: 1,
         locationName: 'location1',
         datasetName: 'dataset1',
-        visitKey: 'location1#2017-07-07'
+        visitKey: 'location1#2017-07-07',
+        varName: 'windSpeed',
+        varValue: '6',
+        varUnit: 'km/h'
       }, {
-        recordNum: 2,
+        locationName: 'location1',
+        datasetName: 'dataset1',
+        visitKey: 'location1#2017-07-07',
+        varName: 'ph',
+        varValue: '7',
+        varUnit: null
+      }, {
         locationName: 'location2',
         datasetName: 'dataset2',
-        visitKey: 'location2#2008-02-02'
+        visitKey: 'location2#2008-02-02',
+        varName: 'windSpeed',
+        varValue: '7',
+        varUnit: 'km/h'
       }]
       const countResult = [{ recordsHeld: 31 }]
-      const varsResult = [{
-        visitKey: 'location1#2017-07-07',
-        varName: 'height',
-        varValue: '123',
-        varUnit: 'cm'
-      }, {
-        visitKey: 'location2#2008-02-02',
-        varName: 'height',
-        varValue: '468',
-        varUnit: 'cm'
-      }]
       const speciesNamesResult = [{
         visitKey: 'location1#2017-07-07',
         scientificName: null,
@@ -42,7 +42,6 @@ describe('/v1/environmentData-json', () => {
       stubDb.setExecSelectPromiseResponses([
         recordsResult,
         countResult,
-        varsResult,
         speciesNamesResult
       ])
       let event = {
@@ -91,13 +90,14 @@ describe('/v1/environmentData-json', () => {
         },
         response: [ // should be no 'locationName' or 'datasetName' fields
           {
-            recordNum: 1,
-            variables: [{ varName: 'height', varValue: '123', varUnit: 'cm' }],
+            variables: [
+              { varName: 'windSpeed', varValue: '6', varUnit: 'km/h' },
+              { varName: 'ph', varValue: '7', varUnit: null }
+            ],
             scientificNames: [],
             taxonRemarks: ['taxon name']
           }, {
-            recordNum: 2,
-            variables: [{ varName: 'height', varValue: '468', varUnit: 'cm' }],
+            variables: [{ varName: 'windSpeed', varValue: '7', varUnit: 'km/h' }],
             scientificNames: ['sci name'],
             taxonRemarks: []
           }

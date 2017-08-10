@@ -20,15 +20,12 @@ describe('/v2/environmentData-csv', function () {
         bibliographicCitation: 'Department of Par...',
         locationName: 'location1',
         datasetName: 'dataset1',
-        visitKey: 'location1#2017-07-07'
-      }]
-      const countResult = [{ recordsHeld: 31 }]
-      const varsResult = [{
         visitKey: 'location1#2017-07-07',
         varName: 'windSpeed',
         varValue: '6',
         varUnit: 'km/h'
       }]
+      const countResult = [{ recordsHeld: 31 }]
       const speciesNamesResult = [{
         visitKey: 'location1#2017-07-07',
         scientificName: 'species one',
@@ -37,7 +34,6 @@ describe('/v2/environmentData-csv', function () {
       stubDb.setExecSelectPromiseResponses([
         recordsResult,
         countResult,
-        varsResult,
         speciesNamesResult
       ])
       let event = {

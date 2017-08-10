@@ -36,8 +36,8 @@ function responder (requestBody, db, queryStringParameters, extrasProvider) {
 
 module.exports.doQuery = doQuery
 function doQuery (event, params, processStart, db, elapsedTimeCalculator) {
-  const recordsSql = getRecordsSql(params.speciesNames, params.start, params.rows)
-  const countSql = getCountSql(params.speciesNames)
+  const recordsSql = getRecordsSql(params.speciesNames, params.varNames, params.start, params.rows)
+  const countSql = getCountSql(params.speciesNames, params.varNames)
   let recordsPromise = db.execSelectPromise(recordsSql)
   let countPromise = db.execSelectPromise(countSql)
   return Promise.all([recordsPromise, countPromise]).then(values => {
@@ -49,6 +49,7 @@ function doQuery (event, params, processStart, db, elapsedTimeCalculator) {
     let numFound = count[0][recordsHeldField]
     let totalPages = r.calculateTotalPages(params.rows, numFound)
     let pageNumber = r.calculatePageNumber(params.start, numFound, totalPages)
+    let rolledupRecords = rollupRecords(records)
     let partialResponseObj = {
       responseHeader: {
         elapsedTime: elapsedTimeCalculator(processStart),
@@ -62,7 +63,7 @@ function doQuery (event, params, processStart, db, elapsedTimeCalculator) {
         },
         totalPages: totalPages
       },
-      response: records
+      response: rolledupRecords
     }
     let strategyForVersion = getStrategyForVersion(event)
     strategyForVersion(partialResponseObj)
@@ -79,8 +80,6 @@ function doQuery (event, params, processStart, db, elapsedTimeCalculator) {
     let passPartialResponseObjDownChainPromise = new Promise(resolve => {
       resolve(partialResponseObj)
     })
-    let varsSql = getVarsSql(visitKeyClauses)
-    let varsPromise = db.execSelectPromise(varsSql)
     let speciesNamesClauses = params.speciesNames
     let speciesNamesSql = getSpeciesNamesSql(visitKeyClauses, speciesNamesClauses)
     let speciesNamesPromise = db.execSelectPromise(speciesNamesSql)
@@ -88,25 +87,14 @@ function doQuery (event, params, processStart, db, elapsedTimeCalculator) {
       resolve(false)
     })
     return Promise.all([passPartialResponseObjDownChainPromise, continuePromiseChainProcessingPromise,
-      varsPromise, speciesNamesPromise])
+      speciesNamesPromise])
   }).then(dataWrapper => {
     let partialResponseObj = dataWrapper[0]
     let isShortCircuitPromiseChain = dataWrapper[1]
     if (isShortCircuitPromiseChain) {
       return partialResponseObj
     }
-    let varsRecords = dataWrapper[2]
-    let varsLookup = varsRecords.reduce((prev, curr) => {
-      let visitKey = curr.visitKey
-      delete (curr.visitKey)
-      if (typeof prev[visitKey] === 'undefined') {
-        prev[visitKey] = []
-      }
-      prev[visitKey].push(curr)
-      return prev
-    }, {})
-    appendVars(partialResponseObj.response, varsLookup)
-    let speciesNamesRecords = dataWrapper[3]
+    let speciesNamesRecords = dataWrapper[2]
     let speciesNamesLookup = speciesNamesRecords.reduce((prev, curr) => {
       let visitKey = curr.visitKey
       delete (curr.visitKey)
@@ -141,25 +129,50 @@ function getStrategyForVersion (event) {
 
 module.exports._testonly = {
   doHandle: doHandle,
-  appendVars: appendVars,
   appendSpeciesNames: appendSpeciesNames,
   stripVisitKeys: stripVisitKeys,
   getRecordsSql: getRecordsSql,
   getCountSql: getCountSql,
-  getVarsSql: getVarsSql,
   getSpeciesNamesSql: getSpeciesNamesSql,
   getVisitKeyClauses: getVisitKeyClauses
 }
 
-function appendVars (records, varsLookup) {
-  records.forEach(e => {
-    let visitKey = e.visitKey
-    if (!varsLookup[visitKey]) {
-      e.variables = []
-      return
+/*
+ * Transforms the response so we have one record with all of its vars.
+ * It uses the 'key' field to determine record identity, grabs all the var
+ * fields and expects all other fields to be the same for each repeat of the record.
+ */
+function rollupRecords (records) {
+  const fieldNameKey = 'visitKey'
+  const fieldNamesVars = ['varName', 'varValue', 'varUnit']
+  let keyManager = {}
+  records.forEach(currRawRecord => {
+    let keyField = currRawRecord[fieldNameKey]
+    if (typeof keyField === 'undefined') {
+      throw new Error(`Data problem: record did not have the '${fieldNameKey}' field`)
     }
-    e.variables = varsLookup[visitKey]
+    if (typeof keyManager[keyField] === 'undefined') {
+      let record = {
+        variables: []
+      }
+      Object.keys(currRawRecord).forEach(currFieldName => {
+        let isVariableDataField = fieldNamesVars.indexOf(currFieldName) >= 0
+        if (isVariableDataField) {
+          return
+        }
+        record[currFieldName] = currRawRecord[currFieldName]
+      })
+      keyManager[keyField] = record
+    }
+    let record = keyManager[keyField]
+    let newVar = {}
+    fieldNamesVars.forEach(currFieldName => {
+      newVar[currFieldName] = currRawRecord[currFieldName]
+    })
+    record.variables.push(newVar)
   })
+  let result = Object.values(keyManager)
+  return result
 }
 
 function appendSpeciesNames (records, speciesNameLookup) {
@@ -181,10 +194,16 @@ function stripVisitKeys (records) {
   })
 }
 
-function getRecordsSql (escapedSpeciesName, start, rows) {
-  r.assertIsSupplied(escapedSpeciesName)
+function getRecordsSql (escapedSpeciesNames, escapedVarNames, start, rows) {
+  r.assertIsSupplied(escapedSpeciesNames)
+  let varFilterClause = buildVarFilterClause(escapedVarNames)
+  let extraVarFilterClause = ''
+  let isFilteringByVar = varFilterClause.length > 0
+  if (isFilteringByVar) {
+    extraVarFilterClause = `AND v.varName IN (${escapedVarNames})`
+  }
   return `
-    SELECT DISTINCT
+    SELECT
     CONCAT(e.locationID, '${visitKeySeparator}', e.eventDate) AS visitKey,
     e.eventDate,
     e.\`month\`,
@@ -196,7 +215,41 @@ function getRecordsSql (escapedSpeciesName, start, rows) {
     e.locationName,
     e.samplingProtocol,
     c.bibliographicCitation,
-    c.datasetName
+    c.datasetName,
+    v.varName,
+    v.varValue,
+    v.varUnit
+    FROM (
+      SELECT DISTINCT
+      e.eventDate,
+      e.locationID
+      FROM species AS s
+      INNER JOIN env AS e
+      ON s.locationID = e.locationID
+      AND s.eventDate = e.eventDate
+      AND (
+        s.scientificName IN (${escapedSpeciesNames})
+        OR s.taxonRemarks IN (${escapedSpeciesNames})
+      )${varFilterClause}
+      ORDER BY 2,1
+      LIMIT ${rows} OFFSET ${start}
+    ) AS coreData
+    INNER JOIN env AS e
+    ON coreData.locationID = e.locationID
+    AND coreData.eventDate = e.eventDate
+    INNER JOIN citations AS c
+    ON e.samplingProtocol = c.samplingProtocol
+    LEFT JOIN envvars AS v
+    ON coreData.locationID = v.locationID
+    AND coreData.eventDate = v.eventDate
+    ${extraVarFilterClause};`
+}
+
+function getCountSql (escapedSpeciesName, escapedVarNames) {
+  r.assertIsSupplied(escapedSpeciesName)
+  let varFilterClause = buildVarFilterClause(escapedVarNames)
+  return `
+    SELECT count(DISTINCT e.locationID, e.eventDate) AS ${recordsHeldField}
     FROM species AS s
     INNER JOIN env AS e
     ON s.locationID = e.locationID
@@ -204,40 +257,26 @@ function getRecordsSql (escapedSpeciesName, start, rows) {
     AND (
       s.scientificName IN (${escapedSpeciesName})
       OR s.taxonRemarks IN (${escapedSpeciesName})
-    )
-    INNER JOIN citations AS c
-    ON e.samplingProtocol = c.samplingProtocol
-    ORDER BY 1
-    LIMIT ${rows} OFFSET ${start};`
+    )${varFilterClause}
+    ;`
 }
 
-function getCountSql (escapedSpeciesName) {
-  r.assertIsSupplied(escapedSpeciesName)
-  return `
-    SELECT count(DISTINCT locationID, eventDate) as ${recordsHeldField}
-    FROM species
-    WHERE (
-      scientificName IN (${escapedSpeciesName})
-      OR taxonRemarks IN (${escapedSpeciesName})
-    );`
-}
-
-function getVarsSql (visitKeyClauses) {
-  r.assertIsSupplied(visitKeyClauses)
-  return `
-    SELECT
-    CONCAT(locationID, '${visitKeySeparator}', eventDate) AS visitKey,
-    varName,
-    varValue,
-    varUnit
-    FROM envvars
-    WHERE (locationID, eventDate) in (${visitKeyClauses})
-    ORDER BY 1;`
+function buildVarFilterClause (escapedVarNames) {
+  let result = ''
+  if (escapedVarNames) {
+    result = `
+      INNER JOIN envvars AS v
+      ON v.locationID = e.locationID
+      AND v.eventDate = e.eventDate
+      AND v.varName IN (${escapedVarNames})`
+  }
+  return result
 }
 
 function getSpeciesNamesSql (visitKeyClauses, speciesNamesClauses) {
   r.assertIsSupplied(visitKeyClauses)
   r.assertIsSupplied(speciesNamesClauses)
+  // TODO do we need to filter by species that match the trait filter?
   return `
     SELECT DISTINCT
     CONCAT(locationID, '${visitKeySeparator}', eventDate) AS visitKey,
@@ -261,7 +300,8 @@ function getVisitKeyClauses (visitKeys) {
     if (prev === '') {
       return fragment
     }
-    return prev + '\n,' + fragment
+    let formattingForEasierReading = '\n    '
+    return prev + ',' + formattingForEasierReading + fragment
   }, '')
 }
 
