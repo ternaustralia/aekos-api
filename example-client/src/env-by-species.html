@@ -1,0 +1,133 @@
+<div class="container">
+  <h2>'Environment by species' then 'environment data'</h2>
+  <div class="row step">
+    <div class="col-xs-5">
+      <h2>Step 1: Get environmental variable vocab</h2>
+      <h3>Step 1.1: Load vocab</h3>
+      <p>Firstly, we need to get a list of the available variables. Click the button to load the vocab.</p>
+      <div class="text-center">
+        <button class="btn btn-default" ng-click="loadVocabs()">Load environmental variable vocab</button>
+      </div>
+      <h3>Step 1.2: Select variables</h3>
+      <p>Once loaded, optionally select the variables that you want to retrieve data for.
+        If you don't select any variables to filter by, we'll retrieve data for all available variables.
+      </p>
+    </div>
+    <div class="col-xs-7">
+      <div class="panel panel-default">
+        <div class="panel-heading">Environmental Variable Vocabulary</div>
+        <div class="panel-body">
+          <div ng-show="vars" ng-repeat="currVar in vars">
+            <input type="checkbox" id="{{currVar.code}}" ng-model="isChecked" ng-change="currVar.isChecked = isChecked"></input>
+            <label for="{{currVar.code}}">{{currVar.label}} ({{currVar.recordsHeld}} records)</label>
+          </div>
+          <div ng-show="isLoadingVars">Loading...</div>
+          <div ng-hide="isLoadVocabClicked">&lt;&lt;&lt;--Click the button to load variables</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row step">
+    <div class="col-xs-5">
+      <h2>Step 2: Get species</h2>
+      <h3>Step 2.1: Find species using autocomplete</h3>
+      <p>To retrieve environmental variable data, we MUST have species names to supply.
+        In this example we'll find names using the autocomplete. Fill in a partial species
+        name and click the button to search.
+      </p>
+      <div class="form-horizontal">
+        <div class="form-group">
+          <label for="partialSpeciesName" class="col-xs-6 control-label">Partial species name</label>
+          <div class="col-xs-6">
+            <input type="text" class="form-control" id="partialSpeciesName" ng-model="partialSpeciesName" placeholder="Try 'aca'">
+          </div>
+        </div>
+      </div>
+      <div class="text-center">
+        <button class="btn btn-default" ng-click="findSpecies()">Find species using autocomplete</button>
+      </div>
+      <div class="text-center paging-buttons">
+        <button class="btn btn-default btn-sm" ng-click="speciesNextPage()">Next page &gt;</button>
+      </div>
+      <p><span class="important-note">Important note about record counts:</span> the counts returned from this service are the
+        number of <em>species</em> records that we hold, not site visit records.</p>
+      <h3>Step 2.2: Select species</h3>
+      <p>Once loaded, select the species that you're interested in. We'll use these to get
+        the environmental variable data for site visits where these species occurred.
+      </p>
+    </div>
+    <div class="col-xs-7">
+      <div class="panel panel-default">
+        <div class="panel-heading">Species Names</div>
+        <div class="panel-body species-list">
+          <div ng-show="species" ng-repeat="sp in species">
+            <input type="checkbox" id="{{sp.speciesName}}" ng-model="isChecked" ng-change="sp.isChecked = isChecked"></input>
+            <label for="{{sp.speciesName}}">{{sp.speciesName}} ({{sp.recordsHeld}} species records)</label>
+          </div>
+          <div ng-show="isLoadingSpecies">Loading...</div>
+          <div ng-hide="isLoadSpeciesClicked">&lt;&lt;&lt;--Click the button to load species</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row step">
+    <div class="col-xs-5">
+      <h2>Step 3: Retrieve Site visit with environmental variable data</h2>
+      <p>Now we can retrieve the environmental variable data for site visits where the species you've selected occurred:</p>
+      <ul>
+        <li ng-repeat="curr in species | filterSelected">{{curr.speciesName}}</li>
+      </ul>
+      <p>...and optionally we can filter the list of environmental variables to only include the variables you've selected (otherwise we retrieve
+        all variables available):</p>
+      <ul>
+        <li ng-repeat="curr in vars | filterSelected">{{curr.label}}</li>
+      </ul>
+      <p>
+        <label>
+          <input type="checkbox" ng-model="isApplyVarFilter">
+          Apply filter to only retrieve data for selected variables
+        </label>
+      </p>
+      <div>Content-type (sent as 'Accept' header):</div>
+      <div class="form-horizontal">
+        <div class="checkbox">
+          <label><input type="radio" value="application/json" ng-model="envDataAccept"> application/json</label>
+        </div>
+        <div class="checkbox">
+          <label><input type="radio" value="text/csv" ng-model="envDataAccept"> text/csv</label>
+        </div>
+      </div>
+      <div>
+      </div>
+      <div class="text-center">
+        <button class="btn btn-default" ng-click="getEnvData()">Retrieve environmental variable data (first page)</button>
+      </div>
+      <div class="text-center paging-buttons">
+        <button class="btn btn-default btn-sm" ng-click="envDataChangePage(envDataFirstPageUrl)" ng-disabled="!envDataFirstPageUrl">
+          &lt;&lt; First page
+        </button>
+        <button class="btn btn-default btn-sm" ng-click="envDataChangePage(envDataPrevPageUrl)" ng-disabled="!envDataPrevPageUrl">
+          &lt; Previous page
+        </button>
+        <button class="btn btn-default btn-sm" ng-click="envDataChangePage(envDataNextPageUrl)" ng-disabled="!envDataNextPageUrl">
+          Next page &gt;
+        </button>
+        <button class="btn btn-default btn-sm" ng-click="envDataChangePage(envDataLastPageUrl)" ng-disabled="!envDataLastPageUrl">
+          Last page &gt;&gt;
+        </button>
+      </div>
+    </div>
+    <div class="col-xs-7">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          Site visits with environmental variable data
+          <span ng-show="envRecords.length && envDataResultWindow === 'json'"> | {{envRecordsHeader.numFound}} total records | page {{envRecordsHeader.pageNumber}}</span>
+        </div>
+        <div class="panel-body data-list" ng-if="envDataResultWindow === 'json'">{{prettyEnvDataJson()}}</div>
+        <div class="panel-body data-list" ng-if="envDataResultWindow === 'csv'">{{envRecords}}</div>
+        <div class="panel-body" ng-show="isLoadingEnvData">Loading...</div>
+        <div class="panel-body" ng-hide="isLoadEnvDataClicked">&lt;&lt;&lt;--Click the button to load environment data</div>
+      </div>
+    </div>
+  </div>
+</div>

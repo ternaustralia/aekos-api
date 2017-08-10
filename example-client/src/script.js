@@ -25,6 +25,28 @@ app.factory('baseUrlService', function () {
   }
 })
 
+app.factory('commonHelpersService', function () {
+  return {
+    getLink: function (parsedLinkHeader, relName) {
+      var value = parsedLinkHeader.find(relName)
+      if (value === null) {
+        return null
+      }
+      return value.resolve()
+    },
+    getChecked: function (vocabs, fieldToReturn) {
+      var result = []
+      vocabs.forEach(function (curr) {
+        if (!curr.isChecked) {
+          return
+        }
+        result.push(curr[fieldToReturn])
+      })
+      return result
+    }
+  }
+})
+
 app.component('exampleParent', {
   templateUrl: './src/exampleParent.html',
   controller: function ($scope, baseUrlService) {

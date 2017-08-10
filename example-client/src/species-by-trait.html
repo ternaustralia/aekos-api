@@ -18,7 +18,7 @@
         <div class="panel-body">
           <div ng-show="traits" ng-repeat="trait in traits">
             <input type="checkbox" id="{{trait.code}}" ng-model="isChecked" ng-change="trait.isChecked = isChecked"></input>
-            <label for="{{trait.code}}">{{trait.label}} ({{trait.recordsHeld}} records)</label>
+            <label for="{{trait.code}}">{{trait.label}} ({{trait.recordsHeld}} species records)</label>
           </div>
           <div ng-show="isLoadingTraits">Loading...</div>
           <div ng-hide="isLoadVocabClicked">&lt;&lt;&lt;--Click the button to load traits</div>
@@ -87,7 +87,7 @@
       <div>
       </div>
       <div class="text-center">
-        <button class="btn btn-default" ng-click="getTraitData()">Retrieve Darwin Core + trait data</button>
+        <button class="btn btn-default" ng-click="getTraitData()">Retrieve Darwin Core + trait data (first page)</button>
       </div>
       <div class="text-center paging-buttons">
         <button class="btn btn-default btn-sm" ng-click="traitDataChangePage(traitDataFirstPageUrl)" ng-disabled="!traitDataFirstPageUrl">

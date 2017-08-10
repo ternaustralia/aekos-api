@@ -26,3 +26,8 @@
 .paging-buttons {
   margin-top: 1em;
 }
+
+.important-note {
+  font-weight: bold;
+  color: red;
+}

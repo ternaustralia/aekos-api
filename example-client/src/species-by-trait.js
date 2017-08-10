@@ -13,7 +13,7 @@ app.component('speciesByTrait', {
   controller: 'SpeciesByTraitController'
 })
 
-app.controller('SpeciesByTraitController', function ($http, $scope, baseUrlService) {
+app.controller('SpeciesByTraitController', function ($http, $scope, baseUrlService, commonHelpersService) {
   var speciesPageSize = 100
   $scope.traitDataAccept = 'application/json'
 
@@ -30,7 +30,7 @@ app.controller('SpeciesByTraitController', function ($http, $scope, baseUrlServi
     }, errorHandler)
   }
 
-  function resetStep2() {
+  function resetStep2 () {
     $scope.species = []
     $scope.isLoadSpeciesClicked = false
   }
@@ -54,7 +54,7 @@ app.controller('SpeciesByTraitController', function ($http, $scope, baseUrlServi
   function speciesSearchHelper () {
     resetStep2()
     resetStep3()
-    var traitNames = getTraits($scope.traits, 'code')
+    var traitNames = commonHelpersService.getChecked($scope.traits, 'code')
     if (traitNames.length === 0) {
       alert('[ERROR] you need to select at least one trait from step 1 first')
       return
@@ -76,11 +76,11 @@ app.controller('SpeciesByTraitController', function ($http, $scope, baseUrlServi
     }, errorHandler)
   }
 
-  function resetStep3() {
+  $scope.isApplyTraitFilter = true
+  function resetStep3 () {
     $scope.traitRecords = []
     $scope.traitRecordsHeader = {}
     $scope.isLoadTraitDataClicked = false
-    $scope.isApplyTraitFilter = true
   }
 
   $scope.getTraitData = function () {
@@ -97,7 +97,7 @@ app.controller('SpeciesByTraitController', function ($http, $scope, baseUrlServi
 
   function traitDataHelper (url) {
     resetStep3()
-    var speciesNames = getSpeciesNames($scope.species)
+    var speciesNames = commonHelpersService.getChecked($scope.species, 'name')
     if (speciesNames.length === 0) {
       alert('[ERROR] you need to select at least one species name from step 2 first')
       return
@@ -106,7 +106,7 @@ app.controller('SpeciesByTraitController', function ($http, $scope, baseUrlServi
     $scope.isLoadingTraitData = true
     var traitNames = []
     if ($scope.isApplyTraitFilter) {
-      traitNames = getTraits($scope.traits, 'code')
+      traitNames = commonHelpersService.getChecked($scope.traits, 'code')
     }
     var data = {
       speciesNames: speciesNames,
@@ -136,45 +136,15 @@ app.controller('SpeciesByTraitController', function ($http, $scope, baseUrlServi
       // uses wombleton/link-headers so we don't hardcode paging URLs
       var rawLinkHeader = response.headers('link')
       var parsedLinkHeader = $.linkheaders(rawLinkHeader)
-      $scope.traitDataFirstPageUrl = getLink(parsedLinkHeader, 'first')
-      $scope.traitDataPrevPageUrl = getLink(parsedLinkHeader, 'prev')
-      $scope.traitDataNextPageUrl = getLink(parsedLinkHeader, 'next')
-      $scope.traitDataLastPageUrl = getLink(parsedLinkHeader, 'last')
+      $scope.traitDataFirstPageUrl = commonHelpersService.getLink(parsedLinkHeader, 'first')
+      $scope.traitDataPrevPageUrl = commonHelpersService.getLink(parsedLinkHeader, 'prev')
+      $scope.traitDataNextPageUrl = commonHelpersService.getLink(parsedLinkHeader, 'next')
+      $scope.traitDataLastPageUrl = commonHelpersService.getLink(parsedLinkHeader, 'last')
     }, errorHandler)
   }
 })
 
-function getLink (parsedLinkHeader, relName) {
-  var value = parsedLinkHeader.find(relName)
-  if (value === null) {
-    return null
-  }
-  return value.resolve()
-}
-
-function getTraits(traits, fieldToReturn) {
-  var result = []
-  traits.forEach(function (curr) {
-    if (!curr.isChecked) {
-      return
-    }
-    result.push(curr[fieldToReturn])
-  })
-  return result
-}
-
-function getSpeciesNames(species) {
-  var result = []
-  species.forEach(function (curr) {
-    if (!curr.isChecked) {
-      return
-    }
-    result.push(curr.name)
-  })
-  return result
-}
-
-function errorHandler(error) {
+function errorHandler (error) {
   var msg = 'Something went wrong:'
   alert(msg + error.message)
   throw new Error(msg, error)
