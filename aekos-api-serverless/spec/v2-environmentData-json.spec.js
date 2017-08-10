@@ -373,6 +373,83 @@ describe('/v2/environmentData-json', () => {
     let result = null
     beforeEach(done => {
       let stubDb = new StubDB()
+      const recordsResult = [{
+        locationName: 'location1',
+        datasetName: 'dataset1',
+        visitKey: 'location1#2017-07-07'
+        // no variables
+      }]
+      const countResult = [{ recordsHeld: 1 }]
+      const speciesNamesResult = [{
+        visitKey: 'location1#2017-07-07',
+        scientificName: null,
+        taxonRemarks: 'taxon name'
+      }]
+      stubDb.setExecSelectPromiseResponses([
+        recordsResult,
+        countResult,
+        speciesNamesResult
+      ])
+      let event = {
+        body: JSON.stringify({
+          speciesNames: ['species one']
+          // don't supply 'varNames'
+        }),
+        queryStringParameters: null,
+        headers: {
+          Host: 'api.aekos.org.au',
+          'X-Forwarded-Proto': 'https'
+        },
+        requestContext: {
+          path: '/v2/environmentData.json'
+        }
+      }
+      let callback = (_, theResult) => {
+        result = theResult
+        done()
+      }
+      objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 42 })
+    })
+
+    it('should handle site visit records that have no variables', () => {
+      expect(result.statusCode).toBe(200)
+      expect(result.headers).toEqual({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
+        'Access-Control-Expose-Headers': 'link',
+        'Content-Type': "'application/json'",
+        'link': ''
+      })
+      expect(JSON.parse(result.body)).toEqual({
+        responseHeader: {
+          elapsedTime: 42,
+          numFound: 1,
+          pageNumber: 1,
+          params: {
+            rows: 20,
+            start: 0,
+            speciesNames: ['species one'],
+            varNames: null
+          },
+          totalPages: 1
+        },
+        response: [
+          {
+            variables: [],
+            scientificNames: [],
+            taxonRemarks: ['taxon name'],
+            locationName: 'location1',
+            datasetName: 'dataset1'
+          }
+        ]
+      })
+    })
+  })
+
+  describe('.doHandle()', () => {
+    let result = null
+    beforeEach(done => {
+      let stubDb = new StubDB()
       let event = {
         body: null, // don't supply 'speciesNames'
         queryStringParameters: null

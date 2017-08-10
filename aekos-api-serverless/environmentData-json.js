@@ -151,7 +151,8 @@ function rollupRecords (records) {
     if (typeof keyField === 'undefined') {
       throw new Error(`Data problem: record did not have the '${fieldNameKey}' field`)
     }
-    if (typeof keyManager[keyField] === 'undefined') {
+    let isFirstAppearanceOfRecord = typeof keyManager[keyField] === 'undefined'
+    if (isFirstAppearanceOfRecord) {
       let record = {
         variables: []
       }
@@ -167,8 +168,17 @@ function rollupRecords (records) {
     let record = keyManager[keyField]
     let newVar = {}
     fieldNamesVars.forEach(currFieldName => {
-      newVar[currFieldName] = currRawRecord[currFieldName]
+      let newFieldValue = currRawRecord[currFieldName]
+      let isNoValueDefined = typeof newFieldValue === 'undefined'
+      if (isNoValueDefined) {
+        return
+      }
+      newVar[currFieldName] = newFieldValue
     })
+    let isNoVariables = Object.values(newVar).length === 0
+    if (isNoVariables) {
+      return
+    }
     record.variables.push(newVar)
   })
   let result = Object.values(keyManager)

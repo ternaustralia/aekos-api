@@ -24,12 +24,31 @@ describe('/v2/environmentData-csv', function () {
         varName: 'windSpeed',
         varValue: '6',
         varUnit: 'km/h'
+      }, {
+        individualCount: 1,
+        eventDate: '2002-02-02',
+        month: 2,
+        year: 2002,
+        decimalLatitude: -32.59758852952833,
+        decimalLongitude: 122.15956081537496,
+        geodeticDatum: 'GDA94',
+        locationID: 'aekos.org.au/collection/wa.gov.au/ravensthorpe/R002',
+        samplingProtocol: 'aekos.org.au/collection/wa.gov.au/ravensthorpe',
+        bibliographicCitation: 'Department of Par...',
+        locationName: 'location2',
+        datasetName: 'dataset2',
+        visitKey: 'location2#2002-02-02'
+        // no variables
       }]
       const countResult = [{ recordsHeld: 31 }]
       const speciesNamesResult = [{
         visitKey: 'location1#2017-07-07',
         scientificName: 'species one',
         taxonRemarks: null
+      }, {
+        visitKey: 'location2#2002-02-02',
+        scientificName: null,
+        taxonRemarks: 'species one'
       }]
       stubDb.setExecSelectPromiseResponses([
         recordsResult,
@@ -69,7 +88,8 @@ describe('/v2/environmentData-csv', function () {
       })
       expect(result.body.split('\n')).toEqual([
         `"decimalLatitude","decimalLongitude","geodeticDatum","locationID","locationName","datasetName","scientificNames","taxonRemarks","eventDate","year","month","bibliographicCitation","samplingProtocol","variable1Name","variable1Value","variable1Units"`,
-        `-33.59758852952833,120.15956081537496,"GDA94","aekos.org.au/collection/wa.gov.au/ravensthorpe/R181","location1","dataset1","species one","","2007-10-03",2007,10,"Department of Par...","aekos.org.au/collection/wa.gov.au/ravensthorpe","windSpeed","6","km/h"`
+        `-33.59758852952833,120.15956081537496,"GDA94","aekos.org.au/collection/wa.gov.au/ravensthorpe/R181","location1","dataset1","species one","","2007-10-03",2007,10,"Department of Par...","aekos.org.au/collection/wa.gov.au/ravensthorpe","windSpeed","6","km/h"`,
+        `-32.59758852952833,122.15956081537496,"GDA94","aekos.org.au/collection/wa.gov.au/ravensthorpe/R002","location2","dataset2","","species one","2002-02-02",2002,2,"Department of Par...","aekos.org.au/collection/wa.gov.au/ravensthorpe"`
       ])
     })
   })
