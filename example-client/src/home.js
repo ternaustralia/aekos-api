@@ -17,6 +17,10 @@ app.controller('HomeController', function ($scope) {
         'species that occur at sites that have data for those variables then ' +
         'retrieve the data for the visits to those sites.',
       sref: 'exampleParent.envBySpecies'
+    }, {
+      title: 'All Species',
+      description: 'This one is easy, just start pouring through every record we have.',
+      sref: 'exampleParent.allSpecies'
     }
   ]
 })

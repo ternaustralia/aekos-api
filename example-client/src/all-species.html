@@ -1,0 +1,49 @@
+<div class="container">
+  <h2>'All species'</h2>
+  <div class="row step">
+    <div class="col-xs-5">
+      <h2>Step 1: Retrieve Darwin Core records</h2>
+      <p>There's only one step here, we just start retrieving the Darwin Core records in the order they come:</p>
+      <div>Content-type (sent as 'Accept' header):</div>
+      <div class="form-horizontal">
+        <div class="checkbox">
+          <label><input type="radio" value="application/json" ng-model="speciesDataAccept"> application/json</label>
+        </div>
+        <div class="checkbox">
+          <label><input type="radio" value="text/csv" ng-model="speciesDataAccept"> text/csv</label>
+        </div>
+      </div>
+      <div>
+      </div>
+      <div class="text-center">
+        <button class="btn btn-default" ng-click="getSpeciesData()">Retrieve Darwin Core records (first page)</button>
+      </div>
+      <div class="text-center paging-buttons">
+        <button class="btn btn-default btn-sm" ng-click="speciesDataChangePage(speciesDataFirstPageUrl)" ng-disabled="!speciesDataFirstPageUrl">
+          &lt;&lt; First page
+        </button>
+        <button class="btn btn-default btn-sm" ng-click="speciesDataChangePage(speciesDataPrevPageUrl)" ng-disabled="!speciesDataPrevPageUrl">
+          &lt; Previous page
+        </button>
+        <button class="btn btn-default btn-sm" ng-click="speciesDataChangePage(speciesDataNextPageUrl)" ng-disabled="!speciesDataNextPageUrl">
+          Next page &gt;
+        </button>
+        <button class="btn btn-default btn-sm" ng-click="speciesDataChangePage(speciesDataLastPageUrl)" ng-disabled="!speciesDataLastPageUrl">
+          Last page &gt;&gt;
+        </button>
+      </div>
+    </div>
+    <div class="col-xs-7">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          Darwin Core records with trait data
+          <span ng-show="speciesRecords.length && speciesDataResultWindow === 'json'"> | {{speciesRecordsHeader.numFound}} total records | page {{speciesRecordsHeader.pageNumber}}</span>
+        </div>
+        <div class="panel-body data-list" ng-if="speciesDataResultWindow === 'json'">{{prettyspeciesDataJson()}}</div>
+        <div class="panel-body data-list" ng-if="speciesDataResultWindow === 'csv'">{{speciesRecords}}</div>
+        <div class="panel-body" ng-show="isLoadingSpeciesData">Loading...</div>
+        <div class="panel-body" ng-hide="isLoadspeciesDataClicked">&lt;&lt;&lt;--Click the button to load trait data</div>
+      </div>
+    </div>
+  </div>
+</div>
