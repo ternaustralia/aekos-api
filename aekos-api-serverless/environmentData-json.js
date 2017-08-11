@@ -144,7 +144,10 @@ module.exports._testonly = {
  */
 function rollupRecords (records) {
   const fieldNameKey = 'visitKey'
-  const fieldNamesVars = ['varName', 'varValue', 'varUnit']
+  const fieldNamesVars = [
+    { name: 'varName', isMandatory: true },
+    { name: 'varValue', isMandatory: true },
+    { name: 'varUnit', isMandatory: false }]
   let keyManager = {}
   records.forEach(currRawRecord => {
     let keyField = currRawRecord[fieldNameKey]
@@ -157,7 +160,9 @@ function rollupRecords (records) {
         variables: []
       }
       Object.keys(currRawRecord).forEach(currFieldName => {
-        let isVariableDataField = fieldNamesVars.indexOf(currFieldName) >= 0
+        let isVariableDataField = fieldNamesVars.some(element => {
+          return element.name === currFieldName
+        })
         if (isVariableDataField) {
           return
         }
@@ -167,14 +172,15 @@ function rollupRecords (records) {
     }
     let record = keyManager[keyField]
     let newVar = {}
-    fieldNamesVars.forEach(currFieldName => {
+    for (let currField of fieldNamesVars) {
+      let currFieldName = currField.name
       let newFieldValue = currRawRecord[currFieldName]
-      let isNoValueDefined = typeof newFieldValue === 'undefined'
-      if (isNoValueDefined) {
-        return
+      let isNoValueDefined = typeof newFieldValue === 'undefined' || newFieldValue === null
+      if (currField.isMandatory && isNoValueDefined) {
+        break
       }
       newVar[currFieldName] = newFieldValue
-    })
+    }
     let isNoVariables = Object.values(newVar).length === 0
     if (isNoVariables) {
       return

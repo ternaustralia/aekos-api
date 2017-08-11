@@ -37,8 +37,10 @@ describe('/v2/environmentData-csv', function () {
         bibliographicCitation: 'Department of Par...',
         locationName: 'location2',
         datasetName: 'dataset2',
-        visitKey: 'location2#2002-02-02'
-        // no variables
+        visitKey: 'location2#2002-02-02',
+        varName: null,
+        varValue: null,
+        varUnit: null
       }]
       const countResult = [{ recordsHeld: 31 }]
       const speciesNamesResult = [{

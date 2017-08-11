@@ -376,8 +376,10 @@ describe('/v2/environmentData-json', () => {
       const recordsResult = [{
         locationName: 'location1',
         datasetName: 'dataset1',
-        visitKey: 'location1#2017-07-07'
-        // no variables
+        visitKey: 'location1#2017-07-07',
+        varName: null,
+        varValue: null,
+        varUnit: null
       }]
       const countResult = [{ recordsHeld: 1 }]
       const speciesNamesResult = [{
