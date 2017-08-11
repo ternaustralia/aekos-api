@@ -83,9 +83,6 @@ custom:
     dataRetrievalTag: Data Retrieval by Species
     everythingRetrievalTag: Data Retrieval (everything)
     searchTag: Search
-    deprecatedDataRetrievalTag: Deprecated - Data Retrieval by Species
-    deprecatedEverythingRetrievalTag: Deprecated - Data Retrieval (everything)
-    deprecatedSearchTag: Deprecated - Search
   commonModelSchemaFragments:
     MethodResponse400Json:
       statusCode: '400'
@@ -350,7 +347,7 @@ functions:
           documentation:
             summary: Retrieve all available environment variable names for specified species
             tags:
-              - ${self:custom.tags.deprecatedSearchTag}
+              - ${self:custom.tags.searchTag}
             description: >
               Finds the environmental variables that the supplied species have. Note that the result doesn't
               include the value of the environmental variables, it only shows that the supplied species have
@@ -402,7 +399,7 @@ functions:
           documentation:
             summary: Retrieve all available traits for specified species
             tags:
-              - ${self:custom.tags.deprecatedSearchTag}
+              - ${self:custom.tags.searchTag}
             description: >
               Finds the traits that the supplied species have. Note that the result doesn't include the value
               of the traits, it only shows that the supplied species have values for those traits. To get
@@ -454,7 +451,7 @@ functions:
           documentation:
             summary: Retrieve all available species for specified traits
             tags:
-              - ${self:custom.tags.deprecatedSearchTag}
+              - ${self:custom.tags.searchTag}
             description: >
               Finds the species names that the supplied trait(s). Note that the result only shows that the supplied
               traits have species records present in the system. To get the values of the traits, you need to use the Data
@@ -505,7 +502,7 @@ functions:
           documentation:
             summary: Get trait vocabulary
             tags:
-              - ${self:custom.tags.deprecatedSearchTag}
+              - ${self:custom.tags.searchTag}
             description: >
               Gets a distinct list of all the traits that appear in the system. The code and label are supplied for
               each trait. The codes are required to use as parameters for other resources and the label information
@@ -544,7 +541,7 @@ functions:
           documentation:
             summary: Get environmental variable vocabulary
             tags:
-              - ${self:custom.tags.deprecatedSearchTag}
+              - ${self:custom.tags.searchTag}
             description: >
               Gets a distinct list of all the environmental variables that appear in the system. The code and label are supplied for
               each trait. The codes are required to use as parameters for other resources and the label information
@@ -583,7 +580,7 @@ functions:
           documentation:
             summary: Autocomplete partial species names
             tags:
-              - ${self:custom.tags.deprecatedSearchTag}
+              - ${self:custom.tags.searchTag}
             description: >
               Performs an autocomplete on the partial species name supplied. Results starting with the supplied
               fragment will be returned ordered by most relevant.
@@ -631,7 +628,7 @@ functions:
           documentation:
             summary: Get a summary of the specified species names
             tags:
-              - ${self:custom.tags.deprecatedSearchTag}
+              - ${self:custom.tags.searchTag}
             description: >
               A summary of the information that the system holds on the supplied species name(s) including a count
               of records. If the system doesn't have any data on a species name, no record for the species name will
@@ -703,7 +700,7 @@ functions:
           documentation:
             summary: Get species data
             tags:
-              - ${self:custom.tags.deprecatedDataRetrievalTag}
+              - ${self:custom.tags.dataRetrievalTag}
             description: >
               Gets Darwin Core records for the supplied species name(s) using content negotation to determine the response type.
               This resource honours Accept headers represented by any of the /v1/speciesData.* resources.
@@ -754,7 +751,7 @@ functions:
           documentation:
             summary: Get species data in JSON format
             tags:
-              - ${self:custom.tags.deprecatedDataRetrievalTag}
+              - ${self:custom.tags.dataRetrievalTag}
             description: >
               Gets Darwin Core records for the supplied species name(s) in JSON format.
             queryParams:
@@ -803,7 +800,7 @@ functions:
           documentation:
             summary: Get species data in CSV format
             tags:
-              - ${self:custom.tags.deprecatedDataRetrievalTag}
+              - ${self:custom.tags.dataRetrievalTag}
             description: >
               Gets Darwin Core records for the supplied species name(s) in CSV format.
             queryParams:
@@ -860,7 +857,7 @@ functions:
           documentation:
             summary: Get trait data
             tags:
-              - ${self:custom.tags.deprecatedDataRetrievalTag}
+              - ${self:custom.tags.dataRetrievalTag}
             description: >
               Gets Darwin Core records with added trait information for the supplied species name(s) using content negotation to
               determine the response type. If you supply trait names then the result records will have the traits filtered down
@@ -916,7 +913,7 @@ functions:
           documentation:
             summary: Get trait data in JSON format
             tags:
-              - ${self:custom.tags.deprecatedDataRetrievalTag}
+              - ${self:custom.tags.dataRetrievalTag}
             description: >
               Gets Darwin Core records with added trait information in JSON format. If you supply trait names then the result
               records will have the traits filtered down to only the traits you've asked for, otherwise all traits are returned.
@@ -970,7 +967,7 @@ functions:
           documentation:
             summary: Get trait data in CSV format
             tags:
-              - ${self:custom.tags.deprecatedDataRetrievalTag}
+              - ${self:custom.tags.dataRetrievalTag}
             description: >
               Gets Darwin Core records with added trait information in CSV format. If you supply trait names then the result
               records will have the traits filtered down to only the traits you've asked for, otherwise all traits are returned.
@@ -1030,7 +1027,7 @@ functions:
           documentation:
             summary: Get environmental variable data
             tags:
-              - ${self:custom.tags.deprecatedDataRetrievalTag}
+              - ${self:custom.tags.dataRetrievalTag}
             description: >
               Gets environmental variable data records for the site/study location/plot visits that the supplied species name(s)
               appear at using content negotation to determine the response type. If you supply environmental variable names then
@@ -1087,7 +1084,7 @@ functions:
           documentation:
             summary: Get environmental variable data in JSON format
             tags:
-              - ${self:custom.tags.deprecatedDataRetrievalTag}
+              - ${self:custom.tags.dataRetrievalTag}
             description: >
               Gets environmental variable data records for the site/study location/plot visits that the supplied species name(s)
               appear at in JSON format. If you supply environmental variable names then the result will have the environmental
@@ -1143,7 +1140,7 @@ functions:
           documentation:
             summary: Get environmental variable data in CSV format
             tags:
-              - ${self:custom.tags.deprecatedDataRetrievalTag}
+              - ${self:custom.tags.dataRetrievalTag}
             description: >
               Gets environmental variable data records for the site/study location/plot visits that the supplied species name(s)
               appear at in CSV format. If you supply environmental variable names then the result will have the environmental
@@ -1199,7 +1196,7 @@ functions:
           documentation:
             summary: Get all species data
             tags:
-              - ${self:custom.tags.deprecatedEverythingRetrievalTag}
+              - ${self:custom.tags.everythingRetrievalTag}
             description: >
               Gets all Darwin Core records using content negotation to determine the response type. This resource honours Accept
               headers represented by any of the /v1/allSpeciesData.* resources.
@@ -1245,7 +1242,7 @@ functions:
           documentation:
             summary: Get all species data in JSON format
             tags:
-              - ${self:custom.tags.deprecatedEverythingRetrievalTag}
+              - ${self:custom.tags.everythingRetrievalTag}
             description: >
               Gets Darwin Core records in JSON format.
             queryParams:
@@ -1290,7 +1287,7 @@ functions:
           documentation:
             summary: Get all species occurrence data in CSV format
             tags:
-              - ${self:custom.tags.deprecatedEverythingRetrievalTag}
+              - ${self:custom.tags.everythingRetrievalTag}
             description: >
               Gets all Darwin Core records in CSV format.
             queryParams:

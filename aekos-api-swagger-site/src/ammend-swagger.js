@@ -28,6 +28,7 @@ fs.readFile(inputFile, 'utf8', (error, data) => {
   }
   let parsedData = JSON.parse(data)
   removeOptionsMethods(parsedData)
+  markDeprecated(parsedData)
   addApiDescription(parsedData)
   removeRootRedirectResource(parsedData)
   updateParameterTypes(parsedData)
@@ -36,6 +37,20 @@ fs.readFile(inputFile, 'utf8', (error, data) => {
   stdout.write(JSON.stringify(parsedData, null, 2))
   stdout.write('\n')
 })
+
+function markDeprecated(parsedData) {
+  Object.keys(parsedData.paths).forEach(currPathKey => {
+    let currPath = parsedData.paths[currPathKey]
+    let isDeprecated = /^\/v1/.test(currPathKey)
+    Object.keys(currPath).forEach(currMethodKey => {
+      let currMethod = currPath[currMethodKey]
+      if (!isDeprecated) {
+        return
+      }
+      currMethod.deprecated = true
+    })
+  })
+}
 
 function removeOptionsMethods(parsedData) {
   Object.keys(parsedData.paths).forEach(currPathKey => {
