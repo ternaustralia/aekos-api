@@ -20,3 +20,5 @@
 - add 'links' header to vocab resources with rel="search"
 - consider adding type= attribute to link header items
 - figure out what rel we can use on search resources to point to data resources
+- add more comments to example code
+- add code snippets on examples

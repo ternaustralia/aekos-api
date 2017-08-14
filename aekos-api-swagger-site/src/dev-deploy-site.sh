@@ -8,32 +8,38 @@ if [ -z "$STAGE" ]; then
 fi
 FILE_TYPE=json
 BUCKET=www.$STAGE.api.aekos.org.au
-SWAGGER_UI_DIR=../swagger-ui-dist
+SWAGGER_UI_DIR=swagger-ui-dist
+EXAMPLES_DIR=examples
 AWS_REGION=us-west-1
 SWAGGER_DEF=swagger-aekos-api-$STAGE.$FILE_TYPE
 stagelessSwaggerDef=`bash -c "echo $SWAGGER_DEF" | sed "s/-$STAGE//"`
-if [ ! -f "$SWAGGER_DEF" ]; then
-  echo "ERROR: can't find swagger definition ./$SWAGGER_DEF"
+if [ ! -f "$thisdir/$SWAGGER_DEF" ]; then
+  echo "ERROR: can't find swagger definition $thisdir/$SWAGGER_DEF"
   exit 1
 fi
-cd $SWAGGER_UI_DIR
+cd ..
 aws s3 sync \
   --region=$AWS_REGION \
   --delete \
   --acl public-read \
+  --exclude="*" \
+  --include="$SWAGGER_UI_DIR/*" \
+  --include="$EXAMPLES_DIR/*" \
+  --exclude="$EXAMPLES_DIR/node_modules/*" \
+  --include="index*" \
+  --include="header-bg.jpg" \
   . s3://$BUCKET/
-cd $thisdir
 aws s3 cp \
   --region=$AWS_REGION \
   --acl public-read \
-  $SWAGGER_DEF s3://$BUCKET/$stagelessSwaggerDef
+  $thisdir/$SWAGGER_DEF s3://$BUCKET/$SWAGGER_UI_DIR/$stagelessSwaggerDef
 aws s3 cp \
   --region=$AWS_REGION \
   --acl public-read \
-  feed.rss s3://$BUCKET/
+  $thisdir/feed.rss s3://$BUCKET/
 aws s3 cp \
   --region=$AWS_REGION \
   --acl public-read \
-  feed.atom s3://$BUCKET/
+  $thisdir/feed.atom s3://$BUCKET/
 echo "URL: ${BUCKET}.s3-website-${AWS_REGION}.amazonaws.com"
 

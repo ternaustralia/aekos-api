@@ -176,7 +176,7 @@ The AEKOS API is used for machine readable HTTP (REST) access to AEKOS ecologica
 
 # High level workflow
  1. Start with a trait or species
- 1. Find what species have that trait or what *traits*/*environmental variables* are available for that species
+ 1. Find what species have that trait or what traits/environmental variables are available for that species
  1. Use your traits/species/environmental variables to retrieve the data with the retrieval services
 
 # Detailed workflow
