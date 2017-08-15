@@ -15,7 +15,7 @@ fi
 echo '[INFO] copying new version (well, whatever version you have checked out)'
 distdir=$swaggeruidir/dist
 pushd $distdir > /dev/null
-git rev-parse HEAD > git-commit.txt
+git log -1 > git-commit.txt
 popd > /dev/null
 pushd swagger-ui-dist > /dev/null
 cp -v $distdir/* .
