@@ -107,7 +107,7 @@ app.controller('EnvBySpeciesController', function ($http, $scope, baseUrlService
     }
     var config = {
       headers: {
-        Accept: $scope.envDataAccept
+        Accept: $scope.envDataAccept // be sure to specify the MIME type you want in the response
       }
     }
     $http.post(url, data, config).then(function (response) {
@@ -126,7 +126,7 @@ app.controller('EnvBySpeciesController', function ($http, $scope, baseUrlService
         default:
           throw new Error('Programmer problem: unhandled accept header=' + acceptHeader)
       }
-      // uses wombleton/link-headers so we don't hardcode paging URLs
+      // uses wombleton/link-headers to pull apart the 'link' header so we don't hardcode paging URLs
       var rawLinkHeader = response.headers('link')
       var parsedLinkHeader = $.linkheaders(rawLinkHeader)
       $scope.envDataFirstPageUrl = commonHelpersService.getLink(parsedLinkHeader, 'first')

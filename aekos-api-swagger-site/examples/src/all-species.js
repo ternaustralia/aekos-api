@@ -40,7 +40,7 @@ app.controller('AllSpeciesController', function ($http, $scope, baseUrlService, 
     $scope.isLoadingSpeciesData = true
     var config = {
       headers: {
-        Accept: $scope.speciesDataAccept
+        Accept: $scope.speciesDataAccept // be sure to specify the MIME type you want in the response
       }
     }
     $http.get(url, config).then(function (response) {
@@ -59,7 +59,7 @@ app.controller('AllSpeciesController', function ($http, $scope, baseUrlService, 
         default:
           throw new Error('Programmer problem: unhandled accept header=' + acceptHeader)
       }
-      // uses wombleton/link-headers so we don't hardcode paging URLs
+      // uses wombleton/link-headers to pull apart the 'link' header so we don't hardcode paging URLs
       var rawLinkHeader = response.headers('link')
       var parsedLinkHeader = $.linkheaders(rawLinkHeader)
       $scope.speciesDataFirstPageUrl = commonHelpersService.getLink(parsedLinkHeader, 'first')
