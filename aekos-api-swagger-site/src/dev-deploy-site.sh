@@ -12,12 +12,16 @@ SWAGGER_UI_DIR=swagger-ui-dist
 EXAMPLES_DIR=examples
 AWS_REGION=us-west-1
 SWAGGER_DEF=swagger-aekos-api-$STAGE.$FILE_TYPE
+gitcommitfile=git-commit.txt
 stagelessSwaggerDef=`bash -c "echo $SWAGGER_DEF" | sed "s/-$STAGE//"`
 if [ ! -f "$thisdir/$SWAGGER_DEF" ]; then
   echo "ERROR: can't find swagger definition $thisdir/$SWAGGER_DEF"
   exit 1
 fi
 cd ..
+git log -1 > $gitcommitfile
+printf '\n\n' >> $gitcommitfile
+git st >> $gitcommitfile
 aws s3 sync \
   --region=$AWS_REGION \
   --delete \
@@ -28,6 +32,7 @@ aws s3 sync \
   --exclude="$EXAMPLES_DIR/node_modules/*" \
   --include="index*" \
   --include="header-bg.jpg" \
+  --include="$gitcommitfile" \
   . s3://$BUCKET/
 aws s3 cp \
   --region=$AWS_REGION \

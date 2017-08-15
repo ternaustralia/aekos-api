@@ -1,5 +1,4 @@
 - add HATEOAS headers for search resources
-- make getSpeciesByTrait perform and return the correct result
 - remove verbs from resources (v3 change)
 - return an appropriate HTTP status when a 'page out of bounds' occurs
 - figure out why the domain-manager doesn't add the base path mapping
@@ -12,7 +11,6 @@
     - ...and even more at https://apigility.org/documentation/api-primer/versioning
     - we can use this to handle the requests: https://github.com/lovell/media-type
     - this book might help: https://www.amazon.com.au/dp/B0046RERXY/ref=cm_sw_r_cp_dp_T2_AiXBzb8PMGS10
-- add a git commit hash to the doco
 - add rollbar calls for errors
 - add try-catch error trapping to respond with our 500 for all resources
 - create RSS or Atom feed for notifying of updates to the API. Could be another resource in the project, another separate API or maybe just github releases
