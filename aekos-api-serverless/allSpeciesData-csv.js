@@ -55,7 +55,7 @@ function doHandle (event, callback, db, elapsedTimeCalculator) {
   })
 }
 
-function responder (db, queryStringParameters, extrasProvider) {
+function responder (_, db, queryStringParameters, extrasProvider) {
   return new Promise((resolve, reject) => {
     let csvHeaders = getCsvHeadersForRequestedVersion(extrasProvider.event)
     allSpeciesDataJson.responder(db, queryStringParameters, extrasProvider).then(successResult => {

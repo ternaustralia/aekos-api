@@ -66,6 +66,62 @@ function handleJsonGeneric (event, callback, db,
     validator/* (queryStringParameters, requestBody):{isValid:boolean, message:string} */,
     responder/* (requestBody, databaseHelper, queryStringParameters):Promise<{}> */,
     extrasProvider, requestBodyGetter/* (event) */) {
+  let responseCaller = (event, callback, requestBody, db, queryStringObj, extrasProvider) => {
+    responder(requestBody, db, queryStringObj, extrasProvider).then(responseBody => {
+      jsonResponseHelpers.ok(callback, responseBody, event)
+    }).catch(error => {
+      console.error('Failed to execute handler', error)
+      jsonResponseHelpers.internalServerError(callback)
+    })
+  }
+  handleGeneric(event, callback, db, validator, responder, extrasProvider, requestBodyGetter, responseCaller)
+}
+
+function handleCsvPost (event, callback, db,
+    validator/* (queryStringParameters, requestBody):{isValid:boolean, message:string} */,
+    responder/* (requestBody, databaseHelper, queryStringParameters):Promise<{}> */,
+    extrasProvider) {
+  if (typeof event.body === 'undefined') {
+    jsonResponseHelpers.badRequest(callback, 'Programmer problem: request body is undefined. Most likely you ' +
+      "haven't defined the test input or wired things up correctly. Or maybe AWS has changed the event object")
+    return
+  }
+  let requestBodyGetter = event => {
+    return JSON.parse(event.body)
+  }
+  handleCsvGeneric(event, callback, db, validator, responder, extrasProvider, requestBodyGetter)
+}
+
+function handleCsvGet (event, callback, db,
+    validator/* (queryStringParameters):{isValid:boolean, message:string} */,
+    responder/* (_, databaseHelper, queryStringParameters):Promise<{}> */,
+    extrasProvider) {
+  let requestBodyGetter = event => {
+    return 'not used'
+  }
+  handleCsvGeneric(event, callback, db, validator, responder, extrasProvider, requestBodyGetter)
+}
+
+function handleCsvGeneric (event, callback, db,
+    validator/* (queryStringParameters, requestBody):{isValid:boolean, message:string} */,
+    responder/* (requestBody, databaseHelper, queryStringParameters):Promise<{}> */,
+    extrasProvider, requestBodyGetter/* (event) */) {
+  let responseCaller = (event, callback, requestBody, db, queryStringObj, extrasProvider) => {
+    responder(requestBody, db, queryStringObj, extrasProvider).then(responseWrapper => {
+      csvResponseHelpers.ok(callback, responseWrapper.body, responseWrapper.downloadFileName, event, responseWrapper.jsonResponse)
+    }).catch(error => {
+      console.error('Failed to execute handler', error)
+      jsonResponseHelpers.internalServerError(callback)
+    })
+  }
+  handleGeneric(event, callback, db, validator, responder, extrasProvider, requestBodyGetter, responseCaller)
+}
+
+function handleGeneric (event, callback, db,
+    validator/* (queryStringParameters, requestBody):{isValid:boolean, message:string} */,
+    responder/* (requestBody, databaseHelper, queryStringParameters):Promise<{}> */,
+    extrasProvider, requestBodyGetter/* (event) */,
+    responseCaller/* (event, callback, requestBody, db, queryStringObj, extrasProvider):void */) {
   let requestBody = requestBodyGetter(event)
   let queryStringObj = event.queryStringParameters
   let validationResult = validator(queryStringObj, requestBody)
@@ -78,56 +134,7 @@ function handleJsonGeneric (event, callback, db,
     jsonResponseHelpers.internalServerError(callback)
   }
   try {
-    responder(requestBody, db, queryStringObj, extrasProvider).then(responseBody => {
-      jsonResponseHelpers.ok(callback, responseBody, event)
-    }).catch(errorHandler)
-  } catch (error) {
-    errorHandler(error)
-  }
-}
-
-function handleCsvPost (event, callback, db,
-    validator/* (queryStringParameters, requestBody):{isValid:boolean, message:string} */,
-    responder/* (requestBody, databaseHelper, queryStringParameters):Promise<{}> */,
-    extrasProvider) {
-  let requestBody = JSON.parse(event.body)
-  let queryStringObj = event.queryStringParameters
-  let validationResult = validator(queryStringObj, requestBody)
-  if (!validationResult.isValid) {
-    jsonResponseHelpers.badRequest(callback, validationResult.message)
-    return
-  }
-  let errorHandler = error => {
-    console.error('Failed to execute POST handler', error)
-    jsonResponseHelpers.internalServerError(callback)
-  }
-  try {
-    responder(requestBody, db, queryStringObj, extrasProvider).then(responseWrapper => {
-      csvResponseHelpers.ok(callback, responseWrapper.body, responseWrapper.downloadFileName, event, responseWrapper.jsonResponse)
-    }).catch(errorHandler)
-  } catch (error) {
-    errorHandler(error)
-  }
-}
-
-function handleCsvGet (event, callback, db,
-    validator/* (queryStringParameters):{isValid:boolean, message:string} */,
-    responder/* (databaseHelper, queryStringParameters):Promise<{}> */,
-    extrasProvider) {
-  let queryStringObj = event.queryStringParameters
-  let validationResult = validator(queryStringObj)
-  if (!validationResult.isValid) {
-    jsonResponseHelpers.badRequest(callback, validationResult.message)
-    return
-  }
-  let errorHandler = error => {
-    console.error('Failed to execute GET handler', error)
-    jsonResponseHelpers.internalServerError(callback)
-  }
-  try {
-    responder(db, queryStringObj, extrasProvider).then(responseWrapper => {
-      csvResponseHelpers.ok(callback, responseWrapper.body, responseWrapper.downloadFileName, event, responseWrapper.jsonResponse)
-    }).catch(errorHandler)
+    responseCaller(event, callback, requestBody, db, queryStringObj, extrasProvider)
   } catch (error) {
     errorHandler(error)
   }
