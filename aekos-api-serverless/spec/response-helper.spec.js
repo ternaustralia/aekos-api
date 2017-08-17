@@ -13,6 +13,12 @@ describe('response-helper', function () {
     'Access-Control-Expose-Headers': 'link',
     'Content-Type': "'application/json'"
   }
+  const csvAndCorsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Credentials': true,
+    'Access-Control-Expose-Headers': 'link',
+    'Content-Type': "'text/csv'"
+  }
   describe('json', function () {
     describe('.ok()', function () {
       it('should send the supplied body to the callback', function () {
@@ -639,6 +645,60 @@ describe('response-helper', function () {
         expect(result.statusCode).toBe(200)
         expect(result.headers).toEqual(jsonAndCorsHeaders)
         expect(result.body).toBe(JSON.stringify({ someField: 123 }))
+      })
+    })
+  })
+
+  describe('.handleCsvPost()', () => {
+    describe('', () => {
+      let result = null
+      beforeEach(done => {
+        let callback = (_, theResult) => {
+          result = theResult
+          done()
+        }
+        let responder = (requestBody, db) => {
+          return new Promise((resolve, reject) => {
+            resolve({
+              body: 'some,csv,data',
+              downloadFileName: null
+            })
+          })
+        }
+        objectUnderTest.handleCsvGet({}, callback, null, alwaysValidValidator, responder)
+      })
+
+      it('should return the response body when all is successful', () => {
+        expect(result.statusCode).toBe(200)
+        expect(result.headers).toEqual(csvAndCorsHeaders)
+        expect(result.body).toBe('some,csv,data')
+      })
+    })
+  })
+
+  describe('.handleCsvGet()', () => {
+    describe('', () => {
+      let result = null
+      beforeEach(done => {
+        let callback = (_, theResult) => {
+          result = theResult
+          done()
+        }
+        let responder = (db) => {
+          return new Promise((resolve, reject) => {
+            resolve({
+              body: 'some,csv,data',
+              downloadFileName: null
+            })
+          })
+        }
+        objectUnderTest.handleCsvGet({}, callback, null, alwaysValidValidator, responder)
+      })
+
+      it('should return the response body when all is successful', () => {
+        expect(result.statusCode).toBe(200)
+        expect(result.headers).toEqual(csvAndCorsHeaders)
+        expect(result.body).toBe('some,csv,data')
       })
     })
   })
