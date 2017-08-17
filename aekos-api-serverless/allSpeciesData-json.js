@@ -25,8 +25,10 @@ function doHandle (event, callback, db, elapsedTimeCalculator) {
   })
 }
 
-module.exports.responder = responder
-function responder (db, queryStringParameters, extrasProvider) {
+module.exports.responder = (db, queryStringParameters, extrasProvider) => {
+  return responder(null, db, queryStringParameters, extrasProvider)
+}
+function responder (_, db, queryStringParameters, extrasProvider) {
   let processStart = r.now()
   let params = extractParams(queryStringParameters)
   return doAllSpeciesQuery(extrasProvider.event, params, processStart, db, extrasProvider.elapsedTimeCalculator)

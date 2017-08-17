@@ -46,7 +46,27 @@ function handleJsonPost (event, callback, db,
       "haven't defined the test input or wired things up correctly. Or maybe AWS has changed the event object")
     return
   }
-  let requestBody = JSON.parse(event.body)
+  let requestBodyGetter = event => {
+    return JSON.parse(event.body)
+  }
+  handleJsonGeneric(event, callback, db, validator, responder, extrasProvider, requestBodyGetter)
+}
+
+function handleJsonGet (event, callback, db,
+    validator/* (queryStringParameters):{isValid:boolean, message:string} */,
+    responder/* (_, databaseHelper, queryStringParameters):Promise<{}> */,
+    extrasProvider) {
+  let requestBodyGetter = event => {
+    return 'not used'
+  }
+  handleJsonGeneric(event, callback, db, validator, responder, extrasProvider, requestBodyGetter)
+}
+
+function handleJsonGeneric (event, callback, db,
+    validator/* (queryStringParameters, requestBody):{isValid:boolean, message:string} */,
+    responder/* (requestBody, databaseHelper, queryStringParameters):Promise<{}> */,
+    extrasProvider, requestBodyGetter/* (event) */) {
+  let requestBody = requestBodyGetter(event)
   let queryStringObj = event.queryStringParameters
   let validationResult = validator(queryStringObj, requestBody)
   if (!validationResult.isValid) {
@@ -54,7 +74,7 @@ function handleJsonPost (event, callback, db,
     return
   }
   let errorHandler = error => {
-    console.error('Failed to execute POST handler', error)
+    console.error('Failed to execute handler', error)
     jsonResponseHelpers.internalServerError(callback)
   }
   try {
@@ -84,29 +104,6 @@ function handleCsvPost (event, callback, db,
   try {
     responder(requestBody, db, queryStringObj, extrasProvider).then(responseWrapper => {
       csvResponseHelpers.ok(callback, responseWrapper.body, responseWrapper.downloadFileName, event, responseWrapper.jsonResponse)
-    }).catch(errorHandler)
-  } catch (error) {
-    errorHandler(error)
-  }
-}
-
-function handleJsonGet (event, callback, db,
-    validator/* (queryStringParameters):{isValid:boolean, message:string} */,
-    responder/* (databaseHelper, queryStringParameters):Promise<{}> */,
-    extrasProvider) {
-  let queryStringObj = event.queryStringParameters
-  let validationResult = validator(queryStringObj)
-  if (!validationResult.isValid) {
-    jsonResponseHelpers.badRequest(callback, validationResult.message)
-    return
-  }
-  let errorHandler = error => {
-    console.error('Failed to execute GET handler', error)
-    jsonResponseHelpers.internalServerError(callback)
-  }
-  try {
-    responder(db, queryStringObj, extrasProvider).then(responseBody => {
-      jsonResponseHelpers.ok(callback, responseBody, event)
     }).catch(errorHandler)
   } catch (error) {
     errorHandler(error)

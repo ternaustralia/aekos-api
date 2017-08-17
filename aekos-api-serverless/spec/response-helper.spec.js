@@ -5,6 +5,14 @@ let StubDB = require('./StubDB')
 
 describe('response-helper', function () {
   let objectUnderTest = require('../response-helper')
+
+  const alwaysValidValidator = () => { return { isValid: true } }
+  const jsonAndCorsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Credentials': true,
+    'Access-Control-Expose-Headers': 'link',
+    'Content-Type': "'application/json'"
+  }
   describe('json', function () {
     describe('.ok()', function () {
       it('should send the supplied body to the callback', function () {
@@ -419,14 +427,6 @@ describe('response-helper', function () {
   })
 
   describe('.handleJsonPost()', () => {
-    const alwaysValidValidator = () => { return { isValid: true } }
-    const jsonAndCorsHeaders = {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Credentials': true,
-      'Access-Control-Expose-Headers': 'link',
-      'Content-Type': "'application/json'"
-    }
-
     describe('', () => {
       let result = null
       beforeEach(done => {
@@ -609,6 +609,30 @@ describe('response-helper', function () {
           })
         }
         objectUnderTest.handleJsonPost({ body: '{}' }, callback, null, alwaysValidValidator, responder)
+      })
+
+      it('should return the response body when all is successful', () => {
+        expect(result.statusCode).toBe(200)
+        expect(result.headers).toEqual(jsonAndCorsHeaders)
+        expect(result.body).toBe(JSON.stringify({ someField: 123 }))
+      })
+    })
+  })
+
+  describe('.handleJsonGet()', () => {
+    describe('', () => {
+      let result = null
+      beforeEach(done => {
+        let callback = (_, theResult) => {
+          result = theResult
+          done()
+        }
+        let responder = (requestBody, db) => {
+          return new Promise((resolve, reject) => {
+            resolve({ someField: 123 })
+          })
+        }
+        objectUnderTest.handleJsonGet({}, callback, null, alwaysValidValidator, responder)
       })
 
       it('should return the response body when all is successful', () => {
