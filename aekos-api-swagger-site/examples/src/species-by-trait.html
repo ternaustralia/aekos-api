@@ -38,7 +38,18 @@
         <button class="btn btn-default" ng-click="findSpecies()">Find species with selected trait(s)</button>
       </div>
       <div class="text-center paging-buttons">
-        <button class="btn btn-default btn-sm" ng-click="speciesNextPage()">Next page &gt;</button>
+        <button class="btn btn-default btn-sm" ng-click="speciesSearchChangePage(speciesSearchFirstPageUrl)" ng-disabled="!speciesSearchFirstPageUrl">
+          &lt;&lt; First page
+        </button>
+        <button class="btn btn-default btn-sm" ng-click="speciesSearchChangePage(speciesSearchPrevPageUrl)" ng-disabled="!speciesSearchPrevPageUrl">
+          &lt; Previous page
+        </button>
+        <button class="btn btn-default btn-sm" ng-click="speciesSearchChangePage(speciesSearchNextPageUrl)" ng-disabled="!speciesSearchNextPageUrl">
+          Next page &gt;
+        </button>
+        <button class="btn btn-default btn-sm" ng-click="speciesSearchChangePage(speciesSearchLastPageUrl)" ng-disabled="!speciesSearchLastPageUrl">
+          Last page &gt;&gt;
+        </button>
       </div>
       <h3>Step 2.2: Select species</h3>
       <p>Once loaded, select the species that you want to retrieve data for.</p>
