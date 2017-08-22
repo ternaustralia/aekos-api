@@ -418,6 +418,8 @@ functions:
                 statusCode: '200'
                 responseModels:
                   "application/json": V1TraitBySpeciesResponse
+                responseHeaders:
+                  - ${self:custom.commonModelSchemaFragments.LinkHeader}
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
       - http:
@@ -443,6 +445,8 @@ functions:
                 statusCode: '200'
                 responseModels:
                   "application/json": V2TraitBySpeciesResponse
+                responseHeaders:
+                  - ${self:custom.commonModelSchemaFragments.LinkHeader}
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   speciesByTrait-json:

@@ -9,22 +9,43 @@ const defaultPageNum = yaml.load('./constants.yml').defaults.PAGE_NUM
 
 module.exports.handler = (event, context, callback) => {
   let db = require('./db-helper')
-  r.handleJsonPost(event, callback, db, validator, responder)
+  doHandle(event, callback, db)
+}
+
+function doHandle (event, callback, db) {
+  r.handleJsonPost(event, callback, db, validator, responder, {
+    event: event
+  })
 }
 
 const validator = r.speciesNamesValidator
 
 function responder (requestBody, db, queryStringObj) {
   let speciesNames = requestBody[speciesNamesParam]
-  let escapedSpeciesName = db.toSqlList(speciesNames)
+  let escapedSpeciesNames = db.toSqlList(speciesNames)
   let pageSize = r.getOptionalNumberParam(envByS._testonly.wrapAsEvent(queryStringObj), 'pageSize', defaultPageSize)
   let pageNum = r.getOptionalNumberParam(envByS._testonly.wrapAsEvent(queryStringObj), 'pageNum', defaultPageNum)
-  let sql = getSql(escapedSpeciesName, pageNum, pageSize)
-  return db.execSelectPromise(sql).then(queryResult => {
+  let recordsSql = getRecordsSql(escapedSpeciesNames, pageNum, pageSize)
+  let countSql = getCountSql(escapedSpeciesNames)
+  let recordsPromise = db.execSelectPromise(recordsSql)
+  let countPromise = db.execSelectPromise(countSql)
+  return Promise.all([recordsPromise, countPromise]).then(values => {
+    let queryResult = values[0]
+    let count = values[1]
+    if (count.length !== 1) {
+      throw new Error(`SQL result problem: result from count query did not have exactly one row. Result='${JSON.stringify(count)}'`)
+    }
+    let totalRecordsCount = count[0].totalRecords
     return new Promise((resolve, reject) => {
       try {
         let mappedResults = v1TraitVocab.mapQueryResult(queryResult)
-        resolve(mappedResults)
+        resolve({
+          body: mappedResults,
+          linkHeaderData: {
+            pageNumber: pageNum,
+            totalPages: Math.ceil(totalRecordsCount / pageSize)
+          }
+        })
       } catch (error) {
         reject(error)
       }
@@ -33,12 +54,13 @@ function responder (requestBody, db, queryStringObj) {
 }
 
 module.exports._testonly = {
-  getSql: getSql,
-  responder: responder,
+  getRecordsSql: getRecordsSql,
+  getCountSql: getCountSql,
+  doHandle: doHandle,
   validator: validator
 }
 
-function getSql (escapedSpeciesNames, pageNum, pageSize) {
+function getRecordsSql (escapedSpeciesNames, pageNum, pageSize) {
   let offset = r.calculateOffset(pageNum, pageSize)
   return `
     SELECT t.traitName AS code, count(*) AS recordsHeld
@@ -52,4 +74,16 @@ function getSql (escapedSpeciesNames, pageNum, pageSize) {
     GROUP BY 1
     ORDER BY 1
     LIMIT ${pageSize} OFFSET ${offset};`
+}
+
+function getCountSql (escapedSpeciesNames) {
+  return `
+    SELECT count(DISTINCT t.traitName) AS totalRecords
+    FROM species AS s
+    INNER JOIN traits AS t
+    ON t.parentId = s.id
+    AND (
+      s.scientificName IN (${escapedSpeciesNames})
+      OR s.taxonRemarks IN (${escapedSpeciesNames})
+    );`
 }
