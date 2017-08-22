@@ -36,8 +36,37 @@ function responder (requestBody, db, queryStringObj) {
   let escapedSpeciesNames = db.toSqlList(speciesNames)
   let pageSize = r.getOptionalNumberParam(wrapAsEvent(queryStringObj), pageSizeParam, defaultPageSize)
   let pageNum = r.getOptionalNumberParam(wrapAsEvent(queryStringObj), pageNumParam, defaultPageNum)
+  const recordsSql = getRecordsSql(escapedSpeciesNames, pageSize, pageNum)
+  const countSql = getCountSql(escapedSpeciesNames)
+  let recordsPromise = db.execSelectPromise(recordsSql)
+  let countPromise = db.execSelectPromise(countSql)
+  return Promise.all([recordsPromise, countPromise]).then(values => {
+    let queryResult = values[0]
+    let count = values[1]
+    if (count.length !== 1) {
+      throw new Error(`SQL result problem: result from count query did not have exactly one row. Result='${JSON.stringify(count)}'`)
+    }
+    let totalRecordsCount = count[0].totalRecords
+    return new Promise((resolve, reject) => {
+      try {
+        let mappedResults = getEnvVarVocab.mapQueryResult(queryResult)
+        resolve({
+          body: mappedResults,
+          linkHeaderData: {
+            pageNumber: pageNum,
+            totalPages: Math.ceil(totalRecordsCount / pageSize)
+          }
+        })
+      } catch (error) {
+        reject(error)
+      }
+    })
+  })
+}
+
+function getRecordsSql (escapedSpeciesNames, pageSize, pageNum) {
   let offset = r.calculateOffset(pageNum, pageSize)
-  const sql = `
+  return `
     SELECT v.varName AS code, count(*) AS recordsHeld
     FROM species AS s
     INNER JOIN env AS e
@@ -53,19 +82,22 @@ function responder (requestBody, db, queryStringObj) {
     GROUP BY 1
     ORDER BY 1
     LIMIT ${pageSize} OFFSET ${offset};`
-  return db.execSelectPromise(sql).then(queryResult => {
-    return new Promise((resolve, reject) => {
-      try {
-        let mappedResults = getEnvVarVocab.mapQueryResult(queryResult)
-        resolve({
-          body: mappedResults
-          // TODO add linkHeaderData
-        })
-      } catch (error) {
-        reject(error)
-      }
-    })
-  })
+}
+
+function getCountSql (escapedSpeciesNames) {
+  return `
+    SELECT count(DISTINCT v.varName) AS totalRecords
+    FROM species AS s
+    INNER JOIN env AS e
+    ON s.locationID = e.locationID
+    AND s.eventDate = e.eventDate
+    AND (
+      s.scientificName IN (${escapedSpeciesNames})
+      OR s.taxonRemarks IN (${escapedSpeciesNames})
+    )
+    INNER JOIN envvars AS v
+    ON v.locationID = e.locationID
+    AND v.eventDate = e.eventDate;`
 }
 
 function wrapAsEvent (queryStringObj) {

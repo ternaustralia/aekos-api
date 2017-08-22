@@ -24,7 +24,8 @@ describe('/v2/getEnvironmentBySpecies-json', function () {
     let stubDb = new StubDB()
     beforeEach(done => {
       stubDb.setExecSelectPromiseResponses([
-        [{ code: 'clay', recordsHeld: 123 }]
+        [{ code: 'clay', recordsHeld: 123 }],
+        [{ totalRecords: 19 }]
       ])
       spyOn(stubDb, 'execSelectPromise').and.callThrough()
       let event = {
@@ -32,6 +33,10 @@ describe('/v2/getEnvironmentBySpecies-json', function () {
         body: JSON.stringify({ speciesNames: ['species one'] }),
         requestContext: {
           path: '/v2/getEnvironmentBySpecies.json'
+        },
+        headers: {
+          Host: 'api.aekos.org.au',
+          'X-Forwarded-Proto': 'https'
         }
       }
       let callback = (_, theResult) => {
@@ -47,7 +52,8 @@ describe('/v2/getEnvironmentBySpecies-json', function () {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
         'Access-Control-Expose-Headers': 'link',
-        'Content-Type': "'application/json'"
+        'Content-Type': "'application/json'",
+        'link': ''
       })
       expect(JSON.parse(result.body)).toEqual([
         { code: 'clay', recordsHeld: 123, label: 'Clay Content' }
@@ -77,7 +83,8 @@ describe('/v2/getEnvironmentBySpecies-json', function () {
     let stubDb = new StubDB()
     beforeEach(done => {
       stubDb.setExecSelectPromiseResponses([
-        [{ code: 'clay', recordsHeld: 123 }]
+        [{ code: 'clay', recordsHeld: 123 }],
+        [{ totalRecords: 99 }]
       ])
       spyOn(stubDb, 'execSelectPromise').and.callThrough()
       let event = {
@@ -88,6 +95,10 @@ describe('/v2/getEnvironmentBySpecies-json', function () {
         body: JSON.stringify({ speciesNames: ['species one', 'species two'] }),
         requestContext: {
           path: '/v2/getEnvironmentBySpecies.json'
+        },
+        headers: {
+          Host: 'api.aekos.org.au',
+          'X-Forwarded-Proto': 'https'
         }
       }
       let callback = (_, theResult) => {
@@ -103,7 +114,11 @@ describe('/v2/getEnvironmentBySpecies-json', function () {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
         'Access-Control-Expose-Headers': 'link',
-        'Content-Type': "'application/json'"
+        'Content-Type': "'application/json'",
+        'link': '<https://api.aekos.org.au/v2/getEnvironmentBySpecies.json?pageNum=3&pageSize=30>; rel="next", ' +
+                '<https://api.aekos.org.au/v2/getEnvironmentBySpecies.json?pageNum=1&pageSize=30>; rel="prev", ' +
+                '<https://api.aekos.org.au/v2/getEnvironmentBySpecies.json?pageNum=1&pageSize=30>; rel="first", ' +
+                '<https://api.aekos.org.au/v2/getEnvironmentBySpecies.json?pageNum=4&pageSize=30>; rel="last"'
       })
       expect(JSON.parse(result.body)).toEqual([
         { code: 'clay', recordsHeld: 123, label: 'Clay Content' }
