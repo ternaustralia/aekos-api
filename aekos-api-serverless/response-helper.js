@@ -364,17 +364,57 @@ function buildHateoasLinkHeader (event, linkHeaderData) {
     return '<' + uri + '>; rel="' + rel + '"'
   }
 
-  function queryStringWithStart (newStart) {
-    let params = event.queryStringParameters || {}
-    params.start = newStart
-    return querystring.stringify(params)
+  let strategyHasStart = {
+    offsetForNext: linkHeaderData => {
+      return linkHeaderData.start + linkHeaderData.rows
+    },
+    offsetForPrev: linkHeaderData => {
+      return linkHeaderData.start - linkHeaderData.rows
+    },
+    offsetForFirst: () => {
+      return 0
+    },
+    offsetForLast: linkHeaderData => {
+      return (linkHeaderData.totalPages - 1) * linkHeaderData.rows
+    },
+    queryStringWithOffset: offset => {
+      let params = event.queryStringParameters || {}
+      params.start = offset
+      return querystring.stringify(params)
+    }
+  }
+  let strategyHasNoStart = {
+    offsetForNext: linkHeaderData => {
+      return linkHeaderData.pageNumber + 1
+    },
+    offsetForPrev: linkHeaderData => {
+      return linkHeaderData.pageNumber - 1
+    },
+    offsetForFirst: () => {
+      return 1
+    },
+    offsetForLast: linkHeaderData => {
+      return linkHeaderData.totalPages
+    },
+    queryStringWithOffset: offset => {
+      let params = event.queryStringParameters || {}
+      params.pageNum = offset
+      return querystring.stringify(params)
+    }
+  }
+  let key = typeof linkHeaderData.start
+  let strategyMapping = {
+    'number': strategyHasStart,
+    'undefined': strategyHasNoStart
+  }
+  let strategy = strategyMapping[key]
+  if (typeof strategy === 'undefined') {
+    throw new Error(`Programmer problem: no strategy found for key='${key}'`)
   }
   if (typeof event === 'undefined') {
     throw new Error('Programmer problem: event was not supplied')
   }
   // FIXME should handle if expected values aren't available
-  let start = linkHeaderData.start
-  let rows = linkHeaderData.rows
   let pageNumber = linkHeaderData.pageNumber
   let totalPages = linkHeaderData.totalPages
   let scheme = event.headers['X-Forwarded-Proto']
@@ -384,30 +424,31 @@ function buildHateoasLinkHeader (event, linkHeaderData) {
   let result = ''
   let hasNextPage = pageNumber < totalPages
   if (hasNextPage) {
-    let startForNextPage = start + rows
-    let qs = queryStringWithStart(startForNextPage)
+    let offsetForNextPage = strategy.offsetForNext(linkHeaderData)
+    let qs = strategy.queryStringWithOffset(offsetForNextPage)
     let uriForNextPage = `${fromPath}?${qs}`
     result += createLinkHeader(uriForNextPage, 'next')
   }
   let hasPrevPage = pageNumber > 1
   if (hasPrevPage) {
-    let startForPrevPage = start - rows
-    let qs = queryStringWithStart(startForPrevPage)
+    let offsetForPrevPage = strategy.offsetForPrev(linkHeaderData)
+    let qs = strategy.queryStringWithOffset(offsetForPrevPage)
     let uriForPrevPage = `${fromPath}?${qs}`
     result = appendCommaIfNecessary(result)
     result += createLinkHeader(uriForPrevPage, 'prev')
   }
   let hasFirstPage = pageNumber > 1
   if (hasFirstPage) {
-    let qs = queryStringWithStart(0)
+    let offsetForFirstPage = strategy.offsetForFirst()
+    let qs = strategy.queryStringWithOffset(offsetForFirstPage)
     let uriForFirstPage = `${fromPath}?${qs}`
     result = appendCommaIfNecessary(result)
     result += createLinkHeader(uriForFirstPage, 'first')
   }
   let hasLastPage = pageNumber < totalPages
   if (hasLastPage) {
-    let startForLastPage = (totalPages - 1) * rows
-    let qs = queryStringWithStart(startForLastPage)
+    let offsetForLastPage = strategy.offsetForLast(linkHeaderData)
+    let qs = strategy.queryStringWithOffset(offsetForLastPage)
     let uriForLastPage = `${fromPath}?${qs}`
     result = appendCommaIfNecessary(result)
     result += createLinkHeader(uriForLastPage, 'last')

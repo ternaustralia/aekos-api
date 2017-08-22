@@ -224,137 +224,257 @@ describe('response-helper', function () {
       Host: 'api.aekos.org.au',
       'X-Forwarded-Proto': 'https'
     }
-    it('should determine that no header is required for the first page of a single-page response', function () {
-      let event = {
-        headers: reqHeaders,
-        queryStringParameters: {
-          rows: '20',
-          download: 'false',
-          start: '0'
-        },
-        requestContext: {
-          path: '/v1/speciesData.csv'
+    describe('for linkHeaderData with "start"', () => {
+      it('should determine that no header is required for the first page of a single-page response', function () {
+        let event = {
+          headers: reqHeaders,
+          queryStringParameters: {
+            rows: '20',
+            download: 'false',
+            start: '0'
+          },
+          requestContext: {
+            path: '/v2/someResource'
+          }
         }
-      }
-      let linkHeaderData = {
-        pageNumber: 1,
-        totalPages: 1,
-        rows: 20,
-        start: 0
-      }
-      let result = objectUnderTest.buildHateoasLinkHeader(event, linkHeaderData)
-      expect(result).toBe('')
+        let linkHeaderData = {
+          pageNumber: 1,
+          totalPages: 1,
+          rows: 20,
+          start: 0
+        }
+        let result = objectUnderTest.buildHateoasLinkHeader(event, linkHeaderData)
+        expect(result).toBe('')
+      })
+
+      it('should build the HATEOAS header for the first page of a multi-page response', function () {
+        let event = {
+          headers: reqHeaders,
+          queryStringParameters: {
+            rows: '20',
+            download: 'false',
+            start: '0'
+          },
+          requestContext: {
+            path: '/v2/someResource'
+          }
+        }
+        let linkHeaderData = {
+          pageNumber: 1,
+          totalPages: 10,
+          rows: 20,
+          start: 0
+        }
+        let result = objectUnderTest.buildHateoasLinkHeader(event, linkHeaderData)
+        expect(result).toBe(
+          '<https://api.aekos.org.au/v2/someResource?rows=20&download=false&start=20>; rel="next", ' +
+          '<https://api.aekos.org.au/v2/someResource?rows=20&download=false&start=180>; rel="last"')
+      })
+
+      it('should build the HATEOAS header for the middle page of a multi-page (>2) response', function () {
+        let event = {
+          headers: reqHeaders,
+          queryStringParameters: {
+            rows: '20',
+            download: 'false',
+            start: '20'
+          },
+          requestContext: {
+            path: '/v2/someResource'
+          }
+        }
+        let linkHeaderData = {
+          pageNumber: 2,
+          totalPages: 10,
+          rows: 20,
+          start: 20
+        }
+        let result = objectUnderTest.buildHateoasLinkHeader(event, linkHeaderData)
+        expect(result).toBe(
+          '<https://api.aekos.org.au/v2/someResource?rows=20&download=false&start=40>; rel="next", ' +
+          '<https://api.aekos.org.au/v2/someResource?rows=20&download=false&start=0>; rel="prev", ' +
+          '<https://api.aekos.org.au/v2/someResource?rows=20&download=false&start=0>; rel="first", ' +
+          '<https://api.aekos.org.au/v2/someResource?rows=20&download=false&start=180>; rel="last"')
+      })
+
+      it('should build the HATEOAS header for the last page of a response', function () {
+        let event = {
+          headers: reqHeaders,
+          queryStringParameters: {
+            rows: '20',
+            download: 'false',
+            start: '40'
+          },
+          requestContext: {
+            path: '/v2/someResource'
+          }
+        }
+        let linkHeaderData = {
+          pageNumber: 3,
+          totalPages: 3,
+          rows: 20,
+          start: 40
+        }
+        let result = objectUnderTest.buildHateoasLinkHeader(event, linkHeaderData)
+        expect(result).toBe(
+          '<https://api.aekos.org.au/v2/someResource?rows=20&download=false&start=20>; rel="prev", ' +
+          '<https://api.aekos.org.au/v2/someResource?rows=20&download=false&start=0>; rel="first"')
+      })
+
+      it('should build the HATEOAS header when no parameters were passed', function () {
+        let event = {
+          headers: reqHeaders,
+          queryStringParameters: null, // no parameters
+          requestContext: {
+            path: '/v2/someResource'
+          }
+        }
+        let linkHeaderData = {
+          pageNumber: 1,
+          totalPages: 3,
+          rows: 20,
+          start: 0
+        }
+        let result = objectUnderTest.buildHateoasLinkHeader(event, linkHeaderData)
+        expect(result).toBe(
+          '<https://api.aekos.org.au/v2/someResource?start=20>; rel="next", ' +
+          '<https://api.aekos.org.au/v2/someResource?start=40>; rel="last"')
+      })
+
+      it('should give an informative error when the event was not supplied', function () {
+        let event // undefined!
+        let linkHeaderData = {
+          pageNumber: 1,
+          totalPages: 1,
+          rows: 20,
+          start: 0
+        }
+        try {
+          objectUnderTest.buildHateoasLinkHeader(event, linkHeaderData)
+          fail()
+        } catch (error) {
+          expect(error.message).toBe('Programmer problem: event was not supplied')
+          // success
+        }
+      })
     })
 
-    it('should build the HATEOAS header for the first page of a multi-page response', function () {
-      let event = {
-        headers: reqHeaders,
-        queryStringParameters: {
-          rows: '20',
-          download: 'false',
-          start: '0'
-        },
-        requestContext: {
-          path: '/v1/speciesData.csv'
+    describe('for linkHeaderData without "start"', () => {
+      it('should determine that no header is required for the first page of a single-page response', function () {
+        let event = {
+          headers: reqHeaders,
+          queryStringParameters: {
+            pageNum: '1',
+            pageSize: '10'
+          },
+          requestContext: {
+            path: '/v2/someResource'
+          }
         }
-      }
-      let linkHeaderData = {
-        pageNumber: 1,
-        totalPages: 10,
-        rows: 20,
-        start: 0
-      }
-      let result = objectUnderTest.buildHateoasLinkHeader(event, linkHeaderData)
-      expect(result).toBe(
-        '<https://api.aekos.org.au/v1/speciesData.csv?rows=20&download=false&start=20>; rel="next", ' +
-        '<https://api.aekos.org.au/v1/speciesData.csv?rows=20&download=false&start=180>; rel="last"')
-    })
-
-    it('should build the HATEOAS header for the middle page of a multi-page (>2) response', function () {
-      let event = {
-        headers: reqHeaders,
-        queryStringParameters: {
-          rows: '20',
-          download: 'false',
-          start: '0'
-        },
-        requestContext: {
-          path: '/v1/speciesData.csv'
+        let linkHeaderData = {
+          pageNumber: 1,
+          totalPages: 1
         }
-      }
-      let linkHeaderData = {
-        pageNumber: 2,
-        totalPages: 10,
-        rows: 20,
-        start: 20
-      }
-      let result = objectUnderTest.buildHateoasLinkHeader(event, linkHeaderData)
-      expect(result).toBe(
-        '<https://api.aekos.org.au/v1/speciesData.csv?rows=20&download=false&start=40>; rel="next", ' +
-        '<https://api.aekos.org.au/v1/speciesData.csv?rows=20&download=false&start=0>; rel="prev", ' +
-        '<https://api.aekos.org.au/v1/speciesData.csv?rows=20&download=false&start=0>; rel="first", ' +
-        '<https://api.aekos.org.au/v1/speciesData.csv?rows=20&download=false&start=180>; rel="last"')
-    })
+        let result = objectUnderTest.buildHateoasLinkHeader(event, linkHeaderData)
+        expect(result).toBe('')
+      })
 
-    it('should build the HATEOAS header for the last page of a response', function () {
-      let event = {
-        headers: reqHeaders,
-        queryStringParameters: {
-          rows: '20',
-          download: 'false',
-          start: '0'
-        },
-        requestContext: {
-          path: '/v1/speciesData.csv'
+      it('should build the HATEOAS header for the first page of a multi-page response', function () {
+        let event = {
+          headers: reqHeaders,
+          queryStringParameters: {
+            pageNum: '1',
+            pageSize: '10'
+          },
+          requestContext: {
+            path: '/v2/someResource'
+          }
         }
-      }
-      let linkHeaderData = {
-        pageNumber: 3,
-        totalPages: 3,
-        rows: 20,
-        start: 40
-      }
-      let result = objectUnderTest.buildHateoasLinkHeader(event, linkHeaderData)
-      expect(result).toBe(
-        '<https://api.aekos.org.au/v1/speciesData.csv?rows=20&download=false&start=20>; rel="prev", ' +
-        '<https://api.aekos.org.au/v1/speciesData.csv?rows=20&download=false&start=0>; rel="first"')
-    })
-
-    it('should build the HATEOAS header when no parameters were passed', function () {
-      let event = {
-        headers: reqHeaders,
-        queryStringParameters: null,
-        requestContext: {
-          path: '/v1/speciesData.csv'
+        let linkHeaderData = {
+          pageNumber: 1,
+          totalPages: 10
         }
-      }
-      let linkHeaderData = {
-        pageNumber: 1,
-        totalPages: 3,
-        rows: 20,
-        start: 0
-      }
-      let result = objectUnderTest.buildHateoasLinkHeader(event, linkHeaderData)
-      expect(result).toBe(
-        '<https://api.aekos.org.au/v1/speciesData.csv?start=20>; rel="next", ' +
-        '<https://api.aekos.org.au/v1/speciesData.csv?start=40>; rel="last"')
-    })
+        let result = objectUnderTest.buildHateoasLinkHeader(event, linkHeaderData)
+        expect(result).toBe(
+          '<https://api.aekos.org.au/v2/someResource?pageNum=2&pageSize=10>; rel="next", ' +
+          '<https://api.aekos.org.au/v2/someResource?pageNum=10&pageSize=10>; rel="last"')
+      })
 
-    it('should give an informative error when the event was not supplied', function () {
-      let event // undefined!
-      let linkHeaderData = {
-        pageNumber: 1,
-        totalPages: 1,
-        rows: 20,
-        start: 0
-      }
-      try {
-        objectUnderTest.buildHateoasLinkHeader(event, linkHeaderData)
-        fail()
-      } catch (error) {
-        expect(error.message).toBe('Programmer problem: event was not supplied')
-        // success
-      }
+      it('should build the HATEOAS header for the middle page of a multi-page (>2) response', function () {
+        let event = {
+          headers: reqHeaders,
+          queryStringParameters: {
+            pageNum: '2',
+            pageSize: '10'
+          },
+          requestContext: {
+            path: '/v2/someResource'
+          }
+        }
+        let linkHeaderData = {
+          pageNumber: 2,
+          totalPages: 10
+        }
+        let result = objectUnderTest.buildHateoasLinkHeader(event, linkHeaderData)
+        expect(result).toBe(
+          '<https://api.aekos.org.au/v2/someResource?pageNum=3&pageSize=10>; rel="next", ' +
+          '<https://api.aekos.org.au/v2/someResource?pageNum=1&pageSize=10>; rel="prev", ' +
+          '<https://api.aekos.org.au/v2/someResource?pageNum=1&pageSize=10>; rel="first", ' +
+          '<https://api.aekos.org.au/v2/someResource?pageNum=10&pageSize=10>; rel="last"')
+      })
+
+      it('should build the HATEOAS header for the last page of a response', function () {
+        let event = {
+          headers: reqHeaders,
+          queryStringParameters: {
+            pageNum: '5'
+          },
+          requestContext: {
+            path: '/v2/someResource'
+          }
+        }
+        let linkHeaderData = {
+          pageNumber: 5,
+          totalPages: 5
+        }
+        let result = objectUnderTest.buildHateoasLinkHeader(event, linkHeaderData)
+        expect(result).toBe(
+          '<https://api.aekos.org.au/v2/someResource?pageNum=4>; rel="prev", ' +
+          '<https://api.aekos.org.au/v2/someResource?pageNum=1>; rel="first"')
+      })
+
+      it('should build the HATEOAS header when no parameters were passed', function () {
+        let event = {
+          headers: reqHeaders,
+          queryStringParameters: null, // no parameters
+          requestContext: {
+            path: '/v2/someResource'
+          }
+        }
+        let linkHeaderData = {
+          pageNumber: 1,
+          totalPages: 3
+        }
+        let result = objectUnderTest.buildHateoasLinkHeader(event, linkHeaderData)
+        expect(result).toBe(
+          '<https://api.aekos.org.au/v2/someResource?pageNum=2>; rel="next", ' +
+          '<https://api.aekos.org.au/v2/someResource?pageNum=3>; rel="last"')
+      })
+
+      it('should give an informative error when the event was not supplied', function () {
+        let event // undefined!
+        let linkHeaderData = {
+          pageNumber: 1,
+          totalPages: 1
+        }
+        try {
+          objectUnderTest.buildHateoasLinkHeader(event, linkHeaderData)
+          fail()
+        } catch (error) {
+          expect(error.message).toBe('Programmer problem: event was not supplied')
+          // success
+        }
+      })
     })
   })
 
