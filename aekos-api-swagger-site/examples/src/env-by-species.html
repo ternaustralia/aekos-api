@@ -47,7 +47,18 @@
         <button class="btn btn-default" ng-click="findSpecies()">Find species using autocomplete</button>
       </div>
       <div class="text-center paging-buttons">
-        <button class="btn btn-default btn-sm" ng-click="speciesNextPage()">Next page &gt;</button>
+        <button class="btn btn-default btn-sm" ng-click="speciesSearchChangePage(speciesSearchFirstPageUrl)" ng-disabled="!speciesSearchFirstPageUrl">
+          &lt;&lt; First page
+        </button>
+        <button class="btn btn-default btn-sm" ng-click="speciesSearchChangePage(speciesSearchPrevPageUrl)" ng-disabled="!speciesSearchPrevPageUrl">
+          &lt; Previous page
+        </button>
+        <button class="btn btn-default btn-sm" ng-click="speciesSearchChangePage(speciesSearchNextPageUrl)" ng-disabled="!speciesSearchNextPageUrl">
+          Next page &gt;
+        </button>
+        <button class="btn btn-default btn-sm" ng-click="speciesSearchChangePage(speciesSearchLastPageUrl)" ng-disabled="!speciesSearchLastPageUrl">
+          Last page &gt;&gt;
+        </button>
       </div>
       <p><span class="important-note">Important note about record counts:</span> the counts returned from this service are the
         number of <em>species</em> records that we hold, not site visit records.</p>

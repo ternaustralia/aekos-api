@@ -35,37 +35,28 @@ app.controller('EnvBySpeciesController', function ($http, $scope, baseUrlService
   }
 
   $scope.findSpecies = function () {
-    $scope.speciesPaging = {
-      start: 0,
-      rows: speciesRows
-    }
-    speciesSearchHelper()
-  }
-  $scope.speciesNextPage = function () {
-    var nextStart = $scope.speciesPaging.start + $scope.speciesPaging.rows
-    $scope.speciesPaging = {
-      start: nextStart,
-      rows: speciesRows
-    }
-    speciesSearchHelper()
+    speciesSearchHelper(baseUrlService.getBaseUrl() + '/v2/speciesAutocomplete.json?q=' + $scope.partialSpeciesName)
   }
 
-  function speciesSearchHelper () {
+  $scope.speciesSearchChangePage = function (url) {
+    speciesSearchHelper(url)
+  }
+
+  function speciesSearchHelper (url) {
     resetStep2()
     resetStep3()
     $scope.isLoadSpeciesClicked = true
     $scope.isLoadingSpecies = true
-    var partialSpeciesName = $scope.partialSpeciesName
-    var config = {
-      params: {
-        start: $scope.speciesPaging.start,
-        rows: $scope.speciesPaging.rows,
-        q: partialSpeciesName
-      }
-    }
-    $http.get(baseUrlService.getBaseUrl() + '/v2/speciesAutocomplete.json', config).then(function (response) {
+    $http.get(url).then(function (response) {
       $scope.isLoadingSpecies = false
       $scope.species = response.data
+      // uses wombleton/link-headers to pull apart the 'link' header so we don't hardcode paging URLs
+      var rawLinkHeader = response.headers('link')
+      var parsedLinkHeader = $.linkheaders(rawLinkHeader)
+      $scope.speciesSearchFirstPageUrl = commonHelpersService.getLink(parsedLinkHeader, 'first')
+      $scope.speciesSearchPrevPageUrl = commonHelpersService.getLink(parsedLinkHeader, 'prev')
+      $scope.speciesSearchNextPageUrl = commonHelpersService.getLink(parsedLinkHeader, 'next')
+      $scope.speciesSearchLastPageUrl = commonHelpersService.getLink(parsedLinkHeader, 'last')
     }, errorHandler)
   }
 
