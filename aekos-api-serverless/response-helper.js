@@ -478,18 +478,6 @@ function buildHateoasLinkHeader2 (event, linkHeaderData) {
   return result
 }
 
-function isHateoasable (response) {
-  if (typeof response !== 'object' || typeof response.responseHeader !== 'object') {
-    return false
-  }
-  let responseHeader = response.responseHeader
-  return typeof responseHeader.pageNumber === 'number' &&
-    responseHeader.params &&
-    typeof responseHeader.params.rows === 'number' &&
-    typeof responseHeader.params.start === 'number' &&
-    typeof responseHeader.totalPages === 'number'
-}
-
 const validatorIsValid = { isValid: true }
 const validatorNotValid = message => {
   return { isValid: false, message: message }
@@ -719,7 +707,6 @@ module.exports = {
   handleJsonGet: handleJsonGet,
   handleCsvGet: handleCsvGet,
   buildHateoasLinkHeader: buildHateoasLinkHeader,
-  isHateoasable: isHateoasable,
   speciesNamesValidator: speciesNamesValidator,
   traitNamesMandatoryValidator: traitNamesMandatoryValidator,
   traitNamesOptionalValidator: traitNamesOptionalValidator,
