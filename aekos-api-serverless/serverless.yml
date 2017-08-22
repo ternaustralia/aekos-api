@@ -836,6 +836,7 @@ functions:
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   traitData:
     handler: traitData.handler
+    timeout: 40
     events:
       - http:
           path: v2/traitData
