@@ -20,10 +20,15 @@ describe('/v2/getSpeciesByTrait-json', () => {
         body: JSON.stringify({traitNames: ['trait one']}),
         requestContext: {
           path: '/v2/getSpeciesByTrait.json'
+        },
+        headers: {
+          Host: 'api.aekos.org.au',
+          'X-Forwarded-Proto': 'https'
         }
       }
       stubDb.setExecSelectPromiseResponses([
-        [{ speciesName: 'species one', recordsHeld: 123 }]
+        [{ speciesName: 'species one', recordsHeld: 123 }],
+        [{ totalRecords: 11 }]
       ])
       spyOn(stubDb, 'execSelectPromise').and.callThrough()
       let callback = (_, theResult) => {
@@ -38,7 +43,8 @@ describe('/v2/getSpeciesByTrait-json', () => {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
         'Access-Control-Expose-Headers': 'link',
-        'Content-Type': "'application/json'"
+        'Content-Type': "'application/json'",
+        'link': ''
       })
       expect(JSON.parse(result.body)).toEqual([
         { speciesName: 'species one', recordsHeld: 123 }
@@ -60,16 +66,21 @@ describe('/v2/getSpeciesByTrait-json', () => {
     beforeEach(done => {
       let event = {
         queryStringParameters: {
-          pageSize: '50',
-          pageNum: '3'
+          pageNum: '3',
+          pageSize: '50'
         },
         body: JSON.stringify({traitNames: ['trait one', 'trait two']}),
         requestContext: {
           path: '/v2/getSpeciesByTrait.json'
+        },
+        headers: {
+          Host: 'api.aekos.org.au',
+          'X-Forwarded-Proto': 'https'
         }
       }
       stubDb.setExecSelectPromiseResponses([
-        [{ speciesName: 'species one', recordsHeld: 123 }]
+        [{ speciesName: 'species one', recordsHeld: 123 }],
+        [{ totalRecords: 202 }]
       ])
       spyOn(stubDb, 'execSelectPromise').and.callThrough()
       let callback = (_, theResult) => {
@@ -84,7 +95,11 @@ describe('/v2/getSpeciesByTrait-json', () => {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
         'Access-Control-Expose-Headers': 'link',
-        'Content-Type': "'application/json'"
+        'Content-Type': "'application/json'",
+        'link': '<https://api.aekos.org.au/v2/getSpeciesByTrait.json?pageNum=4&pageSize=50>; rel="next", ' +
+                '<https://api.aekos.org.au/v2/getSpeciesByTrait.json?pageNum=2&pageSize=50>; rel="prev", ' +
+                '<https://api.aekos.org.au/v2/getSpeciesByTrait.json?pageNum=1&pageSize=50>; rel="first", ' +
+                '<https://api.aekos.org.au/v2/getSpeciesByTrait.json?pageNum=5&pageSize=50>; rel="last"'
       })
       expect(JSON.parse(result.body)).toEqual([
         { speciesName: 'species one', recordsHeld: 123 }
@@ -93,7 +108,7 @@ describe('/v2/getSpeciesByTrait-json', () => {
     })
   })
 
-  describe('.getSql()', () => {
+  describe('.getRecordsSql()', () => {
     let expectedSql1 = `
     SELECT speciesName AS name, recordsHeld
     FROM traitcounts
@@ -102,7 +117,18 @@ describe('/v2/getSpeciesByTrait-json', () => {
     LIMIT 20 OFFSET 0;`
     it('should return the expected SQL with one trait name', () => {
       let stubDb = new StubDB()
-      let result = objectUnderTest._testonly.getSql("'height'", 1, 20, stubDb)
+      let result = objectUnderTest._testonly.getRecordsSql("'height'", 1, 20, stubDb)
+      expect(result).toBe(expectedSql1)
+    })
+  })
+
+  describe('.getCountSql()', () => {
+    let expectedSql1 = `
+    SELECT count(*) AS totalRecords
+    FROM traitcounts
+    WHERE traitName IN ('height');`
+    it('should return the expected SQL with one trait name', () => {
+      let result = objectUnderTest._testonly.getCountSql("'height'")
       expect(result).toBe(expectedSql1)
     })
   })

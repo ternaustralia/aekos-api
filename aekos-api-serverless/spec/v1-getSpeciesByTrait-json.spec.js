@@ -20,10 +20,15 @@ describe('/v1/getSpeciesByTrait-json', () => {
         body: JSON.stringify({traitNames: ['trait one']}),
         requestContext: {
           path: '/v1/getSpeciesByTrait.json'
+        },
+        headers: {
+          Host: 'api.aekos.org.au',
+          'X-Forwarded-Proto': 'https'
         }
       }
       stubDb.setExecSelectPromiseResponses([
-        [{ speciesName: 'species one', recordsHeld: 123 }]
+        [{ speciesName: 'species one', recordsHeld: 123 }],
+        [{ totalRecords: 19 }]
       ])
       spyOn(stubDb, 'execSelectPromise').and.callThrough()
       let callback = (_, theResult) => {
@@ -38,7 +43,8 @@ describe('/v1/getSpeciesByTrait-json', () => {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
         'Access-Control-Expose-Headers': 'link',
-        'Content-Type': "'application/json'"
+        'Content-Type': "'application/json'",
+        'link': ''
       })
       expect(JSON.parse(result.body)).toEqual([
         { speciesName: 'species one', recordsHeld: 123, id: 'notusedanymore' }
@@ -60,16 +66,21 @@ describe('/v1/getSpeciesByTrait-json', () => {
     beforeEach(done => {
       let event = {
         queryStringParameters: {
-          pageSize: '50',
-          pageNum: '3'
+          pageNum: '3',
+          pageSize: '50'
         },
         body: JSON.stringify({traitNames: ['trait one', 'trait two']}),
         requestContext: {
           path: '/v1/getSpeciesByTrait.json'
+        },
+        headers: {
+          Host: 'api.aekos.org.au',
+          'X-Forwarded-Proto': 'https'
         }
       }
       stubDb.setExecSelectPromiseResponses([
-        [{ speciesName: 'species one', recordsHeld: 123 }]
+        [{ speciesName: 'species one', recordsHeld: 123 }],
+        [{ totalRecords: 202 }]
       ])
       spyOn(stubDb, 'execSelectPromise').and.callThrough()
       let callback = (_, theResult) => {
@@ -84,7 +95,11 @@ describe('/v1/getSpeciesByTrait-json', () => {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
         'Access-Control-Expose-Headers': 'link',
-        'Content-Type': "'application/json'"
+        'Content-Type': "'application/json'",
+        'link': '<https://api.aekos.org.au/v1/getSpeciesByTrait.json?pageNum=4&pageSize=50>; rel="next", ' +
+                '<https://api.aekos.org.au/v1/getSpeciesByTrait.json?pageNum=2&pageSize=50>; rel="prev", ' +
+                '<https://api.aekos.org.au/v1/getSpeciesByTrait.json?pageNum=1&pageSize=50>; rel="first", ' +
+                '<https://api.aekos.org.au/v1/getSpeciesByTrait.json?pageNum=5&pageSize=50>; rel="last"'
       })
       expect(JSON.parse(result.body)).toEqual([
         { speciesName: 'species one', recordsHeld: 123, id: 'notusedanymore' }

@@ -27,14 +27,26 @@ function responder (requestBody, db, queryStringObj, extrasProvider) {
   let escapedTraitNames = db.toSqlList(traitNames)
   let pageSize = r.getOptionalNumberParam(envByS._testonly.wrapAsEvent(queryStringObj), pageSizeParam, defaultPageSize)
   let pageNum = r.getOptionalNumberParam(envByS._testonly.wrapAsEvent(queryStringObj), pageNumParam, defaultPageNum)
-  let sql = getSql(escapedTraitNames, pageNum, pageSize)
-  return db.execSelectPromise(sql).then(queryResult => {
+  let recordsSql = getRecordsSql(escapedTraitNames, pageNum, pageSize)
+  let countSql = getCountSql(escapedTraitNames)
+  let recordsPromise = db.execSelectPromise(recordsSql)
+  let countPromise = db.execSelectPromise(countSql)
+  return Promise.all([recordsPromise, countPromise]).then(values => {
+    let queryResult = values[0]
+    let count = values[1]
+    if (count.length !== 1) {
+      throw new Error(`SQL result problem: result from count query did not have exactly one row. Result='${JSON.stringify(count)}'`)
+    }
+    let totalRecordsCount = count[0].totalRecords
     return new Promise((resolve, reject) => {
       try {
         speciesSummary.processWithVersionStrategy(queryResult, extrasProvider.event)
         resolve({
-          body: queryResult
-          // TODO add linkHeaderData
+          body: queryResult,
+          linkHeaderData: {
+            pageNumber: pageNum,
+            totalPages: Math.ceil(totalRecordsCount / pageSize)
+          }
         })
       } catch (error) {
         reject(error)
@@ -44,12 +56,13 @@ function responder (requestBody, db, queryStringObj, extrasProvider) {
 }
 
 module.exports._testonly = {
-  getSql: getSql,
+  getRecordsSql: getRecordsSql,
+  getCountSql: getCountSql,
   doHandle: doHandle,
   validator: validator
 }
 
-function getSql (escapedTraitNames, pageNum, pageSize) {
+function getRecordsSql (escapedTraitNames, pageNum, pageSize) {
   let offset = r.calculateOffset(pageNum, pageSize)
   return `
     SELECT speciesName AS name, recordsHeld
@@ -57,4 +70,11 @@ function getSql (escapedTraitNames, pageNum, pageSize) {
     WHERE traitName IN (${escapedTraitNames})
     ORDER BY 1
     LIMIT ${pageSize} OFFSET ${offset};`
+}
+
+function getCountSql (escapedTraitNames) {
+  return `
+    SELECT count(*) AS totalRecords
+    FROM traitcounts
+    WHERE traitName IN (${escapedTraitNames});`
 }
