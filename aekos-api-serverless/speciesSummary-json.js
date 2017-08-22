@@ -27,7 +27,10 @@ function responder (requestBody, db, _, extrasProvider) {
     return new Promise((resolve, reject) => {
       try {
         processWithVersionStrategy(sqlResult, extrasProvider.event)
-        resolve(sqlResult)
+        resolve({
+          body: sqlResult
+          // TODO add linkHeaderData
+        })
       } catch (error) {
         reject(error)
       }

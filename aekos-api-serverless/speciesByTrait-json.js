@@ -32,7 +32,10 @@ function responder (requestBody, db, queryStringObj, extrasProvider) {
     return new Promise((resolve, reject) => {
       try {
         speciesSummary.processWithVersionStrategy(queryResult, extrasProvider.event)
-        resolve(queryResult)
+        resolve({
+          body: queryResult
+          // TODO add linkHeaderData
+        })
       } catch (error) {
         reject(error)
       }

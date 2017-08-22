@@ -56,13 +56,14 @@ function doHandle (event, callback, db, elapsedTimeCalculator) {
 function responder (requestBody, db, queryStringParameters, extrasProvider) {
   return new Promise((resolve, reject) => {
     let csvHeaders = getCsvHeadersForRequestedVersion(extrasProvider.event)
-    envDataJson.responder(requestBody, db, queryStringParameters, extrasProvider).then(successResult => {
+    envDataJson.responder(requestBody, db, queryStringParameters, extrasProvider).then(wrapper => {
+      let successResult = wrapper.body
       let result = mapJsonToCsv(successResult.response, csvHeaders)
       let downloadFileName = allSpeciesDataCsv.getCsvDownloadFileName(extrasProvider.event, 'Environment')
       resolve({
         body: result,
         downloadFileName: downloadFileName,
-        jsonResponse: successResult
+        linkHeaderData: wrapper.linkHeaderData
       })
     }).catch(reject)
   })

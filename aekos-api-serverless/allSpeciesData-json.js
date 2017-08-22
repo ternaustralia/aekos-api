@@ -31,7 +31,11 @@ module.exports.responder = (db, queryStringParameters, extrasProvider) => {
 function responder (_, db, queryStringParameters, extrasProvider) {
   let processStart = r.now()
   let params = extractParams(queryStringParameters)
-  return doAllSpeciesQuery(extrasProvider.event, params, processStart, db, extrasProvider.elapsedTimeCalculator)
+  return doAllSpeciesQuery(extrasProvider.event, params, processStart, db, extrasProvider.elapsedTimeCalculator).then(queryResult => {
+    return new Promise((resolve, reject) => {
+      resolve(r.toLinkHeaderDataAndResponseObj(queryResult))
+    })
+  })
 }
 
 module.exports.doAllSpeciesQuery = doAllSpeciesQuery

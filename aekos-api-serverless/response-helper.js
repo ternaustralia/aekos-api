@@ -67,8 +67,8 @@ function handleJsonGeneric (event, callback, db,
     responder/* (requestBody, databaseHelper, queryStringParameters):Promise<{}> */,
     extrasProvider, requestBodyGetter/* (event) */) {
   let responseCaller = (event, callback, requestBody, db, queryStringObj, extrasProvider) => {
-    responder(requestBody, db, queryStringObj, extrasProvider).then(responseBody => {
-      jsonResponseHelpers.ok(callback, responseBody, event)
+    responder(requestBody, db, queryStringObj, extrasProvider).then(responseWrapper => {
+      jsonResponseHelpers.ok(callback, responseWrapper.body, event, responseWrapper.linkHeaderData)
     }).catch(error => {
       console.error('Failed to execute handler', error)
       jsonResponseHelpers.internalServerError(callback)
@@ -108,7 +108,7 @@ function handleCsvGeneric (event, callback, db,
     extrasProvider, requestBodyGetter/* (event) */) {
   let responseCaller = (event, callback, requestBody, db, queryStringObj, extrasProvider) => {
     responder(requestBody, db, queryStringObj, extrasProvider).then(responseWrapper => {
-      csvResponseHelpers.ok(callback, responseWrapper.body, responseWrapper.downloadFileName, event, responseWrapper.jsonResponse)
+      csvResponseHelpers.ok(callback, responseWrapper.body, responseWrapper.downloadFileName, event, responseWrapper.linkHeaderData)
     }).catch(error => {
       console.error('Failed to execute handler', error)
       jsonResponseHelpers.internalServerError(callback)
@@ -415,6 +415,69 @@ function buildHateoasLinkHeader (event, responseHeader) {
   return result
 }
 
+function buildHateoasLinkHeader2 (event, linkHeaderData) {
+  function appendCommaIfNecessary (linkHeader) {
+    if (linkHeader.length > 0) {
+      return linkHeader + ', '
+    }
+    return linkHeader
+  }
+
+  function createLinkHeader (uri, rel) {
+    return '<' + uri + '>; rel="' + rel + '"'
+  }
+
+  function queryStringWithStart (newStart) {
+    let params = event.queryStringParameters || {}
+    params.start = newStart
+    return querystring.stringify(params)
+  }
+  if (typeof event === 'undefined') {
+    throw new Error('Programmer problem: event was not supplied')
+  }
+  // FIXME should handle if expected values aren't available
+  let start = linkHeaderData.start
+  let rows = linkHeaderData.rows
+  let pageNumber = linkHeaderData.pageNumber
+  let totalPages = linkHeaderData.totalPages
+  let scheme = event.headers['X-Forwarded-Proto']
+  let host = event.headers.Host
+  let path = event.requestContext.path
+  let fromPath = `${scheme}://${host}${path}`
+  let result = ''
+  let hasNextPage = pageNumber < totalPages
+  if (hasNextPage) {
+    let startForNextPage = start + rows
+    let qs = queryStringWithStart(startForNextPage)
+    let uriForNextPage = `${fromPath}?${qs}`
+    result += createLinkHeader(uriForNextPage, 'next')
+  }
+  let hasPrevPage = pageNumber > 1
+  if (hasPrevPage) {
+    let startForPrevPage = start - rows
+    let qs = queryStringWithStart(startForPrevPage)
+    let uriForPrevPage = `${fromPath}?${qs}`
+    result = appendCommaIfNecessary(result)
+    result += createLinkHeader(uriForPrevPage, 'prev')
+  }
+  let hasFirstPage = pageNumber > 1
+  if (hasFirstPage) {
+    let qs = queryStringWithStart(0)
+    let uriForFirstPage = `${fromPath}?${qs}`
+    result = appendCommaIfNecessary(result)
+    result += createLinkHeader(uriForFirstPage, 'first')
+  }
+  let hasLastPage = pageNumber < totalPages
+  if (hasLastPage) {
+    let startForLastPage = (totalPages - 1) * rows
+    let qs = queryStringWithStart(startForLastPage)
+    let uriForLastPage = `${fromPath}?${qs}`
+    result = appendCommaIfNecessary(result)
+    result += createLinkHeader(uriForLastPage, 'last')
+  }
+  return result
+}
+
 function isHateoasable (response) {
   if (typeof response !== 'object' || typeof response.responseHeader !== 'object') {
     return false
@@ -566,12 +629,36 @@ function queryStringParamIsBooleanIfPresentValidator (paramName) {
   }
 }
 
+function buildLinkHeaderData (start, rows, pageNumber, totalPages) {
+  return { // Uses ECMAScript 2015 shorthand property names
+    start,
+    rows,
+    pageNumber,
+    totalPages
+  }
+}
+
+function transformResponseToLinkHeaderData (input) {
+  let start = input.responseHeader.params.start
+  let rows = input.responseHeader.params.rows
+  let pageNumber = input.responseHeader.pageNumber
+  let totalPages = input.responseHeader.totalPages
+  return buildLinkHeaderData(start, rows, pageNumber, totalPages)
+}
+
+function toLinkHeaderDataAndResponseObj (input) {
+  return {
+    body: input,
+    linkHeaderData: transformResponseToLinkHeaderData(input)
+  }
+}
+
 const jsonResponseHelpers = {
-  ok: (theCallback, theBody, event) => {
+  ok: (theCallback, theBody, event, linkHeaderData) => {
     let extraHeadersCallback = function () { }
-    if (isHateoasable(theBody)) {
+    if (linkHeaderData) {
       extraHeadersCallback = headers => {
-        headers.link = buildHateoasLinkHeader(event, theBody.responseHeader)
+        headers.link = buildHateoasLinkHeader2(event, linkHeaderData)
       }
     }
     doResponse(theCallback, theBody, 200, jsonContentType, extraHeadersCallback)
@@ -600,8 +687,8 @@ const csvResponseHelpers = {
       if (typeof downloadFileName !== 'undefined' && downloadFileName !== null) {
         headers['Content-Disposition'] = `attachment;filename=${downloadFileName}`
       }
-      if (isHateoasable(dataForHateoas)) {
-        headers.link = buildHateoasLinkHeader(event, dataForHateoas.responseHeader)
+      if (dataForHateoas) {
+        headers.link = buildHateoasLinkHeader2(event, dataForHateoas) // FIXME remove '2' impl
       }
     }
     doResponse(theCallback, theBody, 200, csvContentType, extraHeadersCallback)
@@ -644,6 +731,8 @@ module.exports = {
   rowsValidator: queryStringParamIsPositiveNumberIfPresentValidator(rowsParam),
   downloadParamValidator: queryStringParamIsBooleanIfPresentValidator(downloadParam),
   newVersionHandler: newVersionHandler,
+  buildLinkHeaderData: buildLinkHeaderData,
+  toLinkHeaderDataAndResponseObj: toLinkHeaderDataAndResponseObj,
   _testonly: {
     queryStringParamIsPositiveNumberIfPresentValidator: queryStringParamIsPositiveNumberIfPresentValidator,
     queryStringParamIsBooleanIfPresentValidator: queryStringParamIsBooleanIfPresentValidator,

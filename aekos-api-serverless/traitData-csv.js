@@ -28,13 +28,14 @@ function doHandle (event, callback, db, elapsedTimeCalculator) {
 function responder (requestBody, db, queryStringParameters, extrasProvider) {
   return new Promise((resolve, reject) => {
     let csvHeaders = allSpeciesDataCsv.getCsvHeadersForRequestedVersion(extrasProvider.event)
-    traitDataJson.responder(requestBody, db, queryStringParameters, extrasProvider).then(successResult => {
+    traitDataJson.responder(requestBody, db, queryStringParameters, extrasProvider).then(wrapper => {
+      let successResult = wrapper.body
       let result = mapJsonToCsv(successResult.response, csvHeaders)
       let downloadFileName = allSpeciesDataCsv.getCsvDownloadFileName(extrasProvider.event, 'Trait')
       resolve({
         body: result,
         downloadFileName: downloadFileName,
-        jsonResponse: successResult
+        linkHeaderData: wrapper.linkHeaderData
       })
     }).catch(reject)
   })

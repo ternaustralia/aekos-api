@@ -28,8 +28,9 @@ function responder (requestBody, db, queryStringParameters, extrasProvider) {
     try {
       let processStart = r.now()
       let params = extractParams(requestBody, queryStringParameters, db)
-      let result = doQuery(extrasProvider.event, params, processStart, db, extrasProvider.elapsedTimeCalculator)
-      resolve(result)
+      doQuery(extrasProvider.event, params, processStart, db, extrasProvider.elapsedTimeCalculator).then(result => {
+        resolve(r.toLinkHeaderDataAndResponseObj(result))
+      })
     } catch (error) {
       reject(error)
     }

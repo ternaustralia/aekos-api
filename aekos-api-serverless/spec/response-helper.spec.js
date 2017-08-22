@@ -62,12 +62,11 @@ describe('response-helper', function () {
           rows: 15,
           start: 0
         }
-        let hateoasableResponse = {
-          responseHeader: {
-            pageNumber: 1,
-            params: params,
-            totalPages: 3
-          }
+        let linkHeaderData = {
+          pageNumber: 1,
+          rows: params.rows,
+          start: params.start,
+          totalPages: 3
         }
         let event = {
           headers: {
@@ -79,7 +78,7 @@ describe('response-helper', function () {
           },
           queryStringParameters: params
         }
-        objectUnderTest.json.ok(callback, hateoasableResponse, event)
+        objectUnderTest.json.ok(callback, {}, event, linkHeaderData)
         expect(response.headers).toEqual({
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Credentials': true,
@@ -186,6 +185,36 @@ describe('response-helper', function () {
         let downloadFileName = 'someDownloadFile.csv'
         objectUnderTest.csv.ok(callback, '1,"some value",123\n2,"other value",456', downloadFileName)
         expect(suppliedArg.headers['Content-Disposition']).toBe('attachment;filename=someDownloadFile.csv')
+      })
+
+      describe('', () => {
+        let suppliedArg = null
+        beforeEach(done => {
+          let callback = function (_, result) {
+            suppliedArg = result
+            done()
+          }
+          let dataForHateoas = {
+            start: 0,
+            rows: 20,
+            pageNumber: 1,
+            totalPages: 9
+          }
+          let event = {
+            headers: {
+              'X-Forwarded-Proto': 'https',
+              Host: 'testhost'
+            },
+            requestContext: {
+              path: '/some/path'
+            }
+          }
+          objectUnderTest.csv.ok(callback, '1,"some value",123\n2,"other value",456', null, event, dataForHateoas)
+        })
+
+        it('should respond with the link header when we supply the data for it', () => {
+          expect(suppliedArg.headers['link']).toBe('<https://testhost/some/path?start=20>; rel="next", <https://testhost/some/path?start=160>; rel="last"')
+        })
       })
     })
   })
@@ -611,7 +640,9 @@ describe('response-helper', function () {
         }
         let responder = (requestBody, db) => {
           return new Promise((resolve, reject) => {
-            resolve({ someField: 123 })
+            resolve({
+              body: { someField: 123 }
+            })
           })
         }
         objectUnderTest.handleJsonPost({ body: '{}' }, callback, null, alwaysValidValidator, responder)
@@ -635,7 +666,9 @@ describe('response-helper', function () {
         }
         let responder = (requestBody, db) => {
           return new Promise((resolve, reject) => {
-            resolve({ someField: 123 })
+            resolve({
+              body: { someField: 123 }
+            })
           })
         }
         objectUnderTest.handleJsonGet({}, callback, null, alwaysValidValidator, responder)
@@ -645,6 +678,44 @@ describe('response-helper', function () {
         expect(result.statusCode).toBe(200)
         expect(result.headers).toEqual(jsonAndCorsHeaders)
         expect(result.body).toBe(JSON.stringify({ someField: 123 }))
+      })
+    })
+
+    describe('', () => {
+      let result = null
+      beforeEach(done => {
+        let callback = (_, theResult) => {
+          result = theResult
+          done()
+        }
+        let responder = (db) => {
+          return new Promise((resolve, reject) => {
+            resolve({
+              body: { foo: 'bar' },
+              linkHeaderData: {
+                start: 0,
+                rows: 10,
+                pageNumber: 1,
+                totalPages: 3
+              }
+            })
+          })
+        }
+        let event = {
+          headers: {
+            'X-Forwarded-Proto': 'https',
+            Host: 'testhost'
+          },
+          requestContext: {
+            path: '/some/path'
+          }
+        }
+        objectUnderTest.handleJsonGet(event, callback, null, alwaysValidValidator, responder)
+      })
+
+      it('should return the link header when we supply data for it', () => {
+        expect(result.statusCode).toBe(200)
+        expect(result.headers.link).toBe('<https://testhost/some/path?start=10>; rel="next", <https://testhost/some/path?start=20>; rel="last"')
       })
     })
   })
@@ -665,7 +736,7 @@ describe('response-helper', function () {
             })
           })
         }
-        objectUnderTest.handleCsvGet({}, callback, null, alwaysValidValidator, responder)
+        objectUnderTest.handleCsvPost({ body: '{}' }, callback, null, alwaysValidValidator, responder)
       })
 
       it('should return the response body when all is successful', () => {
@@ -699,6 +770,45 @@ describe('response-helper', function () {
         expect(result.statusCode).toBe(200)
         expect(result.headers).toEqual(csvAndCorsHeaders)
         expect(result.body).toBe('some,csv,data')
+      })
+    })
+
+    describe('', () => {
+      let result = null
+      beforeEach(done => {
+        let callback = (_, theResult) => {
+          result = theResult
+          done()
+        }
+        let responder = (db) => {
+          return new Promise((resolve, reject) => {
+            resolve({
+              body: 'some,csv,data',
+              downloadFileName: null,
+              linkHeaderData: {
+                start: 0,
+                rows: 10,
+                pageNumber: 1,
+                totalPages: 3
+              }
+            })
+          })
+        }
+        let event = {
+          headers: {
+            'X-Forwarded-Proto': 'https',
+            Host: 'testhost'
+          },
+          requestContext: {
+            path: '/some/path'
+          }
+        }
+        objectUnderTest.handleCsvGet(event, callback, null, alwaysValidValidator, responder)
+      })
+
+      it('should return the link header when we supply data for it', () => {
+        expect(result.statusCode).toBe(200)
+        expect(result.headers.link).toBe('<https://testhost/some/path?start=10>; rel="next", <https://testhost/some/path?start=20>; rel="last"')
       })
     })
   })
@@ -1291,6 +1401,50 @@ describe('response-helper', function () {
         expect(error.message).toBe("Programmer problem: the 'speciesNames' field (value='not an " +
         "array') is not an array, this should've been caught by validation")
       }
+    })
+  })
+
+  describe('.buildLinkHeaderData()', () => {
+    it('should build the header data when present', () => {
+      let start = 0
+      let rows = 20
+      let pageNumber = 1
+      let totalPages = 3
+      let result = objectUnderTest.buildLinkHeaderData(start, rows, pageNumber, totalPages)
+      expect(result).toEqual({
+        start: 0,
+        rows: 20,
+        pageNumber: 1,
+        totalPages: 3
+      })
+    })
+  })
+
+  describe('.toLinkHeaderDataAndResponseObj()', () => {
+    it('should extract the header data when present', () => {
+      let input = {
+        response: [{ foo: 'bar' }],
+        responseHeader: {
+          elapsedTime: 42,
+          numFound: 31,
+          pageNumber: 1,
+          params: {
+            rows: 15,
+            start: 0
+          },
+          totalPages: 3
+        }
+      }
+      let result = objectUnderTest.toLinkHeaderDataAndResponseObj(input)
+      expect(result).toEqual({
+        body: input,
+        linkHeaderData: {
+          start: 0,
+          rows: 15,
+          pageNumber: 1,
+          totalPages: 3
+        }
+      })
     })
   })
 })

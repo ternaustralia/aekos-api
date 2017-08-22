@@ -57,7 +57,10 @@ function responder (requestBody, db, queryStringObj) {
     return new Promise((resolve, reject) => {
       try {
         let mappedResults = getEnvVarVocab.mapQueryResult(queryResult)
-        resolve(mappedResults)
+        resolve({
+          body: mappedResults
+          // TODO add linkHeaderData
+        })
       } catch (error) {
         reject(error)
       }
