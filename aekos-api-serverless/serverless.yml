@@ -45,7 +45,7 @@ resources:
         Integration:
           RequestTemplates:
             application/json: |
-              {"statusCode": "301"}
+              {"statusCode": 301}
           Type: MOCK
           IntegrationResponses:
             - ResponseParameters:
