@@ -352,70 +352,7 @@ class VersionHandler {
   }
 }
 
-function buildHateoasLinkHeader (event, responseHeader) {
-  function appendCommaIfNecessary (linkHeader) {
-    if (linkHeader.length > 0) {
-      return linkHeader + ', '
-    }
-    return linkHeader
-  }
-
-  function createLinkHeader (uri, rel) {
-    return '<' + uri + '>; rel="' + rel + '"'
-  }
-
-  function queryStringWithStart (newStart) {
-    let params = event.queryStringParameters || {}
-    params.start = newStart
-    return querystring.stringify(params)
-  }
-  if (typeof event === 'undefined') {
-    throw new Error('Programmer problem: event was not supplied')
-  }
-  // FIXME should handle if expected values aren't available
-  let start = responseHeader.params.start
-  let rows = responseHeader.params.rows
-  let pageNumber = responseHeader.pageNumber
-  let totalPages = responseHeader.totalPages
-  let scheme = event.headers['X-Forwarded-Proto']
-  let host = event.headers.Host
-  let path = event.requestContext.path
-  let fromPath = `${scheme}://${host}${path}`
-  let result = ''
-  let hasNextPage = pageNumber < totalPages
-  if (hasNextPage) {
-    let startForNextPage = start + rows
-    let qs = queryStringWithStart(startForNextPage)
-    let uriForNextPage = `${fromPath}?${qs}`
-    result += createLinkHeader(uriForNextPage, 'next')
-  }
-  let hasPrevPage = pageNumber > 1
-  if (hasPrevPage) {
-    let startForPrevPage = start - rows
-    let qs = queryStringWithStart(startForPrevPage)
-    let uriForPrevPage = `${fromPath}?${qs}`
-    result = appendCommaIfNecessary(result)
-    result += createLinkHeader(uriForPrevPage, 'prev')
-  }
-  let hasFirstPage = pageNumber > 1
-  if (hasFirstPage) {
-    let qs = queryStringWithStart(0)
-    let uriForFirstPage = `${fromPath}?${qs}`
-    result = appendCommaIfNecessary(result)
-    result += createLinkHeader(uriForFirstPage, 'first')
-  }
-  let hasLastPage = pageNumber < totalPages
-  if (hasLastPage) {
-    let startForLastPage = (totalPages - 1) * rows
-    let qs = queryStringWithStart(startForLastPage)
-    let uriForLastPage = `${fromPath}?${qs}`
-    result = appendCommaIfNecessary(result)
-    result += createLinkHeader(uriForLastPage, 'last')
-  }
-  return result
-}
-
-function buildHateoasLinkHeader2 (event, linkHeaderData) {
+function buildHateoasLinkHeader (event, linkHeaderData) {
   function appendCommaIfNecessary (linkHeader) {
     if (linkHeader.length > 0) {
       return linkHeader + ', '
@@ -646,7 +583,7 @@ const jsonResponseHelpers = {
     let extraHeadersCallback = function () { }
     if (linkHeaderData) {
       extraHeadersCallback = headers => {
-        headers.link = buildHateoasLinkHeader2(event, linkHeaderData)
+        headers.link = buildHateoasLinkHeader(event, linkHeaderData)
       }
     }
     doResponse(theCallback, theBody, 200, jsonContentType, extraHeadersCallback)
@@ -676,7 +613,7 @@ const csvResponseHelpers = {
         headers['Content-Disposition'] = `attachment;filename=${downloadFileName}`
       }
       if (dataForHateoas) {
-        headers.link = buildHateoasLinkHeader2(event, dataForHateoas) // FIXME remove '2' impl
+        headers.link = buildHateoasLinkHeader(event, dataForHateoas)
       }
     }
     doResponse(theCallback, theBody, 200, csvContentType, extraHeadersCallback)

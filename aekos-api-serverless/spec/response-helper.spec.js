@@ -224,7 +224,7 @@ describe('response-helper', function () {
       Host: 'api.aekos.org.au',
       'X-Forwarded-Proto': 'https'
     }
-    it('should build the HATEOAS header for the first page of a single-page response', function () {
+    it('should determine that no header is required for the first page of a single-page response', function () {
       let event = {
         headers: reqHeaders,
         queryStringParameters: {
@@ -236,15 +236,13 @@ describe('response-helper', function () {
           path: '/v1/speciesData.csv'
         }
       }
-      let responseHeader = {
+      let linkHeaderData = {
         pageNumber: 1,
         totalPages: 1,
-        params: {
-          rows: 20,
-          start: 0
-        }
+        rows: 20,
+        start: 0
       }
-      let result = objectUnderTest.buildHateoasLinkHeader(event, responseHeader)
+      let result = objectUnderTest.buildHateoasLinkHeader(event, linkHeaderData)
       expect(result).toBe('')
     })
 
@@ -260,15 +258,13 @@ describe('response-helper', function () {
           path: '/v1/speciesData.csv'
         }
       }
-      let responseHeader = {
+      let linkHeaderData = {
         pageNumber: 1,
         totalPages: 10,
-        params: {
-          rows: 20,
-          start: 0
-        }
+        rows: 20,
+        start: 0
       }
-      let result = objectUnderTest.buildHateoasLinkHeader(event, responseHeader)
+      let result = objectUnderTest.buildHateoasLinkHeader(event, linkHeaderData)
       expect(result).toBe(
         '<https://api.aekos.org.au/v1/speciesData.csv?rows=20&download=false&start=20>; rel="next", ' +
         '<https://api.aekos.org.au/v1/speciesData.csv?rows=20&download=false&start=180>; rel="last"')
@@ -286,15 +282,13 @@ describe('response-helper', function () {
           path: '/v1/speciesData.csv'
         }
       }
-      let responseHeader = {
+      let linkHeaderData = {
         pageNumber: 2,
         totalPages: 10,
-        params: {
-          rows: 20,
-          start: 20
-        }
+        rows: 20,
+        start: 20
       }
-      let result = objectUnderTest.buildHateoasLinkHeader(event, responseHeader)
+      let result = objectUnderTest.buildHateoasLinkHeader(event, linkHeaderData)
       expect(result).toBe(
         '<https://api.aekos.org.au/v1/speciesData.csv?rows=20&download=false&start=40>; rel="next", ' +
         '<https://api.aekos.org.au/v1/speciesData.csv?rows=20&download=false&start=0>; rel="prev", ' +
@@ -314,15 +308,13 @@ describe('response-helper', function () {
           path: '/v1/speciesData.csv'
         }
       }
-      let responseHeader = {
+      let linkHeaderData = {
         pageNumber: 3,
         totalPages: 3,
-        params: {
-          rows: 20,
-          start: 40
-        }
+        rows: 20,
+        start: 40
       }
-      let result = objectUnderTest.buildHateoasLinkHeader(event, responseHeader)
+      let result = objectUnderTest.buildHateoasLinkHeader(event, linkHeaderData)
       expect(result).toBe(
         '<https://api.aekos.org.au/v1/speciesData.csv?rows=20&download=false&start=20>; rel="prev", ' +
         '<https://api.aekos.org.au/v1/speciesData.csv?rows=20&download=false&start=0>; rel="first"')
@@ -336,15 +328,13 @@ describe('response-helper', function () {
           path: '/v1/speciesData.csv'
         }
       }
-      let responseHeader = {
+      let linkHeaderData = {
         pageNumber: 1,
         totalPages: 3,
-        params: {
-          rows: 20,
-          start: 0
-        }
+        rows: 20,
+        start: 0
       }
-      let result = objectUnderTest.buildHateoasLinkHeader(event, responseHeader)
+      let result = objectUnderTest.buildHateoasLinkHeader(event, linkHeaderData)
       expect(result).toBe(
         '<https://api.aekos.org.au/v1/speciesData.csv?start=20>; rel="next", ' +
         '<https://api.aekos.org.au/v1/speciesData.csv?start=40>; rel="last"')
@@ -352,16 +342,14 @@ describe('response-helper', function () {
 
     it('should give an informative error when the event was not supplied', function () {
       let event // undefined!
-      let responseHeader = {
+      let linkHeaderData = {
         pageNumber: 1,
         totalPages: 1,
-        params: {
-          rows: 20,
-          start: 0
-        }
+        rows: 20,
+        start: 0
       }
       try {
-        objectUnderTest.buildHateoasLinkHeader(event, responseHeader)
+        objectUnderTest.buildHateoasLinkHeader(event, linkHeaderData)
         fail()
       } catch (error) {
         expect(error.message).toBe('Programmer problem: event was not supplied')
@@ -437,7 +425,7 @@ describe('response-helper', function () {
       let passedRequestBody = null
       let responder = (body /* ignore other params */) => {
         passedRequestBody = body
-        return new Promise((resolve, reject) => { resolve() })
+        return new Promise((resolve, reject) => { resolve({body: {}}) })
       }
       objectUnderTest.handleJsonPost({ body: '{"foo":123}' }, () => {}, null,
         () => { return { isValid: true } }, responder)
@@ -448,7 +436,7 @@ describe('response-helper', function () {
       let passedQueryString = null
       let responder = (body, db, queryStringObj) => {
         passedQueryString = queryStringObj
-        return new Promise((resolve, reject) => { resolve() })
+        return new Promise((resolve, reject) => { resolve({body: {}}) })
       }
       objectUnderTest.handleJsonPost({ body: '{}', queryStringParameters: {foo: 123} }, () => {}, null,
         () => { return { isValid: true } }, responder)
@@ -463,9 +451,7 @@ describe('response-helper', function () {
         }
         let responder = (requestBody, db) => {
           isResponderCalled = true
-          return new Promise(resolve => {
-            resolve()
-          })
+          return new Promise(resolve => { resolve({body: {}}) })
         }
         objectUnderTest.handleJsonPost({ body: '{}' }, callback, null, alwaysValidValidator, responder)
       })
