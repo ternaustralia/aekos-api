@@ -189,13 +189,17 @@ function rollupRecords (records) {
       }
       newVar[currFieldName] = newFieldValue
     }
-    let isNoVariables = Object.values(newVar).length === 0
+    let isNoVariables = Object.keys(newVar).length === 0
     if (isNoVariables) {
       return
     }
     record.variables.push(newVar)
   })
-  let result = Object.values(keyManager)
+  let result = Object.keys(keyManager).reduce((previous, current) => {
+    let value = keyManager[current]
+    previous.push(value)
+    return previous
+  }, [])
   return result
 }
 

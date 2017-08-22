@@ -96,7 +96,11 @@ function rollupRecords (responseObj) {
     })
     record.traits.push(newTrait)
   })
-  let result = Object.values(keyManager)
+  let result = Object.keys(keyManager).reduce((previous, current) => {
+    let value = keyManager[current]
+    previous.push(value)
+    return previous
+  }, [])
   return {
     response: result,
     responseHeader: responseObj.responseHeader
