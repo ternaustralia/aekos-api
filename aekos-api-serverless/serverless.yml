@@ -597,6 +597,8 @@ functions:
                 statusCode: '200'
                 responseModels:
                   "application/json": V1SpeciesAutocompleteResponse
+                responseHeaders:
+                  - ${self:custom.commonModelSchemaFragments.LinkHeader}
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
       - http:
@@ -620,6 +622,8 @@ functions:
                 statusCode: '200'
                 responseModels:
                   "application/json": V2SpeciesAutocompleteResponse
+                responseHeaders:
+                  - ${self:custom.commonModelSchemaFragments.LinkHeader}
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   speciesSummary-json:

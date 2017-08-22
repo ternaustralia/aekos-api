@@ -22,10 +22,21 @@ function doHandle (event, callback, db) {
   let partialName = event.queryStringParameters[qParam]
   let start = r.getOptionalNumberParam(event, startParam, startDefault)
   let rows = r.getOptionalNumberParam(event, rowsParam, rowsDefault)
-  const sql = getSql(partialName, rows, start, db)
-  db.execSelectPromise(sql).then(queryResult => {
+  const recordsSql = getRecordsSql(partialName, rows, start, db)
+  const countSql = getCountSql(partialName, db)
+  let recordsPromise = db.execSelectPromise(recordsSql)
+  let countPromise = db.execSelectPromise(countSql)
+  Promise.all([recordsPromise, countPromise]).then(values => {
+    let queryResult = values[0]
+    let count = values[1]
+    if (count.length !== 1) {
+      throw new Error(`SQL result problem: result from count query did not have exactly one row. Result='${JSON.stringify(count)}'`)
+    }
+    let totalRecordsCount = count[0].totalRecords
     speciesSummary.processWithVersionStrategy(queryResult, event)
-    r.json.ok(callback, queryResult)
+    let totalPages = r.calculateTotalPages(rows, totalRecordsCount)
+    let pageNumber = r.calculatePageNumber(start, totalRecordsCount, totalPages)
+    r.json.ok(callback, queryResult, event, r.buildLinkHeaderData(start, rows, pageNumber, totalPages))
   }).catch(error => {
     console.log('Failed to execute species autocomplete SQL', error)
     r.json.internalServerError(callback)
@@ -33,11 +44,12 @@ function doHandle (event, callback, db) {
 }
 
 module.exports._testonly = {
-  getSql: getSql,
+  getRecordsSql: getRecordsSql,
+  getCountSql: getCountSql,
   doHandle: doHandle
 }
 
-function getSql (partialName, rows, start, db) {
+function getRecordsSql (partialName, rows, start, db) {
   let escapedPartialName = db.escape(partialName + startsWithChar)
   return `
     SELECT speciesName, sum(recordsHeld) AS recordsHeld
@@ -56,4 +68,20 @@ function getSql (partialName, rows, start, db) {
     GROUP BY 1
     ORDER BY 1
     LIMIT ${rows} OFFSET ${start};`
+}
+
+function getCountSql (partialName, db) {
+  let escapedPartialName = db.escape(partialName + startsWithChar)
+  return `
+    SELECT count(*) AS totalRecords
+    FROM (
+      SELECT DISTINCT scientificName AS speciesName
+      FROM species
+      WHERE scientificName LIKE ${escapedPartialName}
+      UNION
+      SELECT DISTINCT taxonRemarks AS speciesName
+      FROM species
+      WHERE taxonRemarks LIKE ${escapedPartialName}
+    ) AS a
+    WHERE speciesName IS NOT NULL;`
 }

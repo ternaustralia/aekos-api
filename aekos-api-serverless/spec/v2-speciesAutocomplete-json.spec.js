@@ -3,37 +3,6 @@ var objectUnderTest = require('../speciesAutocomplete-json')
 let StubDB = require('./StubDB')
 
 describe('/v2/speciesAutocomplete-json', () => {
-  describe('.getSql()', () => {
-    let expectedSql1 = `
-    SELECT speciesName, sum(recordsHeld) AS recordsHeld
-    FROM (
-      SELECT scientificName AS speciesName, count(*) AS recordsHeld
-      FROM species
-      WHERE scientificName LIKE 'aca%'
-      GROUP BY 1
-      UNION
-      SELECT taxonRemarks AS speciesName, count(*) AS recordsHeld
-      FROM species
-      WHERE taxonRemarks LIKE 'aca%'
-      GROUP BY 1 
-    ) AS a
-    WHERE speciesName IS NOT NULL
-    GROUP BY 1
-    ORDER BY 1
-    LIMIT 20 OFFSET 0;`
-    it('should return the expected SQL with a simple partial name', () => {
-      let stubDb = new StubDB()
-      let result = objectUnderTest._testonly.getSql('aca', 20, 0, stubDb)
-      expect(result).toBe(expectedSql1)
-    })
-
-    it('should return the expected SQL with all params supplied', () => {
-      let stubDb = new StubDB()
-      let result = objectUnderTest._testonly.getSql('species one', 50, 100, stubDb)
-      expect(result).toContain('LIMIT 50 OFFSET 100;')
-    })
-  })
-
   describe('.doHandle()', () => {
     let expectedSql1 = `
     SELECT speciesName, sum(recordsHeld) AS recordsHeld
@@ -59,10 +28,17 @@ describe('/v2/speciesAutocomplete-json', () => {
         },
         requestContext: {
           path: '/v2/speciesAutocomplete.json'
+        },
+        headers: {
+          Host: 'api.aekos.org.au',
+          'X-Forwarded-Proto': 'https'
         }
       }
       let stubDb = new StubDB()
-      stubDb.setExecSelectPromiseResponses([{ someField: 123 }])
+      stubDb.setExecSelectPromiseResponses([
+        [{ someField: 123 }],
+        [{ totalRecords: 44 }]
+      ])
       spyOn(stubDb, 'execSelectPromise').and.callThrough()
       objectUnderTest._testonly.doHandle(event, () => {}, stubDb)
       expect(stubDb.execSelectPromise).toHaveBeenCalledWith(expectedSql1)
@@ -96,10 +72,17 @@ describe('/v2/speciesAutocomplete-json', () => {
         },
         requestContext: {
           path: '/v2/speciesAutocomplete.json'
+        },
+        headers: {
+          Host: 'api.aekos.org.au',
+          'X-Forwarded-Proto': 'https'
         }
       }
       let stubDb = new StubDB()
-      stubDb.setExecSelectPromiseResponses([{ someField: 123 }])
+      stubDb.setExecSelectPromiseResponses([
+        [{ someField: 123 }],
+        [{ totalRecords: 44 }]
+      ])
       spyOn(stubDb, 'execSelectPromise').and.callThrough()
       objectUnderTest._testonly.doHandle(event, () => {}, stubDb)
       expect(stubDb.execSelectPromise).toHaveBeenCalledWith(expectedSql1)
@@ -115,11 +98,16 @@ describe('/v2/speciesAutocomplete-json', () => {
         },
         requestContext: {
           path: '/v2/speciesAutocomplete.json'
+        },
+        headers: {
+          Host: 'api.aekos.org.au',
+          'X-Forwarded-Proto': 'https'
         }
       }
       let stubDb = new StubDB()
       stubDb.setExecSelectPromiseResponses([
-        [{ speciesName: 'acacia whatever', recordsHeld: 123 }]
+        [{ speciesName: 'acacia whatever', recordsHeld: 123 }],
+        [{ totalRecords: 44 }]
       ])
       let theCallback = (_, theResult) => {
         result = theResult
@@ -134,7 +122,9 @@ describe('/v2/speciesAutocomplete-json', () => {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
         'Access-Control-Expose-Headers': 'link',
-        'Content-Type': "'application/json'"
+        'Content-Type': "'application/json'",
+        'link': '<https://api.aekos.org.au/v2/speciesAutocomplete.json?q=aca&start=20>; rel="next", ' +
+                '<https://api.aekos.org.au/v2/speciesAutocomplete.json?q=aca&start=40>; rel="last"'
       })
       expect(JSON.parse(result.body)).toEqual(
         [{ speciesName: 'acacia whatever', recordsHeld: 123 }]
@@ -167,6 +157,57 @@ describe('/v2/speciesAutocomplete-json', () => {
       expect(JSON.parse(result.body)).toEqual(
         { message: "the 'q' query string parameter must be supplied", statusCode: 400 }
       )
+    })
+  })
+
+  describe('.getRecordsSql()', () => {
+    let expectedSql1 = `
+    SELECT speciesName, sum(recordsHeld) AS recordsHeld
+    FROM (
+      SELECT scientificName AS speciesName, count(*) AS recordsHeld
+      FROM species
+      WHERE scientificName LIKE 'aca%'
+      GROUP BY 1
+      UNION
+      SELECT taxonRemarks AS speciesName, count(*) AS recordsHeld
+      FROM species
+      WHERE taxonRemarks LIKE 'aca%'
+      GROUP BY 1 
+    ) AS a
+    WHERE speciesName IS NOT NULL
+    GROUP BY 1
+    ORDER BY 1
+    LIMIT 20 OFFSET 0;`
+    it('should return the expected SQL with a simple partial name', () => {
+      let stubDb = new StubDB()
+      let result = objectUnderTest._testonly.getRecordsSql('aca', 20, 0, stubDb)
+      expect(result).toBe(expectedSql1)
+    })
+
+    it('should return the expected SQL with all params supplied', () => {
+      let stubDb = new StubDB()
+      let result = objectUnderTest._testonly.getRecordsSql('species one', 50, 100, stubDb)
+      expect(result).toContain('LIMIT 50 OFFSET 100;')
+    })
+  })
+
+  describe('.getCountSql()', () => {
+    let expectedSql1 = `
+    SELECT count(*) AS totalRecords
+    FROM (
+      SELECT DISTINCT scientificName AS speciesName
+      FROM species
+      WHERE scientificName LIKE 'aca%'
+      UNION
+      SELECT DISTINCT taxonRemarks AS speciesName
+      FROM species
+      WHERE taxonRemarks LIKE 'aca%'
+    ) AS a
+    WHERE speciesName IS NOT NULL;`
+    it('should return the expected SQL with a simple partial name', () => {
+      let stubDb = new StubDB()
+      let result = objectUnderTest._testonly.getCountSql('aca', stubDb)
+      expect(result).toBe(expectedSql1)
     })
   })
 })

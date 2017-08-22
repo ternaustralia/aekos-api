@@ -12,11 +12,16 @@ describe('/v1/speciesAutocomplete-json', () => {
         },
         requestContext: {
           path: '/v1/speciesAutocomplete.json'
+        },
+        headers: {
+          Host: 'api.aekos.org.au',
+          'X-Forwarded-Proto': 'https'
         }
       }
       let stubDb = new StubDB()
       stubDb.setExecSelectPromiseResponses([
-        [{ speciesName: 'acacia whatever', recordsHeld: 123 }]
+        [{ speciesName: 'acacia whatever', recordsHeld: 123 }],
+        [{ totalRecords: 33 }]
       ])
       let theCallback = (_, theResult) => {
         result = theResult
@@ -31,7 +36,9 @@ describe('/v1/speciesAutocomplete-json', () => {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
         'Access-Control-Expose-Headers': 'link',
-        'Content-Type': "'application/json'"
+        'Content-Type': "'application/json'",
+        'link': '<https://api.aekos.org.au/v1/speciesAutocomplete.json?q=aca&start=20>; rel="next", ' +
+                '<https://api.aekos.org.au/v1/speciesAutocomplete.json?q=aca&start=20>; rel="last"'
       })
       expect(JSON.parse(result.body)).toEqual(
         [{ speciesName: 'acacia whatever', recordsHeld: 123, id: 'notusedanymore' }]
