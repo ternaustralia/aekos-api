@@ -1,5 +1,5 @@
 'use strict'
-let objectUnderTest = require('../speciesData-json')
+let uberRouter = require('../uberRouter')
 let StubDB = require('./StubDB')
 let ConsoleSilencer = require('./ConsoleSilencer')
 let consoleSilencer = new ConsoleSilencer()
@@ -31,15 +31,14 @@ describe('/v1/speciesData-json', () => {
           Host: 'api.aekos.org.au',
           'X-Forwarded-Proto': 'https'
         },
-        requestContext: {
-          path: '/v1/speciesData.json'
-        }
+        requestContext: { path: '/v1/speciesData.json' },
+        path: '/v1/speciesData.json'
       }
       let callback = (_, theResult) => {
         result = theResult
         done()
       }
-      objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 42 })
+      uberRouter._testonly.doHandle(event, callback, stubDb, () => { return 42 })
     })
 
     it('should return a 200 response when all params are supplied', () => {
@@ -89,15 +88,14 @@ describe('/v1/speciesData-json', () => {
           Host: 'api.aekos.org.au',
           'X-Forwarded-Proto': 'https'
         },
-        requestContext: {
-          path: '/v1/speciesData.json'
-        }
+        requestContext: { path: '/v1/speciesData.json' },
+        path: '/v1/speciesData.json'
       }
       let callback = (_, theResult) => {
         result = theResult
         done()
       }
-      objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 0 })
+      uberRouter._testonly.doHandle(event, callback, stubDb, () => { return 0 })
     })
 
     it('should calculate paging information when only start is provided', () => {
@@ -125,15 +123,14 @@ describe('/v1/speciesData-json', () => {
           Host: 'api.aekos.org.au',
           'X-Forwarded-Proto': 'https'
         },
-        requestContext: {
-          path: '/v1/speciesData.json'
-        }
+        requestContext: { path: '/v1/speciesData.json' },
+        path: '/v1/speciesData.json'
       }
       let callback = (_, theResult) => {
         result = theResult
         done()
       }
-      objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 0 })
+      uberRouter._testonly.doHandle(event, callback, stubDb, () => { return 0 })
     })
 
     it('should behave weirdly when the user supplies wierd params', () => {
@@ -153,13 +150,14 @@ describe('/v1/speciesData-json', () => {
         body: null, // don't supply 'speciesName' (or even a body)
         queryStringParameters: {
           start: '0'
-        }
+        },
+        path: '/v1/speciesData.json'
       }
       let callback = (_, theResult) => {
         result = theResult
         done()
       }
-      objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 42 })
+      uberRouter._testonly.doHandle(event, callback, stubDb, () => { return 42 })
     })
 
     it('should return a 400 response when we do not supply speciesNames', () => {
@@ -184,7 +182,9 @@ describe('/v1/speciesData-json', () => {
       spyOn(stubDb, 'execSelectPromise').and.throwError('some error')
       let event = {
         body: JSON.stringify({speciesNames: ['species one']}),
-        queryStringParameters: null
+        queryStringParameters: null,
+        requestContext: { path: '/v1/speciesData.json' },
+        path: '/v1/speciesData.json'
       }
       let callback = (_, theResult) => {
         consoleSilencer.resetConsoleError()
@@ -192,7 +192,7 @@ describe('/v1/speciesData-json', () => {
         done()
       }
       consoleSilencer.silenceConsoleError()
-      objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 42 })
+      uberRouter._testonly.doHandle(event, callback, stubDb, () => { return 42 })
     })
 
     it('should return a 500 response when executing a query fails', () => {

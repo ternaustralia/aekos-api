@@ -31,9 +31,8 @@ describe('/v1/getEnvironmentBySpecies-json', function () {
       let event = {
         queryStringParameters: null,
         body: JSON.stringify({ speciesNames: ['species one'] }),
-        requestContext: {
-          path: '/v1/getEnvironmentBySpecies.json'
-        },
+        requestContext: { path: '/v1/getEnvironmentBySpecies.json' },
+        path: '/v1/getEnvironmentBySpecies.json',
         headers: {
           Host: 'api.aekos.org.au',
           'X-Forwarded-Proto': 'https'
@@ -93,9 +92,8 @@ describe('/v1/getEnvironmentBySpecies-json', function () {
           pageSize: '30'
         },
         body: JSON.stringify({ speciesNames: ['species one', 'species two'] }),
-        requestContext: {
-          path: '/v1/getEnvironmentBySpecies.json'
-        },
+        requestContext: { path: '/v1/getEnvironmentBySpecies.json' },
+        path: '/v1/getEnvironmentBySpecies.json',
         headers: {
           Host: 'api.aekos.org.au',
           'X-Forwarded-Proto': 'https'

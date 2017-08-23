@@ -1,5 +1,5 @@
 'use strict'
-let objectUnderTest = require('../speciesData-csv')
+let uberRouter = require('../uberRouter')
 let StubDB = require('./StubDB')
 
 describe('/v1/speciesData-csv', () => {
@@ -37,15 +37,14 @@ describe('/v1/speciesData-csv', () => {
           Host: 'api.aekos.org.au',
           'X-Forwarded-Proto': 'https'
         },
-        requestContext: {
-          path: '/v1/speciesData.csv'
-        }
+        requestContext: { path: '/v1/speciesData.csv' },
+        path: '/v1/speciesData.csv'
       }
       let callback = (_, theResult) => {
         result = theResult
         done()
       }
-      objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 42 })
+      uberRouter._testonly.doHandle(event, callback, stubDb, () => { return 42 })
     })
 
     it('should return a 200 response when we do a simple request', () => {

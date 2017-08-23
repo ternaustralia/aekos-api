@@ -18,9 +18,8 @@ describe('/v1/getSpeciesByTrait-json', () => {
       let event = {
         queryStringParameters: null,
         body: JSON.stringify({traitNames: ['trait one']}),
-        requestContext: {
-          path: '/v1/getSpeciesByTrait.json'
-        },
+        requestContext: { path: '/v1/getSpeciesByTrait.json' },
+        path: '/v1/getSpeciesByTrait.json',
         headers: {
           Host: 'api.aekos.org.au',
           'X-Forwarded-Proto': 'https'
@@ -70,9 +69,8 @@ describe('/v1/getSpeciesByTrait-json', () => {
           pageSize: '50'
         },
         body: JSON.stringify({traitNames: ['trait one', 'trait two']}),
-        requestContext: {
-          path: '/v1/getSpeciesByTrait.json'
-        },
+        requestContext: { path: '/v1/getSpeciesByTrait.json' },
+        path: '/v1/getSpeciesByTrait.json',
         headers: {
           Host: 'api.aekos.org.au',
           'X-Forwarded-Proto': 'https'

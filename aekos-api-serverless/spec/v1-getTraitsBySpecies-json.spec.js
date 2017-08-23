@@ -24,9 +24,8 @@ describe('/v1/getTraitsBySpecies-json', () => {
       let event = {
         queryStringParameters: null,
         body: JSON.stringify({speciesNames: ['species one']}),
-        requestContext: {
-          path: '/v1/getTraitsBySpecies.json'
-        },
+        requestContext: { path: '/v1/getTraitsBySpecies.json' },
+        path: '/v1/getTraitsBySpecies.json',
         headers: {
           Host: 'api.aekos.org.au',
           'X-Forwarded-Proto': 'https'

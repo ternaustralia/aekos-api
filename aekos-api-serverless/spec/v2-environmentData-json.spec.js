@@ -2,6 +2,7 @@
 let Set = require('collections/set')
 let StubDB = require('./StubDB')
 let objectUnderTest = require('../environmentData-json')
+let uberRouter = require('../uberRouter')
 
 describe('/v2/environmentData-json', () => {
   describe('.doHandle()', () => {
@@ -121,15 +122,14 @@ describe('/v2/environmentData-json', () => {
           Host: 'api.aekos.org.au',
           'X-Forwarded-Proto': 'https'
         },
-        requestContext: {
-          path: '/v2/environmentData.json'
-        }
+        requestContext: { path: '/v2/environmentData.json' },
+        path: '/v2/environmentData.json'
       }
       let callback = (_, theResult) => {
         result = theResult
         done()
       }
-      objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 42 })
+      uberRouter._testonly.doHandle(event, callback, stubDb, () => { return 42 })
     })
 
     it('should return a 200 response when the minimum required parameters are supplied', () => {
@@ -308,15 +308,14 @@ describe('/v2/environmentData-json', () => {
           Host: 'api.aekos.org.au',
           'X-Forwarded-Proto': 'https'
         },
-        requestContext: {
-          path: '/v2/environmentData.json'
-        }
+        requestContext: { path: '/v2/environmentData.json' },
+        path: '/v2/environmentData.json'
       }
       let callback = (_, theResult) => {
         result = theResult
         done()
       }
-      objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 42 })
+      uberRouter._testonly.doHandle(event, callback, stubDb, () => { return 42 })
     })
 
     it('should return a 200 response when all parameters are supplied', () => {
@@ -402,15 +401,14 @@ describe('/v2/environmentData-json', () => {
           Host: 'api.aekos.org.au',
           'X-Forwarded-Proto': 'https'
         },
-        requestContext: {
-          path: '/v2/environmentData.json'
-        }
+        requestContext: { path: '/v2/environmentData.json' },
+        path: '/v2/environmentData.json'
       }
       let callback = (_, theResult) => {
         result = theResult
         done()
       }
-      objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 42 })
+      uberRouter._testonly.doHandle(event, callback, stubDb, () => { return 42 })
     })
 
     it('should handle site visit records that have no variables', () => {
@@ -454,13 +452,15 @@ describe('/v2/environmentData-json', () => {
       let stubDb = new StubDB()
       let event = {
         body: null, // don't supply 'speciesNames'
-        queryStringParameters: null
+        queryStringParameters: null,
+        requestContext: { path: '/v2/environmentData.json' },
+        path: '/v2/environmentData.json'
       }
       let callback = (_, theResult) => {
         result = theResult
         done()
       }
-      objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 42 })
+      uberRouter._testonly.doHandle(event, callback, stubDb, () => { return 42 })
     })
 
     it('should return a 400 response when we do not supply speciesNames', () => {

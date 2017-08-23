@@ -1,5 +1,6 @@
 'use strict'
 let objectUnderTest = require('../speciesData-json')
+let uberRouter = require('../uberRouter')
 let StubDB = require('./StubDB')
 
 describe('/v2/speciesData-json', () => {
@@ -29,15 +30,14 @@ describe('/v2/speciesData-json', () => {
           Host: 'api.aekos.org.au',
           'X-Forwarded-Proto': 'https'
         },
-        requestContext: {
-          path: '/v2/speciesData.json'
-        }
+        requestContext: { path: '/v2/speciesData.json' },
+        path: '/v2/speciesData.json'
       }
       let callback = (_, theResult) => {
         result = theResult
         done()
       }
-      objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 42 })
+      uberRouter._testonly.doHandle(event, callback, stubDb, () => { return 42 })
     })
 
     it('should return a 200 response when all params are supplied', () => {
@@ -94,15 +94,14 @@ describe('/v2/speciesData-json', () => {
           Host: 'api.aekos.org.au',
           'X-Forwarded-Proto': 'https'
         },
-        requestContext: {
-          path: '/v2/speciesData.json'
-        }
+        requestContext: { path: '/v2/speciesData.json' },
+        path: '/v2/speciesData.json'
       }
       let callback = (_, theResult) => {
         result = theResult
         done()
       }
-      objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 0 })
+      uberRouter._testonly.doHandle(event, callback, stubDb, () => { return 0 })
     })
 
     it('should calculate paging information when only start is provided', () => {
@@ -130,15 +129,14 @@ describe('/v2/speciesData-json', () => {
           Host: 'api.aekos.org.au',
           'X-Forwarded-Proto': 'https'
         },
-        requestContext: {
-          path: '/v2/speciesData.json'
-        }
+        requestContext: { path: '/v2/speciesData.json' },
+        path: '/v2/speciesData.json'
       }
       let callback = (_, theResult) => {
         result = theResult
         done()
       }
-      objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 0 })
+      uberRouter._testonly.doHandle(event, callback, stubDb, () => { return 0 })
     })
 
     it('should behave weirdly when the user supplies wierd params', () => {

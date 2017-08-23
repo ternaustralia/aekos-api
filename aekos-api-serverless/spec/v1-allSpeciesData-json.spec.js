@@ -1,5 +1,5 @@
 'use strict'
-let objectUnderTest = require('../allSpeciesData-json')
+let uberRouter = require('../uberRouter')
 let StubDB = require('./StubDB')
 
 describe('/v1/allSpeciesData-json', () => {
@@ -28,15 +28,14 @@ describe('/v1/allSpeciesData-json', () => {
           Host: 'api.aekos.org.au',
           'X-Forwarded-Proto': 'https'
         },
-        requestContext: {
-          path: '/v1/allSpeciesData.json'
-        }
+        requestContext: { path: '/v1/allSpeciesData.json' },
+        path: '/v1/allSpeciesData.json'
       }
       let callback = (_, theResult) => {
         result = theResult
         done()
       }
-      objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 42 })
+      uberRouter._testonly.doHandle(event, callback, stubDb, () => { return 42 })
     })
 
     it('should return a 200 response when all params are supplied', () => {
@@ -90,15 +89,14 @@ describe('/v1/allSpeciesData-json', () => {
           Host: 'api.aekos.org.au',
           'X-Forwarded-Proto': 'https'
         },
-        requestContext: {
-          path: '/v1/allSpeciesData.json'
-        }
+        requestContext: { path: '/v1/allSpeciesData.json' },
+        path: '/v1/allSpeciesData.json'
       }
       let callback = (_, theResult) => {
         result = theResult
         done()
       }
-      objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 42 })
+      uberRouter._testonly.doHandle(event, callback, stubDb, () => { return 42 })
     })
 
     it('should return a 200 response and assume defaults when no parameters are supplied', () => {

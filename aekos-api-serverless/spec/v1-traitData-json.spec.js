@@ -1,5 +1,5 @@
 'use strict'
-let objectUnderTest = require('../traitData-json')
+let uberRouter = require('../uberRouter')
 let StubDB = require('./StubDB')
 
 describe('/v1/traitData-json', () => {
@@ -40,15 +40,14 @@ describe('/v1/traitData-json', () => {
           Host: 'api.aekos.org.au',
           'X-Forwarded-Proto': 'https'
         },
-        requestContext: {
-          path: '/v1/traitData.json'
-        }
+        requestContext: { path: '/v1/traitData.json' },
+        path: '/v1/traitData.json'
       }
       let callback = (_, theResult) => {
         result = theResult
         done()
       }
-      objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 42 })
+      uberRouter._testonly.doHandle(event, callback, stubDb, () => { return 42 })
     })
 
     it('should return a 200 response when we return all traits for a species', () => {
@@ -110,15 +109,14 @@ describe('/v1/traitData-json', () => {
           Host: 'api.aekos.org.au',
           'X-Forwarded-Proto': 'https'
         },
-        requestContext: {
-          path: '/v1/traitData.json'
-        }
+        requestContext: { path: '/v1/traitData.json' },
+        path: '/v1/traitData.json'
       }
       let callback = (_, theResult) => {
         result = theResult
         done()
       }
-      objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 42 })
+      uberRouter._testonly.doHandle(event, callback, stubDb, () => { return 42 })
     })
 
     it('should echo the supplied trait name', () => {
@@ -146,15 +144,14 @@ describe('/v1/traitData-json', () => {
           Host: 'api.aekos.org.au',
           'X-Forwarded-Proto': 'https'
         },
-        requestContext: {
-          path: '/v1/traitData.json'
-        }
+        requestContext: { path: '/v1/traitData.json' },
+        path: '/v1/traitData.json'
       }
       let callback = (_, theResult) => {
         result = theResult
         done()
       }
-      objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 42 })
+      uberRouter._testonly.doHandle(event, callback, stubDb, () => { return 42 })
     })
 
     it('should return a 400 response when we do not supply speciesNames', () => {

@@ -8,16 +8,12 @@ let v2CsvHeaders = allSpeciesDataCsv.v2CsvHeaders
 module.exports.v1CsvHeaders = v1CsvHeaders
 module.exports.v2CsvHeaders = v2CsvHeaders
 
-module.exports.handler = (event, context, callback) => {
-  let db = require('./db-helper')
-  doHandle(event, callback, db, r.calculateElapsedTime)
-}
-
 const validator = r.compositeValidator([
   traitDataJson.validator,
   r.downloadParamValidator
 ])
 
+module.exports.doHandle = doHandle
 function doHandle (event, callback, db, elapsedTimeCalculator) {
   r.handleCsvPost(event, callback, db, validator, responder, {
     event: event,

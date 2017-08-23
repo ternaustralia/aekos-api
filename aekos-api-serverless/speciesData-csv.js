@@ -3,16 +3,12 @@ let r = require('./response-helper')
 let speciesDataJson = require('./speciesData-json')
 let allSpeciesDataCsv = require('./allSpeciesData-csv')
 
-module.exports.handler = (event, context, callback) => {
-  let db = require('./db-helper')
-  doHandle(event, callback, db, r.calculateElapsedTime)
-}
-
 const validator = r.compositeValidator([
   speciesDataJson.validator,
   r.downloadParamValidator
 ])
 
+module.exports.doHandle = doHandle
 function doHandle (event, callback, db, elapsedTimeCalculator) {
   r.handleCsvPost(event, callback, db, validator, responder, {
     event: event,
@@ -34,8 +30,4 @@ function responder (requestBody, db, queryStringParameters, extrasProvider) {
       })
     }).catch(reject)
   })
-}
-
-module.exports._testonly = {
-  doHandle: doHandle
 }

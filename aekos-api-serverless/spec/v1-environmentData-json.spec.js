@@ -1,6 +1,6 @@
 'use strict'
+let uberRouter = require('../uberRouter')
 let StubDB = require('./StubDB')
-let objectUnderTest = require('../environmentData-json')
 
 describe('/v1/environmentData-json', () => {
   describe('.doHandle()', () => {
@@ -54,15 +54,14 @@ describe('/v1/environmentData-json', () => {
           Host: 'api.aekos.org.au',
           'X-Forwarded-Proto': 'https'
         },
-        requestContext: {
-          path: '/v1/environmentData.json'
-        }
+        requestContext: { path: '/v1/environmentData.json' },
+        path: '/v1/environmentData.json'
       }
       let callback = (_, theResult) => {
         result = theResult
         done()
       }
-      objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 42 })
+      uberRouter._testonly.doHandle(event, callback, stubDb, () => { return 42 })
     })
 
     it('should return a 200 response when the minimum required parameters are supplied', () => {

@@ -9,11 +9,7 @@ const varNamesParam = yaml.load('./constants.yml').paramNames.varName.multiple
 const recordsHeldField = 'recordsHeld'
 const visitKeySeparator = '#'
 
-module.exports.handler = (event, context, callback) => {
-  let db = require('./db-helper')
-  doHandle(event, callback, db, r.calculateElapsedTime)
-}
-
+module.exports.doHandle = doHandle
 function doHandle (event, callback, db, elapsedTimeCalculator) {
   r.handleJsonPost(event, callback, db, validator, responder, {
     event: event,

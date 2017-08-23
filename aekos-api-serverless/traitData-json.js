@@ -6,11 +6,7 @@ let yaml = require('yamljs')
 const speciesNamesParam = yaml.load('./constants.yml').paramNames.speciesName.multiple
 const traitNamesParam = yaml.load('./constants.yml').paramNames.traitName.multiple
 
-module.exports.handler = (event, context, callback) => {
-  let db = require('./db-helper')
-  doHandle(event, callback, db, r.calculateElapsedTime)
-}
-
+module.exports.doHandle = doHandle
 function doHandle (event, callback, db, elapsedTimeCalculator) {
   r.handleJsonPost(event, callback, db, validator, responder, {
     event: event,

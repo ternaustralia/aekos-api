@@ -7,17 +7,13 @@ const rowsParam = yaml.load('./constants.yml').paramNames.ROWS
 const defaultStart = yaml.load('./constants.yml').defaults.START
 const defaultRows = yaml.load('./constants.yml').defaults.ROWS
 
-module.exports.handler = (event, context, callback) => {
-  let db = require('./db-helper')
-  doHandle(event, callback, db, r.calculateElapsedTime)
-}
-
 const validator = r.compositeValidator([
   r.startValidator,
   r.rowsValidator
 ])
 module.exports.validator = validator
 
+module.exports.doHandle = doHandle
 function doHandle (event, callback, db, elapsedTimeCalculator) {
   r.handleJsonGet(event, callback, db, validator, responder, {
     event: event,
@@ -97,10 +93,6 @@ function removeV2FieldsFrom (successResult) {
     delete curr.locationName
     delete curr.datasetName
   })
-}
-
-module.exports._testonly = {
-  doHandle: doHandle
 }
 
 function coalesce (val1, val2) {

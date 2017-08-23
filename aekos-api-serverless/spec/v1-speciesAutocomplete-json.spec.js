@@ -10,9 +10,8 @@ describe('/v1/speciesAutocomplete-json', () => {
         queryStringParameters: {
           q: 'aca'
         },
-        requestContext: {
-          path: '/v1/speciesAutocomplete.json'
-        },
+        requestContext: { path: '/v1/speciesAutocomplete.json' },
+        path: '/v1/speciesAutocomplete.json',
         headers: {
           Host: 'api.aekos.org.au',
           'X-Forwarded-Proto': 'https'

@@ -38,16 +38,12 @@ const downloadParam = yaml.load('./constants.yml').paramNames.DOWNLOAD
 module.exports.v1CsvHeaders = v1CsvHeaders
 module.exports.v2CsvHeaders = v2CsvHeaders
 
-module.exports.handler = (event, context, callback) => {
-  let db = require('./db-helper')
-  doHandle(event, callback, db, r.calculateElapsedTime)
-}
-
 const validator = r.compositeValidator([
   allSpeciesDataJson.validator,
   r.downloadParamValidator
 ])
 
+module.exports.doHandle = doHandle
 function doHandle (event, callback, db, elapsedTimeCalculator) {
   r.handleCsvGet(event, callback, db, validator, responder, {
     event: event,
@@ -81,7 +77,6 @@ function getCsvHeadersForRequestedVersion (event) {
 }
 
 module.exports._testonly = {
-  doHandle: doHandle,
   getCsvHeaderRow: getCsvHeaderRow,
   validator: validator
 }

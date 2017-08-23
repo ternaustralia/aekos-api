@@ -1,5 +1,6 @@
 'use strict'
 let objectUnderTest = require('../allSpeciesData-json')
+let uberRouter = require('../uberRouter')
 let StubDB = require('./StubDB')
 let ConsoleSilencer = require('./ConsoleSilencer')
 let consoleSilencer = new ConsoleSilencer()
@@ -30,15 +31,14 @@ describe('/v2/allSpeciesData-json', () => {
           Host: 'api.aekos.org.au',
           'X-Forwarded-Proto': 'https'
         },
-        requestContext: {
-          path: '/v2/allSpeciesData.json'
-        }
+        requestContext: { path: '/v2/allSpeciesData.json' },
+        path: '/v2/allSpeciesData.json'
       }
       let callback = (_, theResult) => {
         result = theResult
         done()
       }
-      objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 42 })
+      uberRouter._testonly.doHandle(event, callback, stubDb, () => { return 42 })
     })
 
     it('should return a 200 response when all params are supplied', () => {
@@ -91,15 +91,14 @@ describe('/v2/allSpeciesData-json', () => {
           Host: 'api.aekos.org.au',
           'X-Forwarded-Proto': 'https'
         },
-        requestContext: {
-          path: '/v2/allSpeciesData.json'
-        }
+        requestContext: { path: '/v2/allSpeciesData.json' },
+        path: '/v2/allSpeciesData.json'
       }
       let callback = (_, theResult) => {
         result = theResult
         done()
       }
-      objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 42 })
+      uberRouter._testonly.doHandle(event, callback, stubDb, () => { return 42 })
     })
 
     it('should return a 200 response and assume defaults when no parameters are supplied', () => {
@@ -156,15 +155,14 @@ describe('/v2/allSpeciesData-json', () => {
           Host: 'maazptt3zb.execute-api.us-west-1.amazonaws.com',
           'X-Forwarded-Proto': 'https'
         },
-        requestContext: {
-          path: '/dev/v2/allSpeciesData.json'
-        }
+        requestContext: { path: '/v2/allSpeciesData.json' },
+        path: '/v2/allSpeciesData.json'
       }
       let callback = (_, theResult) => {
         result = theResult
         done()
       }
-      objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 42 })
+      uberRouter._testonly.doHandle(event, callback, stubDb, () => { return 42 })
     })
 
     it('should work as expected when we use the out-of-the-box AWS URL including stage in the path (not a custom domain)', () => {
@@ -174,8 +172,8 @@ describe('/v2/allSpeciesData-json', () => {
         'Access-Control-Allow-Credentials': true,
         'Access-Control-Expose-Headers': 'link',
         'Content-Type': "'application/json'",
-        link: '<https://maazptt3zb.execute-api.us-west-1.amazonaws.com/dev/v2/allSpeciesData.json?rows=15&start=15>; rel="next", ' +
-              '<https://maazptt3zb.execute-api.us-west-1.amazonaws.com/dev/v2/allSpeciesData.json?rows=15&start=30>; rel="last"'
+        link: '<https://maazptt3zb.execute-api.us-west-1.amazonaws.com/v2/allSpeciesData.json?rows=15&start=15>; rel="next", ' +
+              '<https://maazptt3zb.execute-api.us-west-1.amazonaws.com/v2/allSpeciesData.json?rows=15&start=30>; rel="last"'
       })
       expect(JSON.parse(result.body)).toEqual({
         responseHeader: {
@@ -208,14 +206,17 @@ describe('/v2/allSpeciesData-json', () => {
     beforeEach(done => {
       let stubDb = new StubDB()
       spyOn(stubDb, 'execSelectPromise').and.throwError('some error')
-      let event = {}
+      let event = {
+        requestContext: { path: '/v2/allSpeciesData.json' },
+        path: '/v2/allSpeciesData.json'
+      }
       let callback = (_, theResult) => {
         consoleSilencer.resetConsoleError()
         result = theResult
         done()
       }
       consoleSilencer.silenceConsoleError()
-      objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 42 })
+      uberRouter._testonly.doHandle(event, callback, stubDb, () => { return 42 })
     })
 
     it('should return a 500 response when executing a query fails', () => {

@@ -11,9 +11,7 @@ describe('/v1/speciesSummary-json', () => {
         [{ speciesName: 'species one', recordsHeld: 123 }]
       ])
       let event = {
-        requestContext: {
-          path: '/v1/speciesSummary.json'
-        },
+        path: '/v1/speciesSummary.json',
         body: JSON.stringify({ speciesNames: ['species one'] })
       }
       let callback = (_, theResult) => {

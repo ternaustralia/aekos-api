@@ -4,17 +4,13 @@ let yaml = require('yamljs')
 let allSpeciesDataJson = require('./allSpeciesData-json')
 const speciesNamesParam = yaml.load('./constants.yml').paramNames.speciesName.multiple
 
-module.exports.handler = (event, context, callback) => {
-  let db = require('./db-helper')
-  doHandle(event, callback, db, r.calculateElapsedTime)
-}
-
 const validator = r.compositeValidator([
   allSpeciesDataJson.validator,
   r.speciesNamesValidator
 ])
 module.exports.validator = validator
 
+module.exports.doHandle = doHandle
 function doHandle (event, callback, db, elapsedTimeCalculator) {
   r.handleJsonPost(event, callback, db, validator, responder, {
     event: event,
@@ -50,8 +46,7 @@ function doQuery (event, params, processStart, db, elapsedTimeCalculator) {
 
 module.exports._testonly = {
   getRecordsSql: getRecordsSql,
-  getCountSql: getCountSql,
-  doHandle: doHandle
+  getCountSql: getCountSql
 }
 
 function getRecordsSql (escapedSpeciesName, start, rows) {

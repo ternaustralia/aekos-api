@@ -15,9 +15,7 @@ describe('/v2/getTraitVocab-json', function () {
     let result = null
     beforeEach(done => {
       let event = {
-        requestContext: {
-          path: '/v2/getTraitVocab.json'
-        },
+        path: '/v2/getTraitVocab.json',
         headers: {
           Host: 'api.aekos.org.au',
           'X-Forwarded-Proto': 'https'

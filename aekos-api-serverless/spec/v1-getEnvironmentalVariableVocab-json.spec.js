@@ -16,9 +16,7 @@ describe('/v1/getEnvironmentalVariableVocab-json', function () {
         done()
       }
       let event = {
-        requestContext: {
-          path: '/v1/getEnvironmentalVariableVocab.json'
-        }
+        path: '/v1/getEnvironmentalVariableVocab.json'
       }
       uberRouter._testonly.doHandle(event, callback, stubDb)
     })

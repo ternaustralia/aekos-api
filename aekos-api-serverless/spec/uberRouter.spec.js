@@ -9,9 +9,7 @@ describe('uberRouter', () => {
     let result = null
     beforeEach(done => {
       let event = {
-        requestContext: {
-          path: '/path/that/is/not/mapped'
-        }
+        path: '/path/that/is/not/mapped'
       }
       let callback = (_, theResult) => {
         consoleSilencer.resetConsoleError()

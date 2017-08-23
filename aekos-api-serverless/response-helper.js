@@ -275,12 +275,12 @@ function now () {
   return new Date().getTime()
 }
 
-function calculateElapsedTime (startMs) {
+function elapsedTimeCalculator (startMs) {
   return now() - startMs
 }
 
 function newContentNegotiationHandler (jsonHandler, csvHandler) {
-  return function (event, context, callback) {
+  return function (event, callback, db, elapsedTimeCalculator) {
     let urlSuffix = getUrlSuffix(event)
     let contentTypeIndicator
     switch (urlSuffix) {
@@ -296,10 +296,10 @@ function newContentNegotiationHandler (jsonHandler, csvHandler) {
     }
     switch (contentTypeIndicator) {
       case contentTypes.json:
-        jsonHandler.handler(event, context, callback)
+        jsonHandler.doHandle(event, callback, db, elapsedTimeCalculator)
         break
       case contentTypes.csv:
-        csvHandler.handler(event, context, callback)
+        csvHandler.doHandle(event, callback, db, elapsedTimeCalculator)
         break
       case contentTypes.unhandled:
         jsonResponseHelpers.badRequest(callback, `Cannot handle the specified Accept header '${event.headers.Accept}`)
@@ -337,13 +337,8 @@ class VersionHandler {
   }
 
   handle (event) {
-    let path = event.requestContext.path
-    let isStageInPath = /^\/\w+\/v\d\//.test(path)
-    let pathWithoutStage = path
-    if (isStageInPath) {
-      pathWithoutStage = path.replace(/\/\w+/, '')
-    }
-    let versionPrefix = pathWithoutStage.substr(0, this._versionPrefixLength)
+    let path = event.path // this path won't have stage prefixes
+    let versionPrefix = path.substr(0, this._versionPrefixLength)
     let result = this._config[versionPrefix]
     if (result) {
       return result
@@ -683,7 +678,7 @@ module.exports = {
   calculateOffset: calculateOffset,
   resolveVocabCode: resolveVocabCode,
   now: now,
-  calculateElapsedTime: calculateElapsedTime,
+  calculateElapsedTime: elapsedTimeCalculator,
   contentTypes: contentTypes,
   calculatePageNumber: calculatePageNumber,
   calculateTotalPages: calculateTotalPages,

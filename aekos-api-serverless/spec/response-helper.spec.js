@@ -1606,9 +1606,7 @@ describe('response-helper', () => {
   describe('.newVersionHandler()', () => {
     it('should match a single version', () => {
       let event = {
-        requestContext: {
-          path: '/v1/someResource'
-        }
+        path: '/v1/someResource'
       }
       let objectUnderTest = responseHelper.newVersionHandler({
         '/v1/': () => {
@@ -1621,9 +1619,7 @@ describe('response-helper', () => {
 
     it('should match the correct version out of many', () => {
       let event = {
-        requestContext: {
-          path: '/v2/someResource'
-        }
+        path: '/v2/someResource'
       }
       let objectUnderTest = responseHelper.newVersionHandler({
         '/v1/': () => {
@@ -1637,26 +1633,9 @@ describe('response-helper', () => {
       expect(result()).toBe('two')
     })
 
-    it('should strip the stage when present', () => {
-      let event = {
-        requestContext: {
-          path: '/dev/v1/someResource'
-        }
-      }
-      let objectUnderTest = responseHelper.newVersionHandler({
-        '/v1/': () => {
-          return 'one'
-        }
-      })
-      let result = objectUnderTest.handle(event)
-      expect(result()).toBe('one')
-    })
-
     it('should be able to handle non-functions and the values in the config', () => {
       let event = {
-        requestContext: {
-          path: '/dev/v1/someResource'
-        }
+        path: '/v1/someResource'
       }
       let objectUnderTest = responseHelper.newVersionHandler({
         '/v1/': 'some value'
@@ -1678,9 +1657,7 @@ describe('response-helper', () => {
     it('should throw the expected error when we handle a path that is not in the config', () => {
       try {
         let event = {
-          requestContext: {
-            path: '/v3/someResource'
-          }
+          path: '/v3/someResource'
         }
         let objectUnderTest = responseHelper.newVersionHandler({
           '/v1/': () => {}
@@ -1699,7 +1676,7 @@ describe('response-helper', () => {
       let isCalled = false
 
       return {
-        handler: () => {
+        doHandle: () => {
           isCalled = true
         },
         hasBeenCalled: () => {
@@ -1710,7 +1687,7 @@ describe('response-helper', () => {
 
     it('should call the JSON handler when we have a JSON Accept header', () => {
       let trackerModule = new TrackCallsModule()
-      let objectUnderTest = responseHelper.newContentNegotiationHandler(trackerModule, () => { })
+      let objectUnderTest = responseHelper.newContentNegotiationHandler(trackerModule, {})
       let event = {
         headers: {
           Accept: 'application/json'
@@ -1722,7 +1699,7 @@ describe('response-helper', () => {
 
     it('should call the JSON handler when we have a .json suffix on URL', () => {
       let trackerModule = new TrackCallsModule()
-      let objectUnderTest = responseHelper.newContentNegotiationHandler(trackerModule, () => { })
+      let objectUnderTest = responseHelper.newContentNegotiationHandler(trackerModule, {})
       let event = {
         path: '/some/path.json'
       }
@@ -1732,7 +1709,7 @@ describe('response-helper', () => {
 
     it('should call the CSV handler when we have a CSV Accept header', () => {
       let trackerModule = new TrackCallsModule()
-      let objectUnderTest = responseHelper.newContentNegotiationHandler(() => { }, trackerModule)
+      let objectUnderTest = responseHelper.newContentNegotiationHandler({}, trackerModule)
       let event = {
         headers: {
           Accept: 'text/csv'
@@ -1744,7 +1721,7 @@ describe('response-helper', () => {
 
     it('should call the CSV handler when we have a .csv suffix on URL (ignoring the Accept header)', () => {
       let trackerModule = new TrackCallsModule()
-      let objectUnderTest = responseHelper.newContentNegotiationHandler(() => { }, trackerModule)
+      let objectUnderTest = responseHelper.newContentNegotiationHandler({}, trackerModule)
       let event = {
         path: '/some/path.csv',
         headers: {
@@ -1755,17 +1732,72 @@ describe('response-helper', () => {
       expect(trackerModule.hasBeenCalled()).toBeTruthy()
     })
 
-    it('should return a 400 when it cannot handle the Accept header', done => {
-      let trackerModule = new TrackCallsModule()
-      let objectUnderTest = responseHelper.newContentNegotiationHandler(() => { }, trackerModule)
-      let event = {
-        headers: {
-          Accept: 'something/weird'
+    describe('', () => {
+      let result = null
+      beforeEach(done => {
+        let trackerModule = new TrackCallsModule()
+        let objectUnderTest = responseHelper.newContentNegotiationHandler({}, trackerModule)
+        let event = {
+          headers: {
+            Accept: 'something/weird'
+          }
         }
-      }
-      objectUnderTest(event, null, (_, result) => {
+        let callback = (_, theResult) => {
+          result = theResult
+          done()
+        }
+        objectUnderTest(event, callback, null)
+      })
+
+      it('should return a 400 when it cannot handle the Accept header', () => {
         expect(result.statusCode).toBe(400)
-        done()
+      })
+    })
+
+    describe('', () => {
+      let passedDb = null
+      beforeEach(done => {
+        let handler = {
+          doHandle: (event, callback, db) => {
+            passedDb = db
+            done()
+          }
+        }
+        let objectUnderTest = responseHelper.newContentNegotiationHandler({}, handler)
+        let event = {
+          path: '/some/path.csv'
+        }
+        let callback = null
+        let db = { flag: 'the DB!' }
+        objectUnderTest(event, callback, db)
+      })
+
+      it('should pass the DB to the inner handler', () => {
+        expect(passedDb.flag).toBe('the DB!')
+      })
+    })
+
+    describe('', () => {
+      let passedElapsedTimeCalculator = null
+      beforeEach(done => {
+        let handler = {
+          doHandle: (event, callback, db, elapsedTimeCalculator) => {
+            passedElapsedTimeCalculator = elapsedTimeCalculator
+            done()
+          }
+        }
+        let objectUnderTest = responseHelper.newContentNegotiationHandler({}, handler)
+        let event = {
+          path: '/some/path.csv'
+        }
+        let callback = null
+        let db = null
+        let elapsedTimeCalculator = { flag: 'the calculator!' }
+        objectUnderTest(event, callback, db, elapsedTimeCalculator)
+      })
+
+      it('should pass the elapsedTimeCalculator to the inner handler', () => {
+        expect(passedElapsedTimeCalculator.flag).toBe('the calculator!')
       })
     })
   })

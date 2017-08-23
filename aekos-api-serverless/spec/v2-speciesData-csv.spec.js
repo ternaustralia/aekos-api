@@ -1,5 +1,5 @@
 'use strict'
-let objectUnderTest = require('../speciesData-csv')
+let uberRouter = require('../uberRouter')
 let StubDB = require('./StubDB')
 
 describe('/v2/speciesData.csv', () => {
@@ -39,15 +39,14 @@ describe('/v2/speciesData.csv', () => {
           Host: 'api.aekos.org.au',
           'X-Forwarded-Proto': 'https'
         },
-        requestContext: {
-          path: '/v2/speciesData.csv'
-        }
+        requestContext: { path: '/v2/speciesData.csv' },
+        path: '/v2/speciesData.csv'
       }
       let callback = (_, theResult) => {
         result = theResult
         done()
       }
-      objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 42 })
+      uberRouter._testonly.doHandle(event, callback, stubDb, () => { return 42 })
     })
 
     it('should return a 200 response when we do a simple request', () => {
@@ -104,15 +103,14 @@ describe('/v2/speciesData.csv', () => {
           Host: 'api.aekos.org.au',
           'X-Forwarded-Proto': 'https'
         },
-        requestContext: {
-          path: '/v2/allSpeciesData.csv'
-        }
+        requestContext: { path: '/v2/speciesData.csv' },
+        path: '/v2/speciesData.csv'
       }
       let callback = (_, theResult) => {
         result = theResult
         done()
       }
-      objectUnderTest._testonly.doHandle(event, callback, stubDb, () => { return 42 })
+      uberRouter._testonly.doHandle(event, callback, stubDb, () => { return 42 })
     })
 
     it('should respond as a download when the download param is supplied', () => {

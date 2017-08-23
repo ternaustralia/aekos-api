@@ -27,9 +27,8 @@ describe('/v2/speciesAutocomplete-json', () => {
         queryStringParameters: {
           q: 'aca'
         },
-        requestContext: {
-          path: '/v2/speciesAutocomplete.json'
-        },
+        requestContext: { path: '/v2/speciesAutocomplete.json' },
+        path: '/v2/speciesAutocomplete.json',
         headers: {
           Host: 'api.aekos.org.au',
           'X-Forwarded-Proto': 'https'
@@ -71,9 +70,8 @@ describe('/v2/speciesAutocomplete-json', () => {
           start: '10',
           rows: '10'
         },
-        requestContext: {
-          path: '/v2/speciesAutocomplete.json'
-        },
+        requestContext: { path: '/v2/speciesAutocomplete.json' },
+        path: '/v2/speciesAutocomplete.json',
         headers: {
           Host: 'api.aekos.org.au',
           'X-Forwarded-Proto': 'https'
@@ -97,9 +95,8 @@ describe('/v2/speciesAutocomplete-json', () => {
         queryStringParameters: {
           q: 'aca'
         },
-        requestContext: {
-          path: '/v2/speciesAutocomplete.json'
-        },
+        requestContext: { path: '/v2/speciesAutocomplete.json' },
+        path: '/v2/speciesAutocomplete.json',
         headers: {
           Host: 'api.aekos.org.au',
           'X-Forwarded-Proto': 'https'
@@ -138,9 +135,8 @@ describe('/v2/speciesAutocomplete-json', () => {
     beforeEach(done => {
       let event = {
         queryStringParameters: null, // no 'q' param
-        requestContext: {
-          path: '/v2/speciesAutocomplete.json'
-        }
+        requestContext: { path: '/v2/speciesAutocomplete.json' },
+        path: '/v2/speciesAutocomplete.json'
       }
       let stubDb = new StubDB()
       let theCallback = (_, theResult) => {
