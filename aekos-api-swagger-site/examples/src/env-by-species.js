@@ -13,8 +13,7 @@ app.component('envBySpecies', {
   controller: 'EnvBySpeciesController'
 })
 
-app.controller('EnvBySpeciesController', function ($http, $scope, baseUrlService, commonHelpersService) {
-  var speciesRows = 20
+app.controller('EnvBySpeciesController', function ($http, $scope, baseUrlService, commonHelpersService, httpErrorHandler, alertingErrorHandler) {
   $scope.envDataAccept = 'application/json'
 
   $scope.isLoadVocabClicked = false
@@ -26,7 +25,7 @@ app.controller('EnvBySpeciesController', function ($http, $scope, baseUrlService
     $http.get(baseUrlService.getBaseUrl() + '/v2/getEnvironmentalVariableVocab.json').then(function (response) {
       $scope.isLoadingVars = false
       $scope.vars = response.data
-    }, errorHandler)
+    }, httpErrorHandler).catch(alertingErrorHandler)
   }
 
   function resetStep2 () {
@@ -57,7 +56,7 @@ app.controller('EnvBySpeciesController', function ($http, $scope, baseUrlService
       $scope.speciesSearchPrevPageUrl = commonHelpersService.getLink(parsedLinkHeader, 'prev')
       $scope.speciesSearchNextPageUrl = commonHelpersService.getLink(parsedLinkHeader, 'next')
       $scope.speciesSearchLastPageUrl = commonHelpersService.getLink(parsedLinkHeader, 'last')
-    }, errorHandler)
+    }, httpErrorHandler).catch(alertingErrorHandler)
   }
 
   $scope.isApplyVarFilter = false
@@ -124,12 +123,6 @@ app.controller('EnvBySpeciesController', function ($http, $scope, baseUrlService
       $scope.envDataPrevPageUrl = commonHelpersService.getLink(parsedLinkHeader, 'prev')
       $scope.envDataNextPageUrl = commonHelpersService.getLink(parsedLinkHeader, 'next')
       $scope.envDataLastPageUrl = commonHelpersService.getLink(parsedLinkHeader, 'last')
-    }, errorHandler)
+    }, httpErrorHandler).catch(alertingErrorHandler)
   }
 })
-
-function errorHandler (error) {
-  var msg = 'Something went wrong:'
-  alert(msg + error.message)
-  throw new Error(msg, error)
-}

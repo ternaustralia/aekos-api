@@ -13,8 +13,7 @@ app.component('speciesByTrait', {
   controller: 'SpeciesByTraitController'
 })
 
-app.controller('SpeciesByTraitController', function ($http, $scope, baseUrlService, commonHelpersService) {
-  var speciesPageSize = 100
+app.controller('SpeciesByTraitController', function ($http, $scope, baseUrlService, commonHelpersService, httpErrorHandler, alertingErrorHandler) {
   $scope.traitDataAccept = 'application/json'
 
   $scope.isLoadVocabClicked = false
@@ -27,7 +26,7 @@ app.controller('SpeciesByTraitController', function ($http, $scope, baseUrlServi
     $http.get(baseUrlService.getBaseUrl() + '/v2/getTraitVocab.json').then(function (response) {
       $scope.isLoadingTraits = false
       $scope.traits = response.data
-    }, errorHandler)
+    }, httpErrorHandler).catch(alertingErrorHandler)
   }
 
   function resetStep2 () {
@@ -66,7 +65,7 @@ app.controller('SpeciesByTraitController', function ($http, $scope, baseUrlServi
       $scope.speciesSearchPrevPageUrl = commonHelpersService.getLink(parsedLinkHeader, 'prev')
       $scope.speciesSearchNextPageUrl = commonHelpersService.getLink(parsedLinkHeader, 'next')
       $scope.speciesSearchLastPageUrl = commonHelpersService.getLink(parsedLinkHeader, 'last')
-    }, errorHandler)
+    }, httpErrorHandler).catch(alertingErrorHandler)
   }
 
   $scope.isApplyTraitFilter = true
@@ -133,12 +132,6 @@ app.controller('SpeciesByTraitController', function ($http, $scope, baseUrlServi
       $scope.traitDataPrevPageUrl = commonHelpersService.getLink(parsedLinkHeader, 'prev')
       $scope.traitDataNextPageUrl = commonHelpersService.getLink(parsedLinkHeader, 'next')
       $scope.traitDataLastPageUrl = commonHelpersService.getLink(parsedLinkHeader, 'last')
-    }, errorHandler)
+    }, httpErrorHandler).catch(alertingErrorHandler)
   }
 })
-
-function errorHandler (error) {
-  var msg = 'Something went wrong:'
-  alert(msg + error.message)
-  throw new Error(msg, error)
-}

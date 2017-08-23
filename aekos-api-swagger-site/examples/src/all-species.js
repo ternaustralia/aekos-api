@@ -13,7 +13,7 @@ app.component('allSpecies', {
   controller: 'AllSpeciesController'
 })
 
-app.controller('AllSpeciesController', function ($http, $scope, baseUrlService, commonHelpersService) {
+app.controller('AllSpeciesController', function ($http, $scope, baseUrlService, commonHelpersService, httpErrorHandler, alertingErrorHandler) {
   $scope.speciesDataAccept = 'application/json'
 
   function resetStep3 () {
@@ -66,12 +66,6 @@ app.controller('AllSpeciesController', function ($http, $scope, baseUrlService, 
       $scope.speciesDataPrevPageUrl = commonHelpersService.getLink(parsedLinkHeader, 'prev')
       $scope.speciesDataNextPageUrl = commonHelpersService.getLink(parsedLinkHeader, 'next')
       $scope.speciesDataLastPageUrl = commonHelpersService.getLink(parsedLinkHeader, 'last')
-    }, errorHandler)
+    }, httpErrorHandler).catch(alertingErrorHandler)
   }
 })
-
-function errorHandler (error) {
-  var msg = 'Something went wrong:'
-  alert(msg + error.message)
-  throw new Error(msg, error)
-}

@@ -15,6 +15,19 @@ app.config(function ($urlRouterProvider, $stateProvider) {
 
 app.constant('devBaseUrl', 'https://dev.api.aekos.org.au')
 
+app.constant('httpErrorHandler', function (error) {
+  var url = error.config.url
+  var method = error.config.method
+  var msg = 'Something went wrong: failed to ' + method + ' the url ' + url +
+    '. Check the developer console for more details.'
+  throw new Error(msg, error)
+})
+
+app.constant('alertingErrorHandler', function (error) {
+  console.error(error.message)
+  alert(error.message)
+})
+
 app.factory('baseUrlService', function (devBaseUrl) {
   var baseUrl = devBaseUrl
   return {
