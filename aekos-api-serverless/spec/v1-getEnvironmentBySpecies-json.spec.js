@@ -1,5 +1,5 @@
 'use strict'
-let objectUnderTest = require('../environmentBySpecies-json')
+let uberRouter = require('../uberRouter')
 let StubDB = require('./StubDB')
 
 describe('/v1/getEnvironmentBySpecies-json', function () {
@@ -43,7 +43,7 @@ describe('/v1/getEnvironmentBySpecies-json', function () {
         result = theResult
         done()
       }
-      objectUnderTest._testonly.doHandle(event, callback, stubDb)
+      uberRouter._testonly.doHandle(event, callback, stubDb)
     })
 
     it('should return the expected result', () => {
@@ -105,7 +105,7 @@ describe('/v1/getEnvironmentBySpecies-json', function () {
         result = theResult
         done()
       }
-      objectUnderTest._testonly.doHandle(event, callback, stubDb)
+      uberRouter._testonly.doHandle(event, callback, stubDb)
     })
 
     it('should use the paging params in the built SQL', () => {

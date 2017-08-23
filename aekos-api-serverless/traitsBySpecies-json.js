@@ -7,11 +7,7 @@ let envByS = require('./environmentBySpecies-json') // remove when we don't need
 const defaultPageSize = yaml.load('./constants.yml').defaults.PAGE_SIZE
 const defaultPageNum = yaml.load('./constants.yml').defaults.PAGE_NUM
 
-module.exports.handler = (event, context, callback) => {
-  let db = require('./db-helper')
-  doHandle(event, callback, db)
-}
-
+module.exports.doHandle = doHandle
 function doHandle (event, callback, db) {
   r.handleJsonPost(event, callback, db, validator, responder, {
     event: event
@@ -56,7 +52,6 @@ function responder (requestBody, db, queryStringObj) {
 module.exports._testonly = {
   getRecordsSql: getRecordsSql,
   getCountSql: getCountSql,
-  doHandle: doHandle,
   validator: validator
 }
 

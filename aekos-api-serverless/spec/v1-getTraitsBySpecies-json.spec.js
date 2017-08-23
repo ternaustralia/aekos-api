@@ -2,7 +2,7 @@
 let StubDB = require('./StubDB')
 
 describe('/v1/getTraitsBySpecies-json', () => {
-  let objectUnderTest = require('../traitsBySpecies-json')
+  let uberRouter = require('../uberRouter')
 
   describe('.doHandle()', () => {
     let expectedSql = `
@@ -25,7 +25,7 @@ describe('/v1/getTraitsBySpecies-json', () => {
         queryStringParameters: null,
         body: JSON.stringify({speciesNames: ['species one']}),
         requestContext: {
-          path: '/v1/getTraitBySpecies.json'
+          path: '/v1/getTraitsBySpecies.json'
         },
         headers: {
           Host: 'api.aekos.org.au',
@@ -41,7 +41,7 @@ describe('/v1/getTraitsBySpecies-json', () => {
         result = theResult
         done()
       }
-      objectUnderTest._testonly.doHandle(event, callback, stubDb)
+      uberRouter._testonly.doHandle(event, callback, stubDb)
     })
     it('should build the expected SQL from a single species name and no paging params', () => {
       expect(result.statusCode).toBe(200)

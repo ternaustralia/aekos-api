@@ -3,16 +3,8 @@ let r = require('./response-helper')
 const codeField = 'varName'
 const countField = 'recordsHeld'
 
-module.exports.handler = (event, context, callback) => {
-  let db = require('./db-helper')
-  doHandle(db, callback)
-}
-
-module.exports._testonly = {
-  doHandle: doHandle
-}
-
-function doHandle (db, callback) {
+module.exports.doHandle = doHandle
+function doHandle (event, callback, db) {
   const sql = `
     SELECT ${codeField} as code, count(*) AS ${countField}
     FROM envvars

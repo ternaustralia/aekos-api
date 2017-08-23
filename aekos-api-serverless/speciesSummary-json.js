@@ -3,11 +3,11 @@ let r = require('./response-helper')
 let yaml = require('yamljs')
 const speciesNamesParam = yaml.load('./constants.yml').paramNames.speciesName.multiple
 
-module.exports.handler = (event, context, callback) => {
-  let db = require('./db-helper')
-  doHandle(event, callback, db)
-}
-
+// module.exports.handler = (event, context, callback) => {
+//   let db = require('./db-helper')
+//   doHandle(event, callback, db)
+// }
+module.exports.doHandle = doHandle
 function doHandle (event, callback, db) {
   r.handleJsonPost(event, callback, db, r.speciesNamesValidator, responder, {
     event: event
@@ -16,8 +16,7 @@ function doHandle (event, callback, db) {
 
 module.exports._testonly = {
   responder: responder,
-  getSql: getSql,
-  doHandle: doHandle
+  getSql: getSql
 }
 
 function responder (requestBody, db, _, extrasProvider) {

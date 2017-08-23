@@ -8,11 +8,7 @@ const pageNumParam = yaml.load('./constants.yml').paramNames.PAGE_NUM
 const defaultPageSize = yaml.load('./constants.yml').defaults.PAGE_SIZE
 const defaultPageNum = yaml.load('./constants.yml').defaults.PAGE_NUM
 
-module.exports.handler = (event, context, callback) => {
-  let db = require('./db-helper')
-  doHandle(event, callback, db)
-}
-
+module.exports.doHandle = doHandle
 function doHandle (event, callback, db) {
   r.handleJsonPost(event, callback, db, validator, responder, {
     event: event
@@ -26,7 +22,6 @@ const validator = r.compositeValidator([
 ])
 
 module.exports._testonly = {
-  doHandle: doHandle,
   validator: validator,
   wrapAsEvent: wrapAsEvent
 }

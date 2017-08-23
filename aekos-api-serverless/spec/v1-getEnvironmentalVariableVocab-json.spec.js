@@ -1,27 +1,9 @@
 'use strict'
 let objectUnderTest = require('../environmentalVariableVocab-json')
+let uberRouter = require('../uberRouter')
 let StubDB = require('./StubDB')
 
 describe('/v1/getEnvironmentalVariableVocab-json', function () {
-  describe('.mapQueryResult()', () => {
-    it('should map to the code field', function () {
-      let queryResult = [
-        {
-          code: 'visibleFireEvidence',
-          recordsHeld: 123
-        }
-      ]
-      let result = objectUnderTest.mapQueryResult(queryResult)
-      expect(result.length).toBe(1)
-      let first = result[0]
-      expect(first).toEqual({
-        recordsHeld: 123,
-        code: 'visibleFireEvidence',
-        label: 'Visible Fire Evidence'
-      })
-    })
-  })
-
   describe('.doHandle()', () => {
     let result = null
     beforeEach(done => {
@@ -33,7 +15,12 @@ describe('/v1/getEnvironmentalVariableVocab-json', function () {
         result = callbackResult
         done()
       }
-      objectUnderTest._testonly.doHandle(stubDb, callback)
+      let event = {
+        requestContext: {
+          path: '/v1/getEnvironmentalVariableVocab.json'
+        }
+      }
+      uberRouter._testonly.doHandle(event, callback, stubDb)
     })
 
     it('should return the expected result', () => {
@@ -44,9 +31,9 @@ describe('/v1/getEnvironmentalVariableVocab-json', function () {
         'Access-Control-Expose-Headers': 'link',
         'Content-Type': "'application/json'"
       })
-      expect(result.body).toBe(JSON.stringify(
+      expect(JSON.parse(result.body)).toEqual(
         [{ code: 'soil', recordsHeld: 123, label: 'Soil Feature' }]
-      ))
+      )
       let validate = require('jsonschema').validate
       expect(validate(JSON.parse(result.body), objectUnderTest.responseSchema()).valid).toBe(true)
     })

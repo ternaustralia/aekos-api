@@ -337,65 +337,81 @@ plugins:
   - serverless-domain-manager
 
 functions:
-  environmentBySpecies-json:
-    handler: environmentBySpecies-json.handler
+  uberRouter:
+    handler: uberRouter.handler
     events:
       - http:
-          path: v1/getEnvironmentBySpecies.json
-          method: post
+          path: v1/getTraitVocab.json
+          method: get
           cors: ${self:custom.customCors}
           documentation:
-            summary: Retrieve all available environment variable names for specified species
+            summary: Get trait vocabulary
             tags:
               - ${self:custom.tags.searchTag}
             description: >
-              Finds the environmental variables that the supplied species have. Note that the result doesn't
-              include the value of the environmental variables, it only shows that the supplied species have
-              values for those variables. To get the values, you need to use the Data Retrieval resources.
-            queryParams:
-              - ${self:custom.commonModelSchemaFragments.PageNumQueryParam}
-              - ${self:custom.commonModelSchemaFragments.PageSizeQueryParam}
-            requestModels:
-               "application/json": V1GetEnvironmentBySpeciesRequest
+              Gets a distinct list of all the traits that appear in the system. The code and label are supplied for
+              each trait. The codes are required to use as parameters for other resources and the label information
+              is useful for creating UIs.
             methodResponses:
               -
                 statusCode: '200'
                 responseModels:
-                  "application/json": V1EnvironmentBySpeciesResponse
-                responseHeaders:
-                  - ${self:custom.commonModelSchemaFragments.LinkHeader}
-              - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+                  "application/json": V1TraitVocabResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
       - http:
-          path: v2/getEnvironmentBySpecies.json
-          method: post
+          path: v2/getTraitVocab.json
+          method: get
           cors: ${self:custom.customCors}
           documentation:
-            summary: Retrieve all available environment variable names for specified species
+            summary: Get trait vocabulary
             tags:
               - ${self:custom.tags.searchTag}
             description: >
-              Finds the environmental variables that the supplied species have. Note that the result doesn't
-              include the value of the environmental variables, it only shows that the supplied species have
-              values for those variables. To get the values, you need to use the Data Retrieval resources.
-              ${file(./constants.yml):messages.documentation.noChangesSinceV1}
-            queryParams:
-              - ${self:custom.commonModelSchemaFragments.PageNumQueryParam}
-              - ${self:custom.commonModelSchemaFragments.PageSizeQueryParam}
-            requestModels:
-               "application/json": V2EnvironmentBySpeciesRequest
+              Gets a distinct list of all the traits that appear in the system. The code and label are supplied for
+              each trait. The codes are required to use as parameters for other resources and the label information
+              is useful for creating UIs. ${file(./constants.yml):messages.documentation.noChangesSinceV1}
             methodResponses:
               -
                 statusCode: '200'
                 responseModels:
-                  "application/json": V2EnvironmentBySpeciesResponse
-                responseHeaders:
-                  - ${self:custom.commonModelSchemaFragments.LinkHeader}
-              - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+                  "application/json": V1TraitVocabResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
-  traitsBySpecies-json:
-    handler: traitsBySpecies-json.handler
-    events:
+      - http:
+          path: v1/getEnvironmentalVariableVocab.json
+          method: get
+          cors: ${self:custom.customCors}
+          documentation:
+            summary: Get environmental variable vocabulary
+            tags:
+              - ${self:custom.tags.searchTag}
+            description: >
+              Gets a distinct list of all the environmental variables that appear in the system. The code and label are supplied for
+              each trait. The codes are required to use as parameters for other resources and the label information
+              is useful for creating UIs.
+            methodResponses:
+              -
+                statusCode: '200'
+                responseModels:
+                  "application/json": V1EnvironmentalVariableVocabResponse
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
+      - http:
+          path: v2/getEnvironmentalVariableVocab.json
+          method: get
+          cors: ${self:custom.customCors}
+          documentation:
+            summary: Get environmental variable vocabulary
+            tags:
+              - ${self:custom.tags.searchTag}
+            description: >
+              Gets a distinct list of all the environmental variables that appear in the system. The code and label are supplied for
+              each trait. The codes are required to use as parameters for other resources and the label information
+              is useful for creating UIs. ${file(./constants.yml):messages.documentation.noChangesSinceV1}
+            methodResponses:
+              -
+                statusCode: '200'
+                responseModels:
+                  "application/json": V1EnvironmentalVariableVocabResponse
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
       - http:
           path: v1/getTraitsBySpecies.json
           method: post
@@ -449,9 +465,6 @@ functions:
                   - ${self:custom.commonModelSchemaFragments.LinkHeader}
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
-  speciesByTrait-json:
-    handler: speciesByTrait-json.handler
-    events:
       - http:
           path: v1/getSpeciesByTrait.json
           method: post
@@ -504,83 +517,58 @@ functions:
                   - ${self:custom.commonModelSchemaFragments.LinkHeader}
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
-  environmentalVariableVocab-json:
-    handler: environmentalVariableVocab-json.handler
-    events:
       - http:
-          path: v1/getEnvironmentalVariableVocab.json
-          method: get
+          path: v1/getEnvironmentBySpecies.json
+          method: post
           cors: ${self:custom.customCors}
           documentation:
-            summary: Get environmental variable vocabulary
+            summary: Retrieve all available environment variable names for specified species
             tags:
               - ${self:custom.tags.searchTag}
             description: >
-              Gets a distinct list of all the environmental variables that appear in the system. The code and label are supplied for
-              each trait. The codes are required to use as parameters for other resources and the label information
-              is useful for creating UIs.
+              Finds the environmental variables that the supplied species have. Note that the result doesn't
+              include the value of the environmental variables, it only shows that the supplied species have
+              values for those variables. To get the values, you need to use the Data Retrieval resources.
+            queryParams:
+              - ${self:custom.commonModelSchemaFragments.PageNumQueryParam}
+              - ${self:custom.commonModelSchemaFragments.PageSizeQueryParam}
+            requestModels:
+               "application/json": V1GetEnvironmentBySpeciesRequest
             methodResponses:
               -
                 statusCode: '200'
                 responseModels:
-                  "application/json": V1EnvironmentalVariableVocabResponse
+                  "application/json": V1EnvironmentBySpeciesResponse
+                responseHeaders:
+                  - ${self:custom.commonModelSchemaFragments.LinkHeader}
+              - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
       - http:
-          path: v2/getEnvironmentalVariableVocab.json
-          method: get
+          path: v2/getEnvironmentBySpecies.json
+          method: post
           cors: ${self:custom.customCors}
           documentation:
-            summary: Get environmental variable vocabulary
+            summary: Retrieve all available environment variable names for specified species
             tags:
               - ${self:custom.tags.searchTag}
             description: >
-              Gets a distinct list of all the environmental variables that appear in the system. The code and label are supplied for
-              each trait. The codes are required to use as parameters for other resources and the label information
-              is useful for creating UIs. ${file(./constants.yml):messages.documentation.noChangesSinceV1}
+              Finds the environmental variables that the supplied species have. Note that the result doesn't
+              include the value of the environmental variables, it only shows that the supplied species have
+              values for those variables. To get the values, you need to use the Data Retrieval resources.
+              ${file(./constants.yml):messages.documentation.noChangesSinceV1}
+            queryParams:
+              - ${self:custom.commonModelSchemaFragments.PageNumQueryParam}
+              - ${self:custom.commonModelSchemaFragments.PageSizeQueryParam}
+            requestModels:
+               "application/json": V2EnvironmentBySpeciesRequest
             methodResponses:
               -
                 statusCode: '200'
                 responseModels:
-                  "application/json": V1EnvironmentalVariableVocabResponse
-              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
-  uberRouter:
-    handler: uberRouter.handler
-    events:
-      - http:
-          path: v1/getTraitVocab.json
-          method: get
-          cors: ${self:custom.customCors}
-          documentation:
-            summary: Get trait vocabulary
-            tags:
-              - ${self:custom.tags.searchTag}
-            description: >
-              Gets a distinct list of all the traits that appear in the system. The code and label are supplied for
-              each trait. The codes are required to use as parameters for other resources and the label information
-              is useful for creating UIs.
-            methodResponses:
-              -
-                statusCode: '200'
-                responseModels:
-                  "application/json": V1TraitVocabResponse
-              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
-      - http:
-          path: v2/getTraitVocab.json
-          method: get
-          cors: ${self:custom.customCors}
-          documentation:
-            summary: Get trait vocabulary
-            tags:
-              - ${self:custom.tags.searchTag}
-            description: >
-              Gets a distinct list of all the traits that appear in the system. The code and label are supplied for
-              each trait. The codes are required to use as parameters for other resources and the label information
-              is useful for creating UIs. ${file(./constants.yml):messages.documentation.noChangesSinceV1}
-            methodResponses:
-              -
-                statusCode: '200'
-                responseModels:
-                  "application/json": V1TraitVocabResponse
+                  "application/json": V2EnvironmentBySpeciesResponse
+                responseHeaders:
+                  - ${self:custom.commonModelSchemaFragments.LinkHeader}
+              - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
       - http:
           path: v1/speciesAutocomplete.json
@@ -631,9 +619,6 @@ functions:
                   - ${self:custom.commonModelSchemaFragments.LinkHeader}
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
-  speciesSummary-json:
-    handler: speciesSummary-json.handler
-    events:
       - http:
           path: v1/speciesSummary.json
           method: post

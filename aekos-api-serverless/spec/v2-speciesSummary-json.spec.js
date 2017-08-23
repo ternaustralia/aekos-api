@@ -1,5 +1,6 @@
 'use strict'
 let objectUnderTest = require('../speciesSummary-json')
+let uberRouter = require('../uberRouter')
 let StubDB = require('./StubDB')
 
 describe('/v1/speciesSummary-json', () => {
@@ -20,7 +21,7 @@ describe('/v1/speciesSummary-json', () => {
         result = theResult
         done()
       }
-      objectUnderTest._testonly.doHandle(event, callback, stubDb)
+      uberRouter._testonly.doHandle(event, callback, stubDb)
     })
 
     it('should handle a single element', () => {

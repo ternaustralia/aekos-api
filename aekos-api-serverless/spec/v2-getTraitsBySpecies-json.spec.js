@@ -3,6 +3,7 @@ let StubDB = require('./StubDB')
 
 describe('/v2/getTraitsBySpecies-json', () => {
   let objectUnderTest = require('../traitsBySpecies-json')
+  let uberRouter = require('../uberRouter')
 
   describe('.doHandle()', () => {
     let expectedSql = `
@@ -25,7 +26,7 @@ describe('/v2/getTraitsBySpecies-json', () => {
         queryStringParameters: null,
         body: JSON.stringify({speciesNames: ['species one']}),
         requestContext: {
-          path: '/v2/getTraitBySpecies.json'
+          path: '/v2/getTraitsBySpecies.json'
         },
         headers: {
           Host: 'api.aekos.org.au',
@@ -41,7 +42,7 @@ describe('/v2/getTraitsBySpecies-json', () => {
         result = theResult
         done()
       }
-      objectUnderTest._testonly.doHandle(event, callback, stubDb)
+      uberRouter._testonly.doHandle(event, callback, stubDb)
     })
     it('should build the expected SQL from a single species name and no paging params', () => {
       expect(result.statusCode).toBe(200)
@@ -83,7 +84,7 @@ describe('/v2/getTraitsBySpecies-json', () => {
         },
         body: JSON.stringify({speciesNames: ['species one', 'species two']}),
         requestContext: {
-          path: '/v2/getTraitBySpecies.json'
+          path: '/v2/getTraitsBySpecies.json'
         },
         headers: {
           Host: 'api.aekos.org.au',
@@ -99,7 +100,7 @@ describe('/v2/getTraitsBySpecies-json', () => {
         result = theResult
         done()
       }
-      objectUnderTest._testonly.doHandle(event, callback, stubDb)
+      uberRouter._testonly.doHandle(event, callback, stubDb)
     })
     it('should build the expected SQL with all params supplied', () => {
       expect(result.statusCode).toBe(200)
@@ -108,10 +109,10 @@ describe('/v2/getTraitsBySpecies-json', () => {
         'Access-Control-Allow-Credentials': true,
         'Access-Control-Expose-Headers': 'link',
         'Content-Type': "'application/json'",
-        'link': '<https://api.aekos.org.au/v2/getTraitBySpecies.json?pageNum=3&pageSize=10>; rel="next", ' +
-                '<https://api.aekos.org.au/v2/getTraitBySpecies.json?pageNum=1&pageSize=10>; rel="prev", ' +
-                '<https://api.aekos.org.au/v2/getTraitBySpecies.json?pageNum=1&pageSize=10>; rel="first", ' +
-                '<https://api.aekos.org.au/v2/getTraitBySpecies.json?pageNum=4&pageSize=10>; rel="last"'
+        'link': '<https://api.aekos.org.au/v2/getTraitsBySpecies.json?pageNum=3&pageSize=10>; rel="next", ' +
+                '<https://api.aekos.org.au/v2/getTraitsBySpecies.json?pageNum=1&pageSize=10>; rel="prev", ' +
+                '<https://api.aekos.org.au/v2/getTraitsBySpecies.json?pageNum=1&pageSize=10>; rel="first", ' +
+                '<https://api.aekos.org.au/v2/getTraitsBySpecies.json?pageNum=4&pageSize=10>; rel="last"'
       })
       expect(JSON.parse(result.body)).toEqual([
         { code: 'height', label: 'Height', recordsHeld: 12 }

@@ -2,7 +2,7 @@
 let StubDB = require('./StubDB')
 
 describe('/v1/getSpeciesByTrait-json', () => {
-  let objectUnderTest = require('../speciesByTrait-json')
+  let uberRouter = require('../uberRouter')
 
   describe('.doHandle()', () => {
     let expectedSql = `
@@ -35,7 +35,7 @@ describe('/v1/getSpeciesByTrait-json', () => {
         result = theResult
         done()
       }
-      objectUnderTest._testonly.doHandle(event, callback, stubDb)
+      uberRouter._testonly.doHandle(event, callback, stubDb)
     })
     it('should build the expected SQL from a single trait name and no paging params', () => {
       expect(result.statusCode).toBe(200)
@@ -87,7 +87,7 @@ describe('/v1/getSpeciesByTrait-json', () => {
         result = theResult
         done()
       }
-      objectUnderTest._testonly.doHandle(event, callback, stubDb)
+      uberRouter._testonly.doHandle(event, callback, stubDb)
     })
     it('should build the expected SQL from multiple trait names and paging params', () => {
       expect(result.statusCode).toBe(200)
