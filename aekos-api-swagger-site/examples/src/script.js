@@ -13,8 +13,10 @@ app.config(function ($urlRouterProvider, $stateProvider) {
   })
 })
 
-app.factory('baseUrlService', function () {
-  var baseUrl = 'https://k2jqcign2l.execute-api.us-west-1.amazonaws.com/test'
+app.constant('devBaseUrl', 'https://dev.api.aekos.org.au')
+
+app.factory('baseUrlService', function (devBaseUrl) {
+  var baseUrl = devBaseUrl
   return {
     getBaseUrl: function () {
       return baseUrl
@@ -49,17 +51,22 @@ app.factory('commonHelpersService', function () {
 
 app.component('exampleParent', {
   templateUrl: './src/exampleParent.html',
-  controller: function ($scope, baseUrlService) {
+  controller: function ($scope, baseUrlService, devBaseUrl) {
     $scope.baseUrl = baseUrlService.getBaseUrl()
+    $scope.devBaseUrl = devBaseUrl
     $scope.updateBaseUrl = function (newUrl) {
       baseUrlService.setBaseUrl(newUrl)
+    }
+    $scope.setBaseUrl = function (newUrl) {
+      $scope.baseUrl = newUrl
+      $scope.updateBaseUrl(newUrl)
     }
   }
 })
 
 app.filter('filterSelected', function () {
-  return function (items) {
-    var items = items || []
+  return function (potentiallyUndefinedItems) {
+    var items = potentiallyUndefinedItems || []
     var result = []
     items.forEach(function (e) {
       if (e.isChecked) {

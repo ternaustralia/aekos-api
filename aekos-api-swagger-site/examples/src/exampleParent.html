@@ -4,13 +4,19 @@
     <div class="col-xs-2">
       <a class="btn btn-default" ui-sref="home">Back to home</a>
     </div>
-    <div class="form-horizontal col-xs-8">
+    <div class="form-horizontal col-xs-6">
       <div class="form-group">
-        <label for="baseUrl" class="col-xs-3 control-label">Base URL</label>
-        <div class="col-xs-9">
+        <label for="baseUrl" class="col-xs-2 control-label">Base URL</label>
+        <div class="col-xs-10">
           <input type="text" class="form-control" id="baseUrl" ng-change="updateBaseUrl(baseUrl)" ng-model="baseUrl">
         </div>
       </div>
+    </div>
+    <div class="form-horizontal col-xs-4">
+      <label for="baseUrl" class="col-xs-5 control-label">Preset URLs</label>
+      <a class="btn btn-default" ng-click="setBaseUrl(devBaseUrl)">dev</a>
+      <a class="btn btn-default" ng-click="setBaseUrl('https://test.api.aekos.org.au')">test</a>
+      <a class="btn btn-default" ng-click="setBaseUrl('https://api.aekos.org.au')">prod</a>
     </div>
   </div>
 </div>
