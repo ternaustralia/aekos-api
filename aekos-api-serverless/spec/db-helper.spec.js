@@ -1,6 +1,6 @@
 'use strict'
 
-var objectUnderTest = require('../db-helper')
+let objectUnderTest = require('../db-helper')
 
 describe('DB Helper', function () {
   describe('.escape()', () => {

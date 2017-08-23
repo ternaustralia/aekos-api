@@ -47,7 +47,7 @@ describe('/v2/getEnvironmentalVariableVocab-json', function () {
       expect(result.body).toBe(JSON.stringify(
         [{ code: 'soil', recordsHeld: 123, label: 'Soil Feature' }]
       ))
-      var validate = require('jsonschema').validate
+      let validate = require('jsonschema').validate
       expect(validate(JSON.parse(result.body), objectUnderTest.responseSchema()).valid).toBe(true)
     })
   })

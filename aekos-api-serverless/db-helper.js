@@ -3,7 +3,7 @@ let mysql = require('mysql')
 let promiseMysql = require('promise-mysql')
 
 module.exports.execSelect = (selectSql, callback) => {
-  var connection = mysql.createConnection({
+  let connection = mysql.createConnection({
     host: process.env.DBURL,
     port: process.env.DBPORT,
     user: process.env.DBUSER,

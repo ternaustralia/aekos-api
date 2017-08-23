@@ -1,5 +1,5 @@
 'use strict'
-var objectUnderTest = require('../traitData-csv')
+let objectUnderTest = require('../traitData-csv')
 let StubDB = require('./StubDB')
 
 describe('/v1/traitData-csv', () => {

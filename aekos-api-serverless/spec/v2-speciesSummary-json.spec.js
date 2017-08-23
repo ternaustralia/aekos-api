@@ -1,5 +1,5 @@
 'use strict'
-var objectUnderTest = require('../speciesSummary-json')
+let objectUnderTest = require('../speciesSummary-json')
 let StubDB = require('./StubDB')
 
 describe('/v1/speciesSummary-json', () => {
