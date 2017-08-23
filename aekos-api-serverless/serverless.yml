@@ -504,45 +504,6 @@ functions:
                   - ${self:custom.commonModelSchemaFragments.LinkHeader}
               - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
-  traitVocab-json:
-    handler: traitVocab-json.handler
-    events:
-      - http:
-          path: v1/getTraitVocab.json
-          method: get
-          cors: ${self:custom.customCors}
-          documentation:
-            summary: Get trait vocabulary
-            tags:
-              - ${self:custom.tags.searchTag}
-            description: >
-              Gets a distinct list of all the traits that appear in the system. The code and label are supplied for
-              each trait. The codes are required to use as parameters for other resources and the label information
-              is useful for creating UIs.
-            methodResponses:
-              -
-                statusCode: '200'
-                responseModels:
-                  "application/json": V1TraitVocabResponse
-              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
-      - http:
-          path: v2/getTraitVocab.json
-          method: get
-          cors: ${self:custom.customCors}
-          documentation:
-            summary: Get trait vocabulary
-            tags:
-              - ${self:custom.tags.searchTag}
-            description: >
-              Gets a distinct list of all the traits that appear in the system. The code and label are supplied for
-              each trait. The codes are required to use as parameters for other resources and the label information
-              is useful for creating UIs. ${file(./constants.yml):messages.documentation.noChangesSinceV1}
-            methodResponses:
-              -
-                statusCode: '200'
-                responseModels:
-                  "application/json": V1TraitVocabResponse
-              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
   environmentalVariableVocab-json:
     handler: environmentalVariableVocab-json.handler
     events:
@@ -582,9 +543,45 @@ functions:
                 responseModels:
                   "application/json": V1EnvironmentalVariableVocabResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
-  speciesAutocomplete-json:
-    handler: speciesAutocomplete-json.handler
+  uberRouter:
+    handler: uberRouter.handler
     events:
+      - http:
+          path: v1/getTraitVocab.json
+          method: get
+          cors: ${self:custom.customCors}
+          documentation:
+            summary: Get trait vocabulary
+            tags:
+              - ${self:custom.tags.searchTag}
+            description: >
+              Gets a distinct list of all the traits that appear in the system. The code and label are supplied for
+              each trait. The codes are required to use as parameters for other resources and the label information
+              is useful for creating UIs.
+            methodResponses:
+              -
+                statusCode: '200'
+                responseModels:
+                  "application/json": V1TraitVocabResponse
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
+      - http:
+          path: v2/getTraitVocab.json
+          method: get
+          cors: ${self:custom.customCors}
+          documentation:
+            summary: Get trait vocabulary
+            tags:
+              - ${self:custom.tags.searchTag}
+            description: >
+              Gets a distinct list of all the traits that appear in the system. The code and label are supplied for
+              each trait. The codes are required to use as parameters for other resources and the label information
+              is useful for creating UIs. ${file(./constants.yml):messages.documentation.noChangesSinceV1}
+            methodResponses:
+              -
+                statusCode: '200'
+                responseModels:
+                  "application/json": V1TraitVocabResponse
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
       - http:
           path: v1/speciesAutocomplete.json
           method: get

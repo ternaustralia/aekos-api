@@ -9,11 +9,7 @@ const startDefault = yaml.load('./constants.yml').defaults.START
 const rowsParam = yaml.load('./constants.yml').paramNames.ROWS
 const rowsDefault = yaml.load('./constants.yml').defaults.ROWS
 
-module.exports.handler = (event, context, callback) => {
-  let db = require('./db-helper')
-  doHandle(event, callback, db)
-}
-
+module.exports.doHandle = doHandle
 function doHandle (event, callback, db) {
   if (!r.isQueryStringParamPresent(event, qParam)) {
     r.json.badRequest(callback, `the '${qParam}' query string parameter must be supplied`)
@@ -45,8 +41,7 @@ function doHandle (event, callback, db) {
 
 module.exports._testonly = {
   getRecordsSql: getRecordsSql,
-  getCountSql: getCountSql,
-  doHandle: doHandle
+  getCountSql: getCountSql
 }
 
 function getRecordsSql (partialName, rows, start, db) {

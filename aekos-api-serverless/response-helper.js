@@ -637,6 +637,14 @@ const jsonResponseHelpers = {
     }
     doResponse(theCallback, body, statusCode, jsonContentType)
   },
+  notFound: (theCallback, theMessage) => {
+    let statusCode = 404
+    let body = {
+      message: theMessage,
+      statusCode: statusCode
+    }
+    doResponse(theCallback, body, statusCode, jsonContentType)
+  },
   internalServerError: (theCallback) => {
     let statusCode = 500
     let body = {

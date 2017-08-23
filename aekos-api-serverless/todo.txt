@@ -1,4 +1,3 @@
-- add HATEOAS headers for search resources
 - remove verbs from resources (v3 change)
 - return an appropriate HTTP status when a 'page out of bounds' occurs
 - figure out why the domain-manager doesn't add the base path mapping

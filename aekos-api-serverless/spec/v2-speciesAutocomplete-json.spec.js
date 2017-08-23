@@ -1,5 +1,6 @@
 'use strict'
-var objectUnderTest = require('../speciesAutocomplete-json')
+let objectUnderTest = require('../speciesAutocomplete-json')
+let uberRouter = require('../uberRouter')
 let StubDB = require('./StubDB')
 
 describe('/v2/speciesAutocomplete-json', () => {
@@ -40,7 +41,7 @@ describe('/v2/speciesAutocomplete-json', () => {
         [{ totalRecords: 44 }]
       ])
       spyOn(stubDb, 'execSelectPromise').and.callThrough()
-      objectUnderTest._testonly.doHandle(event, () => {}, stubDb)
+      uberRouter._testonly.doHandle(event, () => {}, stubDb)
       expect(stubDb.execSelectPromise).toHaveBeenCalledWith(expectedSql1)
     })
   })
@@ -84,7 +85,7 @@ describe('/v2/speciesAutocomplete-json', () => {
         [{ totalRecords: 44 }]
       ])
       spyOn(stubDb, 'execSelectPromise').and.callThrough()
-      objectUnderTest._testonly.doHandle(event, () => {}, stubDb)
+      uberRouter._testonly.doHandle(event, () => {}, stubDb)
       expect(stubDb.execSelectPromise).toHaveBeenCalledWith(expectedSql1)
     })
   })
@@ -113,7 +114,7 @@ describe('/v2/speciesAutocomplete-json', () => {
         result = theResult
         done()
       }
-      objectUnderTest._testonly.doHandle(event, theCallback, stubDb)
+      uberRouter._testonly.doHandle(event, theCallback, stubDb)
     })
 
     it('should return the result of the query', () => {
@@ -136,14 +137,17 @@ describe('/v2/speciesAutocomplete-json', () => {
     let result = null
     beforeEach(done => {
       let event = {
-        queryStringParameters: null // no 'q' param
+        queryStringParameters: null, // no 'q' param
+        requestContext: {
+          path: '/v2/speciesAutocomplete.json'
+        }
       }
       let stubDb = new StubDB()
       let theCallback = (_, theResult) => {
         result = theResult
         done()
       }
-      objectUnderTest._testonly.doHandle(event, theCallback, stubDb)
+      uberRouter._testonly.doHandle(event, theCallback, stubDb)
     })
 
     it('should return 400 when we do not supply the q param', () => {

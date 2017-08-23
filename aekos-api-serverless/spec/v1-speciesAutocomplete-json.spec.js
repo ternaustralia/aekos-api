@@ -1,5 +1,5 @@
 'use strict'
-var objectUnderTest = require('../speciesAutocomplete-json')
+let uberRouter = require('../uberRouter')
 let StubDB = require('./StubDB')
 
 describe('/v1/speciesAutocomplete-json', () => {
@@ -27,7 +27,7 @@ describe('/v1/speciesAutocomplete-json', () => {
         result = theResult
         done()
       }
-      objectUnderTest._testonly.doHandle(event, theCallback, stubDb)
+      uberRouter._testonly.doHandle(event, theCallback, stubDb)
     })
 
     it('should add the "id" field for backwards compatibility', () => {
