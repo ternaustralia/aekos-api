@@ -3,10 +3,6 @@ let r = require('./response-helper')
 let yaml = require('yamljs')
 const speciesNamesParam = yaml.load('./constants.yml').paramNames.speciesName.multiple
 
-// module.exports.handler = (event, context, callback) => {
-//   let db = require('./db-helper')
-//   doHandle(event, callback, db)
-// }
 module.exports.doHandle = doHandle
 function doHandle (event, callback, db) {
   r.handleJsonPost(event, callback, db, r.speciesNamesValidator, responder, {
@@ -28,7 +24,7 @@ function responder (requestBody, db, _, extrasProvider) {
         processWithVersionStrategy(sqlResult, extrasProvider.event)
         resolve({
           body: sqlResult
-          // TODO add linkHeaderData
+          // no linkHeaderData because we don't support paging
         })
       } catch (error) {
         reject(error)
