@@ -50,7 +50,7 @@ module.exports._testonly = {
 }
 
 function doHandle (event, callback, db, elapsedTimeCalculator) {
-  let path = event.path
+  let path = event.path // we use event.path because it doesn't have a stage prefix
   let mappedHandler = mapping[path]
   if (!mappedHandler) {
     let msg = `The resource '${path}' does not exist.`

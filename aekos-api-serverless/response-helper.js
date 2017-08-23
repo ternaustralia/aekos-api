@@ -414,7 +414,7 @@ function buildHateoasLinkHeader (event, linkHeaderData) {
   let totalPages = linkHeaderData.totalPages
   let scheme = event.headers['X-Forwarded-Proto']
   let host = event.headers.Host
-  let path = event.requestContext.path
+  let path = event.requestContext.path // we use the requestContext.path because it WILL have a stage prefix if needed
   let fromPath = `${scheme}://${host}${path}`
   let result = ''
   let hasNextPage = pageNumber < totalPages
