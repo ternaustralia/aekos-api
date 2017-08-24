@@ -4,7 +4,7 @@ let uberRouter = require('../uberRouter')
 let StubDB = require('./StubDB')
 
 describe('/v1/speciesSummary-json', () => {
-  describe('.responder()', () => {
+  describe('.doHandle()', () => {
     let result = null
     beforeEach(done => {
       let stubDb = new StubDB()

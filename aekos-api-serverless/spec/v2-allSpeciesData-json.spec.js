@@ -234,6 +234,37 @@ describe('/v2/allSpeciesData-json', () => {
     })
   })
 
+  describe('doHandle', () => {
+    let result = null
+    beforeEach(done => {
+      let stubDb = new StubDB()
+      stubDb.setExecSelectPromiseResponses([
+        [ /* no records, will cause Error */ ],
+        [{ recordsHeld: 31 }]
+      ])
+      let event = {
+        queryStringParameters: null, // no params
+        headers: {
+          Host: 'api.aekos.org.au',
+          'X-Forwarded-Proto': 'https'
+        },
+        requestContext: { path: '/v2/allSpeciesData.json' },
+        path: '/v2/allSpeciesData.json'
+      }
+      let callback = (_, theResult) => {
+        consoleSilencer.resetConsoleError()
+        result = theResult
+        done()
+      }
+      consoleSilencer.silenceConsoleError()
+      uberRouter._testonly.doHandle(event, callback, stubDb, () => { return 42 })
+    })
+
+    it('should catch an error thrown during query result processing and respond with a 500', () => {
+      expect(result.statusCode).toBe(500)
+    })
+  })
+
   describe('responder', () => {
     let errorMessage = null
     beforeEach(done => {

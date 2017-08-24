@@ -1,5 +1,7 @@
 'use strict'
 let StubDB = require('./StubDB')
+let ConsoleSilencer = require('./ConsoleSilencer')
+let consoleSilencer = new ConsoleSilencer()
 
 describe('/v2/getSpeciesByTrait-json', () => {
   let objectUnderTest = require('../speciesByTrait-json')
@@ -104,6 +106,38 @@ describe('/v2/getSpeciesByTrait-json', () => {
         { speciesName: 'species one', recordsHeld: 123 }
       ])
       expect(stubDb.execSelectPromise).toHaveBeenCalledWith(expectedSql)
+    })
+  })
+
+  describe('.doHandle()', () => {
+    let result = null
+    let stubDb = new StubDB()
+    beforeEach(done => {
+      let event = {
+        queryStringParameters: null,
+        body: JSON.stringify({traitNames: ['trait one']}),
+        requestContext: { path: '/v2/getSpeciesByTrait.json' },
+        path: '/v2/getSpeciesByTrait.json',
+        headers: {
+          Host: 'api.aekos.org.au',
+          'X-Forwarded-Proto': 'https'
+        }
+      }
+      stubDb.setExecSelectPromiseResponses([
+        [ /* no records */ ],
+        [ /* no count, will cause Error */ ]
+      ])
+      spyOn(stubDb, 'execSelectPromise').and.callThrough()
+      let callback = (_, theResult) => {
+        consoleSilencer.resetConsoleError()
+        result = theResult
+        done()
+      }
+      consoleSilencer.silenceConsoleError()
+      uberRouter._testonly.doHandle(event, callback, stubDb)
+    })
+    it('should catch an error thrown during query result processing and respond with a 500', () => {
+      expect(result.statusCode).toBe(500)
     })
   })
 

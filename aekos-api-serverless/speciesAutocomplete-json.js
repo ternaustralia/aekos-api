@@ -34,7 +34,7 @@ function doHandle (event, callback, db) {
     let pageNumber = r.calculatePageNumber(start, totalRecordsCount, totalPages)
     r.json.ok(callback, queryResult, event, r.buildLinkHeaderData(start, rows, pageNumber, totalPages))
   }).catch(error => {
-    console.log('Failed to execute species autocomplete SQL', error)
+    console.error('Failed to execute species autocomplete SQL', error)
     r.json.internalServerError(callback)
   })
 }

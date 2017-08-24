@@ -2,6 +2,8 @@
 let objectUnderTest = require('../speciesAutocomplete-json')
 let uberRouter = require('../uberRouter')
 let StubDB = require('./StubDB')
+let ConsoleSilencer = require('./ConsoleSilencer')
+let consoleSilencer = new ConsoleSilencer()
 
 describe('/v2/speciesAutocomplete-json', () => {
   describe('.doHandle()', () => {
@@ -157,6 +159,39 @@ describe('/v2/speciesAutocomplete-json', () => {
       expect(JSON.parse(result.body)).toEqual(
         { message: "the 'q' query string parameter must be supplied", statusCode: 400 }
       )
+    })
+  })
+
+  describe('.doHandle()', () => {
+    let result = null
+    beforeEach(done => {
+      let event = {
+        queryStringParameters: {
+          q: 'aca'
+        },
+        requestContext: { path: '/v2/speciesAutocomplete.json' },
+        path: '/v2/speciesAutocomplete.json',
+        headers: {
+          Host: 'api.aekos.org.au',
+          'X-Forwarded-Proto': 'https'
+        }
+      }
+      let stubDb = new StubDB()
+      stubDb.setExecSelectPromiseResponses([
+        [ /* no records */ ],
+        [ /* no count, will cause Error */ ]
+      ])
+      let theCallback = (_, theResult) => {
+        consoleSilencer.resetConsoleError()
+        result = theResult
+        done()
+      }
+      consoleSilencer.silenceConsoleError()
+      uberRouter._testonly.doHandle(event, theCallback, stubDb)
+    })
+
+    it('should catch an error thrown during query result processing and respond with a 500', () => {
+      expect(result.statusCode).toBe(500)
     })
   })
 

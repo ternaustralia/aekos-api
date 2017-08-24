@@ -1,5 +1,7 @@
 'use strict'
 let StubDB = require('./StubDB')
+let ConsoleSilencer = require('./ConsoleSilencer')
+let consoleSilencer = new ConsoleSilencer()
 
 describe('/v2/getTraitsBySpecies-json', () => {
   let objectUnderTest = require('../traitsBySpecies-json')
@@ -116,6 +118,39 @@ describe('/v2/getTraitsBySpecies-json', () => {
         { code: 'height', label: 'Height', recordsHeld: 12 }
       ])
       expect(stubDb.execSelectPromise).toHaveBeenCalledWith(expectedSql)
+    })
+  })
+
+  describe('.doHandle()', () => {
+    let result = null
+    let stubDb = new StubDB()
+    beforeEach(done => {
+      let event = {
+        queryStringParameters: null,
+        body: JSON.stringify({speciesNames: ['species one']}),
+        requestContext: { path: '/v2/getTraitsBySpecies.json' },
+        path: '/v2/getTraitsBySpecies.json',
+        headers: {
+          Host: 'api.aekos.org.au',
+          'X-Forwarded-Proto': 'https'
+        }
+      }
+      stubDb.setExecSelectPromiseResponses([
+        [ /* no records */ ],
+        [ /* no count, will cause Error */ ]
+      ])
+      spyOn(stubDb, 'execSelectPromise').and.callThrough()
+      let callback = (_, theResult) => {
+        consoleSilencer.resetConsoleError()
+        result = theResult
+        done()
+      }
+      consoleSilencer.silenceConsoleError()
+      uberRouter._testonly.doHandle(event, callback, stubDb)
+    })
+
+    it('should build the expected SQL from a single species name and no paging params', () => {
+      expect(result.statusCode).toBe(500)
     })
   })
 

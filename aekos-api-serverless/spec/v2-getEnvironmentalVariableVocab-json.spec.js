@@ -2,6 +2,8 @@
 let objectUnderTest = require('../environmentalVariableVocab-json')
 let uberRouter = require('../uberRouter')
 let StubDB = require('./StubDB')
+let ConsoleSilencer = require('./ConsoleSilencer')
+let consoleSilencer = new ConsoleSilencer()
 
 describe('/v2/getEnvironmentalVariableVocab-json', function () {
   describe('.doHandle()', () => {
@@ -34,6 +36,28 @@ describe('/v2/getEnvironmentalVariableVocab-json', function () {
       )
       let validate = require('jsonschema').validate
       expect(validate(JSON.parse(result.body), objectUnderTest.responseSchema()).valid).toBe(true)
+    })
+  })
+
+  describe('.doHandle()', () => {
+    let result = null
+    beforeEach(done => {
+      let stubDb = new StubDB()
+      stubDb.setExecSelectPromiseResponses([
+        'not an array so forEach() explodes'
+      ])
+      let callback = (_, callbackResult) => {
+        consoleSilencer.resetConsoleError()
+        result = callbackResult
+        done()
+      }
+      let event = {path: '/v2/getEnvironmentalVariableVocab.json'}
+      consoleSilencer.silenceConsoleError()
+      uberRouter._testonly.doHandle(event, callback, stubDb)
+    })
+
+    it('should catch an error thrown during query result processing and respond with a 500', () => {
+      expect(result.statusCode).toBe(500)
     })
   })
 

@@ -2,6 +2,8 @@
 let objectUnderTest = require('../traitData-json')
 let uberRouter = require('../uberRouter')
 let StubDB = require('./StubDB')
+let ConsoleSilencer = require('./ConsoleSilencer')
+let consoleSilencer = new ConsoleSilencer()
 
 describe('/v2/traitData-json', () => {
   describe('doHandle', () => {
@@ -195,6 +197,39 @@ describe('/v2/traitData-json', () => {
         message: "The 'speciesNames' field was not supplied",
         statusCode: 400
       })
+    })
+  })
+
+  describe('doHandle', () => {
+    let result = null
+    let stubDb = new StubDB()
+    beforeEach(done => {
+      stubDb.setExecSelectPromiseResponses([
+        [ /* no records, will cause Error */ ],
+        [{ recordsHeld: 31 }]
+      ])
+      spyOn(stubDb, 'execSelectPromise').and.callThrough()
+      let event = {
+        body: JSON.stringify({speciesNames: ['species eleven']}),
+        queryStringParameters: null,
+        headers: {
+          Host: 'api.aekos.org.au',
+          'X-Forwarded-Proto': 'https'
+        },
+        requestContext: { path: '/v2/traitData.json' },
+        path: '/v2/traitData.json'
+      }
+      let callback = (_, theResult) => {
+        consoleSilencer.resetConsoleError()
+        result = theResult
+        done()
+      }
+      consoleSilencer.silenceConsoleError()
+      uberRouter._testonly.doHandle(event, callback, stubDb, () => { return 42 })
+    })
+
+    it('should catch an error thrown during query result processing and respond with a 500', () => {
+      expect(result.statusCode).toBe(500)
     })
   })
 

@@ -34,18 +34,12 @@ function responder (requestBody, db, queryStringObj, extrasProvider) {
       throw new Error(`SQL result problem: result from count query did not have exactly one row. Result='${JSON.stringify(count)}'`)
     }
     let totalRecordsCount = count[0].totalRecords
-    return new Promise((resolve, reject) => {
-      try {
-        speciesSummary.processWithVersionStrategy(queryResult, extrasProvider.event)
-        resolve({
-          body: queryResult,
-          linkHeaderData: {
-            pageNumber: pageNum,
-            totalPages: Math.ceil(totalRecordsCount / pageSize)
-          }
-        })
-      } catch (error) {
-        reject(error)
+    speciesSummary.processWithVersionStrategy(queryResult, extrasProvider.event)
+    return Promise.resolve({
+      body: queryResult,
+      linkHeaderData: {
+        pageNumber: pageNum,
+        totalPages: Math.ceil(totalRecordsCount / pageSize)
       }
     })
   })

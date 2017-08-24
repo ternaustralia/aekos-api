@@ -19,16 +19,10 @@ function responder (requestBody, db, _, extrasProvider) {
   let speciesNames = requestBody[speciesNamesParam]
   let sql = getSql(speciesNames, db)
   return db.execSelectPromise(sql).then(sqlResult => {
-    return new Promise((resolve, reject) => {
-      try {
-        processWithVersionStrategy(sqlResult, extrasProvider.event)
-        resolve({
-          body: sqlResult
-          // no linkHeaderData because we don't support paging
-        })
-      } catch (error) {
-        reject(error)
-      }
+    processWithVersionStrategy(sqlResult, extrasProvider.event)
+    return Promise.resolve({
+      body: sqlResult
+      // no linkHeaderData because we don't support paging
     })
   })
 }

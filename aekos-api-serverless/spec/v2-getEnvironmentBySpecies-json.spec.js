@@ -2,6 +2,8 @@
 let objectUnderTest = require('../environmentBySpecies-json')
 let uberRouter = require('../uberRouter')
 let StubDB = require('./StubDB')
+let ConsoleSilencer = require('./ConsoleSilencer')
+let consoleSilencer = new ConsoleSilencer()
 
 describe('/v2/getEnvironmentBySpecies-json', function () {
   describe('.doHandle()', () => {
@@ -123,6 +125,39 @@ describe('/v2/getEnvironmentBySpecies-json', function () {
         { code: 'clay', recordsHeld: 123, label: 'Clay Content' }
       ])
       expect(stubDb.execSelectPromise).toHaveBeenCalledWith(expectedSql)
+    })
+  })
+
+  describe('.doHandle()', () => {
+    let result = null
+    let stubDb = new StubDB()
+    beforeEach(done => {
+      stubDb.setExecSelectPromiseResponses([
+        [ /* no records, function will die before it needs them */ ],
+        [ /* no count, will cause Error */ ]
+      ])
+      spyOn(stubDb, 'execSelectPromise').and.callThrough()
+      let event = {
+        queryStringParameters: null,
+        body: JSON.stringify({ speciesNames: ['species one'] }),
+        requestContext: { path: '/v2/getEnvironmentBySpecies.json' },
+        path: '/v2/getEnvironmentBySpecies.json',
+        headers: {
+          Host: 'api.aekos.org.au',
+          'X-Forwarded-Proto': 'https'
+        }
+      }
+      let callback = (_, theResult) => {
+        consoleSilencer.resetConsoleError()
+        result = theResult
+        done()
+      }
+      consoleSilencer.silenceConsoleError()
+      uberRouter._testonly.doHandle(event, callback, stubDb)
+    })
+
+    it('should return the expected result', () => {
+      expect(result.statusCode).toBe(500)
     })
   })
 

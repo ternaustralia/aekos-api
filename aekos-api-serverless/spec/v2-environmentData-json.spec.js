@@ -3,6 +3,8 @@ let Set = require('collections/set')
 let StubDB = require('./StubDB')
 let objectUnderTest = require('../environmentData-json')
 let uberRouter = require('../uberRouter')
+let ConsoleSilencer = require('./ConsoleSilencer')
+let consoleSilencer = new ConsoleSilencer()
 
 describe('/v2/environmentData-json', () => {
   describe('.doHandle()', () => {
@@ -475,6 +477,39 @@ describe('/v2/environmentData-json', () => {
         message: 'No request body was supplied',
         statusCode: 400
       })
+    })
+  })
+
+  describe('.doHandle()', () => {
+    let result = null
+    let stubDb = new StubDB()
+    beforeEach(done => {
+      stubDb.setExecSelectPromiseResponses([
+        [ /* no records, the function will die before it needs this */ ],
+        [ /* recordsHeld, Error will be thrown */ ]
+      ])
+      spyOn(stubDb, 'execSelectPromise').and.callThrough()
+      let event = {
+        body: JSON.stringify({speciesNames: ['species one']}),
+        queryStringParameters: null,
+        headers: {
+          Host: 'api.aekos.org.au',
+          'X-Forwarded-Proto': 'https'
+        },
+        requestContext: { path: '/v2/environmentData.json' },
+        path: '/v2/environmentData.json'
+      }
+      let callback = (_, theResult) => {
+        consoleSilencer.resetConsoleError()
+        result = theResult
+        done()
+      }
+      consoleSilencer.silenceConsoleError()
+      uberRouter._testonly.doHandle(event, callback, stubDb, () => { return 42 })
+    })
+
+    it('should catch an error thrown during query result processing and respond with a 500', () => {
+      expect(result.statusCode).toBe(500)
     })
   })
 

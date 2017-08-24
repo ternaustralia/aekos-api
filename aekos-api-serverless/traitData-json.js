@@ -22,16 +22,10 @@ module.exports.validator = validator
 
 module.exports.responder = responder
 function responder (requestBody, db, queryStringParameters, extrasProvider) {
-  return new Promise((resolve, reject) => {
-    try {
-      let processStart = r.now()
-      let params = extractParams(requestBody, queryStringParameters, db)
-      getTraitData(extrasProvider.event, params, processStart, db, extrasProvider.elapsedTimeCalculator).then(result => {
-        resolve(r.toLinkHeaderDataAndResponseObj(result))
-      })
-    } catch (error) {
-      reject(error)
-    }
+  let processStart = r.now()
+  let params = extractParams(requestBody, queryStringParameters, db)
+  return getTraitData(extrasProvider.event, params, processStart, db, extrasProvider.elapsedTimeCalculator).then(result => {
+    return Promise.resolve(r.toLinkHeaderDataAndResponseObj(result))
   })
 }
 

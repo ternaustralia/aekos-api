@@ -2,6 +2,8 @@
 let objectUnderTest = require('../speciesData-json')
 let uberRouter = require('../uberRouter')
 let StubDB = require('./StubDB')
+let ConsoleSilencer = require('./ConsoleSilencer')
+let consoleSilencer = new ConsoleSilencer()
 
 describe('/v2/speciesData-json', () => {
   describe('doHandle', () => {
@@ -145,6 +147,41 @@ describe('/v2/speciesData-json', () => {
       expect(responseHeader.params.rows).toBe(20) // we get default rows which is greater than the start
       expect(responseHeader.pageNumber).toBe(1) // should probably be 2 but it's a weird edge case
       expect(responseHeader.totalPages).toBe(1) // are there 1,2 or 3 pages?
+    })
+  })
+
+  describe('doHandle', () => {
+    let result = null
+    beforeEach(done => {
+      let stubDb = new StubDB()
+      stubDb.setExecSelectPromiseResponses([
+        [ /* no records, will cause Error */ ],
+        [ {recordsHeld: 9} ]
+      ])
+      let event = {
+        body: JSON.stringify({speciesNames: ['species one']}),
+        queryStringParameters: {
+          start: '0',
+          rows: '0' // will be validated against soon
+        },
+        headers: {
+          Host: 'api.aekos.org.au',
+          'X-Forwarded-Proto': 'https'
+        },
+        requestContext: { path: '/v2/speciesData.json' },
+        path: '/v2/speciesData.json'
+      }
+      let callback = (_, theResult) => {
+        consoleSilencer.resetConsoleError()
+        result = theResult
+        done()
+      }
+      consoleSilencer.silenceConsoleError()
+      uberRouter._testonly.doHandle(event, callback, stubDb, () => { return 0 })
+    })
+
+    it('should catch an error thrown during query result processing and respond with a 500', () => {
+      expect(result.statusCode).toBe(500)
     })
   })
 

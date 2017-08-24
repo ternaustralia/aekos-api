@@ -1,6 +1,8 @@
 'use strict'
 let uberRouter = require('../uberRouter')
 let StubDB = require('./StubDB')
+let ConsoleSilencer = require('./ConsoleSilencer')
+let consoleSilencer = new ConsoleSilencer()
 
 describe('/v1/speciesSummary-json', () => {
   describe('.doHandle()', () => {
@@ -32,6 +34,31 @@ describe('/v1/speciesSummary-json', () => {
       expect(JSON.parse(result.body)).toEqual([
         { speciesName: 'species one', recordsHeld: 123, id: 'notusedanymore' }
       ])
+    })
+  })
+
+  describe('.doHandle()', () => {
+    let result = null
+    beforeEach(done => {
+      let stubDb = new StubDB()
+      stubDb.setExecSelectPromiseResponses([
+        { forEach: () => { throw new Error('bang!') } }
+      ])
+      let event = {
+        path: '/v1/speciesSummary.json',
+        body: JSON.stringify({ speciesNames: ['species one'] })
+      }
+      let callback = (_, theResult) => {
+        consoleSilencer.resetConsoleError()
+        result = theResult
+        done()
+      }
+      consoleSilencer.silenceConsoleError()
+      uberRouter._testonly.doHandle(event, callback, stubDb)
+    })
+
+    it('should catch an error thrown during query result processing and respond with a 500', () => {
+      expect(result.statusCode).toBe(500)
     })
   })
 })
