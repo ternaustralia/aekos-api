@@ -144,6 +144,21 @@ custom:
           description: Find species, traits and environmental variables
     models:
       -
+        name: ApiResponse
+        contentType: "application/json"
+        schema:
+          type: object
+          properties:
+            links:
+              type: array
+              items:
+                type: object
+                properties:
+                  rel:
+                    type: string
+                  href:
+                    type: string
+      -
         name: V1SpeciesAutocompleteResponse
         contentType: "application/json"
         schema:
@@ -340,6 +355,23 @@ functions:
   uberRouter:
     handler: uberRouter.handler
     events:
+      - http:
+          path: api
+          method: get
+          cors: ${self:custom.customCors}
+          documentation:
+            summary: Get API HATEOAS links
+            tags:
+              - meta
+            description: >
+              Provides links for actions that can be taken. As a RESTful (HATEOAS) client, this is
+              your starting point.
+            methodResponses:
+              -
+                statusCode: '200'
+                responseModels:
+                  "application/json": ApiResponse
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
       - http:
           path: v1/getTraitVocab.json
           method: get

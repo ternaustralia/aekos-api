@@ -478,6 +478,30 @@ describe('response-helper', function () {
     })
   })
 
+  describe('.buildRfc5988Link()', () => {
+    it('should build a link for no parts', () => {
+      let parts = []
+      let result = objectUnderTest.buildRfc5988Link(parts)
+      expect(result).toBe('')
+    })
+
+    it('should build a link for a single part', () => {
+      let parts = [
+        { rel: 'next', href: 'http://example.com/some/path' }
+      ]
+      let result = objectUnderTest.buildRfc5988Link(parts)
+      expect(result).toBe('<http://example.com/some/path>; rel="next"')
+    })
+
+    it('should build a link for a multiple parts', () => {
+      let parts = [
+        { rel: 'next', href: 'http://example.com/some/path' }
+      ]
+      let result = objectUnderTest.buildRfc5988Link(parts)
+      expect(result).toBe('<http://example.com/some/path>; rel="next"')
+    })
+  })
+
   describe('.handleJsonPost()', () => {
     describe('', () => {
       let result = null

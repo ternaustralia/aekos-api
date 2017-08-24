@@ -347,7 +347,7 @@ class VersionHandler {
   }
 }
 
-function buildHateoasLinkHeader (event, linkHeaderData) {
+function buildRfc5988Link (parts) {
   function appendCommaIfNecessary (linkHeader) {
     if (linkHeader.length > 0) {
       return linkHeader + ', '
@@ -355,10 +355,23 @@ function buildHateoasLinkHeader (event, linkHeaderData) {
     return linkHeader
   }
 
-  function createLinkHeader (uri, rel) {
-    return '<' + uri + '>; rel="' + rel + '"'
+  function createLinkHeader (href, rel) {
+    return '<' + href + '>; rel="' + rel + '"'
   }
+  return parts.reduce((previous, current) => {
+    let currFragment = createLinkHeader(current.href, current.rel)
+    let result = previous
+    result = appendCommaIfNecessary(result)
+    result += currFragment
+    return result
+  }, '')
+}
 
+function rfc5988LinkPart (href, rel) {
+  return {href, rel}
+}
+
+function buildHateoasLinkHeader (event, linkHeaderData) {
   let strategyHasStart = {
     offsetForNext: linkHeaderData => {
       return linkHeaderData.start + linkHeaderData.rows
@@ -416,39 +429,36 @@ function buildHateoasLinkHeader (event, linkHeaderData) {
   let host = event.headers.Host
   let path = event.requestContext.path // we use the requestContext.path because it WILL have a stage prefix if needed
   let fromPath = `${scheme}://${host}${path}`
-  let result = ''
+  let linkParts = []
   let hasNextPage = pageNumber < totalPages
   if (hasNextPage) {
     let offsetForNextPage = strategy.offsetForNext(linkHeaderData)
     let qs = strategy.queryStringWithOffset(offsetForNextPage)
     let uriForNextPage = `${fromPath}?${qs}`
-    result += createLinkHeader(uriForNextPage, 'next')
+    linkParts.push(rfc5988LinkPart(uriForNextPage, 'next'))
   }
   let hasPrevPage = pageNumber > 1
   if (hasPrevPage) {
     let offsetForPrevPage = strategy.offsetForPrev(linkHeaderData)
     let qs = strategy.queryStringWithOffset(offsetForPrevPage)
     let uriForPrevPage = `${fromPath}?${qs}`
-    result = appendCommaIfNecessary(result)
-    result += createLinkHeader(uriForPrevPage, 'prev')
+    linkParts.push(rfc5988LinkPart(uriForPrevPage, 'prev'))
   }
   let hasFirstPage = pageNumber > 1
   if (hasFirstPage) {
     let offsetForFirstPage = strategy.offsetForFirst()
     let qs = strategy.queryStringWithOffset(offsetForFirstPage)
     let uriForFirstPage = `${fromPath}?${qs}`
-    result = appendCommaIfNecessary(result)
-    result += createLinkHeader(uriForFirstPage, 'first')
+    linkParts.push(rfc5988LinkPart(uriForFirstPage, 'first'))
   }
   let hasLastPage = pageNumber < totalPages
   if (hasLastPage) {
     let offsetForLastPage = strategy.offsetForLast(linkHeaderData)
     let qs = strategy.queryStringWithOffset(offsetForLastPage)
     let uriForLastPage = `${fromPath}?${qs}`
-    result = appendCommaIfNecessary(result)
-    result += createLinkHeader(uriForLastPage, 'last')
+    linkParts.push(rfc5988LinkPart(uriForLastPage, 'last'))
   }
-  return result
+  return buildRfc5988Link(linkParts)
 }
 
 const validatorIsValid = { isValid: true }
@@ -701,6 +711,8 @@ module.exports = {
   newVersionHandler: newVersionHandler,
   buildLinkHeaderData: buildLinkHeaderData,
   toLinkHeaderDataAndResponseObj: toLinkHeaderDataAndResponseObj,
+  buildRfc5988Link: buildRfc5988Link,
+  rfc5988LinkPart: rfc5988LinkPart,
   _testonly: {
     queryStringParamIsPositiveNumberIfPresentValidator: queryStringParamIsPositiveNumberIfPresentValidator,
     queryStringParamIsBooleanIfPresentValidator: queryStringParamIsBooleanIfPresentValidator,
