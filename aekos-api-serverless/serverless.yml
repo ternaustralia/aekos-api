@@ -126,12 +126,59 @@ custom:
       description: describes other actions that can be taken
       type: string
   documentation:
-    # FIXME doesn't write to the format that AWS expects: {info: {description: "", version: "", title: "", contact: {name: "", email: ""}}}
     api:
-      version: 2
-      summary: AEKOS API
-      # description doesn't work so we add it manually after we pull the Swagger from API Gateway
-      #    see: https://github.com/9cookies/serverless-aws-documentation/issues/37
+      info:
+        version: '2'
+        title: AEKOS API
+        description: |
+          The AEKOS API is used for machine readable HTTP (REST) access to AEKOS ecological data.
+
+          # High level workflow
+          1. Start with a trait or species
+          1. Find what species have that trait or what traits/environmental variables are available for that species
+          1. Use your traits/species/environmental variables to retrieve the data with the retrieval services
+          
+          # Detailed workflow
+          Firstly, start with the search services. You should either find a species with `speciesAutocomplete`
+          or find a trait with `getTraitVocab`. Then, for traits, find the species with that trait with
+          `getSpeciesByTrait`. For species, you can find what traits or environmental variables are available with
+          `getEnvironmentBySpecies` or `getTraitsBySpecies`.
+          Now you can retrieve the data. You can get Darwin Core species records (using species names), Darwin Core +
+          traits (using species names and optionally filtering by trait names) or environmental variable records
+          (using species names and optionally filtering by environmental variable names).
+          
+          # A note about species names
+          We have used Darwin Core terms (version 2015-06-02) as field names for the result of the data retrieval resources.
+          There are two fields that are relevant to species names: `scientificName` and `taxonRemarks`. The former is, as the name
+          suggests, for scientific species names and the latter is for records that have a common species name or a
+          commentary about the organism e.g.: "Grass", "Absent" or "Clover". See http://rs.tdwg.org/dwc/terms/index.htm#scientificName
+          and http://rs.tdwg.org/dwc/terms/index.htm#taxonRemarks for more information.
+          
+          # A note about performance/response times
+          This API is running on AWS Lambda and API Gateway. Lambda handler functions will go to sleep
+          when they haven't been called for some time (something around 5-10 minutes seems to be the consensus). When the
+          resource is warm (it has recently been called) it will respond instantly. However, when it's cold (gone
+          to sleep) it will have to start up before it can respond so the total response time could be up to 10 seconds. **All endpoints for this API go through the same handler so calling any endpoint will pre-heat the whole API**.
+          
+          To build a UI (typically calls are time sensitive) on top of this API, you can "pre-heat" the whole API as the page loads. A workflow like:
+          1. user loads page
+          1. as page loads, call the `/api` resource
+          1. user spends a few seconds filling out form on page
+          1. user submits request
+          1. AEKOS API responds quickly because the resource is already warmed up
+          
+          Obviously if you can pre-empt needing to call this API by at least 10 seconds and call the `/api/` resource at that time, you can ensure that you'll get the best performance.
+          
+          # CORS support
+          All resources are CORS-enabled for any origin. In the interest of keeping this documentation clean, the `OPTIONS` methods have been omitted.
+        termsOfService: http://www.ecoinformatics.org.au/licensing_and_attributions
+        contact:
+          name: TERN Ecoinformatics
+          url: http://www.ecoinformatics.org.au
+          email: api@aekos.org.au
+        license:
+          name: Licensing and attributions
+          url: http://www.ecoinformatics.org.au/licensing_and_attributions
       tags:
         -
           name: ${self:custom.tags.dataRetrievalTag}

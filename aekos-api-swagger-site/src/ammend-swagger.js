@@ -29,7 +29,7 @@ fs.readFile(inputFile, 'utf8', (error, data) => {
   let parsedData = JSON.parse(data)
   removeOptionsMethods(parsedData)
   markDeprecated(parsedData)
-  addApiDescription(parsedData)
+  fixApiTitleAndVersion(parsedData)
   removeRootRedirectResource(parsedData)
   updateParameterTypes(parsedData)
   fixContentNegotiationResponses(parsedData)
@@ -106,20 +106,10 @@ function updateParameterTypes (parsedData) {
   })
 }
 
-function addApiDescription(parsedData) {
+function fixApiTitleAndVersion(parsedData) {
   let info = parsedData.info
-  info.description = theDesc
   info.title = 'AEKOS REST API'
-  info.termsOfService = 'http://www.ecoinformatics.org.au/licensing_and_attributions'
-  info.contact = {
-    name: 'TERN Ecoinformatics',
-    url: 'http://www.ecoinformatics.org.au',
-    email: 'api@aekos.org.au'
-  }
-  info.license = {
-    name: 'Licensing and attributions',
-    url: 'http://www.ecoinformatics.org.au/licensing_and_attributions'
-  }
+  info.version = 'v2'
 }
 
 function removeRootRedirectResource (parsedData) {
