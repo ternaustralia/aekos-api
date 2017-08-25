@@ -8,6 +8,12 @@ const pageSizeParam = yaml.load('./constants.yml').paramNames.PAGE_SIZE
 const pageNumParam = yaml.load('./constants.yml').paramNames.PAGE_NUM
 const startParam = yaml.load('./constants.yml').paramNames.START
 const rowsParam = yaml.load('./constants.yml').paramNames.ROWS
+const pageSizeMin = yaml.load('./constants.yml').minValues.PAGE_SIZE
+const pageNumMin = yaml.load('./constants.yml').minValues.PAGE_NUM
+const startMin = yaml.load('./constants.yml').minValues.START
+const rowsMin = yaml.load('./constants.yml').minValues.ROWS
+const pageSizeMax = yaml.load('./constants.yml').maxValues.PAGE_SIZE
+const rowsMax = yaml.load('./constants.yml').maxValues.ROWS
 const downloadParam = yaml.load('./constants.yml').paramNames.DOWNLOAD
 const msg500 = yaml.load('./constants.yml').messages.public.internalServerError
 let codeToLabelMapping = require('./ontology/code-to-label.json')
@@ -549,7 +555,7 @@ function compositeValidator (validatorArray) {
   }
 }
 
-function queryStringParamIsPositiveNumberIfPresentValidator (paramName) {
+function queryStringParamIsNumberInRangeIfPresentValidator (paramName, minValue, maxValue) {
   return (queryStringObj, _) => {
     let isQueryStringNotPresent = queryStringObj === null || typeof queryStringObj === 'undefined'
     if (isQueryStringNotPresent) {
@@ -565,9 +571,13 @@ function queryStringParamIsPositiveNumberIfPresentValidator (paramName) {
     if (isParamNotANumber) {
       return validatorNotValid(`The '${paramName}' must be a number when supplied. Supplied value = '${value}'`)
     }
-    let isParamNegative = parsedValue < 0
-    if (isParamNegative) {
-      return validatorNotValid(`The '${paramName}' must be a number >= 0. Supplied value = '${value}'`)
+    let isParamLessThanMin = parsedValue < minValue
+    if (isParamLessThanMin) {
+      return validatorNotValid(`The '${paramName}' must be a number >= ${minValue}. Supplied value = '${value}'`)
+    }
+    let isParamGreaterThanMax = parsedValue > maxValue
+    if (isParamGreaterThanMax) {
+      return validatorNotValid(`The '${paramName}' must be a number <= ${maxValue}. Supplied value = '${value}'`)
     }
     return validatorIsValid
   }
@@ -703,10 +713,10 @@ module.exports = {
   traitNamesOptionalValidator: traitNamesOptionalValidator,
   envVarNamesOptionalValidator: envVarNamesOptionalValidator,
   compositeValidator: compositeValidator,
-  pageSizeValidator: queryStringParamIsPositiveNumberIfPresentValidator(pageSizeParam),
-  pageNumValidator: queryStringParamIsPositiveNumberIfPresentValidator(pageNumParam),
-  startValidator: queryStringParamIsPositiveNumberIfPresentValidator(startParam),
-  rowsValidator: queryStringParamIsPositiveNumberIfPresentValidator(rowsParam),
+  pageSizeValidator: queryStringParamIsNumberInRangeIfPresentValidator(pageSizeParam, pageSizeMin, pageSizeMax),
+  pageNumValidator: queryStringParamIsNumberInRangeIfPresentValidator(pageNumParam, pageNumMin),
+  startValidator: queryStringParamIsNumberInRangeIfPresentValidator(startParam, startMin),
+  rowsValidator: queryStringParamIsNumberInRangeIfPresentValidator(rowsParam, rowsMin, rowsMax),
   downloadParamValidator: queryStringParamIsBooleanIfPresentValidator(downloadParam),
   newVersionHandler: newVersionHandler,
   buildLinkHeaderData: buildLinkHeaderData,
@@ -714,7 +724,7 @@ module.exports = {
   buildRfc5988Link: buildRfc5988Link,
   rfc5988LinkPart: rfc5988LinkPart,
   _testonly: {
-    queryStringParamIsPositiveNumberIfPresentValidator: queryStringParamIsPositiveNumberIfPresentValidator,
+    queryStringParamIsNumberInRangeIfPresentValidator: queryStringParamIsNumberInRangeIfPresentValidator,
     queryStringParamIsBooleanIfPresentValidator: queryStringParamIsBooleanIfPresentValidator,
     genericMandatoryNamesValidator: genericMandatoryNamesValidator,
     genericOptionalNamesValidator: genericOptionalNamesValidator,

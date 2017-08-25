@@ -160,10 +160,7 @@ describe('/v2/speciesData-json', () => {
       ])
       let event = {
         body: JSON.stringify({speciesNames: ['species one']}),
-        queryStringParameters: {
-          start: '0',
-          rows: '0' // will be validated against soon
-        },
+        queryStringParameters: null,
         headers: {
           Host: 'api.aekos.org.au',
           'X-Forwarded-Proto': 'https'

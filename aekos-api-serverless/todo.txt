@@ -18,5 +18,3 @@
 - consider adding type= attribute to link header items
 - figure out what rel we can use on search resources to point to data resources
 - add "catch-all" type handler so we can give something more informative than 403 {"message":"Missing Authentication Token"}
-- add validator for rows >= 1
-- add validator for rows < (some sane figure). Need to work out what that is but 800 might be good.

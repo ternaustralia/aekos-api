@@ -19,6 +19,14 @@ defaults:
   PAGE_SIZE: "20"
   START: "0"
   ROWS: "20"
+minValues:
+  PAGE_NUM: 1
+  PAGE_SIZE: 1
+  START: 0
+  ROWS: 1
+maxValues:
+  PAGE_SIZE: 1000
+  ROWS: 1000
 messages:
   public:
     internalServerError: Sorry about that, something has gone wrong

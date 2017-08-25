@@ -1566,30 +1566,30 @@ describe('response-helper', () => {
     })
   })
 
-  describe('.queryStringParamIsPositiveNumberIfPresentValidator()', () => {
+  describe('.queryStringParamIsNumberInRangeIfPresentValidator()', () => {
     it('should pass validation when the param is NOT present', () => {
-      let objectUnderTest = responseHelper._testonly.queryStringParamIsPositiveNumberIfPresentValidator('param1')
+      let objectUnderTest = responseHelper._testonly.queryStringParamIsNumberInRangeIfPresentValidator('param1', 0, 100)
       let queryStringObject = {}
       let result = objectUnderTest(queryStringObject, null)
       expect(result).toEqual({ isValid: true })
     })
 
     it('should pass validation when no params are present (null)', () => {
-      let objectUnderTest = responseHelper._testonly.queryStringParamIsPositiveNumberIfPresentValidator('param1')
+      let objectUnderTest = responseHelper._testonly.queryStringParamIsNumberInRangeIfPresentValidator('param1', 0, 100)
       let queryStringObject = null
       let result = objectUnderTest(queryStringObject, null)
       expect(result).toEqual({ isValid: true })
     })
 
     it('should pass validation when no params are present (undefined)', () => {
-      let objectUnderTest = responseHelper._testonly.queryStringParamIsPositiveNumberIfPresentValidator('param1')
+      let objectUnderTest = responseHelper._testonly.queryStringParamIsNumberInRangeIfPresentValidator('param1', 0, 100)
       let event = {}
       let result = objectUnderTest(event.willBeUndefined, null)
       expect(result).toEqual({ isValid: true })
     })
 
-    it('should pass validation when the param is present and a number', () => {
-      let objectUnderTest = responseHelper._testonly.queryStringParamIsPositiveNumberIfPresentValidator('param1')
+    it('should pass validation when the param is present and a number in the range', () => {
+      let objectUnderTest = responseHelper._testonly.queryStringParamIsNumberInRangeIfPresentValidator('param1', 0, 200)
       let queryStringObject = {
         param1: '123' // API Gateway passes strings
       }
@@ -1597,8 +1597,17 @@ describe('response-helper', () => {
       expect(result).toEqual({ isValid: true })
     })
 
-    it('should pass validation when the param is zero', () => {
-      let objectUnderTest = responseHelper._testonly.queryStringParamIsPositiveNumberIfPresentValidator('param1')
+    it('should pass validation when the param is present and a number and there is no maxValue', () => {
+      let objectUnderTest = responseHelper._testonly.queryStringParamIsNumberInRangeIfPresentValidator('param1', 0 /*, no maxValue */)
+      let queryStringObject = {
+        param1: '99999999'
+      }
+      let result = objectUnderTest(queryStringObject, null)
+      expect(result).toEqual({ isValid: true })
+    })
+
+    it('should pass validation when the param equals the minValue', () => {
+      let objectUnderTest = responseHelper._testonly.queryStringParamIsNumberInRangeIfPresentValidator('param1', 0, 100)
       let queryStringObject = {
         param1: '0'
       }
@@ -1606,8 +1615,17 @@ describe('response-helper', () => {
       expect(result).toEqual({ isValid: true })
     })
 
-    it('should fail validation when the param is present but is a negative number', () => {
-      let objectUnderTest = responseHelper._testonly.queryStringParamIsPositiveNumberIfPresentValidator('param1')
+    it('should pass validation when the param equals maxValue', () => {
+      let objectUnderTest = responseHelper._testonly.queryStringParamIsNumberInRangeIfPresentValidator('param1', 1, 100)
+      let queryStringObject = {
+        param1: '100'
+      }
+      let result = objectUnderTest(queryStringObject, null)
+      expect(result).toEqual({ isValid: true })
+    })
+
+    it('should fail validation when the param is present but is less than minValue', () => {
+      let objectUnderTest = responseHelper._testonly.queryStringParamIsNumberInRangeIfPresentValidator('param1', 0, 100)
       let queryStringObject = {
         param1: '-1'
       }
@@ -1616,8 +1634,18 @@ describe('response-helper', () => {
       expect(result.message).toBeDefined()
     })
 
+    it('should fail validation when the param is present but is greater than maxValue', () => {
+      let objectUnderTest = responseHelper._testonly.queryStringParamIsNumberInRangeIfPresentValidator('param1', 0, 100)
+      let queryStringObject = {
+        param1: '101'
+      }
+      let result = objectUnderTest(queryStringObject, null)
+      expect(result.isValid).toBe(false)
+      expect(result.message).toBeDefined()
+    })
+
     it('should fail validation when the param is present and NOT a number', () => {
-      let objectUnderTest = responseHelper._testonly.queryStringParamIsPositiveNumberIfPresentValidator('param1')
+      let objectUnderTest = responseHelper._testonly.queryStringParamIsNumberInRangeIfPresentValidator('param1', 0, 100)
       let queryStringObject = {
         param1: 'asdf'
       }

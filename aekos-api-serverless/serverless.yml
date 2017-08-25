@@ -94,10 +94,12 @@ custom:
         "application/json": 500JsonResponse
     StartQueryParam:
       name: ${file(./constants.yml):paramNames.START}
-      description: 0-indexed result start index
+      description: 0-indexed result start index, default=${self:custom.constants.defaults.START}
     RowsQueryParam:
       name: ${file(./constants.yml):paramNames.ROWS}
-      description: records per page
+      description: >
+        records per page, default=${self:custom.constants.defaults.ROWS},
+        must be ${self:custom.constants.minValues.ROWS} &lt;= rows &lt;= ${self:custom.constants.maxValues.ROWS}
     SingleSpeciesNameQueryParam:
       name: ${file(./constants.yml):paramNames.SINGLE_SPECIES_NAME}
       description: single species name to search for
@@ -113,7 +115,9 @@ custom:
       description: 1-indexed page number, default=${self:custom.constants.defaults.PAGE_NUM}
     PageSizeQueryParam:
       name: ${file(./constants.yml):paramNames.PAGE_SIZE}
-      description: records per page, default=${self:custom.constants.defaults.PAGE_SIZE}
+      description: >
+        records per page, default=${self:custom.constants.defaults.PAGE_SIZE},
+        must be ${self:custom.constants.minValues.PAGE_SIZE} &lt;= pageSize &lt;= ${self:custom.constants.maxValues.PAGE_SIZE}
     DownloadQueryParam:
       name: ${file(./constants.yml):paramNames.DOWNLOAD}
       description: true to trigger a browser download of the result, default=false

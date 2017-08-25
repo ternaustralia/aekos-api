@@ -4,6 +4,7 @@ let uberRouter = require('../uberRouter')
 let StubDB = require('./StubDB')
 let ConsoleSilencer = require('./ConsoleSilencer')
 let consoleSilencer = new ConsoleSilencer()
+let yaml = require('yamljs')
 
 describe('/v2/allSpeciesData-json', () => {
   describe('doHandle', () => {
@@ -262,6 +263,63 @@ describe('/v2/allSpeciesData-json', () => {
 
     it('should catch an error thrown during query result processing and respond with a 500', () => {
       expect(result.statusCode).toBe(500)
+    })
+  })
+
+  describe('doHandle', () => {
+    let result = null
+    beforeEach(done => {
+      let event = {
+        queryStringParameters: {
+          rows: '0'
+        },
+        headers: {
+          Host: 'api.aekos.org.au',
+          'X-Forwarded-Proto': 'https'
+        },
+        requestContext: { path: '/v2/allSpeciesData.json' },
+        path: '/v2/allSpeciesData.json'
+      }
+      let callback = (_, theResult) => {
+        consoleSilencer.resetConsoleError()
+        result = theResult
+        done()
+      }
+      consoleSilencer.silenceConsoleError()
+      uberRouter._testonly.doHandle(event, callback, null, () => { return 42 })
+    })
+
+    it('should fail validation when we supply rows=0', () => {
+      expect(result.statusCode).toBe(400)
+    })
+  })
+
+  describe('doHandle', () => {
+    let result = null
+    beforeEach(done => {
+      const rowsMax = yaml.load('./constants.yml').maxValues.ROWS
+      let event = {
+        queryStringParameters: {
+          rows: '' + (rowsMax + 1)
+        },
+        headers: {
+          Host: 'api.aekos.org.au',
+          'X-Forwarded-Proto': 'https'
+        },
+        requestContext: { path: '/v2/allSpeciesData.json' },
+        path: '/v2/allSpeciesData.json'
+      }
+      let callback = (_, theResult) => {
+        consoleSilencer.resetConsoleError()
+        result = theResult
+        done()
+      }
+      consoleSilencer.silenceConsoleError()
+      uberRouter._testonly.doHandle(event, callback, null, () => { return 42 })
+    })
+
+    it('should fail validation when we supply rows greater than the configured max', () => {
+      expect(result.statusCode).toBe(400)
     })
   })
 
