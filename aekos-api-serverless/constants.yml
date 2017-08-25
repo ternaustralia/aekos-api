@@ -5,9 +5,6 @@ paramNames:
     multiple: traitNames
   varName:
     multiple: varNames
-  SINGLE_SPECIES_NAME: "speciesName"
-  SINGLE_TRAIT_NAME: "traitName"
-  SINGLE_VAR_NAME: "varName"
   PAGE_NUM: "pageNum"
   PAGE_SIZE: "pageSize"
   ROWS: "rows"

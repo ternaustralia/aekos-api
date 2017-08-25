@@ -100,16 +100,6 @@ custom:
       description: >
         records per page, default=${self:custom.constants.defaults.ROWS},
         must be ${self:custom.constants.minValues.ROWS} &lt;= rows &lt;= ${self:custom.constants.maxValues.ROWS}
-    SingleSpeciesNameQueryParam:
-      name: ${file(./constants.yml):paramNames.SINGLE_SPECIES_NAME}
-      description: single species name to search for
-      required: true
-    SingleTraitNameQueryParam:
-      name: ${file(./constants.yml):paramNames.SINGLE_TRAIT_NAME}
-      description: single trait name filter (only values for this trait will be returned)
-    SingleVarNameQueryParam:
-      name: ${file(./constants.yml):paramNames.SINGLE_VAR_NAME}
-      description: single environmental variable name filter (only values for this variable will be returned)
     PageNumQueryParam:
       name: ${file(./constants.yml):paramNames.PAGE_NUM}
       description: 1-indexed page number, default=${self:custom.constants.defaults.PAGE_NUM}
