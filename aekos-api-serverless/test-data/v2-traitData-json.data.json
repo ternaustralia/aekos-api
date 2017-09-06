@@ -1,0 +1,13 @@
+{
+  "queryStringParameters": {},
+  "body": "{\"speciesNames\":[\"Abutilon cryptopetalum (F.Muell.) Benth.\"]}",
+  "requestContext": {
+    "path": "/v2/traitData"
+  },
+  "path": "/v2/traitData",
+  "headers": {
+    "Accept": "application/json",
+    "Host": "api.aekos.org.au",
+    "X-Forwarded-Proto": "https"
+  }
+}

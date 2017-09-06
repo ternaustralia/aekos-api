@@ -12,18 +12,19 @@ console.warn(`[INFO] Using a max sleep of ${maxSleepMinutes} minutes`)
 const loggingFrequency = 10
 const targetHost = 'test.api.aekos.org.au'
 let callCount = 0
-console.log(`callTimestamp;callTimestampMs;path;statusCode;elapsedMs;sleepPeriodMs;sleepPeriodMinutes;bodyFragment`)
+console.log(`callTimestamp;callTimestampMs;requestID;statusCode;elapsedMs;sleepPeriodMs;sleepPeriodMinutes;bodyFragment`)
 scheduleNext()
 
-function doCall (reqConfig, sleepPeriodMs, done) {
+function doCall (namedRequest, sleepPeriodMs, done) {
   let start = new Date()
   let startMs = start.getTime()
+  let reqConfig = namedRequest.req
   let req = https.request(reqConfig.options, (res) => {
     const { statusCode } = res
 
     res.setEncoding('utf8')
     let rawData = ''
-    const maxRawDataLength = 20
+    const maxRawDataLength = 90
     res.on('data', (chunk) => {
       rawData += chunk
       if (rawData.length > maxRawDataLength) {
@@ -31,16 +32,17 @@ function doCall (reqConfig, sleepPeriodMs, done) {
       }
     })
     res.on('end', () => {
-      let bodyFragment = rawData.length > maxRawDataLength ? rawData.substr(0, maxRawDataLength) + '...' : rawData
+      let bodyFragment = stripCsvNoise(rawData)
+      bodyFragment = bodyFragment.length > maxRawDataLength ? bodyFragment.substr(0, maxRawDataLength) + '...' : bodyFragment
       let elapsed = new Date().getTime() - startMs
-      console.log(`${start};${startMs};${reqConfig.options.path};${statusCode};${elapsed};${sleepPeriodMs};${msToMinutes(sleepPeriodMs)};${bodyFragment}`)
+      console.log(`${format(start)};${startMs};${namedRequest.name};${statusCode};${elapsed};${sleepPeriodMs};${msToMinutes(sleepPeriodMs)};${bodyFragment}`)
       done()
     })
   })
   req.on('error', (e) => {
     console.error(new Error(`Got error: ${e.message}`))
     let elapsed = new Date().getTime() - start
-    console.log(`${start};${startMs};${reqConfig.options.path};FAIL;${elapsed};${sleepPeriodMs};${msToMinutes(sleepPeriodMs)};${e.message}`)
+    console.log(`${format(start)};${startMs};${namedRequest.name};FAIL;${elapsed};${sleepPeriodMs};${msToMinutes(sleepPeriodMs)};${e.message}`)
     done()
   })
   reqConfig.body(req)
@@ -52,7 +54,8 @@ function scheduleNext () {
   let reqId = Math.floor(Math.random() * availableReqs.length)
   let req = availableReqs[reqId]
   let sleepPeriodMs = Math.floor((Math.random() * maxSleepMinutes * 60 * 1000))
-  console.warn(`[INFO] Sleeping for ${sleepPeriodMs}ms (${msToMinutes(sleepPeriodMs)} minutes) before calling ${req.options.path}`)
+  let wakeTime = new Date(new Date().getTime() + sleepPeriodMs)
+  console.warn(`[INFO] Sleeping for ${sleepPeriodMs}ms/${msToMinutes(sleepPeriodMs)} minutes (${format(wakeTime)}) before calling ${req.name}`)
   setTimeout(() => {
     doCall(req, sleepPeriodMs, () => {
       scheduleNext()
@@ -61,6 +64,25 @@ function scheduleNext () {
   if (callCount % loggingFrequency === 0) {
     console.warn('[INFO] Number of calls so far=' + callCount)
   }
+}
+
+function stripCsvNoise (body) {
+  if (body.indexOf('\n') === -1) {
+    return body
+  }
+  let firstNewlineIndex = body.indexOf('\n')
+  return body.substr(firstNewlineIndex + 1).replace('\n', ' ')
+}
+
+function format (d) {
+  const days = ['Sun', 'Mon', 'Tues', 'Wed', 'Thu', 'Fri', 'Sat']
+  function pad (v) {
+    if (('' + v).length === 2) {
+      return v
+    }
+    return '0' + v
+  }
+  return `${days[d.getDay()]} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
 }
 
 function msToMinutes (value) {
@@ -81,13 +103,51 @@ function toTwoDecimalPlaces (value) {
 // 'Austrostipa sp.', '17538'
 function getAvailableReqs () {
   return [
-    getJson('/v2/getTraitVocab.json'),
-    getJson('/v2/getEnvironmentalVariableVocab.json'),
-    postJson('/v2/traitData', {
+    nr('v2/getTraitVocab.json', getJson('/v2/getTraitVocab.json')),
+    nr('v2/getEnvironmentalVariableVocab.json', getJson('/v2/getEnvironmentalVariableVocab.json')),
+    nr('v2/speciesData-json#default-page', postJson('/v2/speciesData', {
+      'speciesNames': [ 'Austrostipa sp.' ]
+    })),
+    nr('v2/speciesData-json#200-recs', postJson('/v2/speciesData?rows=200', {
+      'speciesNames': [ 'Avena barbata', 'Stipa sp.' ]
+    })),
+    nr('v2/speciesData-json#1000-recs', postJson('/v2/speciesData?rows=1000', {
+      'speciesNames': [ 'Avena barbata', 'Stipa sp.' ]
+    })),
+    nr('v2/speciesData-csv#default-page+stressful', postCsv('/v2/speciesData', {
+      'speciesNames': [ 'Avena barbata', 'Stipa sp.' ]
+    })),
+    nr('v2/speciesData-csv#default-page+easy', postCsv('/v2/speciesData', {
+      'speciesNames': [ 'Abutilon cryptopetalum (F.Muell.) Benth.', 'Geijera parviflora Lindl.', 'Eucalyptus melanophloia F.Muell.' ]
+    })),
+    nr('v2/speciesData-csv#300-recs', postCsv('/v2/speciesData?rows=300&start=300', {
+      'speciesNames': [ 'Avena barbata', 'Stipa sp.' ]
+    })),
+    nr('v2/traitData-json#default-page', postJson('/v2/traitData', {
       'traitNames': [ 'averageHeight', 'cover' ],
       'speciesNames': [ 'Abutilon cryptopetalum (F.Muell.) Benth.' ]
-    })
+    })),
+    nr('v2/traitData-json#200-recs', postJson('/v2/traitData?rows=200', {
+      'traitNames': [ ],
+      'speciesNames': [ 'Avena barbata' ]
+    })),
+    nr('v2/traitData-json#1000-recs', postJson('/v2/traitData?rows=1000', {
+      'traitNames': [ ],
+      'speciesNames': [ 'Avena barbata' ]
+    })),
+    nr('v2/traitData-csv#100-recs', postCsv('/v2/traitData?rows=1000', {
+      'traitNames': [ ],
+      'speciesNames': [ 'Avena barbata' ]
+    }))
   ]
+}
+
+// Creates a named request
+function nr (name, req) {
+  return {
+    name: name,
+    req: req
+  }
 }
 
 function getJson (uri) {
@@ -109,6 +169,14 @@ function getJson (uri) {
 }
 
 function postJson (uri, body) {
+  return postHelper(uri, body, 'application/json')
+}
+
+function postCsv (uri, body) {
+  return postHelper(uri, body, 'text/csv')
+}
+
+function postHelper (uri, body, accept) {
   let bodyData = JSON.stringify(body)
   return {
     options: {
@@ -117,8 +185,9 @@ function postJson (uri, body) {
       method: 'POST',
       path: uri,
       headers: {
-        accept: 'application/json',
-        'content-length': bodyData.length
+        accept: accept,
+        'content-length': bodyData.length,
+        'content-type': 'application/json'
       },
       timeout: 60 * 1000
     },

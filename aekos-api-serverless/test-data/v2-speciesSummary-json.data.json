@@ -1,0 +1,12 @@
+{
+  "queryStringParameters": {},
+  "body": "{\"speciesNames\":[\"Acacia dealbata\"]}",
+  "requestContext": {
+    "path": "/v2/speciesSummary.json"
+  },
+  "path": "/v2/speciesSummary.json",
+  "headers": {
+    "Host": "api.aekos.org.au",
+    "X-Forwarded-Proto": "https"
+  }
+}

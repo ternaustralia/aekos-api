@@ -1,0 +1,15 @@
+{
+  "queryStringParameters": {
+    "rows": "800"
+  },
+  "body": "{\"speciesNames\":[\"Avena barbata\",\"Stipa sp.\"]}",
+  "requestContext": {
+    "path": "/v2/traitData"
+  },
+  "path": "/v2/traitData",
+  "headers": {
+    "Accept": "application/json",
+    "Host": "api.aekos.org.au",
+    "X-Forwarded-Proto": "https"
+  }
+}

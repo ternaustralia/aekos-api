@@ -1,0 +1,15 @@
+{
+  "queryStringParameters": {
+    "start": "0",
+    "rows": "3"
+  },
+  "requestContext": {
+    "path": "/v2/allSpeciesData"
+  },
+  "path": "/v2/allSpeciesData",
+  "headers": {
+    "Accept": "application/json",
+    "Host": "api.aekos.org.au",
+    "X-Forwarded-Proto": "https"
+  }
+}
