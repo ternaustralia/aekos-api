@@ -1,20 +1,19 @@
 #!/bin/bash
 cd `dirname $0`
 export SLS_DEBUG=*
-FUNC=$1
-if [ -z "$FUNC" ]; then
-  echo "Invokes a single function."
-  echo "The function name is one of the keys under 'functions' in serverless.yml."
-  echo "Usage: $0 <function-name>"
-  echo "   eg: $0 traitVocab-json"
-  exit 1
+eventDataFile=$1
+stage=$2
+if [ -z "$stage" ]; then
+  stage='dev'
 fi
-FUNC=`bash -c "echo $FUNC | sed 's/\.js$//'"`
-DATA=./test-data/${FUNC}.data.json
-if [ ! -f "$DATA" ]; then
-  echo "[ERROR] the data file $DATA doesn't exist"
+if [ -z "$eventDataFile" ]; then
+  echo "[ERROR] the data file '$eventDataFile' doesn't exist"
+  echo "Invokes the uber router using the supplied event data"
+  echo "Usage: $0 <event-data-file>"
+  echo "   eg: $0 test-data/v2-getTraitVocab-json.data.json"
   exit 1
 fi
 serverless invoke local \
-  --function=$FUNC \
-  --path=$DATA
+  --stage=$stage \
+  --function=uberRouter \
+  --path=$eventDataFile
