@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="author" content="TERN">
+  <title>Sampling Protocol Summary - AEKOS API</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ng-prettyjson/0.2.0/ng-prettyjson.min.css">
+</head>
+
+<body ng-app="app" ng-controller="TheController">
+  <h2>AEKOS API Sampling protocol summary</h2>
+  <pre pretty-json="samplingProtocolSummary"></pre>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.5/angular.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ng-prettyjson/0.2.0/ng-prettyjson.min.js"></script>
+  <script type="text/javascript">
+    var app = angular.module('app', ['ngPrettyJson'])
+    app.controller('TheController', function ($scope, $http, $location) {
+      $scope.samplingProtocolSummary = 'Loading...'
+      var base = 'https://dev.api.aekos.org.au'
+      if ($location.protocol() !== 'file') {
+        // var base = ''
+        // TODO match for (dev|test|).api.aekos.org.au to create the correct base
+      }
+      $http.get(base + '/sampling-protocol-summary').then(function (resp) {
+        $scope.samplingProtocolSummary = resp.data
+      })
+    })
+  </script>
+</body>
+</html>
