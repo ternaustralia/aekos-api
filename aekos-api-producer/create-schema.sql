@@ -7,7 +7,8 @@ DROP TABLE IF EXISTS citations;
 CREATE TABLE citations (
 	samplingProtocol VARCHAR(100) NOT NULL,
 	bibliographicCitation VARCHAR(1000),
-	datasetName VARCHAR(150)
+	datasetName VARCHAR(150),
+	licence VARCHAR(100)
 	,PRIMARY KEY (samplingProtocol) -- NOT_RAW
 );
 

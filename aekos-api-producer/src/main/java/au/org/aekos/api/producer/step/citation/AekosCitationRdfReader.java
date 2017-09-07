@@ -16,7 +16,8 @@ public class AekosCitationRdfReader extends AbstractRdfReader<InputCitationRecor
 		return new InputCitationRecord(
 				e.get("samplingProtocol"),
 				e.get("bibliographicCitation"),
-				e.get("datasetName")
+				e.get("datasetName"),
+				e.get("licenceUrl")
 			);
 	}
 

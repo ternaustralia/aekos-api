@@ -1,0 +1,11 @@
+PREFIX : <urn:test#>
+
+SELECT *
+WHERE {
+	GRAPH ?rdfGraph {
+		?rdfSubject :samplingProtocol	    ?samplingProtocol .      
+		?rdfSubject :bibliographicCitation	?bibliographicCitation .
+		?rdfSubject :datasetName	        ?datasetName .
+		?rdfSubject :licenceUrl	            ?licenceUrl .
+	}
+}

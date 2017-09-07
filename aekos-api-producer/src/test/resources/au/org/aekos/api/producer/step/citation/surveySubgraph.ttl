@@ -1,0 +1,111 @@
+# a basic survey subgraph with the minimum to satisfy the citation query
+# Generated with:
+#PREFIX aekos: <http://www.aekos.org.au/ontology/1.0.0#>
+#PREFIX : <http://www.aekos.org.au/ontology/1.0.0/oeh_vis#>
+#
+#construct {
+#  ?s ?p ?o .
+#  ?md ?mdp ?mdo .
+#  ?rights ?rp ?ro .
+#  ?lic ?lp ?lo .
+#  ?lt ?ltp ?lto .
+#  ?cit ?citp ?cito .
+#}
+#from :
+#where {
+#  ?s ?p ?o .
+#  FILTER (?s = :SURVEYSUBGRAPH-T1493885545978) .
+#  ?s aekos:metadata ?md .
+#  ?md aekos:rights ?rights .
+#  ?rights ?rp ?ro .
+#  ?rights aekos:licence ?lic .
+#  ?lic ?lp ?lo .
+#  ?lic aekos:licencetype ?lt .
+#  ?lt ?ltp ?lto .
+#  ?rights aekos:citation ?cit .
+#  ?cit ?citp ?cito .
+#}
+
+@prefix test_project: <http://www.aekos.org.au/ontology/1.0.0/test_project#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix aekos: <http://www.aekos.org.au/ontology/1.0.0#> .
+
+test_project:SURVEYSUBGRAPH-T1493885545978
+        a                            aekos:SURVEYSUBGRAPH ;
+        aekos:aekossurveyidentifier  "aekos.org.au/collection/nsw.gov.au/nsw_atlas/vis_flora_module/MER_W2B_11" ;
+        aekos:authors                []  ;
+        aekos:centroidcoordinates    test_project:SPATIALPOINT-B2999320 ;
+        aekos:conditions             test_project:CONDITIONSOFUSEVALUE-B2999276 ;
+        aekos:custodian              "Office of Environment and Heritage" ;
+        aekos:emlelement             test_project:EML_COLLECTIONOBJECT-B2999277 ;
+        aekos:entitydisplay          test_project:PresentationModel-B2999322 ;
+        aekos:firstvisitdate         "2011-03-21T13:30:00Z"^^xsd:dateTime ;
+        aekos:icons                  []  ;
+        aekos:lastvisitdate          "2011-04-13T14:30:00Z"^^xsd:dateTime ;
+        aekos:lifecycle              test_project:LIFECYCLE-T1493885545989 ;
+        aekos:mapcoordinates         test_project:COORDINATES-T1493885548212 ;
+        aekos:metadata               test_project:METADATAOBJECT-T1493885627197 ;
+        aekos:organisations          []  ;
+        aekos:projectdetails         test_project:RESEARCHACTIVITY-T1493885545986 ;
+        aekos:rifcs                  test_project:RIFCS_REGISTRYOBJECT-T1493885627199 ;
+        aekos:rights                 test_project:LEGALRIGHTS-T1493885545990 ;
+        aekos:spatialscope           test_project:SPATIALSCOPE-T1493885546000 ;
+        aekos:studylocationcount     "23"^^xsd:decimal ;
+        aekos:surveyicons            test_project:SURVEYICONSVALUE-B2999319 ;
+        aekos:surveyidentifier       test_project:NUMBERIDENTIFIER-1960945840 ;
+        aekos:surveyidentifiertext   "MER_W2B_11" ;
+        aekos:surveymethods          test_project:METHODSVALUE-B2999321 ;
+        aekos:surveytitle            " Office of Environment and Heritage, New South Wales - MER_W2B_11 Vegetation Survey contains 23 study locations " ;
+        aekos:temporalscope          test_project:TEMPORALSCOPE-T1493885545999 ;
+        aekos:thematicscope          test_project:THEMATICSCOPE-T1493885546006 .
+
+test_project:LEGALRIGHTS-T1493885545990
+        a                             aekos:LEGALRIGHTS ;
+        aekos:accessrights            test_project:ACCESSRIGHTS-T1493885545998 ;
+        aekos:citation                test_project:CITATION-T1493885545994 ;
+        aekos:collaborationstatement  " These data have been released in the spirit of open scientific collaboration. Data users are encouraged to consider consultation with <a href='mailto:vis&#64;environment.nsw.gov.au' target='_blank'>vis&#64;environment.nsw.gov.au</a> to minimize duplication of research. " ;
+        aekos:entitydisplay           test_project:PresentationModel-C3066870 ;
+        aekos:licence                 test_project:LICENCE-T1493885545993 ;
+        aekos:rightsstatement         " &#169; State of New South Wales (Office of Environment and Heritage). Rights owned by State of New South Wales (Office of Environment and Heritage). Rights licensed subject to <a href=\"http://www.ausgoal.gov.au/creative-commons-v4.0\"  target=\"_blank\" >Creative Commons Attribution 3.0 Australia</a>. " ;
+        aekos:rightsstatementtext     "&#169; State of New South Wales (Office of Environment and Heritage). Rights owned by State of New South Wales (Office of Environment and Heritage). Rights licensed subject to Creative Commons Attribution 3.0 Australia ( http://www.ausgoal.gov.au/creative-commons-v4.0 )." .
+
+test_project:LICENCE-T1493885545993
+        a                     aekos:LICENCE ;
+        aekos:entitydisplay   test_project:PresentationModel-B2999275 ;
+        aekos:licencedetails  " This material is licensed under a <a href='http://creativecommons.org/licences/by/3.0/au/deed.en' target='_blank'> Creative Commons Attribution 3.0 Australia </a>" ;
+        aekos:licencetype     test_project:LICENCETYPE-T1493885545992 .
+
+test_project:LICENCETYPE-T1493885545992
+        a                    aekos:LICENCETYPE ;
+        aekos:code           "CC-BY" ;
+        aekos:entitydisplay  test_project:PresentationModel-C3066805 ;
+        aekos:image          test_project:ImageDataValue-C3066803 ;
+        aekos:name           "Creative Commons Attribution 3.0 Australia" ;
+        aekos:url            "http://creativecommons.org/licences/by/3.0/au/deed.en" .
+
+test_project:METADATAOBJECT-T1493885627197
+        a                       aekos:METADATAOBJECT ;
+        aekos:authors           []  ;
+        aekos:entitydisplay     test_project:PresentationModel-C3066878 ;
+        aekos:lifecycle         test_project:LIFECYCLE-T1493885545989 ;
+        aekos:measuredvariable  []  ;
+        aekos:methodstext       "Study Location Selection Method: Field survey based on an explicit (fully and clearly described; leaving nothing merely implied)survey design is essential for vegetation field sampling or systematic landscape assessment.Unambiguous design and execution of field sampling reduces bias in both sampling andresults and allows future workers to build on results rather than restarting processes from thebeginning. Starting new projects as if pre-existing work was of no relevance has beenrelatively common in New South Wales.Field survey provides one of the main types of vegetation data from which native vegetationproducts are derived. Absolute numbers of plots will not be stipulated in this Standard assurvey effort is determined by a variety of factors that will vary widely across the state.Random stratified sampling is adopted as best practice by Thackway et al. (2005), Sivertsen& Smith (2006), Neldner et al. (2005) and Brocklehurst et al. (2007) and is adopted for theNSW Standard. Well constructed stratification should adequately address thematic diversity(complexity in vegetation types). A stratified sampling design can be based on either a classification of EnvironmentalSampling Units (ESUs) (Horner et al. 2002) or a gradient analysis of sampling gaps(Ferrier 2002). A classification of ESUs is derived from the intersection of several layersof classified environmental or other spatial information. In contrast, a gradient approachuses a multivariate gap analysis to identify potential sampling locations from a largerandomly generated set that are environmentally most dissimilar to those alreadyrepresented in a set of existing samples. Map-based stratification may be augmented by decision rules which are applied in thefield. For example, for every site allocated, up to three topographic positions may besampled (e.g. crest, slope and flat); in this example three plots must be described ateach site. The choice of spatial variables is crucial to both classification and gradient approachesto stratification. Examples of stratification variables include substrate type, landform unitand climatic variables, woody/non-woody or crown density classes or other remotelysensed units. All selected stratification variables should have strong inferredrelationships with plant species composition. Stratification outputs are valuable products in their own right; they may usefully beaccessed for other science-based NRM activities. Representation: ESUs (see above) represent unique combinations of environmentaland biotic factors. By sampling each ESU across its geographic range and inproportion to its total area, a representative sample can be compiled. \tReplication: As a general rule each ESU is sampled at multiple locations (minimumof three). Randomisation: Sites are located randomly within the ESUs but may be subject torules regarding relationships with boundaries, clumping and access. Survey effort depends on scale and theme. The number of plots varies according to thescale of the project and the level of detail demanded. Survey effort also depends onfactors such as degree of fragmentation, comparative areas of native and exoticvegetation, and whether exotic or candidate native vegetation is to be sampled. \tRapid survey (including reconnaissance surveyï¿½, field completion and ground truthing)is, for the purpose of this Standard, defined as coarse level (broad-scale), systematicsurvey for the purpose of familiarisation or for accuracy assessment of existing spatiallayers (Section 9 of the Standard). Requirements of the Standard for All field surveys, including reconnaissance (rapid survey), are based on an explicit,\trepeatable and relevant stratification of the project area. Stratification must meet the requirements of randomisation, representation and\treplication, either by sampling classified ESUs or by sampling sites ranked highly in a\tgap analysis until the required number of sites is reached; or Where a particular vegetation type is the survey target, plots should be assigned randomly in the known and projected habitats of the target type. Stratification methods and results are published for all projects. Spatial products from this process are archived in the NSW Vegetation Information System. Survey effort reflects scale and project needs.; Study Location Visit Method : Field data will be collected for the three themes identified in the NSW targets (NRC2005): type, extent and condition (including benchmarks). Information about the Landscape and Land Management context of the study location is also recorded. There are many argumentsabout the prohibitive cost of collecting quantitative rather than qualitative data. The mostexpensive component of field data is the cost of putting teams into the field (travelallowance, travel time, running costs). Field programs should ideally collect the fullcomplement of vegetation data identified in the Standard. However, a lack of resourcesmay mean that compromises must be made when collecting field data. In such cases thedata collected will be determined by the activity needs and available resourcesNSW vegetation activities are frequently hampered by inadequate data. Use of preclassifieddata may reduce flexibility of analysis and interpretation. Inconsistency in thefield data collected is also a problem. Some of the most important data collected (relativecover/abundance/dominance of species in a plot) is pre-classified (Braun-Blanquet 1932,Poore 1955). The Braun-Blanquet system has up to seven interpretations with classesthat vary from 1-4 to 1-7 used in different surveys carried out within New South Wales.When pooled for analysis, these data require standardisation, which results in loss ofinformation, to reduce the influence of methodological artefacts on outcomes of theanalysis. Primary (not pre-classified) data on cover and abundance will enhance theflexibility of data for pooled analysis.; Vegetation Structure Method: The structure of the vegetation assemblage of the plot is characterised by recording the dominant species, growth forms, cover and height for each strata present with at least 5% crown cover across the plot. Dominant species in each stratum present are recorded to generate an NVIS Level 5 vegetation composition description (see ESCAVI 2003).; Vegetation Condition Method: The condition of vegetation on the plot is quantified using the following attributes: native species richness; native and exotic species cover; ground surface cover of bare ground and litter; number of tree hollows; the amount of woody debris present on the ground surface; the number and abundance of regenerating woody overstorey species; woody stem sizes; and tree health.; Disturbance Assessment Method: The severity and age of a set of standard disturbance factors is described for the plot including: vegetation clearing; cultivation; soil erosion; grazing; fire damage; and storm damage. Disturbance types not in this list can also be recorded. The observed evidence of disturbance is also recorded. Focal taxa are nominated for each plot which are used in judging the overall condition of the plot and include: disturbance sensitive species, grazing sensitive species and species listed under the Threatened Species Conservation Act 1995 (available at http://www.austlii.edu.au/au/legis/nsw/consol_act/tsca1995323/).; Site Management History Method: The history of land management at the site is intended to be gleaned through conversation with the land manager or owner.  Land management practices of interest to the NSW Native Vegetation Survey method, i.e. those that are likely to effect the structure,  composition and condition of native vegetation include: grazing management; farming; erosion control; pasture improvement; timber extraction; regrowth management; weed control; pest animal control; burning; or any other relevant land management practice.; Physiography Assessment Method: Description of landscape context includes broad scale landscape features such as morphology, landform element and pattern,  slope, aspect, outcrop lithology and drainage (follows McDonald et al. 1990). Soil is described for surface texture, depth, colour and basic soil type. Distance of the plot from the nearest water body and the type of water body.; Floristics Assessment Method: Floristic assessment for The Standard (Siversten 2009) involves the description of all vascular flora species for the following attributes: stratum, growth form, field identification, cover and abundance. Field identifications are validated/corrected by herbarium determinations (by NSW Royal Botanic Gardens (RBG) Determiners) of voucher specimens in approximately one percent of cases. RBG accession numbers are added to specimen records in the VIS Module of NSW Wildlife Atlas when provided. " ;
+        aekos:organisations     []  ;
+        aekos:projectdetails    test_project:RESEARCHACTIVITY-T1493885627198 ;
+        aekos:rights            test_project:LEGALRIGHTS-T1493885545990 ;
+        aekos:spatialscope      test_project:SPATIALSCOPE-T1493885546000 ;
+        aekos:specieslist       []  ;
+        aekos:surveyidentifier  "aekos.org.au/collection/nsw.gov.au/nsw_atlas/vis_flora_module/MER_W2B_11" ;
+        aekos:temporalscope     test_project:TEMPORALSCOPE-T1493885545999 ;
+        aekos:thematicscope     test_project:THEMATICSCOPE-T1493885546006 .
+
+test_project:CITATION-T1493885545994
+        a                            aekos:CITATION ;
+        aekos:author                 "New South Wales Office of Environment and Heritage" ;
+        aekos:authors                []  ;
+        aekos:entitydisplay          test_project:PresentationModel-B2999248 ;
+        aekos:formattedcitation      " New South Wales Office of Environment and Heritage (2014). MER_W2B_11 Vegetation Survey, Data from the Atlas of NSW database: VIS flora survey module, Version 11 /2013. Persistent URL: <a href='http://www.aekos.org.au/collection/nsw.gov.au/nsw_atlas/vis_flora_module/MER_W2B_11' target='_blank'>http://www.aekos.org.au/collection/nsw.gov.au/nsw_atlas/vis_flora_module/MER_W2B_11</a>. TERN &#198;KOS, rights owned by State of New South Wales (Office of Environment and Heritage http://www.environment.nsw.gov.au/). Accessed [<em>dd mmm yyyy</em>, e.g., 01 Jan 2016]. " ;
+        aekos:formattedcitationtext  "New South Wales Office of Environment and Heritage (2014). MER_W2B_11 Vegetation Survey, Data from the Atlas of NSW database: VIS flora survey module, Version 11/2013. Persistent URL: http://www.aekos.org.au/collection/nsw.gov.au/nsw_atlas/vis_flora_module/MER_W2B_11. TERN &#198;KOS, rights owned by State of New South Wales (Office of Environment and Heritage http://www.environment.nsw.gov.au/). Accessed [dd mmm yyyy, e.g. 01 Jan 2016]." ;
+        aekos:publisher              "State of New South Wales (Office of Environment and Heritage http://www.environment.nsw.gov.au/)" ;
+        aekos:title                  "MER_W2B_11 Vegetation Survey, Data from the Atlas of NSW database: VIS flora survey module" ;
+        aekos:year                   "2014" .

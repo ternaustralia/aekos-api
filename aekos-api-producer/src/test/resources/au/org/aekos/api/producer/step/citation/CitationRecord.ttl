@@ -1,0 +1,8 @@
+@prefix :	<urn:test#>
+
+:record1
+	:samplingProtocol			  "protocol 1" ;      
+	:bibliographicCitation	"citation 1" ;
+	:datasetName	          "dataset 1" ;
+	:licenceUrl		          "http://example.com/licence" .
+
