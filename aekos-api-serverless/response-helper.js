@@ -713,6 +713,7 @@ module.exports = {
   traitNamesOptionalValidator: traitNamesOptionalValidator,
   envVarNamesOptionalValidator: envVarNamesOptionalValidator,
   compositeValidator: compositeValidator,
+  nullValidator: () => { return validatorIsValid },
   pageSizeValidator: queryStringParamIsNumberInRangeIfPresentValidator(pageSizeParam, pageSizeMin, pageSizeMax),
   pageNumValidator: queryStringParamIsNumberInRangeIfPresentValidator(pageNumParam, pageNumMin),
   startValidator: queryStringParamIsNumberInRangeIfPresentValidator(startParam, startMin),

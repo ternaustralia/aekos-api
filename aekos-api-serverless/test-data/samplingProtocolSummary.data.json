@@ -1,0 +1,9 @@
+{
+  "requestContext": {
+    "path": "/sampling-protocol-summary"
+  },
+  "path": "/sampling-protocol-summary",
+  "headers": {
+    "Accept": "application/json"
+  }
+}

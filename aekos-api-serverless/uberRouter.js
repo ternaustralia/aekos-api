@@ -2,6 +2,7 @@
 let r = require('./response-helper')
 const mapping = {
   '/api': require('./api'),
+  '/sampling-protocol-summary': require('./samplingProtocolSummary'),
   '/v1/speciesAutocomplete.json': require('./speciesAutocomplete-json'),
   '/v2/speciesAutocomplete.json': require('./speciesAutocomplete-json'),
   '/v1/getTraitVocab.json': require('./traitVocab-json'),

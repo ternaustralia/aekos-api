@@ -8,7 +8,7 @@ provider:
   name: aws
   runtime: nodejs6.10
   memorySize: 128
-  timeout: 40
+  timeout: 100
   vpc:
     securityGroupIds:
       - ${file(secrets.yml):${self:custom.stage}.securityGroupId}
@@ -199,6 +199,10 @@ custom:
                     type: string
                   href:
                     type: string
+      -
+        name: SamplingProtocolSummaryResponse
+        contentType: "application/json"
+        items: ${self:custom.modelDetails.SamplingProtocolSummaryResponse}
       -
         name: V1SpeciesAutocompleteResponse
         contentType: "application/json"
@@ -412,6 +416,28 @@ functions:
                 statusCode: '200'
                 responseModels:
                   "application/json": ApiResponse
+              - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
+      - http:
+          path: sampling-protocol-summary
+          method: get
+          cors: ${self:custom.customCors}
+          documentation:
+            summary: Get summary of the sampling protocol values in the system
+            tags:
+              - meta
+            description: >
+              The response gives 3 levels. The 'datasetGroups' summarises the samplingProtocol
+              values at the highest level. Then 'samplingProtocolGroups' summarises at the next
+              level down and for some surveys, this is the lowest level available. Finally, the
+              'surveys' is a list of all surveys (also samplingProtocol values) in the system.
+              You can use this list to build client-side filters for other responses. For example,
+              if you didn't want any OEH records, you could find the common samplingProtocol prefix
+              for all the OEH surveys and then discard records you recieve that match that prefix.
+            methodResponses:
+              -
+                statusCode: '200'
+                responseModels:
+                  "application/json": SamplingProtocolSummaryResponse
               - ${self:custom.commonModelSchemaFragments.MethodResponse500Json}
       - http:
           path: v1/getTraitVocab.json

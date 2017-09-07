@@ -55,6 +55,17 @@ exports:
           traitUnit:
             type: string
   fragments:
+    UpperLevelSamplingProtocolSummarySchema: &UpperLevelSamplingProtocolSummarySchema
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: string
+          name:
+            type: string
+          envRecordsHeld:
+            type: number
     VocabObjectSchema:
       type: array
       items:
@@ -216,3 +227,17 @@ exports:
       type: object
       properties:
         <<: [*v1LocationRelatedProperties, *v2LocationRelatedProperties, *v1EnvVariableArray]
+  SamplingProtocolSummaryResponse:
+    type: object
+    properties:
+      datasetGroups: *UpperLevelSamplingProtocolSummarySchema
+      samplingProtocolGroups: *UpperLevelSamplingProtocolSummarySchema
+      surveys:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string

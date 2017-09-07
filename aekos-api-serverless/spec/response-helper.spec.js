@@ -1496,6 +1496,14 @@ describe('response-helper', () => {
   const unsuccessfulValidator = () => {
     return { isValid: false, message: 'I always fail :(' }
   }
+  describe('.nullValidator()', () => {
+    it('should always be valid', () => {
+      let objectUnderTest = responseHelper.nullValidator
+      let result = objectUnderTest(null, null)
+      expect(result).toEqual({ isValid: true })
+    })
+  })
+
   describe('.compositeValidator()', () => {
     it('should be able to run with a single validator', () => {
       let objectUnderTest = responseHelper.compositeValidator([successfulValidator])
