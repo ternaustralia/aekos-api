@@ -18,22 +18,22 @@ describe('/repository-metadata', () => {
       stubDb.setExecSelectPromiseResponses([
         [
           {
-            id: 'aekos.org.au/collection/adelaide.edu.au',
+            id: 'aekos.org.au/collection/adelaide.edu.au/*',
             envRecordsHeld: 11
           },
           {
-            id: 'aekos.org.au/collection/csiro',
+            id: 'aekos.org.au/collection/csiro/*',
             envRecordsHeld: 22
           }
         ], [
           {
-            name: 'AusPlots Rangelands',
+            name: 'should be overwritten by mapped name',
             id: 'aekos.org.au/collection/adelaide.edu.au/ausplotsrangelands',
             envRecordsHeld: 1
           },
           {
             name: null,
-            id: 'aekos.org.au/collection/adelaide.edu.au/Koonamore',
+            id: 'aekos.org.au/collection/adelaide.edu.au/Koonamore/*',
             envRecordsHeld: 33
           }
         ], [
@@ -57,20 +57,20 @@ describe('/repository-metadata', () => {
       expect(JSON.parse(result.body)).toEqual({
         datasetGroups: [{
           name: 'Adelaide University',
-          id: 'aekos.org.au/collection/adelaide.edu.au',
+          id: 'aekos.org.au/collection/adelaide.edu.au/*',
           envRecordsHeld: 11
         }, {
-          name: null,
-          id: 'aekos.org.au/collection/csiro',
+          name: 'TERN Australian Transect Network-CSIRO & NATT',
+          id: 'aekos.org.au/collection/csiro/*',
           envRecordsHeld: 22
         }],
         samplingProtocolGroups: [{
-          name: 'AusPlots Rangelands',
+          name: 'TERN AusPlots Rangelands',
           id: 'aekos.org.au/collection/adelaide.edu.au/ausplotsrangelands',
           envRecordsHeld: 1
         }, {
-          name: 'Koonamore Survey',
-          id: 'aekos.org.au/collection/adelaide.edu.au/Koonamore',
+          name: 'UofA Koonamore Survey',
+          id: 'aekos.org.au/collection/adelaide.edu.au/Koonamore/*',
           envRecordsHeld: 33
         }],
         surveys: [{
