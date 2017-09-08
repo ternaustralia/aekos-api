@@ -32,6 +32,7 @@ aws s3 sync \
   --exclude="$EXAMPLES_DIR/node_modules/*" \
   --include="index*" \
   --include="sampling-protocol-summary.html" \
+  --include="favicon.ico" \
   --include="header-bg.jpg" \
   --include="$gitcommitfile" \
   . s3://$BUCKET/

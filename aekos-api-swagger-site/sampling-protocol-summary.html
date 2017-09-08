@@ -7,26 +7,112 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="author" content="TERN">
   <title>Sampling Protocol Summary - AEKOS API</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ng-prettyjson/0.2.0/ng-prettyjson.min.css">
+  <style type="text/css">
+    .name-col, .id-col {
+      width: 44%;
+    }
+
+    .id-field {
+      font-family: monospace;
+    }
+  </style>
 </head>
 
-<body ng-app="app" ng-controller="TheController">
-  <h2>AEKOS API Sampling protocol summary</h2>
+<body ng-app="app" ng-controller="TheController" class="container">
+  <h1 class="text-center">AEKOS API Sampling protocol summary</h1>
+  <a ng-click="jumpToRaw()" href>
+    <small>Jump to raw JSON data</small>
+  </a>
+  <h2>About this page</h2>
+  <p>
+    This page is a pretty interface to the <code>/sampling-protocol-summary</code> resource on
+    the AEKOS API. The intent is that you can understand what all the <code>samplingProtocol</code>
+    values in the system mean. Using that knowledge, you can choose to discard particular records
+    that you recieve from the other resources in the API based on the <code>samplingProtocol</code>
+    in those responses. The values you see in responses will never contain a <code>*</code> suffix,
+    this is simply used to indicate that there are a family of <code>samplingProtocol</code> values
+    starting with that prefix.
+  </p>
+  <h2>Formatted data</h2>
+  <table class="table table-striped">
+    <caption>Dataset Groups</caption>
+    <thead>
+      <tr>
+        <th class="id-col"><code>samplingProtocol</code> prefix</th>
+        <th class="name-col">Name</th>
+        <th>Site Records Held</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="curr in spsCopy.datasetGroups">
+        <td class="id-field">{{curr.id}}</td>
+        <td>{{curr.name | nullsafe}}</td>
+        <td>{{curr.envRecordsHeld}}</td>
+      </tr>
+    </tbody>
+  </table>
+  <table class="table table-striped">
+    <caption>Sampling Protocol Groups</caption>
+    <thead>
+      <tr>
+        <th class="id-col"><code>samplingProtocol</code> prefix</th>
+        <th class="name-col">Name</th>
+        <th>Site Records Held</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="curr in spsCopy.samplingProtocolGroups">
+        <td class="id-field">{{curr.id}}</td>
+        <td>{{curr.name | nullsafe}}</td>
+        <td>{{curr.envRecordsHeld}}</td>
+      </tr>
+    </tbody>
+  </table>
+  <table class="table table-striped">
+    <caption>Surveys</caption>
+    <thead>
+      <tr>
+        <th><code>samplingProtocol</code></th>
+        <th class="name-col">Name</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="curr in spsCopy.surveys">
+        <td class="id-field">{{curr.id}}</td>
+        <td>{{curr.name | nullsafe}}</td>
+      </tr>
+    </tbody>
+  </table>
+  <h2 id="raw">Raw data</h2>
   <pre pretty-json="samplingProtocolSummary"></pre>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.5/angular.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ng-prettyjson/0.2.0/ng-prettyjson.min.js"></script>
   <script type="text/javascript">
     var app = angular.module('app', ['ngPrettyJson'])
-    app.controller('TheController', function ($scope, $http, $location) {
+    app.controller('TheController', function ($scope, $http, $location, $anchorScroll) {
       $scope.samplingProtocolSummary = 'Loading...'
       var base = 'https://dev.api.aekos.org.au'
       if ($location.protocol() !== 'file') {
-        // var base = ''
-        // TODO match for (dev|test|).api.aekos.org.au to create the correct base
+        var host = $location.host().match(/((dev|test)\.)?api\.aekos\.org\.au/)[0]
+        var base = 'https://' + host
       }
       $http.get(base + '/sampling-protocol-summary').then(function (resp) {
         $scope.samplingProtocolSummary = resp.data
+        $scope.spsCopy = angular.copy(resp.data)
       })
+      $scope.jumpToRaw = function () {
+        $anchorScroll('raw')
+      }
+    })
+    app.filter('nullsafe', function () {
+      return function (val) {
+        if (val) {
+          return val
+        }
+        return '(no name)'
+      }
     })
   </script>
 </body>
