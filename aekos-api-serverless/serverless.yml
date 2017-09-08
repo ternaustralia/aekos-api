@@ -433,6 +433,7 @@ functions:
               You can use this list to build client-side filters for other responses. For example,
               if you didn't want any OEH records, you could find the common samplingProtocol prefix
               for all the OEH surveys and then discard records you recieve that match that prefix.
+              See <a href="/sampling-protocol-summary.html" target="_blank">this page</a> for more details.
             methodResponses:
               -
                 statusCode: '200'
