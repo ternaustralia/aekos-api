@@ -105,6 +105,7 @@ function getAvailableReqs () {
   return [
     nr('v2/getTraitVocab.json', getJson('/v2/getTraitVocab.json')),
     nr('v2/getEnvironmentalVariableVocab.json', getJson('/v2/getEnvironmentalVariableVocab.json')),
+    nr('v2/allSpeciesData-json#near-end-big-page', getJson('/v2/allSpeciesData?start=3966000&rows=1000')),
     nr('v2/speciesData-json#default-page', postJson('/v2/speciesData', {
       'speciesNames': [ 'Austrostipa sp.' ]
     })),
