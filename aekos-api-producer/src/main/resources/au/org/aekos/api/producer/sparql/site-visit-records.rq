@@ -71,6 +71,7 @@ WHERE { GRAPH ?g {
     ?oi aekos:temporality/aekos:has_start ?eventDateTemp3 .
   }
   BIND(COALESCE(?eventDateTemp1, ?eventDateTemp2, ?eventDateTemp3) AS ?eventDateTemp)
+  FILTER(BOUND(?eventDateTemp)) . # for visits with no observeditems, DERG's Kunnamuka Swamp West for example
   BIND (CONCAT(str(year(?eventDateTemp)),"-",str(month(?eventDateTemp)),"-",str(day(?eventDateTemp))) as ?eventDate) .
   # month
   BIND (month(?eventDateTemp) as ?month) .

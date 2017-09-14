@@ -18,7 +18,6 @@ import org.apache.jena.rdf.model.Model;
 import org.junit.Test;
 
 import au.org.aekos.api.producer.ResourceStringifier;
-import au.org.aekos.api.producer.step.MissingDataException;
 import au.org.aekos.api.producer.step.env.in.InputEnvRecord;
 
 public class AekosEnvRdfReaderTest {
@@ -97,8 +96,10 @@ public class AekosEnvRdfReaderTest {
 			objectUnderTest.read();
 			fail();
 		} catch (RuntimeException e) {
-			if (!e.getCause().getClass().equals(MissingDataException.class)) {
-				fail("Wrong exception thrown");
+			boolean isWrongException = !e.getClass().equals(IllegalStateException.class);
+			boolean isWrongMessage = e.getMessage() == null || !e.getMessage().startsWith("Data problem: no results were found");
+			if (isWrongException || isWrongMessage) {
+				throw e;
 			}
 			// success
 		}
