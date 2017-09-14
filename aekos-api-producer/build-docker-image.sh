@@ -18,4 +18,4 @@ echo "  # change the left side of the following paths and run"
 echo "  docker run \\
     -v /host/path/to/tdb:/data \\
     -v /host/path/to/output:/output \\
-    $IMAGE_NAME"
+    $IMAGE_NAME | tee somefile.log"

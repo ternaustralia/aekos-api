@@ -5,7 +5,7 @@ CURR_DIR=`dirname $0`
 set -e
 source $CURR_DIR/db_env_vars.sh
 SCHEMA_PATH="$CURR_DIR/create-schema.sql"
-TARGET_DB="$DB_NAME`date +%Y%m%d_%H%M`"
+TARGET_DB="$DB_NAME_PREFIX`date +%Y%m%d_%H%M`"
 LOG_FILE="$TARGET_DB-load.log"
 echo "Writing to log file $LOG_FILE"
 RAWDB="rawdata"
