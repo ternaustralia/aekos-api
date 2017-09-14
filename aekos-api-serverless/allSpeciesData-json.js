@@ -46,7 +46,9 @@ module.exports.doQuery = doQuery
 function doQuery (event, params, processStart, db, elapsedTimeCalculator, recordsSql, countSql) {
   let recordsPromise = db.execSelectPromise(recordsSql)
   let countPromise = db.execSelectPromise(countSql)
+  // console.warn(`[PERF] ${elapsedTimeCalculator(processStart)}ms to start queries`)
   return Promise.all([recordsPromise, countPromise]).then(values => {
+    // console.warn(`[PERF] ${elapsedTimeCalculator(processStart)}ms to queries finished`)
     let records = values[0]
     let count = values[1]
     if (count.length !== 1) {
@@ -110,6 +112,7 @@ function getRecordsSql (start, rows, lateRowWhereOrJoinFragment,
     speciesIdFragment = `
     s.id,`
   }
+  // TODO add 'licence' field to query
   return `
     SELECT${speciesIdFragment}
     s.scientificName,
