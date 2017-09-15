@@ -38,6 +38,7 @@ Resources:
             QueryString: false
           TargetOriginId: !Join ['', [S3-www., !If [IsProd, !Ref "AWS::NoValue", !Ref envlevel], api.aekos.org.au]]
           ViewerProtocolPolicy: redirect-to-https
+        DefaultRootObject: index.html
         Enabled: true
         Origins:
           -
