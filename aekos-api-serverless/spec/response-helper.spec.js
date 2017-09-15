@@ -543,6 +543,27 @@ describe('response-helper', function () {
       })
     })
 
+    describe('', () => {
+      let result = null
+      beforeEach(done => {
+        let callback = (_, theResult) => {
+          consoleSilencer.resetConsoleError()
+          result = theResult
+          done()
+        }
+        let validator = function () { fail('Should not have been called') }
+        const invalidJsonBody = "{foo:'bar'}" // uses single quotes, not double
+        consoleSilencer.silenceConsoleError()
+        objectUnderTest.handleJsonPost({ body: invalidJsonBody }, callback, null, validator,
+          function () { fail('Should not have been called') })
+      })
+
+      it('should return a 400 when invalid JSON is supplied as the body', () => {
+        expect(result.statusCode).toBe(400)
+        expect(result.headers).toEqual(jsonAndCorsHeaders)
+      })
+    })
+
     it('should pass the requestBody to the validator', () => {
       let passedRequestBody = null
       let validator = (_, body) => {

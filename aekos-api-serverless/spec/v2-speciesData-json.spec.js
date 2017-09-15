@@ -182,6 +182,43 @@ describe('/v2/speciesData-json', () => {
     })
   })
 
+  describe('doHandle', () => {
+    let result = null
+    beforeEach(done => {
+      const invalidJsonString = `{speciesNames:['species one']}`
+      let event = {
+        body: invalidJsonString,
+        queryStringParameters: {
+          rows: '15',
+          start: '0'
+        },
+        headers: {
+          Host: 'api.aekos.org.au',
+          'X-Forwarded-Proto': 'https'
+        },
+        requestContext: { path: '/v2/speciesData.json' },
+        path: '/v2/speciesData.json'
+      }
+      let callback = (_, theResult) => {
+        consoleSilencer.resetConsoleError()
+        result = theResult
+        done()
+      }
+      consoleSilencer.silenceConsoleError()
+      uberRouter._testonly.doHandle(event, callback, null, () => { return 42 })
+    })
+
+    it('should return 400 for invalid JSON supplied in the POST body', () => {
+      expect(result.statusCode).toBe(400)
+      expect(result.headers).toEqual({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
+        'Access-Control-Expose-Headers': 'link',
+        'Content-Type': "'application/json'"
+      })
+    })
+  })
+
   describe('extractParams', () => {
     it('should extract the params when they are present', () => {
       let requestBody = {

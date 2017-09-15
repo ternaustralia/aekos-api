@@ -128,7 +128,15 @@ function handleGeneric (event, callback, db,
     responder/* (requestBody, databaseHelper, queryStringParameters):Promise<{}> */,
     extrasProvider, requestBodyGetter/* (event) */,
     responseCaller/* (event, callback, requestBody, db, queryStringObj, extrasProvider):void */) {
-  let requestBody = requestBodyGetter(event)
+  let requestBody = null
+  try {
+    requestBody = requestBodyGetter(event)
+  } catch (e) {
+    const msg = 'Could not parse the supplied JSON body'
+    console.error(`${msg}. Body = '${event.body}'`)
+    jsonResponseHelpers.badRequest(callback, msg)
+    return
+  }
   let queryStringObj = event.queryStringParameters
   let validationResult = validator(queryStringObj, requestBody)
   if (!validationResult.isValid) {
