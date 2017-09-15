@@ -6,4 +6,4 @@ if [ -z "$stage" ]; then
 fi
 sls create_domain \
   --stage=$stage \
-  --region=us-west-1
+  --region=ap-southeast-2

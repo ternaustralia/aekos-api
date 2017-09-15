@@ -16,5 +16,5 @@ functionName=`bash -c "echo $functionName | sed 's/\.js$//'"`
 serverless logs \
   --function=$functionName \
   --stage=$stage \
-  --region=us-west-1 \
+  --region=ap-southeast-2 \
   --tail

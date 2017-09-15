@@ -6,5 +6,5 @@ if [ -z "$stage" ]; then
 fi
 serverless remove \
   --stage=$stage \
-  --region=us-west-1 \
+  --region=ap-southeast-2 \
   --verbose

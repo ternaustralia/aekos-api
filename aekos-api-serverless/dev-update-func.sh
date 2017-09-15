@@ -16,4 +16,4 @@ FUNC=`bash -c "echo $FUNC | sed 's/\.\(j\|t\)s$//'"`
 serverless deploy function \
   --function=$FUNC \
   --stage=$stage \
-  --region=us-west-1
+  --region=ap-southeast-2
