@@ -7,4 +7,9 @@ if [ -z "$stage" ]; then
   echo "   eg: $0 dev"
   exit 1
 fi
-aws apigateway get-rest-apis --output json | ./extract-rest-api-id.js $stage
+AWS_REGION=ap-southeast-2
+aws \
+  --region=$AWS_REGION \
+  apigateway \
+  get-rest-apis \
+  --output json | ./extract-rest-api-id.js $stage

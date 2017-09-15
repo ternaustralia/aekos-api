@@ -8,7 +8,7 @@ if [ -z "$STAGE" ]; then
 fi
 API_ID=`./get-rest-api-id.sh $STAGE`
 FILE_TYPE=json
-REGION=us-west-1
+REGION=ap-southeast-2
 OUTPUT=swagger-aekos-api-$STAGE.$FILE_TYPE
 TEMP_FILE=$OUTPUT.temp
 printf "Downloading Swagger definition to ./$OUTPUT
