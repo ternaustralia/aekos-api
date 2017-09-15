@@ -72,4 +72,4 @@ SELECT count(*) AS traitsOrphans FROM rawdata.traits;
 -- DELETE FROM envvars;
 -- DELETE FROM env;
 -- DELETE FROM citations;
--- DROP TABLE traitcounts;
+-- DROP TABLE IF EXISTS traitcounts;
