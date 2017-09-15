@@ -58,7 +58,7 @@ function getSamplingProtocolGroupsSql () {
         CONCAT(SUBSTRING_INDEX(samplingProtocol, '/', 4), '/*') AS id,
         COUNT(*) AS envRecordsHeld
       FROM citations
-      GROUP BY 1
+      GROUP BY 1,2
     ) AS d
     WHERE d.rawId NOT IN ( SELECT samplingProtocol FROM citations )
     UNION
