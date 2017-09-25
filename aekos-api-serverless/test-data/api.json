@@ -1,0 +1,11 @@
+{
+  "requestContext": {
+    "path": "/api"
+  },
+  "path": "/api",
+  "headers": {
+    "Accept": "application/json",
+    "Host": "api.aekos.org.au",
+    "X-Forwarded-Proto": "https"
+  }
+}
