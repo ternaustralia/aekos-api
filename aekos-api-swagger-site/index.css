@@ -29,7 +29,8 @@ body {
 }
 
 .featurette-divider {
-  margin: 80px 0;
+  margin: 40px 1em;
+  border-bottom: 1px solid #ddd;
 }
 
 .featurette {
