@@ -5,3 +5,7 @@ tdb/
 auth/
 metrics/
 lucene-index/
+tdb
+auth
+metrics
+lucene-index
