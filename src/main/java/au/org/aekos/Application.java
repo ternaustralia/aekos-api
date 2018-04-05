@@ -157,32 +157,4 @@ public class Application extends SpringBootServletInitializer {
     public BlockingQueue<MetricsQueueItem> metricsInnerQueue() {
     	return new LinkedBlockingDeque<>(metricsQueueCapacity);
     }
-    
-	@Bean
-	public EmbeddedServletContainerFactory servletContainer() {
-		TomcatEmbeddedServletContainerFactory tomcat = new TomcatEmbeddedServletContainerFactory() {
-			@Override
-			protected void postProcessContext(Context context) {
-				SecurityConstraint securityConstraint = new SecurityConstraint();
-				securityConstraint.setUserConstraint("CONFIDENTIAL");
-				SecurityCollection collection = new SecurityCollection();
-				collection.addPattern("/*");
-				securityConstraint.addCollection(collection);
-				context.addConstraint(securityConstraint);
-			}
-		};
-		tomcat.addAdditionalTomcatConnectors(createHttpConnector());
-		return tomcat;
-	}
-
-	private Connector createHttpConnector() {
-		Connector connector = new Connector("org.apache.coyote.http11.Http11NioProtocol");
-		connector.setScheme("http");
-		connector.setSecure(false);
-		Integer serverPort = environment.getProperty("server.port", Integer.class, 8443);
-		Integer serverHttpPort = environment.getProperty("server.http.port", Integer.class, 8080);
-		connector.setPort(serverHttpPort);
-		connector.setRedirectPort(serverPort);
-		return connector;
-	}
 }

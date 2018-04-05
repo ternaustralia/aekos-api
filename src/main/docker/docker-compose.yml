@@ -1,0 +1,13 @@
+version: '3'
+services:
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - '/var/run/docker.sock:/tmp/docker.sock:ro'
+  aekos:
+    image: aekos/aekos-api
+    environment:
+      - VIRTUAL_HOST=api.aekos.org.au
