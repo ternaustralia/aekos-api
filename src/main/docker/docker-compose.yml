@@ -35,10 +35,10 @@ services:
       LETSENCRYPT_EMAIL: replace-me @ with.your.email # replace this before running, and don't commit
       LETSENCRYPT_HOST: api.aekos.org.au
     volumes:
-      - './tdb:/data:ro'
-      - './auth:/auth'
-      - './metrics:/metrics'
-      - './lucene-index:/lucene-index:ro'
+      - './tdb/:/data'
+      - './auth/:/auth'
+      - './metrics/:/metrics'
+      - './lucene-index/:/lucene-index:ro'
 volumes:
   vhostd:
   nginx_html:

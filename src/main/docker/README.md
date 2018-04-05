@@ -28,8 +28,9 @@ Now we can run the stack:
 docker-compose up
 ```
 
-If this is the first time you deploy the stack, there won't be any SSL/TLS certificates. They will be generated after an hour when the LetsEncrypt container does its check but we don't want to wait that long, so we'll force a refresh now to be issued certs:
+If this is the first time you deploy the stack, there won't be any SSL/TLS certificates. They may be generated soon after you start the stack but if they aren't, you can force a refresh to be issued certs:
 ```bash
+ls ./letsencrypt-certs/ # check if certs have been issued
 # change `docker_nginx-letsencrypt_1` for the container name if required
 docker exec docker_nginx-letsencrypt_1 /app/force_renew
 ```

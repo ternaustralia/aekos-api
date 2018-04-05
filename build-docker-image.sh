@@ -18,7 +18,7 @@ echo "  # change the left side of the following paths and run"
 echo "  docker run \\
     -p 443:443 \\
     -p 80:80 \\
-    -v /host/path/to/tdb:/data:ro \\
+    -v /host/path/to/tdb:/data \\
     -v /host/path/to/auth:/auth \\
     -v /host/path/to/metrics:/metrics \\
     -v /home/path/to/lucene-index:/lucene-index:ro \\
