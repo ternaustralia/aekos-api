@@ -1,2 +1,7 @@
 prod-keystore.jks
 prod-keystore.properties
+letsencrypt-certs/
+tdb/
+auth/
+metrics/
+lucene-index/

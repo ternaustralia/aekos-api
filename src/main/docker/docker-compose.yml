@@ -1,13 +1,44 @@
+# using approach at https://cloud.google.com/community/tutorials/nginx-reverse-proxy-docker#setting-up-https-with-lets-encrypt
+# force renew: once you've started the stack, you can force certificates to be renewed (issued) with:
+#   docker exec docker_nginx-letsencrypt_1 /app/force_renew
 version: '3'
 services:
   nginx-proxy:
     image: jwilder/nginx-proxy
+    restart: unless-stopped
     ports:
       - '80:80'
       - '443:443'
     volumes:
       - '/var/run/docker.sock:/tmp/docker.sock:ro'
+      - 'vhostd:/etc/nginx/vhost.d'
+      - 'nginx_html:/usr/share/nginx/html'
+      - './letsencrypt-certs:/etc/nginx/certs:ro'
+    labels:
+      com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: 'true'
+  nginx-letsencrypt:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    restart: unless-stopped
+    volumes:
+      - '/var/run/docker.sock:/var/run/docker.sock:ro'
+      - 'vhostd:/etc/nginx/vhost.d'
+      - 'nginx_html:/usr/share/nginx/html'
+      - './letsencrypt-certs:/etc/nginx/certs:rw'
   aekos:
     image: aekos/aekos-api
+    restart: unless-stopped
+    depends_on: 
+      - nginx-proxy
+      - nginx-letsencrypt
     environment:
-      - VIRTUAL_HOST=api.aekos.org.au
+      VIRTUAL_HOST: api.aekos.org.au
+      LETSENCRYPT_EMAIL: replace-me @ with.your.email # replace this before running, and don't commit
+      LETSENCRYPT_HOST: api.aekos.org.au
+    volumes:
+      - './tdb:/data:ro'
+      - './auth:/auth'
+      - './metrics:/metrics'
+      - './lucene-index:/lucene-index:ro'
+volumes:
+  vhostd:
+  nginx_html:

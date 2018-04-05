@@ -2,11 +2,39 @@ Instructions for using docker-compose
 
 First, we need to build the image for the aekos-api app
 ```bash
-# might have to build the loader
+cd ../../../ # up to root of this repo
 ./mvnw -Pprod clean package docker:build
+```
+
+Next, we need to edit the `docker-compose.yml` file to add our email address for the `LETSENCRYPT_EMAIL` value.
+```yml
+aekos:
+  ...
+  environment:
+    LETSENCRYPT_EMAIL: replace-me @ with.your.email # replace this before running, and don't commit
+```
+
+We also need to create a few symlinks to the database, etc:
+```bash
+# in the same directory as this file
+ln -s /host/path/to/tdb ./data
+ln -s /host/path/to/auth ./auth
+ln -s /host/path/to/metrics ./metrics
+ln -s /home/path/to/lucene-index ./lucene-index
 ```
 
 Now we can run the stack:
 ```bash
 docker-compose up
 ```
+
+If this is the first time you deploy the stack, there won't be any SSL/TLS certificates. They will be generated after an hour when the LetsEncrypt container does its check but we don't want to wait that long, so we'll force a refresh now to be issued certs:
+```bash
+# change `docker_nginx-letsencrypt_1` for the container name if required
+docker exec docker_nginx-letsencrypt_1 /app/force_renew
+```
+
+You're done. You have a stack running that:
+ - will survive system restarts
+ - automatically update SSL certs when required
+ - redirects non-HTTPS traffic to HTTPS
