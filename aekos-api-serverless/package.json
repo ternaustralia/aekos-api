@@ -12,7 +12,7 @@
     "nodemon": "^1.11.0",
     "serverless": "^1.19.0",
     "serverless-aws-documentation": "kennu/serverless-aws-documentation",
-    "serverless-domain-manager": "^1.1.6",
+    "serverless-domain-manager": "^2.4.0",
     "standard": "^10.0.2"
   },
   "dependencies": {

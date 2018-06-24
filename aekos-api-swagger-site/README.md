@@ -8,12 +8,21 @@ We use the Swagger UI (http://swagger.io/swagger-ui/) as is provided from Swagge
  - [Yarn](https://yarnpkg.com)
  - AWS CLI (configured with the correct access key)
 
-## Steps
+## Steps to deploy
 
-        cd /path/to/aekos-api/aekos-api-swagger-site # cd into this repo
-        yarn # install dependencies
-        ./dev-upload-site.sh # download the swagger definition, ammend it, deploy the swagger UI site
-        # optionally, invalidate the CloudFront cache to get the new site rolled out faster
+Run these steps the first time
+
+ 1. create an S3 bucket to hold the static site files, e.g: www.`<stage>`.api.aekos.org.au
+ 1. create a CloudFront distribution for the S3 bucket to serve the site
+ 1. create a Route53 A-alias record named the same as the S3 bucket and point to the CloudFront distribution
+
+Run these steps every time
+```bash
+cd /path/to/aekos-api/aekos-api-swagger-site # cd into this repo
+yarn # install dependencies
+./dev-upload-site.sh # download the swagger definition, ammend it, deploy the swagger UI site
+# optionally, invalidate the CloudFront cache to get the new site rolled out faster
+```
 
 # How to update the Swagger UI version
 

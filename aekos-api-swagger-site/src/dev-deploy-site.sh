@@ -6,8 +6,13 @@ STAGE=$1
 if [ -z "$STAGE" ]; then
   STAGE=dev
 fi
+if [ "$STAGE" == "prod" ]; then
+  bucketFragment=''
+else
+  bucketFragment=".$STAGE"
+fi
 FILE_TYPE=json
-BUCKET=www.$STAGE.api.aekos.org.au
+BUCKET=www$bucketFragment.api.aekos.org.au
 SWAGGER_UI_DIR=swagger-ui-dist
 EXAMPLES_DIR=examples
 AWS_REGION=ap-southeast-2

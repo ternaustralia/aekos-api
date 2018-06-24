@@ -25,12 +25,21 @@ We develop against a specific version of NodeJS (v6.10.3 at the time of writing)
 
 ## Deploying
 
-    # TODO add step about creating AWS RDS instance
-    ./dev-deploy.sh # deploy the code to AWS
+    # create a MySQL DB somewhere
+    # use the ../aekos-api-producer/ project to create some data
+    # load the data to the DB
+    cp secrets.example.yml secrets.yml
+    # edit secrets.yml to have the required values
+    ./dev-create-domain.sh
+    ./dev-deploy.sh
     # look at the ../aekos-api-swagger-site/ project for how to deploy the doco site
 
-# 200 Resource limit on CloudFormation
+For higher environments, just run the corresponding scripts.
+
+## Notes to developers
+
+### 200 Resource limit on CloudFormation
 As serverless uses CloudFormation internally, we're subject to the CF limits. One limit is that you cannot have more than 200 resources in a single template. We were pretty close to this but now we use a single "router" lambda and that's solved it. See [https://github.com/serverless/serverless/issues/3411]() for a discussion on possible fixes.
 
-# event.path vs event.requestContext.path
+### event.path vs event.requestContext.path
 We use both throughout this app. When we want to know which path was called because we're branching based on the version, we use the `event.path` because it doesn't contain the stage prefix (e.g: `dev`, `test`) so we know it'll start with `/v1/...`. Then, for the link header, we use `event.requestContext.path` becuase it **will** have the stage prefix. This is important because if we aren't running behind CloudFront, we need that prefix for calls to work so we want it included.
